@@ -18,30 +18,10 @@
 
 package src.salesforce;
 
-import ballerina.config;
-import ballerina.io;
 import ballerina.log;
 import ballerina.net.http;
 import ballerina.net.uri;
 import oauth2;
-
-oauth2:ClientConnector oauth2Connector = null;
-
-function getOAuth2ClientConnector () (oauth2:ClientConnector) {
-    if (oauth2Connector == null) {
-        io:println("Creating OAuth2 client");
-        oauth2Connector = create oauth2:ClientConnector(config:getGlobalValue(ENDPOINT),
-                                                        config:getGlobalValue(ACCESS_TOKEN),
-                                                        config:getGlobalValue(CLIENT_ID),
-                                                        config:getGlobalValue(CLIENT_SECRET),
-                                                        config:getGlobalValue(REFRESH_TOKEN),
-                                                        config:getGlobalValue(REFRESH_TOKEN_ENDPOINT),
-                                                        config:getGlobalValue(REFRESH_TOKEN_PATH));
-        io:println("OAuth2 Client created");
-    }
-
-    return oauth2Connector;
-}
 
 @Description {value:"Accesses records based on the specified object ID, can be used with external objects "}
 @Param {value:"sobjectName: The relevant sobject name"}
@@ -120,7 +100,7 @@ function deleteRecord (string sObjectName, string id) (boolean, SalesforceConnec
 @Return {value:"Error occured."}
 function sendGetRequest (string url) (json, SalesforceConnectorError) {
     endpoint<oauth2:ClientConnector> oauth2Connector {
-        getOAuth2ClientConnector();
+        oauth2ConnectorInstance;
     }
 
     http:OutRequest request = {};
@@ -145,7 +125,7 @@ function sendGetRequest (string url) (json, SalesforceConnectorError) {
 @Return {value:"Error occured."}
 function sendDeleteRequest (string url) (SalesforceConnectorError) {
     endpoint<oauth2:ClientConnector> oauth2Connector {
-        getOAuth2ClientConnector();
+        oauth2ConnectorInstance;
     }
 
     http:OutRequest request = {};
@@ -167,7 +147,7 @@ function sendDeleteRequest (string url) (SalesforceConnectorError) {
 @Return {value:"Error occured."}
 function sendPostRequest (string url, json body) (json, SalesforceConnectorError) {
     endpoint<oauth2:ClientConnector> oauth2Connector {
-        getOAuth2ClientConnector();
+        oauth2ConnectorInstance;
     }
 
     http:OutRequest request = {};
@@ -194,7 +174,7 @@ function sendPostRequest (string url, json body) (json, SalesforceConnectorError
 @Return {value:"Error occured."}
 function sendPatchRequest (string url, json body) (SalesforceConnectorError) {
     endpoint<oauth2:ClientConnector> oauth2Connector {
-        getOAuth2ClientConnector();
+        oauth2ConnectorInstance;
     }
 
     http:OutRequest request = {};
@@ -268,7 +248,6 @@ function checkAndSetErrors (http:InResponse response, http:HttpConnectorError ht
                          };
     } else if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
         json[] body;
-        error _;
         body, _ = (json[])response.getJsonPayload();
         connectorError = {messages:[], salesforceErrors:[]};
         foreach i, e in body {

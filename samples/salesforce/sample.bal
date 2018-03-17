@@ -29,11 +29,22 @@ string sampleSObjectContact = "Contact";
 string sampleSObjectOpportunity = "Opportunity";
 string apiVersion = "v37.0";
 
+string url="https://wso2--wsbox.cs8.my.salesforce.com";
+string accessToken="00DL0000002ASPS!ASAAQHyEs5qD9BzTEevUWAIUOjGh0e9zyVIojgS1dLwNXhlMBXGre8IwNoruuV6joCjAR0qG1B8KhNOxYSczwOuRmCEQU6LG";
+string clientId="3MVG9MHOv_bskkhSA6dmoQao1M5bAQdCQ1ePbHYQKaoldqFSas7uechL0yHewu1QvISJZi2deUh5FvwMseYoF";
+string clientSecret="1164810542004702763";
+string refreshToken="5Aep86161DM2BuiV6zOy.J2C.tQMhSDLfkeFVGqMEInbvqLfxzBz58_XPXLUMpHViE8EqTjdV7pvnI1xq8pMfOA";
+string refreshTokenEndpoint="https://test.salesforce.com";
+string refreshTokenPath="/services/oauth2/token";
+
 public function main (string[] args) {
 
     endpoint<salesforce:SalesforceConnector> salesforceCoreConnector {
-        create salesforce:SalesforceConnector();
+        create salesforce:SalesforceConnector(url, accessToken, clientId, clientSecret, refreshToken, refreshTokenEndpoint, refreshTokenPath);
     }
+
+    salesforceCoreConnector.init();
+    io:println(string `OAuth2 client initialized`);
 
     salesforce:SalesforceConnectorError err;
     json jsonResponse;
@@ -77,10 +88,10 @@ public function main (string[] args) {
     checkErrors(err);
     io:println(string `Describe {{sampleSObjectAccount}} has {{lengthof jsonResponse.fields}} fields and {{lengthof jsonResponse.childRelationships}} child relationships`);
 
-    //jsonResponse, err = salesforceCoreConnector.sObjectPlatformAction();
-    //checkErrors(err);
-    //io:println(string `SObject Platform Action response is:`);
-    //io:println(jsonResponse.toString());
+    jsonResponse, err = salesforceCoreConnector.sObjectPlatformAction();
+    checkErrors(err);
+    io:println(string `SObject Platform Action response is:`);
+    io:println(jsonResponse.toString());
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -135,14 +146,14 @@ public function main (string[] args) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
     // ============================ Create, update, delete records by External IDs ===================== //
 
-    io:println("\n------------------------MAIN METHOD: Handling records by External IDs-----------");
-    account.Name = "Updated Logistics and Transport";
-    jsonResponse, err = salesforceCoreConnector.upsertSObjectByExternalId(sampleSObjectAccount, "id__c", "123456", account);
-    if (err == null) {
-        io:println("Upsert successful: " + jsonResponse.toString());
-    } else {
-        io:println(string `Error occurred when upserting {{sampleSObjectAccount}}: {{err.messages[0]}}`);
-    }
+    //io:println("\n------------------------MAIN METHOD: Handling records by External IDs-----------");
+    //account.Name = "Updated Logistics and Transport";
+    //jsonResponse, err = salesforceCoreConnector.upsertSObjectByExternalId(sampleSObjectAccount, "id__c", "123456", account);
+    //if (err == null) {
+    //    io:println("Upsert successful: " + jsonResponse.toString());
+    //} else {
+    //    io:println(string `Error occurred when upserting {{sampleSObjectAccount}}: {{err.messages[0]}}`);
+    //}
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -307,9 +318,9 @@ public function main (string[] args) {
     //}
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////
-    //// ============================ Products SObject: get, create, update, delete ===================== //
+    //// ============================ Product SObject: get, create, update, delete ===================== //
 
-    io:println("\n------------------------PRODUCTS SObjecct Information-----------------------");
+    io:println("\n------------------------PRODUCT SObjecct Information-----------------------");
     productId, err = salesforceCoreConnector.createProduct(product);
     if (err == null) {
         io:println(string `Created {{sampleSObjectProduct}} with id: {{productId}}`);
