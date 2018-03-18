@@ -172,7 +172,7 @@ public function main (string[] args) {
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // ============================ Executing Queries and Searches ============================= //
 
-    io:println("\n------------------------MAIN METHOD: Executing queries----------------");
+    io:println("\n------------------------MAIN METHOD: Executing SOQL queries ------------------");
     salesforce:QueryResult queryResult;
 
     queryResult, err = salesforceCoreConnector.query("SELECT name FROM Account");
@@ -180,7 +180,7 @@ public function main (string[] args) {
     io:println(string `Found {{lengthof queryResult.records}} results. Next result URL: {{queryResult.nextRecordsUrl}}`);
 
     while (queryResult.nextRecordsUrl != null) {
-        queryResult, err = salesforceCoreConnector.nextQueryResult(queryResult.nextRecordsUrl);
+        queryResult, err = queryResult.getNextQueryResult();
         io:println(string `Found {{lengthof queryResult.records}} results. Next result URL: {{queryResult.nextRecordsUrl}}`);
     }
 
@@ -191,10 +191,11 @@ public function main (string[] args) {
     io:println(string `Found {{lengthof queryPlans}} query plans`);
     io:println(queryPlans);
 
+    io:println("\n------------------------MAIN METHOD: Executing SOSl Searches ------------------");
     salesforce:SearchResult[] searchResults;
     searchResults, err = salesforceCoreConnector.searchSOSLString(searchString);
     checkErrors(err);
-    io:println(string `Found {{lengthof searchResults}} results for {{searchString}} SOSL search:`);
+    io:println(string `Found {{lengthof searchResults}} results for "{{searchString}}" SOSL search.`);
 
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////

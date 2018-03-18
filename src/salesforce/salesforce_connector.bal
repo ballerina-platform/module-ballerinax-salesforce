@@ -53,18 +53,17 @@ public connector SalesforceConnector (string baseUrl, string accessToken, string
     @Description {value:"Lists summary details about each REST API version available"}
     @Return {value:"Array of available API versions"}
     @Return {value:"Error occured"}
-   action getAvailableApiVersions () (json[], SalesforceConnectorError) {
+    action getAvailableApiVersions () (json[], SalesforceConnectorError) {
         SalesforceConnectorError connectorError;
         json response;
         json[] apiVersions;
 
-        response, connectorError = sendGetRequest(prepareUrl([BASE_PATH], null, null));
+        string path = prepareUrl([BASE_PATH], null, null);
+        response, connectorError = sendGetRequest(path);
 
-        if (connectorError != null) {
-            return apiVersions, connectorError;
+        if (response != null) {
+            apiVersions, _ = (json[])response;
         }
-
-        apiVersions, _ = (json[])response;
 
         return apiVersions, connectorError;
     }
@@ -231,13 +230,14 @@ public connector SalesforceConnector (string baseUrl, string accessToken, string
         http:InResponse response = {};
         http:HttpConnectorError err;
         SalesforceConnectorError connectorError;
+        json jsonPayload;
 
         string requestURI = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
         request.setJsonPayload(payload);
         response, err = oauth2Connector.get(requestURI, request);
-        connectorError = checkAndSetErrors(response, err);
+        jsonPayload, connectorError = checkAndSetErrors(response, err, true);
 
-        return response.getJsonPayload(), connectorError;
+        return jsonPayload, connectorError;
     }
 
     // ============================ Create, update, delete records by External IDs ===================== //
@@ -271,13 +271,14 @@ public connector SalesforceConnector (string baseUrl, string accessToken, string
         http:InResponse response = {};
         http:HttpConnectorError err;
         SalesforceConnectorError connectorError;
+        json jsonPayload;
 
         string requestURI = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
         request.setJsonPayload(record);
         response, err = oauth2Connector.patch(requestURI, request);
-        connectorError = checkAndSetErrors(response, err);
+        jsonPayload, connectorError = checkAndSetErrors(response, err, false);
 
-        return response.getJsonPayload(), connectorError;
+        return jsonPayload, connectorError;
     }
 
     // ============================ Get updated and deleted records ===================== //
@@ -326,35 +327,6 @@ public connector SalesforceConnector (string baseUrl, string accessToken, string
 
         string path = prepareUrl([API_BASE_PATH, QUERY], [Q], [query]);
         response, connectorError = sendGetRequest(path);
-
-        QueryResult result = {};
-
-        if (connectorError != null) {
-            return result, connectorError;
-        }
-
-        result.done, _ = (boolean)response.done;
-        result.totalSize, _ = (int)response.totalSize;
-        result.records, _ = (json[])response.records;
-        if (response.nextRecordsUrl != null) {
-            result.nextRecordsUrl = response.nextRecordsUrl.toString();
-        } else {
-            result.nextRecordsUrl = null;
-        }
-
-        // todo Use struct bound functions for this
-        return result, connectorError;
-    }
-
-    @Description {value:"If the queryAll results are too large, retrieve the next batch of results using nextRecordUrl"}
-    @Param {value:"nextRecordsUrl: The url sent with first batch of queryAll results to get the next batch"}
-    @Return {value:"returns QueryResult struct"}
-    @Return {value:"Error occured"}
-    action nextQueryResult (string nextRecordsUrl) (QueryResult, SalesforceConnectorError) {
-        SalesforceConnectorError connectorError;
-        json response;
-
-        response, connectorError = sendGetRequest(nextRecordsUrl);
 
         QueryResult result = {};
 

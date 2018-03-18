@@ -107,17 +107,12 @@ function sendGetRequest (string url) (json, SalesforceConnectorError) {
     http:InResponse response = {};
     http:HttpConnectorError err;
     SalesforceConnectorError connectorError;
+    json jsonPayload;
 
     response, err = oauth2Connector.get(url, request);
-    connectorError = checkAndSetErrors(response, err);
-    json payload = response.getJsonPayload();
+    jsonPayload, connectorError = checkAndSetErrors(response, err, true);
 
-    if (payload == null) {
-        log:printWarn("null payload received for: " + url);
-    }
-
-    // TODO check if payload is null or had any error
-    return payload, connectorError;
+    return jsonPayload, connectorError;
 }
 
 @Description {value:"Prepare and send DELETE request"}
@@ -134,9 +129,8 @@ function sendDeleteRequest (string url) (SalesforceConnectorError) {
     SalesforceConnectorError connectorError;
 
     response, err = oauth2Connector.delete(url, request);
-    connectorError = checkAndSetErrors(response, err);
+    _, connectorError = checkAndSetErrors(response, err, false);
 
-    // TODO check if response is null or had any error
     return connectorError;
 }
 
@@ -154,18 +148,13 @@ function sendPostRequest (string url, json body) (json, SalesforceConnectorError
     http:InResponse response = {};
     http:HttpConnectorError err;
     SalesforceConnectorError connectorError;
+    json jsonPayload;
 
     request.setJsonPayload(body);
     response, err = oauth2Connector.post(url, request);
-    connectorError = checkAndSetErrors(response, err);
-    json payload = response.getJsonPayload();
+    jsonPayload, connectorError = checkAndSetErrors(response, err, true);
 
-    if (payload == null) {
-        log:printWarn("null payload received for: " + url);
-    }
-
-    // TODO check if payload is null or had any error
-    return payload, connectorError;
+    return jsonPayload, connectorError;
 }
 
 @Description {value:"Prepare and send PATCH request"}
@@ -184,9 +173,8 @@ function sendPatchRequest (string url, json body) (SalesforceConnectorError) {
 
     request.setJsonPayload(body);
     response, err = oauth2Connector.patch(url, request);
-    connectorError = checkAndSetErrors(response, err);
+    _, connectorError = checkAndSetErrors(response, err, false);
 
-    // TODO check if response is null or had any error
     return connectorError;
 }
 
@@ -236,27 +224,48 @@ function prepareUrl (string[] paths, string[] queryParamNames, string[] queryPar
 
 @Description {value:"Function to check errors and set errors to relevant error types"}
 @Param {value:"response: http response"}
-@Param {value:"httpError: http connector error"}
+@Param {value:"httpError: http connector error for network related errors"}
+@Param {value:"isRequiredJsonPayload: gets true if response should contain a Json body, else false"}
+@Return {value:"Json Payload"}
 @Return {value:"Error occured"}
-function checkAndSetErrors (http:InResponse response, http:HttpConnectorError httpError) (SalesforceConnectorError) {
+function checkAndSetErrors (http:InResponse response, http:HttpConnectorError httpError, boolean isRequiredJsonPayload) (json, SalesforceConnectorError) {
     SalesforceConnectorError connectorError;
+    json responseBody;
+
     if (httpError != null) {
         connectorError = {
                              messages:["Http error occurred -> status code: " +
                                        <string>httpError.statusCode + "; message: " + httpError.message],
                              errors:[httpError.cause]
                          };
-    } else if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
-        json[] body;
-        body, _ = (json[])response.getJsonPayload();
+    } else if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
+        if (isRequiredJsonPayload) {
+            try {
+                responseBody = response.getJsonPayload();
+            } catch (error e) {
+                connectorError = {messages:[], salesforceErrors:[]};
+                connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
+                connectorError.errors[0] = e;
+            }
+        }
+    } else {
+        json[] errorResponseBody;
+        try {
+            errorResponseBody, _ = (json[])response.getJsonPayload();
+        } catch (error e) {
+            connectorError = {messages:[], salesforceErrors:[]};
+            connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
+            connectorError.errors[0] = e;
+        }
+
         connectorError = {messages:[], salesforceErrors:[]};
-        foreach i, e in body {
+        foreach i, e in errorResponseBody {
             SalesforceError sfError = {message:e.message.toString(), errorCode:e.errorCode.toString()};
             connectorError.messages[i] = e.message.toString();
             connectorError.salesforceErrors[i] = sfError;
         }
     }
-    return connectorError;
+    return responseBody, connectorError;
 }
 
 @Description {value:"Function to set errors to SalesforceConnectorError type"}
