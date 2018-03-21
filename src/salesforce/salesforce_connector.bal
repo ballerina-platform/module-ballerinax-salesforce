@@ -31,7 +31,6 @@ public function <SalesforceConnector sfConnector> init (string baseUrl, string a
     sfConnector.oauth2 = {};
     sfConnector.oauth2.init(baseUrl, accessToken, refreshToken,
                             clientId, clientSecret, refreshTokenEP, refreshTokenPath);
-
 }
 
 @Description {value:"Lists summary details about each REST API version available"}
@@ -450,10 +449,6 @@ public function <SalesforceConnector sfConnector> getFieldValuesFromExternalObje
 @Return {value:"response message"}
 @Return {value:"Error occured"}
 public function <SalesforceConnector sfConnector> createMultipleRecords (string sObjectName, json payload) (json, SalesforceConnectorError) {
-    endpoint<oauth2:ClientConnector> oauth2Connector {
-        oauth2ConnectorInstance;
-    }
-
     http:OutRequest request = {};
     http:InResponse response = {};
     http:HttpConnectorError err;
@@ -462,7 +457,7 @@ public function <SalesforceConnector sfConnector> createMultipleRecords (string 
 
     string requestURI = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
     request.setJsonPayload(payload);
-    response, err = oauth2Connector.get(requestURI, request);
+    response, err = sfConnector.oauth2.get(requestURI, request);
     jsonPayload, connectorError = checkAndSetErrors(response, err, true);
 
     return jsonPayload, connectorError;
@@ -495,10 +490,6 @@ public function <SalesforceConnector sfConnector> getRecordByExternalId (string 
 @Return {value:"response message"}
 @Return {value:"Error occured."}
 public function <SalesforceConnector sfConnector> upsertSObjectByExternalId (string sObjectName, string fieldId, string fieldValue, json record) (json, SalesforceConnectorError) {
-    endpoint<oauth2:ClientConnector> oauth2Connector {
-        oauth2ConnectorInstance;
-    }
-
     http:OutRequest request = {};
     http:InResponse response = {};
     http:HttpConnectorError err;
@@ -507,7 +498,7 @@ public function <SalesforceConnector sfConnector> upsertSObjectByExternalId (str
 
     string requestURI = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     request.setJsonPayload(record);
-    response, err = oauth2Connector.patch(requestURI, request);
+    response, err = sfConnector.oauth2.patch(requestURI, request);
     jsonPayload, connectorError = checkAndSetErrors(response, err, false);
 
     return jsonPayload, connectorError;
@@ -604,6 +595,8 @@ public function <SalesforceConnector sfConnector> sObjectPlatformAction () (json
     return response, connectorError;
 }
 
+//=============================== Utility Functions ======================================//
+
 @Description {value:"Prepare and send the request"}
 @Param {value:"url: The relevant url to be used to send the request"}
 @Return {value:"response json"}
@@ -619,4 +612,126 @@ function <SalesforceConnector sfConnector> sendGetRequest (string url) (json, Sa
     jsonPayload, connectorError = checkAndSetErrors(response, err, true);
 
     return jsonPayload, connectorError;
+}
+
+@Description {value:"Prepare and send POST request"}
+@Param {value:"url: The relevant url to be used to send the request"}
+@Param {value:"body: json payload to be sent as request body"}
+@Return {value:"response json"}
+@Return {value:"Error occured."}
+function <SalesforceConnector sfConnector> sendPostRequest (string url, json body) (json, SalesforceConnectorError) {
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    http:HttpConnectorError err;
+    SalesforceConnectorError connectorError;
+    json jsonPayload;
+
+    request.setJsonPayload(body);
+    response, err = sfConnector.oauth2.post(url, request);
+    jsonPayload, connectorError = checkAndSetErrors(response, err, true);
+
+    return jsonPayload, connectorError;
+}
+
+@Description {value:"Prepare and send DELETE request"}
+@Param {value:"url: The relevant url to be used to send the request"}
+@Return {value:"Error occured."}
+function <SalesforceConnector sfConnector> sendDeleteRequest (string url) (SalesforceConnectorError) {
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    http:HttpConnectorError err;
+    SalesforceConnectorError connectorError;
+
+    response, err = sfConnector.oauth2.delete(url, request);
+    _, connectorError = checkAndSetErrors(response, err, false);
+
+    return connectorError;
+}
+
+@Description {value:"Prepare and send PATCH request"}
+@Param {value:"url: The relevant url to be used to send the request"}
+@Param {value:"body: json payload to be sent as request body"}
+@Return {value:"Error occured."}
+function <SalesforceConnector sfConnector> sendPatchRequest (string url, json body) (SalesforceConnectorError) {
+    http:OutRequest request = {};
+    http:InResponse response = {};
+    http:HttpConnectorError err;
+    SalesforceConnectorError connectorError;
+
+    request.setJsonPayload(body);
+    response, err = sfConnector.oauth2.patch(url, request);
+    _, connectorError = checkAndSetErrors(response, err, false);
+
+    return connectorError;
+}
+
+@Description {value:"Accesses records based on the specified object ID, can be used with external objects "}
+@Param {value:"sobjectName: The relevant sobject name"}
+@Return {value:"response message"}
+@Return {value:"Error occured."}
+function <SalesforceConnector sfConnector> getRecord (string sObjectName, string id) (json, SalesforceConnectorError) {
+    SalesforceConnectorError connectorError;
+    json response;
+
+    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id], null, null);
+    response, connectorError = sendGetRequest(path);
+
+    return response, connectorError;
+}
+
+@Description {value:"Creates new records"}
+@Param {value:"sobjectName: The relevant sobject name"}
+@Param {value:"record: json payload containing record data"}
+@Return {value:"Created record's ID"}
+@Return {value:"Error occured."}
+function <SalesforceConnector sfConnector> createRecord (string sObjectName, json record) (string, SalesforceConnectorError) {
+    SalesforceConnectorError connectorError;
+    json response;
+    string id;
+
+    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName], null, null);
+    response, connectorError = sendPostRequest(path, record);
+
+    if (connectorError != null) {
+        return id, connectorError;
+    }
+
+    log:printDebug(response.toString());
+
+    try {
+        id = response.id.toString();
+    } catch (error e) {
+        log:printErrorCause("Unable to get the newly created record's id", e);
+        connectorError = setError(e);
+    }
+
+    return id, connectorError;
+}
+
+@Description {value:"Updates existing records"}
+@Param {value:"sobjectName: The relevant sobject name"}
+@Param {value:"record: json payload containing record data"}
+@Return {value:"response message"}
+@Return {value:"Error occured."}
+function <SalesforceConnector sfConnector> updateRecord (string sObjectName, string id, json record) (boolean, SalesforceConnectorError) {
+    SalesforceConnectorError connectorError;
+
+    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id], null, null);
+    connectorError = sendPatchRequest(path, record);
+
+    return connectorError == null, connectorError;
+}
+
+@Description {value:"Deletes existing records"}
+@Param {value:"sobjectName: The relevant sobject name"}
+@Param {value:"id: The id of the relevant record supposed to be deleted"}
+@Return {value:"response message"}
+@Return {value:"Error occured."}
+function <SalesforceConnector sfConnector> deleteRecord (string sObjectName, string id) (boolean, SalesforceConnectorError) {
+    SalesforceConnectorError connectorError;
+
+    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id], null, null);
+    connectorError = sendDeleteRequest(path);
+
+    return connectorError == null, connectorError;
 }

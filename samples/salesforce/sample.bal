@@ -16,7 +16,8 @@
 //// under the License.
 ////
 //
-package samples.salesforce;
+//package samples.salesforce;
+
 import ballerina.io;
 import ballerina.net.http;
 import src.salesforce;
@@ -47,6 +48,9 @@ function main (string[] args) {
     //string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
     //time:Time weekAgo = now.subtractDuration(0, 0, 7, 0, 0, 0, 0);
     //string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
+    string endDateTime = "2020-01-01";
+    string startDateTime = "2018-01-01";
+
 
     salesforce:SalesforceConnector salesforceConnector = {};
     salesforceConnector.init(url, accessToken, refreshToken, clientId, clientSecret, refreshTokenEndpoint, refreshTokenPath);
