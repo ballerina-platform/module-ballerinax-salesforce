@@ -19,48 +19,48 @@
 package src.salesforce;
 
 public struct ApiVersion {
-    string |version|;
-    string label;
-    string url;
+   string ^"version";
+   string label;
+   string url;
 }
 
 public struct SalesforceError {
-    string message;
-    string errorCode;
+   string message;
+   string errorCode;
 }
 
 public struct SalesforceConnectorError {
-    string[] messages;
-    error[] errors;
-    SalesforceError[] salesforceErrors;
+   string[] messages;
+   error[] errors;
+   SalesforceError[] salesforceErrors;
 }
 
 public struct QueryResult {
-    boolean done;
-    int totalSize;
-    json[] records;
-    string nextRecordsUrl;
+   boolean done;
+   int totalSize;
+   json[] records;
+   string nextRecordsUrl;
 }
 
 public struct SearchResult {
-    json attributes;
-    string Id;
+   json attributes;
+   string Id;
 }
 
 public struct QueryPlan {
-    int cardinality;
-    string[] fields;
-    string leadingOperationType;
-    FeedbackNote[] notes;
-    float relativeCost;
-    int sobjectCardinality;
-    string sobjectType;
+   int cardinality;
+   string[] fields;
+   string leadingOperationType;
+   FeedbackNote[] notes;
+   float relativeCost;
+   int sobjectCardinality;
+   string sobjectType;
 }
 
 public struct FeedbackNote {
-    string description;
-    string[] fields;
-    string tableEnumOrId;
+   string description;
+   string[] fields;
+   string tableEnumOrId;
 }
 
 //========================== QueryResult bound function ==========================//
@@ -69,25 +69,25 @@ public struct FeedbackNote {
 @Return {value:"returns QueryResult struct"}
 @Return {value:"Error occured"}
 public function <QueryResult queryResult> getNextQueryResult () (QueryResult, SalesforceConnectorError) {
-    SalesforceConnectorError connectorError;
-    json response;
+   SalesforceConnectorError connectorError;
+   json response;
 
-    response, connectorError = sendGetRequest(queryResult.nextRecordsUrl);
+   response, connectorError = sendGetRequest(queryResult.nextRecordsUrl);
 
-    QueryResult result = {};
+   QueryResult result = {};
 
-    if (connectorError != null) {
-        return result, connectorError;
-    }
+   if (connectorError != null) {
+       return result, connectorError;
+   }
 
-    result.done, _ = (boolean)response.done;
-    result.totalSize, _ = (int)response.totalSize;
-    result.records, _ = (json[])response.records;
-    if (response.nextRecordsUrl != null) {
-        result.nextRecordsUrl = response.nextRecordsUrl.toString();
-    } else {
-        result.nextRecordsUrl = null;
-    }
+   result.done, _ = (boolean)response.done;
+   result.totalSize, _ = (int)response.totalSize;
+   result.records, _ = (json[])response.records;
+   if (response.nextRecordsUrl != null) {
+       result.nextRecordsUrl = response.nextRecordsUrl.toString();
+   } else {
+       result.nextRecordsUrl = null;
+   }
 
-    return result, connectorError;
+   return result, connectorError;
 }
