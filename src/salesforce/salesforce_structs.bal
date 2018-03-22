@@ -62,32 +62,3 @@ public struct FeedbackNote {
    string[] fields;
    string tableEnumOrId;
 }
-
-//========================== QueryResult bound function ==========================//
-
-@Description {value:"If the query results are too large, retrieve the next batch of results using nextRecordUrl"}
-@Return {value:"returns QueryResult struct"}
-@Return {value:"Error occured"}
-public function <QueryResult queryResult> getNextQueryResult () (QueryResult, SalesforceConnectorError) {
-   SalesforceConnectorError connectorError;
-   json response;
-
-   response, connectorError = sendGetRequest(queryResult.nextRecordsUrl);
-
-   QueryResult result = {};
-
-   if (connectorError != null) {
-       return result, connectorError;
-   }
-
-   result.done, _ = (boolean)response.done;
-   result.totalSize, _ = (int)response.totalSize;
-   result.records, _ = (json[])response.records;
-   if (response.nextRecordsUrl != null) {
-       result.nextRecordsUrl = response.nextRecordsUrl.toString();
-   } else {
-       result.nextRecordsUrl = null;
-   }
-
-   return result, connectorError;
-}
