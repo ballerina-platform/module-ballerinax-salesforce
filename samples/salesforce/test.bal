@@ -15,6 +15,7 @@ string refreshTokenPath = "/services/oauth2/token";
 public function main (string[] args) {
     error Error = {};
     json jsonResponse;
+    string nextUrl;
 
     json account = {Name:"ABC Inc", BillingCity:"New York", Global_POD__c:"UK"};
     string accountId = "";
@@ -51,6 +52,21 @@ public function main (string[] args) {
         io:println(e);
     }
 
+    io:println("\n------------------------MAIN METHOD: getQueryResult ()----------------------");
+    try {
+        jsonResponse = salesforceConnector.getQueryResult("SELECT name FROM Account");
+        io:println("Success!");
+        //io:println(jsonResponse);
+        while (jsonResponse.nextRecordsUrl != null) {
+            nextUrl = jsonResponse.nextRecordsUrl.toString();
+            jsonResponse = salesforceConnector.getNextQueryResult(nextUrl);
+            io:println("\n------------------------MAIN METHOD: getNextQueryResult ()----------------------");
+            io:println("Successfully received next query results set!");
+        }
+    } catch (error e) {
+        io:println(e);
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
@@ -58,14 +74,14 @@ public function main (string[] args) {
     try {
         string response = salesforceConnector.createAccount(account);
         accountId = response;
-        io:println("\n Account created with: " + response);
+        io:println("\nAccount created with: " + response);
     } catch (error e) {
         io:println(e);
     }
 
     try {
         json j1 = salesforceConnector.getAccountById(accountId);
-        io:println("\n Account details received successfully for: " + accountId);
+        io:println("\nAccount details received successfully for: " + accountId);
     } catch (error e) {
         io:println(e);
     }
@@ -73,7 +89,7 @@ public function main (string[] args) {
     try {
         boolean response = salesforceConnector.updateAccount(accountId, account);
         if (response) {
-            io:println("\n Account successfully updated! ");
+            io:println("\nAccount successfully updated! ");
         }
     } catch (error e) {
         io:println(e);
@@ -82,7 +98,7 @@ public function main (string[] args) {
     try {
         boolean response = salesforceConnector.deleteAccount(accountId);
         if (response) {
-            io:println("\n Account successfully deleted! ");
+            io:println("\nAccount successfully deleted! ");
         }
     } catch (error e) {
         io:println(e);

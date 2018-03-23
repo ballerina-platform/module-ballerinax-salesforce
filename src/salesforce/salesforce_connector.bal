@@ -21,6 +21,7 @@ package src.salesforce;
 import ballerina.net.http;
 import ballerina.mime;
 import oauth2;
+import ballerina.io;
 
 @Description {value:"Salesforce Client Connector"}
 public struct SalesforceConnector {
@@ -363,6 +364,41 @@ public function <SalesforceConnector sfConnector> deleteProduct (string productI
     return sfConnector.deleteRecord(PRODUCT, productId);
 }
 
+//=============================== Query =======================================//
+
+@Description {value:"Executes the specified SOQL query"}
+@Param {value:"query: The request SOQL query"}
+@Return {value:"returns QueryResult struct"}
+@Return {value:"Error occured"}
+public function <SalesforceConnector sfConnector> getQueryResult (string receivedQuery) returns json {
+    json response;
+
+    string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
+    try {
+        response = sfConnector.getRecord(path);
+    }
+    catch (error Error) {
+        throw Error;
+    }
+    return response;
+}
+
+@Description {value:"If the query results are too large, retrieve the next batch of results using nextRecordUrl"}
+@Return {value:"returns QueryResult struct"}
+@Return {value:"Error occured"}
+public function <SalesforceConnector sfConnector> getNextQueryResult (string nextRecordsUrl) returns json {
+    json response;
+
+    try {
+        response = sfConnector.getRecord(nextRecordsUrl);
+    }
+    catch (error Error) {
+        throw Error;
+    }
+    return response;
+}
+
+//==============================================================================//
 //============================ utility functions================================//
 
 public function <SalesforceConnector sfConnector> getRecord (string path) returns json {
@@ -415,7 +451,6 @@ public function <SalesforceConnector sfConnector> createRecord (string sObjectNa
                         id = jsonRes.id.toString();
                     }
                 }
-
 
             } else {
                 sfError = {message:"Was not updated"};
@@ -483,29 +518,36 @@ function prepareUrl (string[] paths) returns string {
             url = url + path;
         }
     }
-
-    // if (queryParamNames != null) {
-    //     url = url + "?";
-    //     boolean first = true;
-    //     foreach i, name in queryParamNames {
-    //         string value = queryParamValues[i];
-
-    //         value = uri:encode(value, ENCODING_CHARSET);
-    //         if (e != null) {
-    //             log:printErrorCause("Unable to encode value: " + value, e);
-    //             break;
-    //         }
-
-    //         if (first) {
-    //             url = url + name + "=" + value;
-    //             first = false;
-    //         } else {
-    //             url = url + "&" + name + "=" + value;
-    //         }
-    //     }
-    // }
-
-    log:printDebug("Prepared URL: " + url);
     return url;
 }
+
+function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
+
+    string url = prepareUrl(paths);
+
+    url = url + "?";
+    boolean first = true;
+    foreach i, name in queryParamNames {
+        string value = queryParamValues[i];
+
+        var response = uri:encode(value, ENCODING_CHARSET);
+        match response {
+            string encoded => {
+                if (first) {
+                    url = url + name + "=" + encoded;
+                    first = false;
+                } else {
+                    url = url + "&" + name + "=" + encoded;
+                }
+            }
+            error e => {
+                log:printErrorCause("Unable to encode value: " + value, e);
+                break;
+            }
+        }
+    }
+
+    return url;
+}
+
 
