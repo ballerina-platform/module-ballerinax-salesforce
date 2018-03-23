@@ -36,6 +36,8 @@ public function main (string[] args) {
     string nextUrl;
 
     json account = {Name:"ABC Inc", BillingCity:"New York", Global_POD__c:"UK"};
+    string searchString = "FIND {John Keells Holdings PLC}";
+    string queryString = "SELECT name FROM Account";
     string accountId = "";
 
     salesforce:SalesforceConnector salesforceConnector = {};
@@ -70,7 +72,7 @@ public function main (string[] args) {
         io:println(e);
     }
 
-    io:println("\n------------------------MAIN METHOD: getQueryResult ()----------------------");
+    io:println("\n--------------------------MAIN METHOD: getQueryResult ()-------------------------");
     try {
         jsonResponse = salesforceConnector.getQueryResult("SELECT name FROM Account");
         io:println("Success!");
@@ -81,6 +83,24 @@ public function main (string[] args) {
             io:println("\n------------------------MAIN METHOD: getNextQueryResult ()----------------------");
             io:println("Successfully received next query results set!");
         }
+    } catch (error e) {
+        io:println(e);
+    }
+
+    io:println("\n----------------------MAIN METHOD: explainQueryOrReportOrListview ()---------------------");
+    try {
+        jsonResponse = salesforceConnector.explainQueryOrReportOrListview(queryString);
+        io:println("Found explanation!");
+        //io:println(jsonResponse);
+    } catch (error e) {
+        io:println(e);
+    }
+
+    io:println("\n------------------------MAIN METHOD: Executing SOSl Searches ------------------");
+    try {
+        jsonResponse = salesforceConnector.searchSOSLString(searchString);
+        io:println("Found results for SOSl search: " + searchString);
+        //io:println(jsonResponse);
     } catch (error e) {
         io:println(e);
     }

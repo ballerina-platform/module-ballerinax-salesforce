@@ -137,7 +137,6 @@ function prepareUrl (string[] paths) returns string {
             if (!path.hasPrefix("/")) {
                 url = url + "/";
             }
-
             url = url + path;
         }
     }
