@@ -17,15 +17,14 @@ Salesforce connector actions are being invoked by a ballerina main function. The
 
 | Language Version  | Connector Version | API Version |
 | ------------------| ------------------| ------------|
-|     0.964.0       |       0.964       |   v37.0     |
+|  0.970-alpha0     |    0.970-alpha0   |   v37.0     |
 
 
 ## Getting started
 
-1. Download the Ballerina tool 0.964.0 distribution by navigating to https://ballerinalang.org/downloads/
-2. Navigate to the [pull request](https://github.com/wso2-ballerina/package-oauth2/pull/12) or [repository](https://github.com/keerthu/package-oauth2/tree/6622641069a7dcb9628ccdc62b8072a2872b0d4f), Download the repo, build the POM and copy oauth2 jar file into the `<ballerina-tools>/bre/lib` folder. (Under the current improvements, OAuth2 ClientConnector.bal file which is in oauth2 package, is being directly used by Salesforce Connector, hence adding OAuth2 jar is not required.)
-3. Clone the repository by running the following command,
-   `git clone https://github.com/erandiganepola/connector-salesforce.git` and
+1. Download the Ballerina tool 0.970-alpha0 distribution by navigating to https://ballerinalang.org/downloads/
+2. Clone the repository by running the following command,
+   `git clone https://github.com/wso2-ballerina/package-salesforce` and
    Import the package to your ballerina project.
 
 ### Prerequisites
@@ -39,28 +38,25 @@ Create a Salesforce organization, create a connected app by visiting Salesforce 
 * Refresh endpoint
  * Refresh endpoint :- Sandbox Organization - https://test.salesforce.com/services/oauth2/token Other Organization - https://login.salesforce.com/services/oauth2/token
 
-IMPORTANT This access token and refresh token can be used to make API requests on your own account's behalf. Do not share your access token, client secret with anyone.
+IMPORTANT: This access token and refresh token can be used to make API requests on your own account's behalf. Do not share your access token, client secret with anyone.
 
 ### Working with Salesforce REST connector actions
 
-In order to use the Salesforce connector, first you need to create a SalesforceConnector endpoint by passing above mentioned parameters and then initialize it.
-#### Salesforce endpoint
+In order to use the Salesforce connector, first you need to create a SalesforceConnector endpoint by passing above mentioned parameters and initialize it.
+#### Salesforce struct
 ```ballerina
-public connector SalesforceConnector (string baseUrl, string accessToken, string clientId, string clientSecret, string 
-                                      refreshToken, string refreshTokenEndpoint, string refreshTokenPath) {
-    endpoint<oauth2:ClientConnector> oauth2Connector {
-        oauth2ConnectorInstance;
-    }
+public struct SalesforceConnector {
+    OAuth2Client oauth2;
+}
 ```
 #### Init() function
 ```ballerina
-action init () {
-        if (!isOAuth2Initialized) {
-            oauth2ConnectorInstance = create oauth2:ClientConnector(baseUrl, accessToken, clientId, clientSecret, 
-                                                                    refreshToken, refreshTokenEndpoint, refreshTokenPath);
-            isOAuth2Initialized = true;
-        }
-    }
+public function <SalesforceConnector sfConnector> init (string baseUrl, string accessToken, string refreshToken,
+                                                        string clientId, string clientSecret, string refreshTokenEP, string refreshTokenPath) {
+    sfConnector.oauth2 = {};
+    sfConnector.oauth2.init(baseUrl, accessToken, refreshToken,
+                            clientId, clientSecret, refreshTokenEP, refreshTokenPath);
+}
 ```
 #### Following public actions are provided to the user
 
