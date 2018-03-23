@@ -613,7 +613,7 @@ public function <SalesforceConnector sfConnector> getSObjectBasicInfo (string so
                         Can be used to retrieve the fields, URLs, and child relationships"}
 @Param {value:"sobjectName: The relevant sobject name"}
 @Return {value:"Json result"}
-public function <SalesforceConnector sfConnector> describeSObject (string sObjectName) returns json | SalesforceConnectorError {
+public function <SalesforceConnector sfConnector> describeSObject (string sObjectName) returns json {
     json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
@@ -628,7 +628,7 @@ public function <SalesforceConnector sfConnector> describeSObject (string sObjec
 
 @Description {value:"Query for actions displayed in the UI, given a user, a context, device format, and a record ID"}
 @Return {value:"Json result"}
-public function <SalesforceConnector sfConnector> sObjectPlatformAction () returns json | SalesforceConnectorError {
+public function <SalesforceConnector sfConnector> sObjectPlatformAction () returns json {
     json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);

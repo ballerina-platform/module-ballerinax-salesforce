@@ -20,6 +20,7 @@ package tests;
 
 import ballerina/io;
 import ballerina/net.http;
+import ballerina/time;
 import salesforce;
 
 string url = "https://wso2--wsbox.cs8.my.salesforce.com";
@@ -35,10 +36,31 @@ public function main (string[] args) {
     json jsonResponse;
     string nextUrl;
 
+    string sampleSObjectAccount = "Account";
+    string sampleSObjectLead = "Lead";
+    string sampleSObjectProduct = "Product";
+    string sampleSObjectContact = "Contact";
+    string sampleSObjectOpportunity = "Opportunity";
+    string sampleCustomObject = "Support_Account";
+    string apiVersion = "v37.0";
+
     json account = {Name:"ABC Inc", BillingCity:"New York", Global_POD__c:"UK"};
+    json supportAccount = {DevelopmentSupportHours:"72"};
+    json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
+    json contact = {LastName:"Patson"};
+    json createOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
+    json product = {Name:"APIM", Description:"APIM product"};
     string searchString = "FIND {John Keells Holdings PLC}";
-    string queryString = "SELECT name FROM Account";
     string accountId = "";
+    string leadId = "";
+    string contactId = "";
+    string opportunityId = "006L0000008xmcU";
+    string productId = "";
+    string queryString = "SELECT name FROM Account";
+    time:Time now = time:currentTime();
+    string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
+    time:Time weekAgo = now.subtractDuration(0, 0, 7, 0, 0, 0, 0);
+    string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
     salesforce:SalesforceConnector salesforceConnector = {};
     salesforceConnector.init(url, accessToken, refreshToken, clientId, clientSecret, refreshTokenEndpoint, refreshTokenPath);
@@ -56,7 +78,7 @@ public function main (string[] args) {
 
     io:println("\n------------------------MAIN METHOD: getResourcesByApiVersion()----------------------");
     try {
-        jsonResponse = salesforceConnector.getResourcesByApiVersion("v37.0");
+        jsonResponse = salesforceConnector.getResourcesByApiVersion(apiVersion);
         io:println("Success!");
         //io:println(jsonResponse);
     } catch (error e) {
@@ -71,6 +93,8 @@ public function main (string[] args) {
     } catch (error e) {
         io:println(e);
     }
+
+    //======================================== Query ===============================================//
 
     io:println("\n--------------------------MAIN METHOD: getQueryResult ()-------------------------");
     try {
@@ -100,6 +124,63 @@ public function main (string[] args) {
     try {
         jsonResponse = salesforceConnector.searchSOSLString(searchString);
         io:println("Found results for SOSl search: " + searchString);
+        //io:println(jsonResponse);
+    } catch (error e) {
+        io:println(e);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // ============================ Describe SObjects available and their fields/metadata ===================== //
+
+    io:println("\n-----------------------MAIN METHOD: getSObjectBasicInfo() --------------------------");
+    try {
+        jsonResponse = salesforceConnector.getSObjectBasicInfo(sampleSObjectAccount);
+        io:println("Success!");
+        //io:println(jsonResponse);
+    } catch (error e) {
+        io:println(e);
+    }
+
+    io:println("\n-----------------------MAIN METHOD: describeAvailableObjects() ---------------------------");
+    try {
+        jsonResponse = salesforceConnector.describeAvailableObjects();
+        io:println("Success!");
+        //io:println(jsonResponse);
+    } catch (error e) {
+        io:println(e);
+    }
+
+    io:println("\n-----------------------MAIN METHOD: describeSObject() ---------------------------");
+    try {
+        jsonResponse = salesforceConnector.describeSObject(sampleSObjectAccount);
+        io:println("Success!");
+        //io:println(jsonResponse);
+    } catch (error e) {
+        io:println(e);
+    }
+
+    io:println("\n-----------------------MAIN METHOD: sObjectPlatformAction() ---------------------------");
+    try {
+        jsonResponse = salesforceConnector.sObjectPlatformAction();
+        io:println("Success!");
+        //io:println(jsonResponse);
+    } catch (error e) {
+        io:println(e);
+    }
+
+    io:println("\n-----------------------MAIN METHOD: getDeletedRecords() ---------------------------");
+    try {
+        jsonResponse = salesforceConnector.getDeletedRecords(sampleSObjectAccount, startDateTime, endDateTime);
+        io:println("Success!");
+        //io:println(jsonResponse);
+    } catch (error e) {
+        io:println(e);
+    }
+
+    io:println("\n-----------------------MAIN METHOD: getUpdatedRecords() ---------------------------");
+    try {
+        jsonResponse = salesforceConnector.getUpdatedRecords(sampleSObjectAccount, startDateTime, endDateTime);
+        io:println("Success!");
         //io:println(jsonResponse);
     } catch (error e) {
         io:println(e);
