@@ -65,162 +65,98 @@ public function main (string[] args) {
     salesforce:SalesforceConnector salesforceConnector = {};
     salesforceConnector.init(url, accessToken, refreshToken, clientId, clientSecret, refreshTokenEndpoint, refreshTokenPath);
 
+    json|salesforce:SalesforceConnectorError response;
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     io:println("\n------------------------MAIN METHOD: getAvailableApiVersions()----------------------");
-    try {
-        jsonResponse = salesforceConnector.getAvailableApiVersions();
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.getAvailableApiVersions();
+    checkErrors(response);
 
     io:println("\n------------------------MAIN METHOD: getResourcesByApiVersion()----------------------");
-    try {
-        jsonResponse = salesforceConnector.getResourcesByApiVersion(apiVersion);
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.getResourcesByApiVersion(apiVersion);
+    checkErrors(response);
 
     io:println("\n------------------------MAIN METHOD: getOrganizationLimits ()----------------------");
-    try {
-        jsonResponse = salesforceConnector.getOrganizationLimits();
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.getOrganizationLimits();
+    checkErrors(response);
+
 
     //======================================== Query ===============================================//
 
     io:println("\n--------------------------MAIN METHOD: getQueryResult ()-------------------------");
-    try {
-        jsonResponse = salesforceConnector.getQueryResult("SELECT name FROM Account");
-        io:println("Success!");
-        //io:println(jsonResponse);
-        while (jsonResponse.nextRecordsUrl != null) {
-            nextUrl = jsonResponse.nextRecordsUrl.toString();
-            jsonResponse = salesforceConnector.getNextQueryResult(nextUrl);
-            io:println("\n------------------------MAIN METHOD: getNextQueryResult ()----------------------");
-            io:println("Successfully received next query results set!");
-        }
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.getQueryResult("SELECT name FROM Account");
+    checkErrors(response);
 
     io:println("\n----------------------MAIN METHOD: explainQueryOrReportOrListview ()---------------------");
-    try {
-        jsonResponse = salesforceConnector.explainQueryOrReportOrListview(queryString);
-        io:println("Found explanation!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.explainQueryOrReportOrListview(queryString);
+    checkErrors(response);
 
     io:println("\n------------------------MAIN METHOD: Executing SOSl Searches ------------------");
-    try {
-        jsonResponse = salesforceConnector.searchSOSLString(searchString);
-        io:println("Found results for SOSl search: " + searchString);
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.searchSOSLString(searchString);
+    checkErrors(response);
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     // ============================ Describe SObjects available and their fields/metadata ===================== //
 
     io:println("\n-----------------------MAIN METHOD: getSObjectBasicInfo() --------------------------");
-    try {
-        jsonResponse = salesforceConnector.getSObjectBasicInfo(sampleSObjectAccount);
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.getSObjectBasicInfo(sampleSObjectAccount);
+    checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: describeAvailableObjects() ---------------------------");
-    try {
-        jsonResponse = salesforceConnector.describeAvailableObjects();
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: describeSObject() ---------------------------");
-    try {
-        jsonResponse = salesforceConnector.describeSObject(sampleSObjectAccount);
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.describeSObject(sampleSObjectAccount);
+    checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: sObjectPlatformAction() ---------------------------");
-    try {
-        jsonResponse = salesforceConnector.sObjectPlatformAction();
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.sObjectPlatformAction();
+    checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: getDeletedRecords() ---------------------------");
-    try {
-        jsonResponse = salesforceConnector.getDeletedRecords(sampleSObjectAccount, startDateTime, endDateTime);
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.getDeletedRecords(sampleSObjectAccount, startDateTime, endDateTime);
+    checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: getUpdatedRecords() ---------------------------");
-    try {
-        jsonResponse = salesforceConnector.getUpdatedRecords(sampleSObjectAccount, startDateTime, endDateTime);
-        io:println("Success!");
-        //io:println(jsonResponse);
-    } catch (error e) {
-        io:println(e);
-    }
+    response = salesforceConnector.getUpdatedRecords(sampleSObjectAccount, startDateTime, endDateTime);
+    checkErrors(response);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
     // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
     io:println("\n------------------------ACCOUNT SObjecct Information----------------");
-    try {
-        string response = salesforceConnector.createAccount(account);
-        accountId = response;
-        io:println("\nAccount created with: " + response);
-    } catch (error e) {
-        io:println(e);
-    }
-
-    try {
-        json j1 = salesforceConnector.getAccountById(accountId);
-        io:println("\nAccount details received successfully for: " + accountId);
-    } catch (error e) {
-        io:println(e);
-    }
-
-    try {
-        boolean response = salesforceConnector.updateAccount(accountId, account);
-        if (response) {
-            io:println("\nAccount successfully updated! ");
+    string|salesforce:SalesforceConnectorError stringResponse = salesforceConnector.createAccount(account);
+    match stringResponse {
+        string id => {
+            io:println("Account created with: " + id);
+            accountId = id;
         }
-    } catch (error e) {
-        io:println(e);
-    }
-
-    try {
-        boolean response = salesforceConnector.deleteAccount(accountId);
-        if (response) {
-            io:println("\nAccount successfully deleted! ");
+        salesforce:SalesforceConnectorError err => {
+            io:println("Error ocurred");
         }
-    } catch (error e) {
-        io:println(e);
     }
 
+    io:println("\nReceived account details: ");
+    response = salesforceConnector.getAccountById(accountId);
+    checkErrors(response);
+
+    io:println("\nUpdated account: ");
+    response = salesforceConnector.updateAccount(accountId, account);
+    checkErrors(response);
+
+    io:println("\nDeleted account: ");
+    response = salesforceConnector.deleteAccount(accountId);
+    checkErrors(response);
+}
+
+public function checkErrors (json|salesforce:SalesforceConnectorError receivedResponse) {
+    match receivedResponse {
+        json payload => {
+        //io:println(payload);
+            io:println("Success!");
+        }
+        salesforce:SalesforceConnectorError err => {
+            io:println(err);
+        }
+    }
 }

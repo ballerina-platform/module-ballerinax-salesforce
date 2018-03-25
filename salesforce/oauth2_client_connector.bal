@@ -1,4 +1,20 @@
-package salesforce;
+// Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+package oauth2;
 
 import ballerina/io;
 import ballerina/net.http;
@@ -25,7 +41,9 @@ http:HttpConnectorError e = {};
 
 public function <OAuth2Client oAuth2Client> init (string baseUrl, string accessToken, string refreshToken,
                                                   string clientId, string clientSecret, string refreshTokenEP, string refreshTokenPath) {
-    endpoint http:ClientEndpoint httpEP {targets:[{uri:baseUrl}]};
+    endpoint http:ClientEndpoint httpEP {
+        targets:[{uri:baseUrl}]
+    };
 
     OAuthConfig conf = {};
     conf.accessToken = accessToken;
@@ -64,7 +82,7 @@ returns http:Response|http:HttpConnectorError {
     }
 
     match httpResponse {
-        http:Response res => return response;
+        http:Response res => return res;
         http:HttpConnectorError err => return err;
     }
 }
@@ -101,7 +119,7 @@ returns http:Response|http:HttpConnectorError {
     }
 
     match httpResponse {
-        http:Response res => return response;
+        http:Response res => return res;
         http:HttpConnectorError err => return err;
     }
 }
@@ -138,7 +156,7 @@ returns http:Response|http:HttpConnectorError {
     }
 
     match httpResponse {
-        http:Response res => return response;
+        http:Response res => return res;
         http:HttpConnectorError err => return err;
     }
 }
@@ -168,7 +186,7 @@ returns http:Response|http:HttpConnectorError {
     }
 
     match httpResponse {
-        http:Response res => return response;
+        http:Response res => return res;
         http:HttpConnectorError err => return err;
     }
 }
@@ -205,7 +223,7 @@ returns http:Response|http:HttpConnectorError {
     }
 
     match httpResponse {
-        http:Response res => return response;
+        http:Response res => return res;
         http:HttpConnectorError err => return err;
     }
 }
@@ -240,6 +258,7 @@ returns (string)|http:HttpConnectorError {
     http:Request refreshTokenRequest = {};
     http:Response httpRefreshTokenResponse = {};
     json accessTokenFromRefreshTokenJSONResponse;
+    http:HttpConnectorError connectorError = {};
 
     string accessTokenFromRefreshTokenReq = refreshTokenPath + "?refresh_token=" + refreshToken
                                             + "&grant_type=refresh_token&client_secret=" + clientSecret
@@ -254,8 +273,12 @@ returns (string)|http:HttpConnectorError {
         json jsonVal => accessTokenFromRefreshTokenJSONResponse = jsonVal;
         mime:EntityError err => io:println(err);
     }
-
-    accessToken =? <string>accessTokenFromRefreshTokenJSONResponse.access_token;
+    if (httpRefreshTokenResponse.statusCode == 200) {
+        accessToken = accessTokenFromRefreshTokenJSONResponse.access_token.toString();
+    } else {
+        connectorError.message = accessTokenFromRefreshTokenJSONResponse.toString();
+        return connectorError;
+    }
     request.setHeader("Authorization", "Bearer " + accessToken);
 
     return accessToken;

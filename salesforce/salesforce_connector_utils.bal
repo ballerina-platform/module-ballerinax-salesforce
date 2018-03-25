@@ -21,113 +21,8 @@ package salesforce;
 import ballerina/log;
 import ballerina/net.http;
 import ballerina/net.uri;
+import ballerina/mime;
 import ballerina/io;
-
-//==============================================================================//
-//============================ utility functions================================//
-
-public function <SalesforceConnector sfConnector> getRecord (string path) returns json {
-    error Error = {};
-    json jsonResult;
-    http:Request request = {};
-    var oauth2Response = sfConnector.oauth2.get(path, request);
-    match oauth2Response {
-        http:HttpConnectorError conError => {
-            Error = {message:conError.message};
-            throw Error;
-        }
-        http:Response result => {
-            var jsonPayload = result.getJsonPayload();
-            match jsonPayload {
-                mime:EntityError entityError => {
-                    Error = {message:entityError.message};
-                    throw Error;
-                }
-                json jsonRes => {
-                    jsonResult = jsonRes;
-                }
-            }
-        }
-    }
-    return jsonResult;
-}
-
-public function <SalesforceConnector sfConnector> createRecord (string sObjectName, json record) returns string {
-    http:Request request = {};
-    string id = "";
-    error sfError = {};
-    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
-    request.setJsonPayload(record);
-    var oauth2Response = sfConnector.oauth2.post(path, request);
-    match oauth2Response {
-        http:HttpConnectorError conError => {
-            sfError = {message:conError.message};
-            throw sfError;
-        }
-        http:Response result => {
-            if (result.statusCode == 200 || result.statusCode == 201 || result.statusCode == 204) {
-                var jsonPayload = result.getJsonPayload();
-                match jsonPayload {
-                    mime:EntityError entityError => {
-                        sfError = {message:entityError.message};
-                        throw sfError;
-                    }
-                    json jsonRes => {
-                        id = jsonRes.id.toString();
-                    }
-                }
-
-            } else {
-                sfError = {message:"Was not updated"};
-                throw sfError;
-            }
-        }
-    }
-    return id;
-}
-
-public function <SalesforceConnector sfConnector> updateRecord (string sObjectName, string id, json record) returns boolean {
-    http:Request request = {};
-    error sfError = {};
-    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-    request.setJsonPayload(record);
-    var oauth2Response = sfConnector.oauth2.patch(path, request);
-    match oauth2Response {
-        http:HttpConnectorError conError => {
-            sfError = {message:conError.message};
-            throw sfError;
-        }
-        http:Response result => {
-            if (result.statusCode == 200 || result.statusCode == 201 || result.statusCode == 204) {
-                return true;
-            } else {
-                sfError = {message:"Was not updated"};
-                throw sfError;
-            }
-        }
-    }
-}
-
-public function <SalesforceConnector sfConnector> deleteRecord (string sObjectName, string id) returns boolean {
-    http:Request request = {};
-    error sfError = {};
-    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-    var oauth2Response = sfConnector.oauth2.delete(path, request);
-    match oauth2Response {
-        http:HttpConnectorError conError => {
-            sfError = {message:conError.message};
-            throw sfError;
-        }
-        http:Response result => {
-            if (result.statusCode == 200 || result.statusCode == 201 || result.statusCode == 204) {
-                return true;
-            } else {
-                sfError = {message:"Was not deleted"};
-                throw sfError;
-            }
-        }
-    }
-}
 
 function prepareUrl (string[] paths) returns string {
     string url = "";
@@ -171,3 +66,83 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
 
     return url;
 }
+
+@Description {value:"Function to check errors and set errors to relevant error types"}
+@Param {value:"response: http response or http connector error with network related errors"}
+@Param {value:"isRequiredJsonPayload: gets true if response should contain a Json body, else false"}
+@Return {value:"Json Payload"}
+@Return {value:"Error occured"}
+function checkAndSetErrors (http:Response|http:HttpConnectorError response, boolean expectPayload)
+returns json|SalesforceConnectorError {
+    SalesforceConnectorError connectorError = {};
+    json result;
+
+    match response {
+        http:Response httpResponse => {
+            if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 ||
+                httpResponse.statusCode == 204) {
+                if (expectPayload) {
+                    json|mime:EntityError responseBody;
+                    try {
+                        responseBody = httpResponse.getJsonPayload();
+                    } catch (error e) {
+                        connectorError = {messages:[], salesforceErrors:[]};
+                        connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
+                        connectorError.errors[0] = e;
+                        return connectorError;
+                    }
+
+                    match responseBody {
+                        mime:EntityError entityError => {
+                            connectorError = {messages:[entityError.message]};
+                            return connectorError;
+                        }
+                        json jsonResponse => {
+                            result = jsonResponse;
+                        }
+                    }
+                }
+            } else {
+                json|mime:EntityError responseBody;
+                try {
+                    responseBody = httpResponse.getJsonPayload();
+                } catch (error e) {
+                    connectorError = {messages:[], salesforceErrors:[]};
+                    connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
+                    connectorError.errors[0] = e;
+                    return connectorError;
+                }
+
+                json[] errors;
+                match responseBody {
+                    mime:EntityError entityError => {
+                        connectorError = {messages:[entityError.message]};
+                        return connectorError;
+                    }
+                    json jsonResponse => {
+                        errors =? <json[]>jsonResponse;
+                    }
+                }
+
+                connectorError = {messages:[], salesforceErrors:[]};
+                foreach i, err in errors {
+                    SalesforceError sfError = {message:err.message.toString(), errorCode:err.errorCode.toString()};
+                    connectorError.messages[i] = err.message.toString();
+                    connectorError.salesforceErrors[i] = sfError;
+                }
+                return connectorError;
+            }
+        }
+        http:HttpConnectorError httpError => {
+            connectorError = {
+                                 messages:["Http error occurred -> status code: " +
+                                           <string>httpError.statusCode + "; message: " + httpError.message],
+                                 errors:httpError.cause
+                             };
+            return connectorError;
+        }
+    }
+
+    return result;
+}
+
