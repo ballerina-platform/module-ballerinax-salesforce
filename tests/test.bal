@@ -125,8 +125,8 @@ public function main (string[] args) {
     // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
     io:println("\n------------------------ACCOUNT SObjecct Information----------------");
-    string|salesforce:SalesforceConnectorError stringResponse = salesforceConnector.createAccount(account);
-    match stringResponse {
+    string|salesforce:SalesforceConnectorError stringAccount = salesforceConnector.createAccount(account);
+    match stringAccount {
         string id => {
             io:println("Account created with: " + id);
             accountId = id;
@@ -147,7 +147,118 @@ public function main (string[] args) {
     io:println("\nDeleted account: ");
     response = salesforceConnector.deleteAccount(accountId);
     checkErrors(response);
-}
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////
+    // ============================ LEAD SObject: get, create, update, delete ===================== //
+
+    io:println("\n------------------------LEAD SObjecct Information----------------");
+    string|salesforce:SalesforceConnectorError stringLead = salesforceConnector.createLead(lead);
+    match stringLead {
+        string id => {
+            io:println("Lead created with: " + id);
+            leadId = id;
+        }
+        salesforce:SalesforceConnectorError err => {
+            io:println("Error ocurred");
+        }
+    }
+
+    io:println("\nReceived Lead details: ");
+    response = salesforceConnector.getLeadById(leadId);
+    checkErrors(response);
+
+    io:println("\nUpdated Lead: ");
+    response = salesforceConnector.updateLead(leadId, lead);
+    checkErrors(response);
+
+    io:println("\nDeleted Lead: ");
+    response = salesforceConnector.deleteLead(leadId);
+    checkErrors(response);
+
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////
+        // ============================ CONTACTS SObject: get, create, update, delete ===================== //
+
+        io:println("\n------------------------CONTACT SObjecct Information----------------");
+        string|salesforce:SalesforceConnectorError stringContact = salesforceConnector.createContact(contact);
+        match stringContact {
+            string id => {
+                io:println("Contact created with: " + id);
+                contactId = id;
+            }
+            salesforce:SalesforceConnectorError err => {
+                io:println("Error ocurred");
+            }
+        }
+
+        io:println("\nReceived Contact details: ");
+        response = salesforceConnector.getContactById(contactId);
+        checkErrors(response);
+
+        io:println("\nUpdated Contact: ");
+        response = salesforceConnector.updateContact(contactId, contact);
+        checkErrors(response);
+
+        io:println("\nDeleted Contact: ");
+        response = salesforceConnector.deleteContact(contactId);
+        checkErrors(response);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////
+        // ============================ PRODUCTS SObject: get, create, update, delete ===================== //
+
+        io:println("\n------------------------PRODUCTS SObjecct Information----------------");
+        string|salesforce:SalesforceConnectorError stringProduct = salesforceConnector.createProduct(product);
+        match stringProduct {
+            string id => {
+                io:println("Products created with: " + id);
+                productId = id;
+            }
+            salesforce:SalesforceConnectorError err => {
+                io:println("Error ocurred");
+            }
+        }
+
+        io:println("\nReceived Product details: ");
+        response = salesforceConnector.getProductById(productId);
+        checkErrors(response);
+
+        io:println("\nUpdated Product: ");
+        response = salesforceConnector.updateProduct(productId, product);
+        checkErrors(response);
+
+        io:println("\nDeleted Product: ");
+        response = salesforceConnector.deleteProduct(productId);
+        checkErrors(response);
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////
+        // ============================ OPPORTUNITY SObject: get, create, update, delete ===================== //
+
+        //io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
+        //string|salesforce:SalesforceConnectorError stringResponse = salesforceConnector.createOpportunity(createOpportunity);
+        //match stringResponse {
+        //    string id => {
+        //        io:println("Account created with: " + id);
+        //        opportunityId = id;
+        //    }
+        //    salesforce:SalesforceConnectorError err => {
+        //        io:println("Error ocurred");
+        //    }
+        //}
+        //
+        //io:println("\nReceived Opportunity details: ");
+        //response = salesforceConnector.getOpportunityById(opportunityId);
+        //checkErrors(response);
+        //
+        //io:println("\nUpdated Opportunity: ");
+        //response = salesforceConnector.updateOpportunity(opportunityId, createOpportunity);
+        //checkErrors(response);
+        //
+        //io:println("\nDeleted Opportunity: ");
+        //response = salesforceConnector.deleteOpportunity(opportunityId);
+        //checkErrors(response);
+    }
+
 
 public function checkErrors (json|salesforce:SalesforceConnectorError receivedResponse) {
     match receivedResponse {
