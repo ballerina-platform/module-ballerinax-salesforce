@@ -46,7 +46,6 @@ public function <SalesforceConnector sfConnector> init (string baseUrl, string a
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getAvailableApiVersions ()
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([BASE_PATH]);
     return sfConnector.getRecord(path);
@@ -58,7 +57,6 @@ returns json|SalesforceConnectorError {
 public function <SalesforceConnector sfConnector> getResourcesByApiVersion (string apiVersion)
 returns json|SalesforceConnectorError {
 
-    json response;
     string path = prepareUrl([BASE_PATH, apiVersion]);
     return sfConnector.getRecord(path);
 }
@@ -68,7 +66,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getOrganizationLimits ()
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, LIMITS]);
     return sfConnector.getRecord(path);
@@ -81,7 +78,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getQueryResult (string receivedQuery)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
     return sfConnector.getRecord(path);
@@ -91,7 +87,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getNextQueryResult (string nextRecordsUrl)
 returns json|SalesforceConnectorError {
-    json response;
 
     return sfConnector.getRecord(nextRecordsUrl);
 }
@@ -102,7 +97,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getAllQueries (string queryString)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareQueryUrl([API_BASE_PATH, QUERYALL], [Q], [queryString]);
     return sfConnector.getRecord(path);
@@ -113,7 +107,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> explainQueryOrReportOrListview (string queryReportOrListview)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [EXPLAIN], [queryReportOrListview]);
     return sfConnector.getRecord(path);
@@ -126,7 +119,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result  or Error occured."}
 public function <SalesforceConnector sfConnector> searchSOSLString (string searchString)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
     return sfConnector.getRecord(path);
@@ -139,7 +131,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getAccountById (string accountId)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, ACCOUNT, accountId]);
     return sfConnector.getRecord(path);
@@ -150,6 +141,7 @@ returns json|SalesforceConnectorError {
 @Return {value:"ID of the account or Error occured."}
 public function <SalesforceConnector sfConnector> createAccount (json accountRecord)
 returns string|SalesforceConnectorError {
+
     return sfConnector.createRecord(ACCOUNT, accountRecord);
 }
 
@@ -159,6 +151,7 @@ returns string|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> updateAccount (string accountId, json accountRecord)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.updateRecord(ACCOUNT, accountId, accountRecord);
 }
 
@@ -167,6 +160,7 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> deleteAccount (string accountId)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.deleteRecord(ACCOUNT, accountId);
 }
 
@@ -177,7 +171,6 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getLeadById (string leadId)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, LEAD, leadId]);
     return sfConnector.getRecord(path);
@@ -188,6 +181,7 @@ returns json|SalesforceConnectorError {
 @Return {value:"ID of the created Lead or Error occured."}
 public function <SalesforceConnector sfConnector> createLead (json leadRecord)
 returns string|SalesforceConnectorError {
+
     return sfConnector.createRecord(LEAD, leadRecord);
 
 }
@@ -198,6 +192,7 @@ returns string|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> updateLead (string leadId, json leadRecord)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.updateRecord(LEAD, leadId, leadRecord);
 }
 
@@ -206,6 +201,7 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> deleteLead (string leadId)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.deleteRecord(LEAD, leadId);
 }
 
@@ -216,7 +212,6 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getContactById (string contactId)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, CONTACT, contactId]);
     return sfConnector.getRecord(path);
@@ -227,6 +222,7 @@ returns json|SalesforceConnectorError {
 @Return {value:"ID of the created Contact or Error occured."}
 public function <SalesforceConnector sfConnector> createContact (json contactRecord)
 returns string|SalesforceConnectorError {
+
     return sfConnector.createRecord(CONTACT, contactRecord);
 
 }
@@ -237,6 +233,7 @@ returns string|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> updateContact (string contactId, json contactRecord)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.updateRecord(CONTACT, contactId, contactRecord);
 }
 
@@ -245,6 +242,7 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> deleteContact (string contactId)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.deleteRecord(CONTACT, contactId);
 }
 
@@ -255,7 +253,6 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getOpportunityById (string opportunityId)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, OPPORTUNITY, opportunityId]);
     return sfConnector.getRecord(path);
@@ -276,6 +273,7 @@ returns string|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> updateOpportunity (string opportunityId, json opportunityRecord)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
 }
 
@@ -284,6 +282,7 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> deleteOpportunity (string opportunityId)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.deleteRecord(OPPORTUNITY, opportunityId);
 }
 
@@ -294,7 +293,6 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getProductById (string productId)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PRODUCT, productId]);
     return sfConnector.getRecord(path);
@@ -304,6 +302,7 @@ returns json|SalesforceConnectorError {
 @Return {value:"ID of the created Product or Error occured."}
 public function <SalesforceConnector sfConnector> createProduct (json productRecord)
 returns string|SalesforceConnectorError {
+
     return sfConnector.createRecord(PRODUCT, productRecord);
 
 }
@@ -314,6 +313,7 @@ returns string|SalesforceConnectorError {
 @Return {value:"boolean: true if success, false otherwise"}
 public function <SalesforceConnector sfConnector> updateProduct (string productId, json productRecord)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.updateRecord(PRODUCT, productId, productRecord);
 }
 
@@ -322,6 +322,7 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"boolen: true if success, false otherwise or Error occured."}
 public function <SalesforceConnector sfConnector> deleteProduct (string productId)
 returns boolean|SalesforceConnectorError {
+
     return sfConnector.deleteRecord(PRODUCT, productId);
 }
 
@@ -334,7 +335,6 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = ([API_BASE_PATH, SOBJECTS, sObjectName, id], [FIELDS], [fields]);
     return sfConnector.getRecord(path);
@@ -347,7 +347,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getFieldValuesFromExternalObjectRecord (string externalObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id], [FIELDS], [fields]);
     return sfConnector.getRecord(path);
@@ -386,7 +385,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getRecordByExternalId (string sObjectName, string fieldName, string fieldValue)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, fieldName, fieldValue]);
     return sfConnector.getRecord(path);
@@ -402,6 +400,7 @@ returns json|SalesforceConnectorError {
 public function <SalesforceConnector sfConnector> upsertSObjectByExternalId (string sObjectName, string fieldId, string fieldValue, json record)
 returns json|SalesforceConnectorError {
     http:Request request = {};
+
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     request.setJsonPayload(record);
 
@@ -426,7 +425,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getDeletedRecords (string sObjectName, string startTime, string endTime)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED], [START, END], [startTime, endTime]);
     return sfConnector.getRecord(path);
@@ -439,7 +437,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getUpdatedRecords (string sObjectName, string startTime, string endTime)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED], [START, END], [startTime, endTime]);
     return sfConnector.getRecord(path);
@@ -450,7 +447,6 @@ returns json|SalesforceConnectorError {
 @Description {value:"Lists the available objects and their metadata for your organization and available to the logged-in user"}
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> describeAvailableObjects () returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
     return sfConnector.getRecord(path);
@@ -461,7 +457,6 @@ public function <SalesforceConnector sfConnector> describeAvailableObjects () re
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getSObjectBasicInfo (string sobjectName)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
     return sfConnector.getRecord(path);
@@ -473,7 +468,6 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> describeSObject (string sObjectName)
 returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
     return sfConnector.getRecord(path);
@@ -482,7 +476,6 @@ returns json|SalesforceConnectorError {
 @Description {value:"Query for actions displayed in the UI, given a user, a context, device format, and a record ID"}
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> sObjectPlatformAction () returns json|SalesforceConnectorError {
-    json response;
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
     return sfConnector.getRecord(path);
@@ -497,6 +490,7 @@ public function <SalesforceConnector sfConnector> sObjectPlatformAction () retur
 public function <SalesforceConnector sfConnector> getRecord (string path)
 returns json|SalesforceConnectorError {
     http:Request request = {};
+
     http:Response|http:HttpConnectorError response = sfConnector.oauth2.get(path, request);
     return checkAndSetErrors(response, true);
 }
@@ -508,8 +502,7 @@ returns json|SalesforceConnectorError {
 public function <SalesforceConnector sfConnector> createRecord (string sObjectName, json record)
 returns string|SalesforceConnectorError {
     http:Request request = {};
-    string id = "";
-    error sfError = {};
+
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     request.setJsonPayload(record);
 
@@ -533,8 +526,10 @@ returns string|SalesforceConnectorError {
 public function <SalesforceConnector sfConnector> updateRecord (string sObjectName, string id, json record)
 returns boolean|SalesforceConnectorError {
     http:Request request = {};
+
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     request.setJsonPayload(record);
+
     http:Response|http:HttpConnectorError response = sfConnector.oauth2.patch(path, request);
     json|SalesforceConnectorError result = checkAndSetErrors(response, false);
     match result {
@@ -554,6 +549,7 @@ returns boolean|SalesforceConnectorError {
 public function <SalesforceConnector sfConnector> deleteRecord (string sObjectName, string id)
 returns boolean|SalesforceConnectorError {
     http:Request request = {};
+
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     http:Response|http:HttpConnectorError response = sfConnector.oauth2.delete(path, request);
     json|SalesforceConnectorError result = checkAndSetErrors(response, false);
@@ -566,5 +562,3 @@ returns boolean|SalesforceConnectorError {
         }
     }
 }
-
-

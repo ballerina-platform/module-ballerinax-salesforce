@@ -150,7 +150,5 @@ returns json|SalesforceConnectorError {
             return connectorError;
         }
     }
-
     return result;
 }
-
