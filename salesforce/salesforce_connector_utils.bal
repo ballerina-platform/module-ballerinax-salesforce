@@ -24,6 +24,9 @@ import ballerina/net.uri;
 import ballerina/mime;
 import ballerina/io;
 
+@Description {value:"Function to set resource URl"}
+@Param {value:"paths: array of path parameters"}
+@Return {value:"string prepared url"}
 function prepareUrl (string[] paths) returns string {
     string url = "";
 
@@ -38,6 +41,11 @@ function prepareUrl (string[] paths) returns string {
     return url;
 }
 
+@Description {value:"Function to prepare resource URl with encoded queries"}
+@Param {value:"paths: array of path parameters"}
+@Param {value:"queryParamNames: array of query parameter names"}
+@Param {value:"queryParamValues: array of query parameter values"}
+@Return {value:"string prepared url"}
 function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
 
     string url = prepareUrl(paths);

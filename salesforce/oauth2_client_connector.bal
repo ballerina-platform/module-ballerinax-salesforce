@@ -40,9 +40,18 @@ http:Response response = {};
 http:HttpConnectorError e = {};
 
 public function <OAuth2Client oAuth2Client> init (string baseUrl, string accessToken, string refreshToken,
-                                                  string clientId, string clientSecret, string refreshTokenEP, string refreshTokenPath) {
+                                                  string clientId, string clientSecret, string refreshTokenEP, string refreshTokenPath,
+                                                  string trustStoreLocation, string trustStorePassword) {
     endpoint http:ClientEndpoint httpEP {
-        targets:[{uri:baseUrl}]
+        targets:[{uri:baseUrl,
+                     secureSocket:{
+                                      trustStore:{
+                                                     filePath:trustStoreLocation,
+                                                     password:trustStorePassword
+                                                 }
+                                  }
+                 }
+                ]
     };
 
     OAuthConfig conf = {};
