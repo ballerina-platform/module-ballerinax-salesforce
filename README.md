@@ -93,84 +93,6 @@ Lists the resources available for the specified API version
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
    
-[getOrganizationLimits()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_limits.htm)
-Lists limits information for your organization
-* Properties
-   ##### Parameters
-   * None
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[getResourcesByApiVersion()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_discoveryresource.htm)
-Lists the resources available for the specified API version
-* Properties
-   ##### Parameters
-   * None
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-    
-[getSObjectBasicInfo()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_basic_info.htm)
-Describes the individual metadata for the specified object
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[getDeletedRecords()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_get_deleted.htm?search_text=deleted)
-Retrieves the list of individual records that have been deleted within the given timespan for the specified object
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   * startTime: The start time of the time span
-   * endTime: The end time of the time span
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[getUpdatedRecords()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_getupdated.htm?search_text=updated)
-Retrieves the list of individual records that have been updated (added or changed) within the given timespan for the specified object
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   * startTime: The start time of the time span
-   * endTime: The end time of the time span
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[sObjectPlatformAction()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_sobject_platformaction.htm)
-Query for actions displayed in the UI, given a user, a context, device format, and a record ID
-* Properties
-   ##### Parameters
-   * None
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[getRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_working_with_records.htm)
-Accesses records based on the specified object ID
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[getRecordByExternalId()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_retrieve_with_externalid.htm?search_text=external%20ID)
-Creates new records or updates existing records (upserts records) based on the value of a specified external ID field
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   * fieldName: The external field name
-   * fieldValue: The external field value
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[explainQueryOrReportOrListview()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query_explain.htm?search_text=explain)
-Get feedback on how Salesforce will execute your list view
-* Properties
-   ##### Parameters
-    * queryReportOrListview: The parameter to get feedback on
-   ##### Returns 
-    * Json Response or salesforce:SalesforceConnectorError
-
 [query()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query.htm)
 Executes the specified SOQL query
 * Properties
@@ -195,6 +117,56 @@ If the queryAll results are too large, retrieve the next batch of results
    * nextRecordsUrl: The url sent with first batch of queryAll results to get the next batch
    ##### Returns
     * Json Response or salesforce:SalesforceConnectorError
+   
+[getOrganizationLimits()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_limits.htm)
+Lists limits information for your organization
+* Properties
+   ##### Parameters
+   * None
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
+    
+[getSObjectBasicInfo()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_basic_info.htm)
+Describes the individual metadata for the specified object
+* Properties
+   ##### Parameters
+   * sobjectName: The relevant sobject name
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
+
+[sObjectPlatformAction()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_sobject_platformaction.htm)
+Query for actions displayed in the UI, given a user, a context, device format, and a record ID
+* Properties
+   ##### Parameters
+   * None
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
+
+[getRecordByExternalId()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_retrieve_with_externalid.htm?search_text=external%20ID)
+Creates new records or updates existing records (upserts records) based on the value of a specified external ID field
+* Properties
+   ##### Parameters
+   * sobjectName: The relevant sobject name
+   * fieldName: The external field name
+   * fieldValue: The external field value
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
+
+[explainQueryOrReportOrListview()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query_explain.htm?search_text=explain)
+Get feedback on how Salesforce will execute your list view
+* Properties
+   ##### Parameters
+    * queryReportOrListview: The parameter to get feedback on
+   ##### Returns 
+    * Json Response or salesforce:SalesforceConnectorError
+
+[getRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_working_with_records.htm)
+Accesses records based on the specified object ID
+* Properties
+   ##### Parameters
+   * sobjectName: The relevant sobject name
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
 
 [createRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_create.htm)
 Creates new records
@@ -213,6 +185,15 @@ Create multiple records
    * payload: json payload containing record data
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
+   
+[updateRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_update_fields.htm)
+Updates an existing record
+* Properties
+   ##### Parameters
+   * sobjectName: The relevant sobject name
+   * record: json payload containing record data
+   ##### Returns
+   * boolean (if success: true, else false) or salesforce:SalesforceConnectorError
 
 [deleteRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_delete_record.htm)
 Deletes existing record
@@ -242,15 +223,6 @@ Retrieve field values from an external record
    * fields: The comma separated set of required fields
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
-
-[updateRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_update_fields.htm)
-Updates an existing record
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   * record: json payload containing record data
-   ##### Returns
-   * boolean (if success: true, else false) or salesforce:SalesforceConnectorError
    
 [getUpdatedRecords()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_getupdated.htm?search_text=updated)
 Retrieves the list of individual records that have been updated (added or changed) within the given timespan for the specified object
