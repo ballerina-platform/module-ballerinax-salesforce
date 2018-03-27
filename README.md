@@ -17,7 +17,7 @@ Salesforce connector actions are being invoked by a ballerina main function. The
 
 | Language Version  | Connector Version | API Version |
 | ------------------| ------------------| ------------|
-|  0.970-alpha0     |    0.970-alpha0   |   v37.0     |
+|  0.970-alpha0     |        0.2        |   v37.0     |
 
 
 ## Getting started
