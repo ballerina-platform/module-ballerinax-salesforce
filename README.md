@@ -61,23 +61,7 @@ public function <SalesforceConnector sfConnector> init (string baseUrl, string a
 ```
 #### Following public actions are provided to the user
 
-[describeAvailableObjects()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_describeGlobal.htm)
-Lists the available objects and their metadata for your organization’s data
-* Properties
-   ##### Parameters
-   * None
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[describeSObject()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_describe.htm)
-Completely describes the individual metadata at all levels for the specified object
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-
-[getAvailableApiVersions()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_versions.htm?search_text=error)
+1. [getAvailableApiVersions()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_versions.htm?search_text=error)
 Lists summary information about each REST API version currently available
 * Properties
    ##### Parameters
@@ -85,7 +69,7 @@ Lists summary information about each REST API version currently available
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
 
-[getResourcesByApiVersion()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_discoveryresource.htm)
+2. [getResourcesByApiVersion()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_discoveryresource.htm)
 Lists the resources available for the specified API version
 * Properties
    ##### Parameters
@@ -93,7 +77,15 @@ Lists the resources available for the specified API version
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
    
-[query()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query.htm)
+3. [getOrganizationLimits()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_limits.htm)
+Lists limits information for your organization
+* Properties
+   ##### Parameters
+   * None
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
+   
+4. [query()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query.htm)
 Executes the specified SOQL query
 * Properties
    ##### Parameters
@@ -101,7 +93,7 @@ Executes the specified SOQL query
     ##### Returns
     * Json Response or salesforce:SalesforceConnectorError
 
-[getAllQueries()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_queryall.htm?search_text=updated)
+5. [getAllQueries()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_queryall.htm?search_text=updated)
 QueryAll will return records that have been deleted because of a merge or delete, archived Task and Event records
 * Properties
    ##### Parameters
@@ -110,23 +102,238 @@ QueryAll will return records that have been deleted because of a merge or delete
    ##### Returns
     * Json Response or salesforce:SalesforceConnectorError
 
-nextQueryResult()
+6. getNextQueryResult()
 If the queryAll results are too large, retrieve the next batch of results
 * Properties
    ##### Parameters
    * nextRecordsUrl: The url sent with first batch of queryAll results to get the next batch
    ##### Returns
     * Json Response or salesforce:SalesforceConnectorError
-   
-[getOrganizationLimits()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_limits.htm)
-Lists limits information for your organization
+    
+7. [searchSOSLString()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_search.htm?search_text=feedback)
+Executes the specified SOSL search
+* Properties
+   ##### Parameters
+    * searchString: The request SOSL string
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+    
+8. [explainQueryOrReportOrListview()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query_explain.htm?search_text=explain)
+Get feedback on how Salesforce will execute your list view
+* Properties
+   ##### Parameters
+    * queryReportOrListview: The parameter to get feedback on
+   ##### Returns 
+    * Json Response or salesforce:SalesforceConnectorError
+    
+ #### Account: SObject specific
+9. getAccountById()
+
+Accesses Account SObject records based on the Account object ID
+* Properties
+   ##### Parameters
+    * accountId: The relevant account's id
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+ 
+10. createAccount(): 
+Creates new Account object record
+* Properties
+   ##### Parameters
+    * accountRecord: json payload containing Account record data
+   ##### Returns
+    * String ID or salesforce:SalesforceConnectorError  
+    
+11. updateAccount(): 
+Updates existing Account object record
+* Properties
+   ##### Parameters
+    * accountId: Specified account id
+    * accountRecord: json payload containing Account record data
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+    
+12. deleteAccount(): 
+Deletes existing Account's records
+* Properties
+   ##### Parameters
+    * accountId: Specified account id
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+
+#### Product: SObject specific
+13. getProductById(): 
+Accesses Product SObject records based on the Product object ID
+* Properties
+   ##### Parameters
+    * productId: The relevant Product's id
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+    
+14. createProduct(): 
+Creates new Product object record
+* Properties
+   ##### Parameters
+    * productRecord: json payload containing Product record data
+   ##### Returns
+    * String ID or salesforce:SalesforceConnectorError  
+    
+15. updateProduct(): 
+Updates existing Product object record
+* Properties
+   ##### Parameters
+    * productId: Specified Product id
+    * productRecord: json payload containing Product record data
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+    
+16. deleteProduct(): 
+Deletes existing Product's records
+* Properties
+   ##### Parameters
+    * productId: Specified Product id
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+
+#### Opportunity: SObject specific
+17. getOpportunityById(): 
+Accesses Opportunity SObject records based on the Opportunity object ID
+* Properties
+   ##### Parameters
+    * opportunityId: The relevant Opportunity's id
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+     
+18. createOpportunity(): 
+Creates new Opportunity object record
+* Properties
+   ##### Parameters
+    * opportunityRecord: json payload containing Opportunity record data
+   ##### Returns
+    * String ID or salesforce:SalesforceConnectorError 
+    
+19. updateOpportunity(): 
+Updates existing Opportunity object record
+* Properties
+   ##### Parameters
+    * opportunityId: Specified Product id
+    * opportunityRecord: json payload containing Product record data
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+    
+20. deleteOpportunity(): 
+Deletes existing Opportunity's records
+* Properties
+   ##### Parameters
+    * opportunityId: Specified Opportunity id
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+    
+#### Lead: SObject specific
+21. getLeadById(): 
+Accesses Lead SObject records based on the Lead object ID
+* Properties
+   ##### Parameters
+    * leadId: The relevant Lead's id
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+    
+22. createLead(): 
+Creates new Lead object record
+* Properties
+   ##### Parameters
+    * leadRecord: json payload containing Lead record data
+   ##### Returns
+    * String ID or salesforce:SalesforceConnectorError 
+    
+23. updateLead(): 
+Updates existing Lead object record
+* Properties
+   ##### Parameters
+    * leadId: Specified Lead id
+    * leadRecord: json payload containing Lead record data
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+    
+24. deleteLead(): 
+Deletes existing Lead's records
+* Properties
+   ##### Parameters
+    * leadId: Specified Lead id
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+
+#### Contact: SObject specific
+25. getContactById(): 
+Accesses Contact SObject records based on the Contact object ID
+* Properties
+   ##### Parameters
+    * contactId: The relevant Contact's id
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+    
+26. createContact(): 
+Creates new Contact object record
+* Properties
+   ##### Parameters
+    * contactRecord: json payload containing Contact record data
+   ##### Returns
+    * String ID or salesforce:SalesforceConnectorError 
+    
+27. updateContact(): 
+Updates existing Contact object record
+* Properties
+   ##### Parameters
+    * contactId: Specified Contact id
+    * contactRecord: json payload containing Contact record data
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+    
+28. deleteContact(): 
+Deletes existing Contact's records
+* Properties
+   ##### Parameters
+    * contactId: Specified Contact id
+   ##### Returns
+    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
+    
+29. [getFieldValuesFromSObjectRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_get_field_values.htm): 
+Retrieve field values from a standard object record for a specified SObject ID
+* Properties
+   ##### Parameters
+    * sobjectName: The relevant sobject name
+    * id: The row ID of the required record
+    * fields: The comma separated set of required fields
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+    
+30. [getFieldValuesFromExternalObjectRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_get_field_values_external_object_hdv.htm): 
+Retrieve field values from an external object record using Salesforce ID or External ID
+* Properties
+   ##### Parameters
+    * externalObjectName: The relevant sobject name
+    * id: The row ID of the required record
+    * fields: The comma separated set of required fields
+   ##### Returns
+    * Json Response or salesforce:SalesforceConnectorError
+    
+31. [describeAvailableObjects()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_describeGlobal.htm)
+Lists the available objects and their metadata for your organization’s data
 * Properties
    ##### Parameters
    * None
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
+
+32. [describeSObject()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_describe.htm)
+Completely describes the individual metadata at all levels for the specified object
+* Properties
+   ##### Parameters
+   * sobjectName: The relevant sobject name
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
     
-[getSObjectBasicInfo()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_basic_info.htm)
+33. [getSObjectBasicInfo()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_basic_info.htm)
 Describes the individual metadata for the specified object
 * Properties
    ##### Parameters
@@ -134,7 +341,7 @@ Describes the individual metadata for the specified object
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
 
-[sObjectPlatformAction()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_sobject_platformaction.htm)
+34. [sObjectPlatformAction()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_sobject_platformaction.htm)
 Query for actions displayed in the UI, given a user, a context, device format, and a record ID
 * Properties
    ##### Parameters
@@ -142,7 +349,7 @@ Query for actions displayed in the UI, given a user, a context, device format, a
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
 
-[getRecordByExternalId()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_retrieve_with_externalid.htm?search_text=external%20ID)
+35. [getRecordByExternalId()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_retrieve_with_externalid.htm?search_text=external%20ID)
 Creates new records or updates existing records (upserts records) based on the value of a specified external ID field
 * Properties
    ##### Parameters
@@ -151,16 +358,19 @@ Creates new records or updates existing records (upserts records) based on the v
    * fieldValue: The external field value
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
-
-[explainQueryOrReportOrListview()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query_explain.htm?search_text=explain)
-Get feedback on how Salesforce will execute your list view
+   
+36. [upsertSObjectByExternalId()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_upsert.htm?search_text=upsert)
+Creates new records or updates existing records (upserts records) based on the value of a specified external ID field
 * Properties
    ##### Parameters
-    * queryReportOrListview: The parameter to get feedback on
-   ##### Returns 
-    * Json Response or salesforce:SalesforceConnectorError
+   * sobjectName: The relevant sobject name
+   * fieldId: The external field id
+   * fieldValue: The external field value
+   * record: json payload containing record data
+   ##### Returns
+   * Json Response or salesforce:SalesforceConnectorError
 
-[getRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_working_with_records.htm)
+37. [getRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/using_resources_working_with_records.htm)
 Accesses records based on the specified object ID
 * Properties
    ##### Parameters
@@ -168,7 +378,7 @@ Accesses records based on the specified object ID
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
 
-[createRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_create.htm)
+38. [createRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_sobject_create.htm)
 Creates new records
 * Properties
     ##### Parameters
@@ -177,7 +387,7 @@ Creates new records
     ##### Returns
     * String ID or salesforce:SalesforceConnectorError
 
-[createMultipleRecords()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_composite_sobject_tree_flat.htm)
+39. [createMultipleRecords()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_composite_sobject_tree_flat.htm)
 Create multiple records
 * Properties
    ##### Parameters
@@ -186,7 +396,7 @@ Create multiple records
    ##### Returns
    * Json Response or salesforce:SalesforceConnectorError
    
-[updateRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_update_fields.htm)
+40. [updateRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_update_fields.htm)
 Updates an existing record
 * Properties
    ##### Parameters
@@ -195,7 +405,7 @@ Updates an existing record
    ##### Returns
    * boolean (if success: true, else false) or salesforce:SalesforceConnectorError
 
-[deleteRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_delete_record.htm)
+41. [deleteRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_delete_record.htm)
 Deletes existing record
 * Properties
    ##### Parameters
@@ -204,27 +414,15 @@ Deletes existing record
    ##### Returns
    * boolean (if success: true, else false) or salesforce:SalesforceConnectorError
 
-[getfieldValuesFromSObjectRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_get_field_values.htm)
-Retrieve field values from a record
+42. [explainQueryOrReportOrListview()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query_explain.htm?search_text=explain)
+Get feedback on how Salesforce will execute the query, report, or list view based on performance
 * Properties
    ##### Parameters
-   * sobjectName: The relevant sobject name
-   * rowId: The row ID of the required record
-   * fields: The comma separated set of required fields
+    * queryReportOrListview: The parameter to get feedback on
    ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
+    * Json Response or salesforce:SalesforceConnectorError
 
-[getFieldValuesFromExternalObjectRecord()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_get_field_values_external_object.htm)
-Retrieve field values from an external record
-* Properties
-   ##### Parameters
-   * sobjectName: The relevant sobject name
-   * rowId: The row ID of the required record
-   * fields: The comma separated set of required fields
-   ##### Returns
-   * Json Response or salesforce:SalesforceConnectorError
-   
-[getUpdatedRecords()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_getupdated.htm?search_text=updated)
+43. [getUpdatedRecords()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_getupdated.htm?search_text=updated)
 Retrieves the list of individual records that have been updated (added or changed) within the given timespan for the specified object
 * Properties
    ##### Parameters
@@ -234,7 +432,7 @@ Retrieves the list of individual records that have been updated (added or change
     ##### Returns
     * Json Response or salesforce:SalesforceConnectorError
 
-[getDeletedRecords()]()
+44. [getDeletedRecords()]()
 Retrieves the list of individual records that have been deleted within the given timespan for the specified object
 * Properties
    ##### Parameters
@@ -244,189 +442,3 @@ Retrieves the list of individual records that have been deleted within the given
    ##### Returns
     * Json Response or salesforce:SalesforceConnectorError
 
-[explainQueryOrReportOrListview()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_query_explain.htm?search_text=explain)
-Get feedback on how Salesforce will execute the query, report, or list view based on performance
-* Properties
-   ##### Parameters
-    * queryReportOrListview: The parameter to get feedback on
-   ##### Returns
-    * Json Response or salesforce:SalesforceConnectorError
-
-[searchSOSLString()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/dome_search.htm?search_text=feedback)
-Executes the specified SOSL search
-* Properties
-   ##### Parameters
-    * searchString: The request SOSL string
-   ##### Returns
-    * Json Response or salesforce:SalesforceConnectorError
-
-#### Account: SObject specific
-getAccountById()
-
-Accesses Account SObject records based on the Account object ID
-* Properties
-   ##### Parameters
-    * accountId: The relevant account's id
-   ##### Returns
-    * Json Response or salesforce:SalesforceConnectorError
- 
-createAccount(): 
-Creates new Account object record
-* Properties
-   ##### Parameters
-    * accountRecord: json payload containing Account record data
-   ##### Returns
-    * String ID or salesforce:SalesforceConnectorError  
-    
-updateAccount(): 
-Updates existing Account object record
-* Properties
-   ##### Parameters
-    * accountId: Specified account id
-    * accountRecord: json payload containing Account record data
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-    
-deleteAccount(): 
-Deletes existing Account's records
-* Properties
-   ##### Parameters
-    * accountId: Specified account id
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-
-#### Product: SObject specific
-getProductById(): 
-Accesses Product SObject records based on the Product object ID
-* Properties
-   ##### Parameters
-    * productId: The relevant Product's id
-   ##### Returns
-    * Json Response or salesforce:SalesforceConnectorError
-    
-createProduct(): 
-Creates new Product object record
-* Properties
-   ##### Parameters
-    * productRecord: json payload containing Product record data
-   ##### Returns
-    * String ID or salesforce:SalesforceConnectorError  
-    
-updateProduct(): 
-Updates existing Product object record
-* Properties
-   ##### Parameters
-    * productId: Specified Product id
-    * productRecord: json payload containing Product record data
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-    
-deleteProduct(): 
-Deletes existing Product's records
-* Properties
-   ##### Parameters
-    * productId: Specified Product id
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-
-#### Opportunity: SObject specific
-getOpportunityById(): 
-Accesses Opportunity SObject records based on the Opportunity object ID
-* Properties
-   ##### Parameters
-    * opportunityId: The relevant Opportunity's id
-   ##### Returns
-    * Json Response or salesforce:SalesforceConnectorError
-     
-createOpportunity(): 
-Creates new Opportunity object record
-* Properties
-   ##### Parameters
-    * opportunityRecord: json payload containing Opportunity record data
-   ##### Returns
-    * String ID or salesforce:SalesforceConnectorError 
-    
-updateOpportunity(): 
-Updates existing Opportunity object record
-* Properties
-   ##### Parameters
-    * opportunityId: Specified Product id
-    * opportunityRecord: json payload containing Product record data
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-    
-deleteOpportunity(): 
-Deletes existing Opportunity's records
-* Properties
-   ##### Parameters
-    * opportunityId: Specified Opportunity id
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-    
-#### Lead: SObject specific
-getLeadById(): 
-Accesses Lead SObject records based on the Lead object ID
-* Properties
-   ##### Parameters
-    * leadId: The relevant Lead's id
-   ##### Returns
-    * Json Response or salesforce:SalesforceConnectorError
-    
-createLead(): 
-Creates new Lead object record
-* Properties
-   ##### Parameters
-    * leadRecord: json payload containing Lead record data
-   ##### Returns
-    * String ID or salesforce:SalesforceConnectorError 
-    
-updateLead(): 
-Updates existing Lead object record
-* Properties
-   ##### Parameters
-    * leadId: Specified Lead id
-    * leadRecord: json payload containing Lead record data
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-    
-deleteLead(): 
-Deletes existing Lead's records
-* Properties
-   ##### Parameters
-    * leadId: Specified Lead id
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-
-#### Contact: SObject specific
-getContactById(): 
-Accesses Contact SObject records based on the Contact object ID
-* Properties
-   ##### Parameters
-    * contactId: The relevant Contact's id
-   ##### Returns
-    * Json Response or salesforce:SalesforceConnectorError
-    
-createContact(): 
-Creates new Contact object record
-* Properties
-   ##### Parameters
-    * contactRecord: json payload containing Contact record data
-   ##### Returns
-    * String ID or salesforce:SalesforceConnectorError 
-    
-updateContact(): 
-Updates existing Contact object record
-* Properties
-   ##### Parameters
-    * contactId: Specified Contact id
-    * contactRecord: json payload containing Contact record data
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
-    
-deleteContact(): 
-Deletes existing Contact's records
-* Properties
-   ##### Parameters
-    * contactId: Specified Contact id
-   ##### Returns
-    * boolean (if success: true, else: false) or salesforce:SalesforceConnectorError
