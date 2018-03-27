@@ -24,7 +24,7 @@ Salesforce connector actions are being invoked by a ballerina main function. The
 
 1. Download the Ballerina tool `0.970-alpha0` distribution by navigating to https://ballerinalang.org/downloads/ and setup      the SDk
 2. Clone the repository by running the following command,
-  `git clone https://github.com/wso2-ballerina/package-salesforce` or `git clone https://github.com/erandiganepola/package-salesforce.git` and
+  `git clone https://github.com/wso2-ballerina/package-salesforce.git` or `git clone https://github.com/erandiganepola/package-salesforce.git` and
    Import the package to your ballerina project.
 
 ### Prerequisites
