@@ -59,6 +59,9 @@ public function <SalesforceConnector sfConnector> init (string baseUrl, string a
                             clientId, clientSecret, refreshTokenEP, refreshTokenPath, "", "");
 }
 ```
+#### Running the test.bal file
+Replace  URL, Client Id, Client Secret, Access Token, Refresh Token, Refresh Token Endpoint, Refresh Token Path and Api Version string values with your data. Run the file using following command `ballerina run <file location>`.
+
 #### Following public actions are provided to the user
 
 1. [getAvailableApiVersions()](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/resources_versions.htm?search_text=error)
