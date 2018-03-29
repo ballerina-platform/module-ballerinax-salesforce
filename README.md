@@ -60,7 +60,7 @@ public function <SalesforceConnector sfConnector> init (string baseUrl, string a
 }
 ```
 #### Running the test.bal file
-Replace  URL, Client Id, Client Secret, Access Token, Refresh Token, Refresh Token Endpoint, Refresh Token Path and Api Version string values with your data. Run the file using following command `ballerina run <file location>`.
+Replace  URL, Client Id, Client Secret, Access Token, Refresh Token, Refresh Token Endpoint, Refresh Token Path and Api Version(default v37.0) string values with your data. Run the file using following command `ballerina run <file location>`.
 
 #### Following public actions are provided to the user
 

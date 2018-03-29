@@ -24,22 +24,7 @@ import ballerina/io;
 
 @Description {value:"Salesforce Client Connector"}
 public struct SalesforceConnector {
-    OAuth2Client oauth2;
-}
-
-@Description {value:"Initialize connector"}
-@Param {value:"baseUrl: The relevant salesforce endpoint URL"}
-@Param {value:"accessToken: The accessToken of the salesforce connected app to access the salesforce REST API"}
-@Param {value:"refreshToken: The refresh token of the salesforce connected app to refresh access tokens when expired"}
-@Param {value:"clientId: The clientId of the salesforce connected app"}
-@Param {value:"clientSecret: The clientSecret of the salesforce connected app"}
-@Param {value:"refreshTokenEP: The refresh token endpoint for salesforce"}
-@Param {value:"refreshTokenPath: The refresh token path URL for the salesforce"}
-public function <SalesforceConnector sfConnector> init (string baseUrl, string accessToken, string refreshToken,
-                                                        string clientId, string clientSecret, string refreshTokenEP, string refreshTokenPath) {
-    sfConnector.oauth2 = {};
-    sfConnector.oauth2.init(baseUrl, accessToken, refreshToken,
-                            clientId, clientSecret, refreshTokenEP, refreshTokenPath, "", "");
+    OAuth2Connector oauth2;
 }
 
 @Description {value:"Lists summary details about each REST API version available"}
