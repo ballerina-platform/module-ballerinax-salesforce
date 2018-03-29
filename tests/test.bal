@@ -246,10 +246,10 @@ public function main (string[] args) {
     // ============================ OPPORTUNITY SObject: get, create, update, delete ===================== //
 
     //io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
-    //string|salesforce:SalesforceConnectorError stringResponse = salesforceConnector.createOpportunity(createOpportunity);
+    //string|salesforce:SalesforceConnectorError stringResponse = salesforceConnector -> createOpportunity(createOpportunity);
     //match stringResponse {
     //    string id => {
-    //        io:println("Account created with: " + id);
+    //        io:println("Opportunity created with: " + id);
     //        opportunityId = id;
     //    }
     //    salesforce:SalesforceConnectorError err => {
@@ -258,15 +258,15 @@ public function main (string[] args) {
     //}
     //
     //io:println("\nReceived Opportunity details: ");
-    //response = salesforceConnector.getOpportunityById(opportunityId);
+    //response = salesforceConnector -> getOpportunityById(opportunityId);
     //checkErrors(response);
     //
     //io:println("\nUpdated Opportunity: ");
-    //response = salesforceConnector.updateOpportunity(opportunityId, createOpportunity);
+    //response = salesforceConnector -> updateOpportunity(opportunityId, createOpportunity);
     //checkErrors(response);
     //
     //io:println("\nDeleted Opportunity: ");
-    //response = salesforceConnector.deleteOpportunity(opportunityId);
+    //response = salesforceConnector -> deleteOpportunity(opportunityId);
     //checkErrors(response);
 }
 
