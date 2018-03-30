@@ -32,7 +32,7 @@ string refreshTokenEndpoint = "your_refresh_token_endpoint";
 string refreshTokenPath = "your_refresh_token_path";
 
 public function main (string[] args) {
-    endpoint salesforce:SalesforceEndpoint salesforceConnector {
+    endpoint salesforce:SalesforceEndpoint salesforceEP {
         oauth2Config:{
                          accessToken:accessToken,
                          baseUrl:url,
@@ -79,64 +79,64 @@ public function main (string[] args) {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     io:println("\n------------------------MAIN METHOD: getAvailableApiVersions()----------------------");
-    response = salesforceConnector -> getAvailableApiVersions();
+    response = salesforceEP -> getAvailableApiVersions();
     checkErrors(response);
 
     io:println("\n------------------------MAIN METHOD: getResourcesByApiVersion()----------------------");
-    response = salesforceConnector -> getResourcesByApiVersion(apiVersion);
+    response = salesforceEP -> getResourcesByApiVersion(apiVersion);
     checkErrors(response);
 
     io:println("\n------------------------MAIN METHOD: getOrganizationLimits ()----------------------");
-    response = salesforceConnector -> getOrganizationLimits();
+    response = salesforceEP -> getOrganizationLimits();
     checkErrors(response);
 
     //======================================== Query ===============================================//
 
     io:println("\n--------------------------MAIN METHOD: getQueryResult ()-------------------------");
-    response = salesforceConnector -> getQueryResult("SELECT name FROM Account");
+    response = salesforceEP -> getQueryResult("SELECT name FROM Account");
     checkErrors(response);
 
     io:println("\n----------------------MAIN METHOD: explainQueryOrReportOrListview ()---------------------");
-    response = salesforceConnector -> explainQueryOrReportOrListview(queryString);
+    response = salesforceEP -> explainQueryOrReportOrListview(queryString);
     checkErrors(response);
 
     //======================================= Search ==============================================//
 
     io:println("\n------------------------MAIN METHOD: Executing SOSl Searches ------------------");
-    response = salesforceConnector -> searchSOSLString(searchString);
+    response = salesforceEP -> searchSOSLString(searchString);
     checkErrors(response);
 
 
     // ============================ Describe SObjects available and their fields/metadata ===================== //
 
     io:println("\n-----------------------MAIN METHOD: getSObjectBasicInfo() --------------------------");
-    response = salesforceConnector -> getSObjectBasicInfo(sampleSObjectAccount);
+    response = salesforceEP -> getSObjectBasicInfo(sampleSObjectAccount);
     checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: describeAvailableObjects() ---------------------------");
     checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: describeSObject() ---------------------------");
-    response = salesforceConnector -> describeSObject(sampleSObjectAccount);
+    response = salesforceEP -> describeSObject(sampleSObjectAccount);
     checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: sObjectPlatformAction() ---------------------------");
-    response = salesforceConnector -> sObjectPlatformAction();
+    response = salesforceEP -> sObjectPlatformAction();
     checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: getDeletedRecords() ---------------------------");
-    response = salesforceConnector -> getDeletedRecords(sampleSObjectAccount, startDateTime, endDateTime);
+    response = salesforceEP -> getDeletedRecords(sampleSObjectAccount, startDateTime, endDateTime);
     checkErrors(response);
 
     io:println("\n-----------------------MAIN METHOD: getUpdatedRecords() ---------------------------");
-    response = salesforceConnector -> getUpdatedRecords(sampleSObjectAccount, startDateTime, endDateTime);
+    response = salesforceEP -> getUpdatedRecords(sampleSObjectAccount, startDateTime, endDateTime);
     checkErrors(response);
 
 
     // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
     io:println("\n------------------------ACCOUNT SObjecct Information----------------");
-    string|salesforce:SalesforceConnectorError stringAccount = salesforceConnector -> createAccount(account);
+    string|salesforce:SalesforceConnectorError stringAccount = salesforceEP -> createAccount(account);
     match stringAccount {
         string id => {
             io:println("Account created with: " + id);
@@ -148,15 +148,15 @@ public function main (string[] args) {
     }
 
     io:println("\nReceived account details: ");
-    response = salesforceConnector -> getAccountById(accountId);
+    response = salesforceEP -> getAccountById(accountId);
     checkErrors(response);
 
     io:println("\nUpdated account: ");
-    response = salesforceConnector -> updateAccount(accountId, account);
+    response = salesforceEP -> updateAccount(accountId, account);
     checkErrors(response);
 
     io:println("\nDeleted account: ");
-    response = salesforceConnector -> deleteAccount(accountId);
+    response = salesforceEP -> deleteAccount(accountId);
     checkErrors(response);
 
 
@@ -164,7 +164,7 @@ public function main (string[] args) {
     // ============================ LEAD SObject: get, create, update, delete ===================== //
 
     io:println("\n------------------------LEAD SObjecct Information----------------");
-    string|salesforce:SalesforceConnectorError stringLead = salesforceConnector -> createLead(lead);
+    string|salesforce:SalesforceConnectorError stringLead = salesforceEP -> createLead(lead);
     match stringLead {
         string id => {
             io:println("Lead created with: " + id);
@@ -176,15 +176,15 @@ public function main (string[] args) {
     }
 
     io:println("\nReceived Lead details: ");
-    response = salesforceConnector -> getLeadById(leadId);
+    response = salesforceEP -> getLeadById(leadId);
     checkErrors(response);
 
     io:println("\nUpdated Lead: ");
-    response = salesforceConnector -> updateLead(leadId, lead);
+    response = salesforceEP -> updateLead(leadId, lead);
     checkErrors(response);
 
     io:println("\nDeleted Lead: ");
-    response = salesforceConnector -> deleteLead(leadId);
+    response = salesforceEP -> deleteLead(leadId);
     checkErrors(response);
 
 
@@ -192,7 +192,7 @@ public function main (string[] args) {
     // ============================ CONTACTS SObject: get, create, update, delete ===================== //
 
     io:println("\n------------------------CONTACT SObjecct Information----------------");
-    string|salesforce:SalesforceConnectorError stringContact = salesforceConnector -> createContact(contact);
+    string|salesforce:SalesforceConnectorError stringContact = salesforceEP -> createContact(contact);
     match stringContact {
         string id => {
             io:println("Contact created with: " + id);
@@ -204,22 +204,22 @@ public function main (string[] args) {
     }
 
     io:println("\nReceived Contact details: ");
-    response = salesforceConnector -> getContactById(contactId);
+    response = salesforceEP -> getContactById(contactId);
     checkErrors(response);
 
     io:println("\nUpdated Contact: ");
-    response = salesforceConnector -> updateContact(contactId, contact);
+    response = salesforceEP -> updateContact(contactId, contact);
     checkErrors(response);
 
     io:println("\nDeleted Contact: ");
-    response = salesforceConnector -> deleteContact(contactId);
+    response = salesforceEP -> deleteContact(contactId);
     checkErrors(response);
 
 
     // ============================ PRODUCTS SObject: get, create, update, delete ===================== //
 
     io:println("\n------------------------PRODUCTS SObjecct Information----------------");
-    string|salesforce:SalesforceConnectorError stringProduct = salesforceConnector -> createProduct(product);
+    string|salesforce:SalesforceConnectorError stringProduct = salesforceEP -> createProduct(product);
     match stringProduct {
         string id => {
             io:println("Products created with: " + id);
@@ -231,44 +231,44 @@ public function main (string[] args) {
     }
 
     io:println("\nReceived Product details: ");
-    response = salesforceConnector -> getProductById(productId);
+    response = salesforceEP -> getProductById(productId);
     checkErrors(response);
 
     io:println("\nUpdated Product: ");
-    response = salesforceConnector -> updateProduct(productId, product);
+    response = salesforceEP -> updateProduct(productId, product);
     checkErrors(response);
 
     io:println("\nDeleted Product: ");
-    response = salesforceConnector -> deleteProduct(productId);
+    response = salesforceEP -> deleteProduct(productId);
     checkErrors(response);
 
 
     // ============================ OPPORTUNITY SObject: get, create, update, delete ===================== //
-
-    //io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
-    //string|salesforce:SalesforceConnectorError stringResponse = salesforceConnector -> createOpportunity(createOpportunity);
-    //match stringResponse {
-    //    string id => {
-    //        io:println("Opportunity created with: " + id);
-    //        opportunityId = id;
-    //    }
-    //    salesforce:SalesforceConnectorError err => {
-    //        io:println("Error ocurred");
-    //    }
-    //}
-    //
-    //io:println("\nReceived Opportunity details: ");
-    //response = salesforceConnector -> getOpportunityById(opportunityId);
-    //checkErrors(response);
-    //
-    //io:println("\nUpdated Opportunity: ");
-    //response = salesforceConnector -> updateOpportunity(opportunityId, createOpportunity);
-    //checkErrors(response);
-    //
-    //io:println("\nDeleted Opportunity: ");
-    //response = salesforceConnector -> deleteOpportunity(opportunityId);
-    //checkErrors(response);
-}
+//
+//    io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
+//    string|salesforce:SalesforceConnectorError stringResponse = salesforceEP -> createOpportunity(createOpportunity);
+//    match stringResponse {
+//        string id => {
+//            io:println("Opportunity created with: " + id);
+//            opportunityId = id;
+//        }
+//        salesforce:SalesforceConnectorError err => {
+//            io:println("Error ocurred");
+//        }
+//    }
+//
+//    io:println("\nReceived Opportunity details: ");
+//    response = salesforceEP -> getOpportunityById(opportunityId);
+//    checkErrors(response);
+//
+//    io:println("\nUpdated Opportunity: ");
+//    response = salesforceEP -> updateOpportunity(opportunityId, createOpportunity);
+//    checkErrors(response);
+//
+//    io:println("\nDeleted Opportunity: ");
+//    response = salesforceEP -> deleteOpportunity(opportunityId);
+//    checkErrors(response);
+//}
 
 
 public function checkErrors (json|salesforce:SalesforceConnectorError receivedResponse) {

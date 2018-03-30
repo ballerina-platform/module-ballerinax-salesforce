@@ -1,10 +1,11 @@
 package salesforce;
 
 import ballerina/io;
+import wso2/oauth2;
 
 
 public struct SalesforceConfiguration {
-    OAuth2Configuration oauth2Config;
+    oauth2:OAuth2Configuration oauth2Config;
 }
 
 public function <SalesforceConfiguration oauth2Config> SalesforceConfiguration () {
@@ -18,8 +19,8 @@ public struct SalesforceEndpoint {
 }
 
 public function <SalesforceEndpoint ep> init (SalesforceConfiguration salesforceConfig) {
-    OAuth2Configuration oAuth2Configuration = salesforceConfig.oauth2Config;
-    OAuth2Connector oAuth2Connector = {accessToken:oAuth2Configuration.accessToken,
+    oauth2:OAuth2Configuration oAuth2Configuration = salesforceConfig.oauth2Config;
+    oauth2:OAuth2Connector oAuth2Connector = {accessToken:oAuth2Configuration.accessToken,
                                           refreshToken:oAuth2Configuration.refreshToken,
                                           clientId:oAuth2Configuration.clientId,
                                           clientSecret:oAuth2Configuration.clientSecret,
