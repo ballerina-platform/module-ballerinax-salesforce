@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package oauth2;
+package salesforce;
 
 import ballerina/io;
 import ballerina/net.http;
