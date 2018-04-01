@@ -4,5 +4,4 @@
 *.xml
 
 #folders
-oauth2/*
 docs/*
