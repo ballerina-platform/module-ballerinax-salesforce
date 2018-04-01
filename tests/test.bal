@@ -180,7 +180,7 @@ function testGetDeletedRecords () {
 }
 
 @test:Config
-function testSObjectPlatformAction () {
+function testGetUpdatedRecords () {
     io:println("\n----------------------- getUpdatedRecords() ---------------------------");
 
     time:Time now = time:currentTime();
