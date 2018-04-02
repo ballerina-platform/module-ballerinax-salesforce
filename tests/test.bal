@@ -6,13 +6,13 @@ import ballerina/io;
 import ballerina/time;
 import salesforce as sf;
 
-string|null url = config:getAsString("ENDPOINT");
-string|null accessToken = config:getAsString("ACCESS_TOKEN");
-string|null clientId = config:getAsString("CLIENT_ID");
-string|null clientSecret = config:getAsString("CLIENT_SECRET");
-string|null refreshToken = config:getAsString("REFRESH_TOKEN");
-string|null refreshTokenEndpoint = config:getAsString("REFRESH_TOKEN_ENDPOINT");
-string|null refreshTokenPath = config:getAsString("REFRESH_TOKEN_PATH");
+string url = setConfParams(config:getAsString("ENDPOINT"));
+string accessToken = setConfParams(config:getAsString("ACCESS_TOKEN"));
+string clientId = setConfParams(config:getAsString("CLIENT_ID"));
+string clientSecret = setConfParams(config:getAsString("CLIENT_SECRET"));
+string refreshToken = setConfParams(config:getAsString("REFRESH_TOKEN"));
+string refreshTokenEndpoint = setConfParams(config:getAsString("REFRESH_TOKEN_ENDPOINT"));
+string refreshTokenPath = setConfParams(config:getAsString("REFRESH_TOKEN_PATH"));
 
 json|sf:SalesforceConnectorError response;
 string accountId = "";
@@ -551,6 +551,18 @@ function testDeleteOpportunity () {
 
         sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+function setConfParams (string|null confParam) returns string {
+    match confParam {
+        string param => {
+            return param;
+        }
+    null => {
+            io:println("Empty value!");
+            return "";
         }
     }
 }
