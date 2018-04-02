@@ -1,273 +1,521 @@
-//
-// Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-//
-// WSO2 Inc. licenses this file to you under the Apache License,
-// Version 2.0 (the "License"); you may not use this file except
-// in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-//
-
 package tests;
 
+import ballerina/test;
+import ballerina/config;
 import ballerina/io;
-import ballerina/net.http;
-import ballerina/time;
-import salesforce;
+import salesforce as sf;
 
-string url = "https://wso2--wsbox.cs8.my.salesforce.com";
-string accessToken = "00DL0000002ASPS!ASAAQE8Fjy_aMAjn4G28QIZ7Qjm9c4D5PygH_dCS4CGUVo_zalVOzwZwYAcBUnCNwwFnolNjqEXntHEuZyZ3fmVPC8ZsVFoa";
-string clientId = "3MVG9MHOv_bskkhSA6dmoQao1M5bAQdCQ1ePbHYQKaoldqFSas7uechL0yHewu1QvISJZi2deUh5FvwMseYoF";
-string clientSecret = "1164810542004702763";
-string refreshToken = "5Aep86161DM2BuiV6zOy.J2C.tQMhSDLfkeFVGqMEInbvqLfxwoof9fCkXwO4xihKfjTXkhSLyZRpv0yhBCJ69B";
-string refreshTokenEndpoint = "https://test.salesforce.com";
-string refreshTokenPath = "/services/oauth2/token";
+string url =? config:getAsString(ENDPOINT);
+string accessToken =? config:getAsString(ACCESS_TOKEN);
+string clientId =? config:getAsString(CLIENT_ID);
+string clientSecret =? config:getAsString(CLIENT_SECRET);
+string refreshToken =? config:getAsString(REFRESH_TOKEN);
+string refreshTokenEndpoint =? config:getAsString(REFRESH_TOKEN_ENDPOINT);
+string refreshTokenPath =? config:getAsString(REFRESH_TOKEN_PATH);
 
-public function main (string[] args) {
-    error Error = {};
-    json jsonResponse;
-    string nextUrl;
+json|sf:SalesforceConnectorError response;
+string accountId = "";
+string leadId = "";
+string contactId = "";
+string opportunityId = "";
+string productId = "";
 
-    string sampleSObjectAccount = "Account";
-    string sampleSObjectLead = "Lead";
-    string sampleSObjectProduct = "Product";
-    string sampleSObjectContact = "Contact";
-    string sampleSObjectOpportunity = "Opportunity";
-    string sampleCustomObject = "Support_Account";
+endpoint sf:SalesforceEndpoint salesforceEP {
+    oauth2Config:{
+                     accessToken:accessToken,
+                     baseUrl:url,
+                     clientId:clientId,
+                     clientSecret:clientSecret,
+                     refreshToken:refreshToken,
+                     refreshTokenEP:refreshTokenEndpoint,
+                     refreshTokenPath:refreshTokenPath,
+                     clientConfig:{}
+                 }
+};
+
+@test:Config
+function testGetAvailableApiVersions () {
+    io:println("\n------------------------ getAvailableApiVersions() ----------------------");
+    response = salesforceEP -> getAvailableApiVersions();
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetResourcesByApiVersion () {
+    io:println("\n------------------------ getResourcesByApiVersion() ----------------------");
     string apiVersion = "v37.0";
+    response = salesforceEP -> getResourcesByApiVersion(apiVersion);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
 
-    json account = {Name:"ABC Inc", BillingCity:"New York", Global_POD__c:"UK"};
-    json supportAccount = {DevelopmentSupportHours:"72"};
-    json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
-    json contact = {LastName:"Patson"};
-    json createOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
-    json product = {Name:"APIM", Description:"APIM product"};
-    string searchString = "FIND {John Keells Holdings PLC}";
-    string accountId = "";
-    string leadId = "";
-    string contactId = "";
-    string opportunityId = "006L0000008xmcU";
-    string productId = "";
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetOrganizationLimits () {
+    io:println("\n------------------------ getOrganizationLimits () ----------------------");
+    response = salesforceEP -> getOrganizationLimits();
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetQueryResult () {
+    io:println("\n-------------------------- getQueryResult () -------------------------");
+    string sampleQuery = "SELECT name FROM Account";
+    response = salesforceEP -> getQueryResult(sampleQuery);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testExplainQueryOrReportOrListview () {
+    io:println("\n------------------ explainQueryOrReportOrListview () ------------------");
     string queryString = "SELECT name FROM Account";
+    response = salesforceEP -> explainQueryOrReportOrListview(queryString);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testSearchSOSLString () {
+    io:println("\n------------------------ Executing SOSl Searches ---------------------");
+    string searchString = "SELECT name FROM Account";
+    response = salesforceEP -> searchSOSLString(searchString);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetSObjectBasicInfo () {
+    io:println("\n----------------------- getSObjectBasicInfo() --------------------------");
+    string sObjectAccount = "Account";
+    response = salesforceEP -> getSObjectBasicInfo(sObjectAccount);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testSObjectPlatformAction () {
+    io:println("\n----------------------- sObjectPlatformAction() ---------------------------");
+    response = salesforceEP -> sObjectPlatformAction();
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetDeletedRecords () {
+    io:println("\n----------------------- getDeletedRecords() ---------------------------");
+
     time:Time now = time:currentTime();
     string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
     time:Time weekAgo = now.subtractDuration(0, 0, 7, 0, 0, 0, 0);
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
-    salesforce:SalesforceConnector salesforceConnector = {};
-    salesforceConnector.init(url, accessToken, refreshToken, clientId, clientSecret, refreshTokenEndpoint, refreshTokenPath);
+    response = salesforceEP -> getDeletedRecords(sObjectAccount, startDateTime, endDateTime);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
 
-    json|salesforce:SalesforceConnectorError response;
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
 
-    io:println("\n------------------------MAIN METHOD: getAvailableApiVersions()----------------------");
-    response = salesforceConnector.getAvailableApiVersions();
-    checkErrors(response);
+@test:Config
+function testGetUpdatedRecords () {
+    io:println("\n----------------------- getUpdatedRecords() ---------------------------");
 
-    io:println("\n------------------------MAIN METHOD: getResourcesByApiVersion()----------------------");
-    response = salesforceConnector.getResourcesByApiVersion(apiVersion);
-    checkErrors(response);
+    time:Time now = time:currentTime();
+    string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
+    time:Time weekAgo = now.subtractDuration(0, 0, 7, 0, 0, 0, 0);
+    string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
-    io:println("\n------------------------MAIN METHOD: getOrganizationLimits ()----------------------");
-    response = salesforceConnector.getOrganizationLimits();
-    checkErrors(response);
+    response = salesforceEP -> getUpdatedRecords(sObjectAccount, startDateTime, endDateTime);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
 
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
 
-    //======================================== Query ===============================================//
+// ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
-    io:println("\n--------------------------MAIN METHOD: getQueryResult ()-------------------------");
-    response = salesforceConnector.getQueryResult("SELECT name FROM Account");
-    checkErrors(response);
-
-    io:println("\n----------------------MAIN METHOD: explainQueryOrReportOrListview ()---------------------");
-    response = salesforceConnector.explainQueryOrReportOrListview(queryString);
-    checkErrors(response);
-
-    io:println("\n------------------------MAIN METHOD: Executing SOSl Searches ------------------");
-    response = salesforceConnector.searchSOSLString(searchString);
-    checkErrors(response);
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // ============================ Describe SObjects available and their fields/metadata ===================== //
-
-    io:println("\n-----------------------MAIN METHOD: getSObjectBasicInfo() --------------------------");
-    response = salesforceConnector.getSObjectBasicInfo(sampleSObjectAccount);
-    checkErrors(response);
-
-    io:println("\n-----------------------MAIN METHOD: describeAvailableObjects() ---------------------------");
-    checkErrors(response);
-
-    io:println("\n-----------------------MAIN METHOD: describeSObject() ---------------------------");
-    response = salesforceConnector.describeSObject(sampleSObjectAccount);
-    checkErrors(response);
-
-    io:println("\n-----------------------MAIN METHOD: sObjectPlatformAction() ---------------------------");
-    response = salesforceConnector.sObjectPlatformAction();
-    checkErrors(response);
-
-    io:println("\n-----------------------MAIN METHOD: getDeletedRecords() ---------------------------");
-    response = salesforceConnector.getDeletedRecords(sampleSObjectAccount, startDateTime, endDateTime);
-    checkErrors(response);
-
-    io:println("\n-----------------------MAIN METHOD: getUpdatedRecords() ---------------------------");
-    response = salesforceConnector.getUpdatedRecords(sampleSObjectAccount, startDateTime, endDateTime);
-    checkErrors(response);
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
-
+@test:Config
+function testCreateAccount () {
     io:println("\n------------------------ACCOUNT SObjecct Information----------------");
-    string|salesforce:SalesforceConnectorError stringAccount = salesforceConnector.createAccount(account);
+    json account = {Name:"ABC Inc", BillingCity:"New York"};
+    string|sf:SalesforceConnectorError stringAccount = salesforceEP -> createAccount(account);
     match stringAccount {
         string id => {
             io:println("Account created with: " + id);
             accountId = id;
         }
-        salesforce:SalesforceConnectorError err => {
-            io:println("Error ocurred");
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
         }
     }
+}
 
+@test:Config
+function testGetAccountById () {
     io:println("\nReceived account details: ");
-    response = salesforceConnector.getAccountById(accountId);
-    checkErrors(response);
+    response = salesforceEP -> getAccountById(accountId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
 
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testUpdateAccount () {
     io:println("\nUpdated account: ");
-    response = salesforceConnector.updateAccount(accountId, account);
-    checkErrors(response);
+    json account = {Name:"ABC Inc", BillingCity:"New York-USA"};
+    response = salesforceEP -> updateAccount(accountId, account);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
 
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testDeleteAccount () {
     io:println("\nDeleted account: ");
-    response = salesforceConnector.deleteAccount(accountId);
-    checkErrors(response);
+    response = salesforceEP -> deleteAccount(accountId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
 
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////
-    // ============================ LEAD SObject: get, create, update, delete ===================== //
+// ============================ LEAD SObject: get, create, update, delete ===================== //
 
+@test:Config
+function testCreateLead () {
     io:println("\n------------------------LEAD SObjecct Information----------------");
-    string|salesforce:SalesforceConnectorError stringLead = salesforceConnector.createLead(lead);
+    json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
+    string|sf:SalesforceConnectorError stringLead = salesforceEP -> createLead(lead);
     match stringLead {
         string id => {
             io:println("Lead created with: " + id);
             leadId = id;
         }
-        salesforce:SalesforceConnectorError err => {
-            io:println("Error ocurred");
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
         }
     }
+}
 
+@test:Config
+function testGetLeadById () {
     io:println("\nReceived Lead details: ");
-    response = salesforceConnector.getLeadById(leadId);
-    checkErrors(response);
-
-    io:println("\nUpdated Lead: ");
-    response = salesforceConnector.updateLead(leadId, lead);
-    checkErrors(response);
-
-    io:println("\nDeleted Lead: ");
-    response = salesforceConnector.deleteLead(leadId);
-    checkErrors(response);
-
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////
-        // ============================ CONTACTS SObject: get, create, update, delete ===================== //
-
-        io:println("\n------------------------CONTACT SObjecct Information----------------");
-        string|salesforce:SalesforceConnectorError stringContact = salesforceConnector.createContact(contact);
-        match stringContact {
-            string id => {
-                io:println("Contact created with: " + id);
-                contactId = id;
-            }
-            salesforce:SalesforceConnectorError err => {
-                io:println("Error ocurred");
-            }
+    response = salesforceEP -> getLeadById(leadId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
         }
 
-        io:println("\nReceived Contact details: ");
-        response = salesforceConnector.getContactById(contactId);
-        checkErrors(response);
-
-        io:println("\nUpdated Contact: ");
-        response = salesforceConnector.updateContact(contactId, contact);
-        checkErrors(response);
-
-        io:println("\nDeleted Contact: ");
-        response = salesforceConnector.deleteContact(contactId);
-        checkErrors(response);
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////
-        // ============================ PRODUCTS SObject: get, create, update, delete ===================== //
-
-        io:println("\n------------------------PRODUCTS SObjecct Information----------------");
-        string|salesforce:SalesforceConnectorError stringProduct = salesforceConnector.createProduct(product);
-        match stringProduct {
-            string id => {
-                io:println("Products created with: " + id);
-                productId = id;
-            }
-            salesforce:SalesforceConnectorError err => {
-                io:println("Error ocurred");
-            }
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
         }
-
-        io:println("\nReceived Product details: ");
-        response = salesforceConnector.getProductById(productId);
-        checkErrors(response);
-
-        io:println("\nUpdated Product: ");
-        response = salesforceConnector.updateProduct(productId, product);
-        checkErrors(response);
-
-        io:println("\nDeleted Product: ");
-        response = salesforceConnector.deleteProduct(productId);
-        checkErrors(response);
-
-        /////////////////////////////////////////////////////////////////////////////////////////////////////
-        // ============================ OPPORTUNITY SObject: get, create, update, delete ===================== //
-
-        //io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
-        //string|salesforce:SalesforceConnectorError stringResponse = salesforceConnector.createOpportunity(createOpportunity);
-        //match stringResponse {
-        //    string id => {
-        //        io:println("Account created with: " + id);
-        //        opportunityId = id;
-        //    }
-        //    salesforce:SalesforceConnectorError err => {
-        //        io:println("Error ocurred");
-        //    }
-        //}
-        //
-        //io:println("\nReceived Opportunity details: ");
-        //response = salesforceConnector.getOpportunityById(opportunityId);
-        //checkErrors(response);
-        //
-        //io:println("\nUpdated Opportunity: ");
-        //response = salesforceConnector.updateOpportunity(opportunityId, createOpportunity);
-        //checkErrors(response);
-        //
-        //io:println("\nDeleted Opportunity: ");
-        //response = salesforceConnector.deleteOpportunity(opportunityId);
-        //checkErrors(response);
     }
+}
 
-
-public function checkErrors (json|salesforce:SalesforceConnectorError receivedResponse) {
-    match receivedResponse {
-        json payload => {
-        //io:println(payload);
-            io:println("Success!");
+@test:Config
+function testUpdateLead () {
+    io:println("\nUpdated Lead: ");
+    json updateLead = {LastName:"Carmen", Company:"WSO2 Lanka (Pvt) Ltd"};
+    response = salesforceEP -> updateLead(leadId, updateLead);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
         }
-        salesforce:SalesforceConnectorError err => {
-            io:println(err);
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testDeleteLead () {
+    io:println("\nDeleted Lead: ");
+    response = salesforceEP -> deleteLead(leadId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+// ============================ CONTACTS SObject: get, create, update, delete ===================== //
+
+@test:Config
+function testCreateContact () {
+    io:println("\n------------------------CONTACT SObjecct Information----------------");
+    json contact = {LastName:"Patson"};
+    string|sf:SalesforceConnectorError stringContact = salesforceEP -> createContact(contact);
+    match stringContact {
+        string id => {
+            io:println("Contact created with: " + id);
+            contactId = id;
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetContactById () {
+    io:println("\nReceived Contact details: ");
+    response = salesforceEP -> getContactById(contactId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testUpdateContact () {
+    io:println("\nUpdated Contact: ");
+    json updateContact = {LastName:"Rebert Patson"};
+    response = salesforceEP -> updateContact(contactId, updateContact);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testDeleteContact () {
+    io:println("\nDeleted Contact: ");
+    response = salesforceEP -> deleteContact(contactId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+// ============================ PRODUCTS SObject: get, create, update, delete ===================== //
+
+@test:Config
+function testCreateProduct () {
+    io:println("\n------------------------PRODUCTS SObjecct Information----------------");
+    json product = {Name:"APIM", Description:"APIM product"};
+    string|sf:SalesforceConnectorError stringProduct = salesforceEP -> createProduct(product);
+    match stringProduct {
+        string id => {
+            io:println("Products created with: " + id);
+            productId = id;
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetProductById () {
+    io:println("\nReceived Product details: ");
+    response = salesforceEP -> getProductById(productId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testUpdateProduct () {
+    io:println("\nUpdated Product: ");
+    json updateProduct = {Name:"APIM", Description:"APIM new product"};
+    response = salesforceEP -> updateProduct(productId, updateProduct);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testDeleteProduct () {
+    io:println("\nDeleted Product: ");
+    response = salesforceEP -> deleteProduct(productId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+// ============================ OPPORTUNITY SObject: get, create, update, delete ===================== //
+
+@test:Config
+function testCreateOpportunity () {
+    io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
+    json createOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
+    string|sf:SalesforceConnectorError stringResponse = salesforceEP -> createOpportunity(createOpportunity);
+    match stringResponse {
+        string id => {
+            io:println("Opportunity created with: " + id);
+            opportunityId = id;
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testGetOpportunityById () {
+    io:println("\nReceived Opportunity details: ");
+    response = salesforceEP -> getOpportunityById(opportunityId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testUpdateOpportunity () {
+    io:println("\nUpdated Opportunity: ");
+    json updateOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
+    response = salesforceEP -> updateOpportunity(opportunityId, updateOpportunity);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testDeleteOpportunity () {
+    io:println("\nDeleted Opportunity: ");
+    response = salesforceEP -> deleteOpportunity( opportunityId);
+    match response {
+        json => {
+            test:assertSuccess("Success!");
+        }
+
+        sf:SalesforceConnectorError => {
+            test:assertFail(msg = err.messages[0]);
         }
     }
 }

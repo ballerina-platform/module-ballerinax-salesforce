@@ -2,3 +2,7 @@
 .idea
 *.iml
 *.xml
+
+#folders
+oauth2/*
+docs/*
