@@ -47,6 +47,6 @@ public function <SalesforceEndpoint ep> init (SalesforceConfiguration salesforce
 }
 ```
 #### Running the tests
-Go to `ballerina.conf` file in `tests` package, replace  Endpoint, Client Id, Client Secret, Access Token, Refresh Token, Refresh Token Endpoint and Refresh Token Path string values with your data. 
+Go to `ballerina.conf` file in `package-salesforce`, replace  Endpoint, Client Id, Client Secret, Access Token, Refresh Token, Refresh Token Endpoint and Refresh Token Path string values with your data. 
 
-Run the file using following command `ballerina test tests`.
+Go inside `package-salesforce` using terminal and run test.bal file using following command `ballerina test tests`.
