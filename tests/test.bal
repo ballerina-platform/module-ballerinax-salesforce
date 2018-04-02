@@ -3,15 +3,16 @@ package tests;
 import ballerina/test;
 import ballerina/config;
 import ballerina/io;
+import ballerina/time;
 import salesforce as sf;
 
-string url =? config:getAsString(ENDPOINT);
-string accessToken =? config:getAsString(ACCESS_TOKEN);
-string clientId =? config:getAsString(CLIENT_ID);
-string clientSecret =? config:getAsString(CLIENT_SECRET);
-string refreshToken =? config:getAsString(REFRESH_TOKEN);
-string refreshTokenEndpoint =? config:getAsString(REFRESH_TOKEN_ENDPOINT);
-string refreshTokenPath =? config:getAsString(REFRESH_TOKEN_PATH);
+string|null url = config:getAsString("ENDPOINT");
+string|null accessToken = config:getAsString("ACCESS_TOKEN");
+string|null clientId = config:getAsString("CLIENT_ID");
+string|null clientSecret = config:getAsString("CLIENT_SECRET");
+string|null refreshToken = config:getAsString("REFRESH_TOKEN");
+string|null refreshTokenEndpoint = config:getAsString("REFRESH_TOKEN_ENDPOINT");
+string|null refreshTokenPath = config:getAsString("REFRESH_TOKEN_PATH");
 
 json|sf:SalesforceConnectorError response;
 string accountId = "";
@@ -38,8 +39,8 @@ function testGetAvailableApiVersions () {
     io:println("\n------------------------ getAvailableApiVersions() ----------------------");
     response = salesforceEP -> getAvailableApiVersions();
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received API versions!");
         }
 
         sf:SalesforceConnectorError err => {
@@ -54,11 +55,11 @@ function testGetResourcesByApiVersion () {
     string apiVersion = "v37.0";
     response = salesforceEP -> getResourcesByApiVersion(apiVersion);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Resources!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -69,11 +70,11 @@ function testGetOrganizationLimits () {
     io:println("\n------------------------ getOrganizationLimits () ----------------------");
     response = salesforceEP -> getOrganizationLimits();
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Organization Limits!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -85,11 +86,11 @@ function testGetQueryResult () {
     string sampleQuery = "SELECT name FROM Account";
     response = salesforceEP -> getQueryResult(sampleQuery);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Query Results!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -101,11 +102,11 @@ function testExplainQueryOrReportOrListview () {
     string queryString = "SELECT name FROM Account";
     response = salesforceEP -> explainQueryOrReportOrListview(queryString);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Explanation!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -117,11 +118,11 @@ function testSearchSOSLString () {
     string searchString = "SELECT name FROM Account";
     response = salesforceEP -> searchSOSLString(searchString);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Search Results!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -130,14 +131,13 @@ function testSearchSOSLString () {
 @test:Config
 function testGetSObjectBasicInfo () {
     io:println("\n----------------------- getSObjectBasicInfo() --------------------------");
-    string sObjectAccount = "Account";
-    response = salesforceEP -> getSObjectBasicInfo(sObjectAccount);
+    response = salesforceEP -> getSObjectBasicInfo("Account");
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Object Info!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -148,11 +148,11 @@ function testSObjectPlatformAction () {
     io:println("\n----------------------- sObjectPlatformAction() ---------------------------");
     response = salesforceEP -> sObjectPlatformAction();
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Results!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -167,13 +167,13 @@ function testGetDeletedRecords () {
     time:Time weekAgo = now.subtractDuration(0, 0, 7, 0, 0, 0, 0);
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
-    response = salesforceEP -> getDeletedRecords(sObjectAccount, startDateTime, endDateTime);
+    response = salesforceEP -> getDeletedRecords("Account", startDateTime, endDateTime);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Deleted Records!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -188,13 +188,13 @@ function testGetUpdatedRecords () {
     time:Time weekAgo = now.subtractDuration(0, 0, 7, 0, 0, 0, 0);
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
-    response = salesforceEP -> getUpdatedRecords(sObjectAccount, startDateTime, endDateTime);
+    response = salesforceEP -> getUpdatedRecords("Account", startDateTime, endDateTime);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Received Updated Records!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -209,7 +209,8 @@ function testCreateAccount () {
     string|sf:SalesforceConnectorError stringAccount = salesforceEP -> createAccount(account);
     match stringAccount {
         string id => {
-            io:println("Account created with: " + id);
+            test:assertNotEquals(id, "", msg = "Account Created with new ID ");
+            io:println(id);
             accountId = id;
         }
         sf:SalesforceConnectorError err => {
@@ -223,11 +224,11 @@ function testGetAccountById () {
     io:println("\nReceived account details: ");
     response = salesforceEP -> getAccountById(accountId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -239,11 +240,11 @@ function testUpdateAccount () {
     json account = {Name:"ABC Inc", BillingCity:"New York-USA"};
     response = salesforceEP -> updateAccount(accountId, account);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -254,11 +255,11 @@ function testDeleteAccount () {
     io:println("\nDeleted account: ");
     response = salesforceEP -> deleteAccount(accountId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success!");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -273,7 +274,8 @@ function testCreateLead () {
     string|sf:SalesforceConnectorError stringLead = salesforceEP -> createLead(lead);
     match stringLead {
         string id => {
-            io:println("Lead created with: " + id);
+            test:assertNotEquals(id, "", msg = "Lead Created with new ID ");
+            io:println(id);
             leadId = id;
         }
         sf:SalesforceConnectorError err => {
@@ -287,11 +289,11 @@ function testGetLeadById () {
     io:println("\nReceived Lead details: ");
     response = salesforceEP -> getLeadById(leadId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -303,11 +305,11 @@ function testUpdateLead () {
     json updateLead = {LastName:"Carmen", Company:"WSO2 Lanka (Pvt) Ltd"};
     response = salesforceEP -> updateLead(leadId, updateLead);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -318,11 +320,11 @@ function testDeleteLead () {
     io:println("\nDeleted Lead: ");
     response = salesforceEP -> deleteLead(leadId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -337,7 +339,8 @@ function testCreateContact () {
     string|sf:SalesforceConnectorError stringContact = salesforceEP -> createContact(contact);
     match stringContact {
         string id => {
-            io:println("Contact created with: " + id);
+            test:assertNotEquals(id, "", msg = "Contact created with new ID ");
+            io:println(id);
             contactId = id;
         }
         sf:SalesforceConnectorError err => {
@@ -351,11 +354,11 @@ function testGetContactById () {
     io:println("\nReceived Contact details: ");
     response = salesforceEP -> getContactById(contactId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -367,11 +370,11 @@ function testUpdateContact () {
     json updateContact = {LastName:"Rebert Patson"};
     response = salesforceEP -> updateContact(contactId, updateContact);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -382,11 +385,11 @@ function testDeleteContact () {
     io:println("\nDeleted Contact: ");
     response = salesforceEP -> deleteContact(contactId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -401,7 +404,8 @@ function testCreateProduct () {
     string|sf:SalesforceConnectorError stringProduct = salesforceEP -> createProduct(product);
     match stringProduct {
         string id => {
-            io:println("Products created with: " + id);
+            test:assertNotEquals(id, "", msg = "Product created with new ID ");
+            io:println(id);
             productId = id;
         }
         sf:SalesforceConnectorError err => {
@@ -415,11 +419,11 @@ function testGetProductById () {
     io:println("\nReceived Product details: ");
     response = salesforceEP -> getProductById(productId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -431,11 +435,11 @@ function testUpdateProduct () {
     json updateProduct = {Name:"APIM", Description:"APIM new product"};
     response = salesforceEP -> updateProduct(productId, updateProduct);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -446,11 +450,11 @@ function testDeleteProduct () {
     io:println("\nDeleted Product: ");
     response = salesforceEP -> deleteProduct(productId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -465,7 +469,8 @@ function testCreateOpportunity () {
     string|sf:SalesforceConnectorError stringResponse = salesforceEP -> createOpportunity(createOpportunity);
     match stringResponse {
         string id => {
-            io:println("Opportunity created with: " + id);
+            test:assertNotEquals(id, "", msg = "Opportunity created with new ID ");
+            io:println(id);
             opportunityId = id;
         }
         sf:SalesforceConnectorError err => {
@@ -479,11 +484,11 @@ function testGetOpportunityById () {
     io:println("\nReceived Opportunity details: ");
     response = salesforceEP -> getOpportunityById(opportunityId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -495,11 +500,11 @@ function testUpdateOpportunity () {
     json updateOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
     response = salesforceEP -> updateOpportunity(opportunityId, updateOpportunity);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -508,13 +513,13 @@ function testUpdateOpportunity () {
 @test:Config
 function testDeleteOpportunity () {
     io:println("\nDeleted Opportunity: ");
-    response = salesforceEP -> deleteOpportunity( opportunityId);
+    response = salesforceEP -> deleteOpportunity(opportunityId);
     match response {
-        json => {
-            test:assertSuccess("Success!");
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Success! ");
         }
 
-        sf:SalesforceConnectorError => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
