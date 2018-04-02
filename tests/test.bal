@@ -1,26 +1,26 @@
 package tests;
 
-import ballerina.test;
-import ballerina.config;
-import config;
+import ballerina/test;
+import ballerina/config;
+import ballerina/io;
+import salesforce as sf;
 
+string url =? config:getAsString(ENDPOINT);
+string accessToken =? config:getAsString(ACCESS_TOKEN);
+string clientId =? config:getAsString(CLIENT_ID);
+string clientSecret =? config:getAsString(CLIENT_SECRET);
+string refreshToken =? config:getAsString(REFRESH_TOKEN);
+string refreshTokenEndpoint =? config:getAsString(REFRESH_TOKEN_ENDPOINT);
+string refreshTokenPath =? config:getAsString(REFRESH_TOKEN_PATH);
 
-string url = config:getAsString(ENDPOINT);
-string accessToken = config:getAsString(ACCESS_TOKEN);
-string clientId = config:getAsString(CLIENT_ID);
-string clientSecret = config:getAsString(CLIENT_SECRET);
-string refreshToken = config:getAsString(REFRESH_TOKEN);
-string refreshTokenEndpoint = config:getAsString(REFRESH_TOKEN_ENDPOINT);
-string refreshTokenPath = config:getAsString(REFRESH_TOKEN_PATH);
-
-json|salesforce:SalesforceConnectorError response;
+json|sf:SalesforceConnectorError response;
 string accountId = "";
 string leadId = "";
 string contactId = "";
 string opportunityId = "";
 string productId = "";
 
-endpoint SalesforceEndpoint salesforceEP {
+endpoint sf:SalesforceEndpoint salesforceEP {
     oauth2Config:{
                      accessToken:accessToken,
                      baseUrl:url,
@@ -42,7 +42,7 @@ function testGetAvailableApiVersions () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError err => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -58,7 +58,7 @@ function testGetResourcesByApiVersion () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -73,7 +73,7 @@ function testGetOrganizationLimits () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -89,7 +89,7 @@ function testGetQueryResult () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -105,7 +105,7 @@ function testExplainQueryOrReportOrListview () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -121,7 +121,7 @@ function testSearchSOSLString () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -137,7 +137,7 @@ function testGetSObjectBasicInfo () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -152,7 +152,7 @@ function testSObjectPlatformAction () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -173,7 +173,7 @@ function testGetDeletedRecords () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -194,7 +194,7 @@ function testGetUpdatedRecords () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -206,13 +206,13 @@ function testGetUpdatedRecords () {
 function testCreateAccount () {
     io:println("\n------------------------ACCOUNT SObjecct Information----------------");
     json account = {Name:"ABC Inc", BillingCity:"New York"};
-    string|salesforce:SalesforceConnectorError stringAccount = salesforceEP -> createAccount(account);
+    string|sf:SalesforceConnectorError stringAccount = salesforceEP -> createAccount(account);
     match stringAccount {
         string id => {
             io:println("Account created with: " + id);
             accountId = id;
         }
-        salesforce:SalesforceConnectorError err => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -227,7 +227,7 @@ function testGetAccountById () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -243,7 +243,7 @@ function testUpdateAccount () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -258,7 +258,7 @@ function testDeleteAccount () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -270,13 +270,13 @@ function testDeleteAccount () {
 function testCreateLead () {
     io:println("\n------------------------LEAD SObjecct Information----------------");
     json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
-    string|salesforce:SalesforceConnectorError stringLead = salesforceEP -> createLead(lead);
+    string|sf:SalesforceConnectorError stringLead = salesforceEP -> createLead(lead);
     match stringLead {
         string id => {
             io:println("Lead created with: " + id);
             leadId = id;
         }
-        salesforce:SalesforceConnectorError err => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -291,7 +291,7 @@ function testGetLeadById () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -300,14 +300,14 @@ function testGetLeadById () {
 @test:Config
 function testUpdateLead () {
     io:println("\nUpdated Lead: ");
-    json lead = {LastName:"Carmen", Company:"WSO2 Lanka (Pvt) Ltd"};
-    response = salesforceEP -> updateLead(leadId, lead);
+    json updateLead = {LastName:"Carmen", Company:"WSO2 Lanka (Pvt) Ltd"};
+    response = salesforceEP -> updateLead(leadId, updateLead);
     match response {
         json => {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -322,7 +322,7 @@ function testDeleteLead () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -334,13 +334,13 @@ function testDeleteLead () {
 function testCreateContact () {
     io:println("\n------------------------CONTACT SObjecct Information----------------");
     json contact = {LastName:"Patson"};
-    string|salesforce:SalesforceConnectorError stringContact = salesforceEP -> createContact(contact);
+    string|sf:SalesforceConnectorError stringContact = salesforceEP -> createContact(contact);
     match stringContact {
         string id => {
             io:println("Contact created with: " + id);
             contactId = id;
         }
-        salesforce:SalesforceConnectorError err => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -355,7 +355,7 @@ function testGetContactById () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -364,13 +364,14 @@ function testGetContactById () {
 @test:Config
 function testUpdateContact () {
     io:println("\nUpdated Contact: ");
-    response = salesforceEP -> updateContact(contactId, contact);
+    json updateContact = {LastName:"Rebert Patson"};
+    response = salesforceEP -> updateContact(contactId, updateContact);
     match response {
         json => {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -385,7 +386,7 @@ function testDeleteContact () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -397,13 +398,13 @@ function testDeleteContact () {
 function testCreateProduct () {
     io:println("\n------------------------PRODUCTS SObjecct Information----------------");
     json product = {Name:"APIM", Description:"APIM product"};
-    string|salesforce:SalesforceConnectorError stringProduct = salesforceEP -> createProduct(product);
+    string|sf:SalesforceConnectorError stringProduct = salesforceEP -> createProduct(product);
     match stringProduct {
         string id => {
             io:println("Products created with: " + id);
             productId = id;
         }
-        salesforce:SalesforceConnectorError err => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -418,7 +419,7 @@ function testGetProductById () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -427,13 +428,14 @@ function testGetProductById () {
 @test:Config
 function testUpdateProduct () {
     io:println("\nUpdated Product: ");
-    response = salesforceEP -> updateProduct(productId, product);
+    json updateProduct = {Name:"APIM", Description:"APIM new product"};
+    response = salesforceEP -> updateProduct(productId, updateProduct);
     match response {
         json => {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -448,7 +450,7 @@ function testDeleteProduct () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -460,13 +462,13 @@ function testDeleteProduct () {
 function testCreateOpportunity () {
     io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
     json createOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
-    string|salesforce:SalesforceConnectorError stringResponse = salesforceEP -> createOpportunity(createOpportunity);
+    string|sf:SalesforceConnectorError stringResponse = salesforceEP -> createOpportunity(createOpportunity);
     match stringResponse {
         string id => {
             io:println("Opportunity created with: " + id);
             opportunityId = id;
         }
-        salesforce:SalesforceConnectorError err => {
+        sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -481,7 +483,7 @@ function testGetOpportunityById () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -490,13 +492,14 @@ function testGetOpportunityById () {
 @test:Config
 function testUpdateOpportunity () {
     io:println("\nUpdated Opportunity: ");
-    response = salesforceEP -> updateOpportunity(opportunityId, createOpportunity);
+    json updateOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
+    response = salesforceEP -> updateOpportunity(opportunityId, updateOpportunity);
     match response {
         json => {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -511,7 +514,7 @@ function testDeleteOpportunity () {
             test:assertSuccess("Success!");
         }
 
-        SalesforceConnectorError => {
+        sf:SalesforceConnectorError => {
             test:assertFail(msg = err.messages[0]);
         }
     }
