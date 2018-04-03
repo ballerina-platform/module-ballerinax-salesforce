@@ -292,8 +292,8 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
-    string path = ([API_BASE_PATH, SOBJECTS, sObjectName, id], [FIELDS], [fields]);
-    return sfConnector.getRecord(path);
+    string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+    return sfConnector.getRecord(prefixPath + "?fields=" + fields);
 }
 
 @Description {value:"Retrieve field values from an external object record using Salesforce ID or External ID"}

@@ -20,6 +20,7 @@ string leadId = "";
 string contactId = "";
 string opportunityId = "";
 string productId = "";
+string recordId = "";
 
 endpoint sf:SalesforceEndpoint salesforceEP {
     oauth2Config:{
@@ -41,6 +42,8 @@ function testGetAvailableApiVersions () {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            json[] versions =? <json[]>jsonRes;
+            test:assertTrue(lengthof versions > 0, msg = "Found 0 or No API versions");
         }
 
         sf:SalesforceConnectorError err => {
@@ -57,8 +60,19 @@ function testGetResourcesByApiVersion () {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            try {
+                test:assertNotEquals(jsonRes["sobjects"], null);
+                test:assertNotEquals(jsonRes["search"], null);
+                test:assertNotEquals(jsonRes["query"], null);
+                test:assertNotEquals(jsonRes["licensing"], null);
+                test:assertNotEquals(jsonRes["connect"], null);
+                test:assertNotEquals(jsonRes["tooling"], null);
+                test:assertNotEquals(jsonRes["chatter"], null);
+                test:assertNotEquals(jsonRes["recent"], null);
+            } catch (error e) {
+                test:assertFail(msg = "Response doesn't have required keys");
+            }
         }
-
         sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
@@ -72,13 +86,97 @@ function testGetOrganizationLimits () {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            test:assertTrue(lengthof jsonRes.getKeys() > 0, msg = "Response doesn't have enough keys");
+            foreach key in jsonRes {
+                try {
+                    test:assertNotEquals(key["Max"], null, msg = "Max limit not found");
+                    test:assertNotEquals(key["Remaining"], null, msg = "Remaining resources not found");
+                } catch (error e) {
+                    test:assertFail(msg = "Response is invalid");
+                }
+            }
         }
-
         sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
     }
 }
+
+//============================ Basic functions================================//
+
+@test:Config
+function testCreateRecord () {
+    io:println("\n------------------------ SObjecct Record Information----------------");
+    json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3"};
+    string|sf:SalesforceConnectorError stringResponse = salesforceEP -> createRecord(sf:ACCOUNT, accountRecord);
+    match stringResponse {
+        string id => {
+            test:assertNotEquals(id, "", msg = "Found empty response!");
+            recordId = id;
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config {
+    dependsOn:["testCreateRecord"]
+}
+function testGetRecord () {
+    io:println("\nReceived Record details!");
+    string path = "/services/data/v37.0/sobjects/Account/" + recordId;
+    response = salesforceEP -> getRecord(path);
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            try {
+                test:assertNotEquals(jsonRes["Name"], null, msg = "Found null JSON response!");
+                test:assertNotEquals(jsonRes["BillingCity"], null, msg = "Found null JSON response!");
+            } catch (error e) {
+                test:assertFail(msg = "A required key was missing in response");
+            }
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config {
+    dependsOn:["testCreateRecord"]
+}
+function testUpdateRecord () {
+    io:println("\nUpdated Record!");
+    json account = {Name:"WSO2 Inc", BillingCity:"Jaffna", Phone:"+94110000000"};
+    boolean|sf:SalesforceConnectorError response = salesforceEP -> updateRecord(sf:ACCOUNT, recordId, account);
+    match response {
+        boolean success => {
+            test:assertTrue(success, msg = "Expects true on success");
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config {
+    dependsOn:["testCreateRecord", "testGetRecord", "testUpdateRecord", "testGetFieldValuesFromSObjectRecord"]
+}
+function testDeleteRecord () {
+    io:println("\nDeleted Record! ");
+    boolean|sf:SalesforceConnectorError response = salesforceEP -> deleteRecord("Account", recordId);
+    match response {
+        boolean success => {
+            test:assertTrue(success, msg = "Expects true on success");
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+//=============================== Query ==================================//
 
 @test:Config
 function testGetQueryResult () {
@@ -112,6 +210,8 @@ function testExplainQueryOrReportOrListview () {
     }
 }
 
+//=============================== Search ==================================//
+
 @test:Config
 function testSearchSOSLString () {
     io:println("\n------------------------ Executing SOSl Searches ---------------------");
@@ -127,6 +227,8 @@ function testSearchSOSLString () {
         }
     }
 }
+
+//============================ SObject Information ===============================//
 
 @test:Config
 function testGetSObjectBasicInfo () {
@@ -159,6 +261,39 @@ function testSObjectPlatformAction () {
 }
 
 @test:Config
+function testDescribeAvailableObjects () {
+    io:println("\n----------------------- describeAvailableObjects() ---------------------------");
+    response = salesforceEP -> describeAvailableObjects();
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+        }
+
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+
+@test:Config
+function testDescribeSObject () {
+    io:println("\n----------------------- describeSObject() ---------------------------");
+    response = salesforceEP -> describeSObject(sf:ACCOUNT);
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+        }
+
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+//=============================== Records Related ==================================//
+
+@test:Config
 function testGetDeletedRecords () {
     io:println("\n----------------------- getDeletedRecords() ---------------------------");
 
@@ -189,6 +324,55 @@ function testGetUpdatedRecords () {
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
     response = salesforceEP -> getUpdatedRecords("Account", startDateTime, endDateTime);
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+        }
+
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config
+function testCreateMultipleRecords () {
+    io:println("\n------------------------ createMultipleRecords() ----------------");
+
+    json multipleRecords = {"records":[{
+                                           "attributes":{"type":"Account", "referenceId":"ref1"},
+                                           "name":"SampleAccount1",
+                                           "phone":"1111111111",
+                                           "website":"www.salesforce.com",
+                                           "numberOfEmployees":"100",
+                                           "industry":"Banking"
+                                       }, {
+                                              "attributes":{"type":"Account", "referenceId":"ref2"},
+                                              "name":"SampleAccount2",
+                                              "phone":"2222222222",
+                                              "website":"www.salesforce2.com",
+                                              "numberOfEmployees":"250",
+                                              "industry":"Banking"
+                                          }]
+                           };
+
+    response = salesforceEP -> createMultipleRecords(sf:ACCOUNT, multipleRecords);
+    match response {
+        json jsonRes => {
+            test:assertEquals(jsonRes.hasErrors.toString(), "false", msg = "Found null JSON response!");
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config {
+    dependsOn:["testCreateRecord"]
+}
+function testGetFieldValuesFromSObjectRecord () {
+    io:println("\n--------------------- getFieldValuesFromSObjectRecord() ------------------------");
+    response = salesforceEP -> getFieldValuesFromSObjectRecord("Account", recordId, "Name,BillingCity");
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
@@ -561,8 +745,8 @@ function setConfParams (string|null confParam) returns string {
             return param;
         }
     null => {
-            io:println("Empty value!");
-            return "";
-        }
-    }
+    io:println("Empty value!");
+    return "";
+}
+}
 }
