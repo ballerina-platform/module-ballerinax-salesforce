@@ -303,8 +303,8 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getFieldValuesFromExternalObjectRecord (string externalObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
-    string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id], [FIELDS], [fields]);
-    return sfConnector.getRecord(path);
+    string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
+    return sfConnector.getRecord(prefixPath + "?fields=" + fields);
 
 }
 

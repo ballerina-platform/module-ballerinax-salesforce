@@ -4,6 +4,7 @@ import ballerina/test;
 import ballerina/config;
 import ballerina/io;
 import ballerina/time;
+import ballerina/util;
 import salesforce as sf;
 
 string url = setConfParams(config:getAsString("ENDPOINT"));
@@ -21,6 +22,7 @@ string contactId = "";
 string opportunityId = "";
 string productId = "";
 string recordId = "";
+string externalID = "";
 
 endpoint sf:SalesforceEndpoint salesforceEP {
     oauth2Config:{
@@ -107,7 +109,8 @@ function testGetOrganizationLimits () {
 @test:Config
 function testCreateRecord () {
     io:println("\n------------------------ SObjecct Record Information----------------");
-    json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3"};
+    externalID = util:uuid();
+    json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3", SF_ExternalID__c:externalID};
     string|sf:SalesforceConnectorError stringResponse = salesforceEP -> createRecord(sf:ACCOUNT, accountRecord);
     match stringResponse {
         string id => {
@@ -161,7 +164,8 @@ function testUpdateRecord () {
 }
 
 @test:Config {
-    dependsOn:["testCreateRecord", "testGetRecord", "testUpdateRecord", "testGetFieldValuesFromSObjectRecord"]
+    dependsOn:["testCreateRecord", "testGetRecord", "testUpdateRecord", "testGetFieldValuesFromSObjectRecord",
+               "testGetRecordByExternalId", "testUpsertSObjectByExternalId"]
 }
 function testDeleteRecord () {
     io:println("\nDeleted Record! ");
@@ -185,9 +189,49 @@ function testGetQueryResult () {
     response = salesforceEP -> getQueryResult(sampleQuery);
     match response {
         json jsonRes => {
-            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-        }
+            test:assertNotEquals(jsonRes["totalSize"], null);
+            test:assertNotEquals(jsonRes["done"], null);
+            test:assertNotEquals(jsonRes["records"], null);
 
+            if (jsonRes.nextRecordsUrl != null) {
+                io:println("\n-------------------------- getNextQueryResult () -------------------------");
+
+                while (jsonRes.nextRecordsUrl == null) {
+                    io:println("\nFound new query result set!");
+                    response = salesforceEP -> getNextQueryResult(jsonRes.nextRecordsUrl.toString());
+                    match response {
+                        json jsonNextRes => {
+                            test:assertNotEquals(jsonNextRes["totalSize"], null);
+                            test:assertNotEquals(jsonNextRes["done"], null);
+                            test:assertNotEquals(jsonNextRes["records"], null);
+                        }
+                        sf:SalesforceConnectorError err => {
+                            test:assertFail(msg = err.messages[0]);
+                        }
+                    }
+                }
+            }
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config {
+    dependsOn:["testGetQueryResult"]
+}
+function testGetAllQueries () {
+    io:println("\n-------------------------- getAllQueries () -------------------------");
+    string sampleQuery = "SELECT Name from Account WHERE isDeleted=TRUE";
+    response = salesforceEP -> getAllQueries(sampleQuery);
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes["totalSize"], null);
+            test:assertNotEquals(jsonRes["done"], null);
+            test:assertNotEquals(jsonRes["records"], null);
+            test:assertNotEquals(jsonRes["records"], null);
+        }
         sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);
         }
@@ -299,7 +343,7 @@ function testGetDeletedRecords () {
 
     time:Time now = time:currentTime();
     string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
-    time:Time weekAgo = now.subtractDuration(0, 0, 0, 1, 0, 0, 0);
+    time:Time weekAgo = now.subtractDuration(0, 0, 1, 0, 0, 0, 0);
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
     response = salesforceEP -> getDeletedRecords("Account", startDateTime, endDateTime);
@@ -320,7 +364,7 @@ function testGetUpdatedRecords () {
 
     time:Time now = time:currentTime();
     string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
-    time:Time weekAgo = now.subtractDuration(0, 0, 0, 1, 0, 0, 0);
+    time:Time weekAgo = now.subtractDuration(0, 0, 1, 0, 0, 0, 0);
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
     response = salesforceEP -> getUpdatedRecords("Account", startDateTime, endDateTime);
@@ -383,6 +427,69 @@ function testGetFieldValuesFromSObjectRecord () {
         }
     }
 }
+
+@test:Config {
+    dependsOn:["testCreateRecord"]
+}
+function testGetRecordByExternalId () {
+    io:println("\n--------------------- getRecordByExternalId() ------------------------");
+    response = salesforceEP -> getRecordByExternalId(sf:ACCOUNT, "SF_ExternalID__c", externalID);
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            try {
+                test:assertNotEquals(jsonRes["Name"], null, msg = "Found null JSON response!");
+                test:assertNotEquals(jsonRes["BillingCity"], null, msg = "Found null JSON response!");
+                test:assertNotEquals(jsonRes["SF_ExternalID__c"], null, msg = "Found null JSON response!");
+            } catch (error e) {
+                test:assertFail(msg = "A required key was missing in response");
+            }
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+@test:Config {
+    dependsOn:["testCreateRecord"]
+}
+function testUpsertSObjectByExternalId () {
+    io:println("\n--------------------- upsertSObjectByExternalId() ------------------------");
+    json upsertRecord = {Name:"Sample Org", BillingCity:"Jaffna, Colombo 3"};
+    json|sf:SalesforceConnectorError response = salesforceEP -> upsertSObjectByExternalId(sf:ACCOUNT, "SF_ExternalID__c", externalID, upsertRecord);
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Expects true on success");
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
+//
+//@test:Config {
+//    dependsOn:["testCreateRecord"]
+//}
+//function testGetFieldValuesFromExternalObjectRecord () {
+//    io:println("\n---------------- getFieldValuesFromExternalObjectRecord -------------------");
+//    response = salesforceEP -> getFieldValuesFromExternalObjectRecord();
+//    match response {
+//        json jsonRes => {
+//            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+//            try {
+//                test:assertNotEquals(jsonRes["Name"], null, msg = "Found null JSON response!");
+//                test:assertNotEquals(jsonRes["BillingCity"], null, msg = "Found null JSON response!");
+//            } catch (error e) {
+//                test:assertFail(msg = "A required key was missing in response");
+//            }
+//        }
+//        sf:SalesforceConnectorError err => {
+//            test:assertFail(msg = err.messages[0]);
+//        }
+//    }
+//}
 
 // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
@@ -747,6 +854,6 @@ function setConfParams (string|null confParam) returns string {
     null => {
     io:println("Empty value!");
     return "";
-}
-}
+        }
+    }
 }
