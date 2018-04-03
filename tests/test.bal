@@ -468,28 +468,27 @@ function testUpsertSObjectByExternalId () {
     }
 }
 
-//
-//@test:Config {
-//    dependsOn:["testCreateRecord"]
-//}
-//function testGetFieldValuesFromExternalObjectRecord () {
-//    io:println("\n---------------- getFieldValuesFromExternalObjectRecord -------------------");
-//    response = salesforceEP -> getFieldValuesFromExternalObjectRecord();
-//    match response {
-//        json jsonRes => {
-//            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-//            try {
-//                test:assertNotEquals(jsonRes["Name"], null, msg = "Found null JSON response!");
-//                test:assertNotEquals(jsonRes["BillingCity"], null, msg = "Found null JSON response!");
-//            } catch (error e) {
-//                test:assertFail(msg = "A required key was missing in response");
-//            }
-//        }
-//        sf:SalesforceConnectorError err => {
-//            test:assertFail(msg = err.messages[0]);
-//        }
-//    }
-//}
+
+@test:Config {
+    dependsOn:["testCreateRecord"]
+}
+function testGetFieldValuesFromExternalObjectRecord () {
+    io:println("\n---------------- getFieldValuesFromExternalObjectRecord -------------------");
+    response = salesforceEP -> getFieldValuesFromExternalObjectRecord("SampleExternalObj", "12345", "Name");
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            try {
+                test:assertNotEquals(jsonRes["Name"], null, msg = "Found null JSON response!");
+            } catch (error e) {
+                test:assertFail(msg = "A required key was missing in response");
+            }
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
 
 // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
