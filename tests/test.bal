@@ -109,8 +109,7 @@ function testGetOrganizationLimits () {
 @test:Config
 function testCreateRecord () {
     io:println("\n------------------------ SObjecct Record Information----------------");
-    externalID = util:uuid();
-    json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3", SF_ExternalID__c:externalID};
+    json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3"};
     string|sf:SalesforceConnectorError stringResponse = salesforceEP -> createRecord(sf:ACCOUNT, accountRecord);
     match stringResponse {
         string id => {
@@ -196,7 +195,7 @@ function testGetQueryResult () {
             if (jsonRes.nextRecordsUrl != null) {
                 io:println("\n-------------------------- getNextQueryResult () -------------------------");
 
-                while (jsonRes.nextRecordsUrl == null) {
+                while (jsonRes.nextRecordsUrl != null) {
                     io:println("\nFound new query result set!");
                     response = salesforceEP -> getNextQueryResult(jsonRes.nextRecordsUrl.toString());
                     match response {
@@ -204,6 +203,8 @@ function testGetQueryResult () {
                             test:assertNotEquals(jsonNextRes["totalSize"], null);
                             test:assertNotEquals(jsonNextRes["done"], null);
                             test:assertNotEquals(jsonNextRes["records"], null);
+
+                            jsonRes = jsonNextRes;
                         }
                         sf:SalesforceConnectorError err => {
                             test:assertFail(msg = err.messages[0]);
@@ -428,11 +429,30 @@ function testGetFieldValuesFromSObjectRecord () {
     }
 }
 
+@test:Config
+function testCreateRecordWithExternalId () {
+    io:println("\n----------------------- CreateRecordWithExternalId ()---------------");
+
+    externalID = util:uuid();
+    json accountExIdRecord = {Name:"Sample Org", BillingCity:"CA", SF_ExternalID__c:externalID};
+
+    string|sf:SalesforceConnectorError stringResponse = salesforceEP -> createRecord(sf:ACCOUNT, accountExIdRecord);
+    match stringResponse {
+        string id => {
+            test:assertNotEquals(id, "", msg = "Found empty response!");
+        }
+        sf:SalesforceConnectorError err => {
+            test:assertFail(msg = err.messages[0]);
+        }
+    }
+}
+
 @test:Config {
-    dependsOn:["testCreateRecord"]
+    dependsOn:["testCreateRecordWithExternalId"]
 }
 function testGetRecordByExternalId () {
     io:println("\n--------------------- getRecordByExternalId() ------------------------");
+
     response = salesforceEP -> getRecordByExternalId(sf:ACCOUNT, "SF_ExternalID__c", externalID);
     match response {
         json jsonRes => {
@@ -461,28 +481,6 @@ function testUpsertSObjectByExternalId () {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Expects true on success");
-        }
-        sf:SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
-        }
-    }
-}
-
-
-@test:Config {
-    dependsOn:["testCreateRecord"]
-}
-function testGetFieldValuesFromExternalObjectRecord () {
-    io:println("\n---------------- getFieldValuesFromExternalObjectRecord -------------------");
-    response = salesforceEP -> getFieldValuesFromExternalObjectRecord("SampleExternalObj", "12345", "Name");
-    match response {
-        json jsonRes => {
-            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-            try {
-                test:assertNotEquals(jsonRes["Name"], null, msg = "Found null JSON response!");
-            } catch (error e) {
-                test:assertFail(msg = "A required key was missing in response");
-            }
         }
         sf:SalesforceConnectorError err => {
             test:assertFail(msg = err.messages[0]);

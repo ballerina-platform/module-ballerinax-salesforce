@@ -18,7 +18,6 @@
 
 package salesforce;
 
-import ballerina/io;
 import wso2/oauth2;
 
 @Description {value:"Represents Salesforce Configuration struct that contains OAuth2 Configuration"}
@@ -39,16 +38,21 @@ public struct SalesforceEndpoint {
 
 @Description {value:"Initialize Salesforce Endpoint"}
 public function <SalesforceEndpoint ep> init (SalesforceConfiguration salesforceConfig) {
-    oauth2:OAuth2Configuration oAuth2Configuration = salesforceConfig.oauth2Config;
-    oauth2:OAuth2Connector oAuth2Connector = {accessToken:oAuth2Configuration.accessToken,
-                                          refreshToken:oAuth2Configuration.refreshToken,
-                                          clientId:oAuth2Configuration.clientId,
-                                          clientSecret:oAuth2Configuration.clientSecret,
-                                          refreshTokenEP:oAuth2Configuration.refreshTokenEP,
-                                          refreshTokenPath:oAuth2Configuration.refreshTokenPath,
-                                          useUriParams:oAuth2Configuration.useUriParams,
-                                          httpClient:http:createHttpClient(oAuth2Configuration.baseUrl, oAuth2Configuration.clientConfig)};
-    ep.salesforceConnector = {oauth2:oAuth2Connector};
+    endpoint oauth2:OAuth2Endpoint oauth2Endpoint {
+        baseUrl:salesforceConfig.oauth2Config.baseUrl,
+        accessToken:salesforceConfig.oauth2Config.accessToken,
+        clientConfig:{},
+        refreshToken:salesforceConfig.oauth2Config.refreshToken,
+        clientId:salesforceConfig.oauth2Config.clientId,
+        clientSecret:salesforceConfig.oauth2Config.clientSecret,
+        refreshTokenEP:salesforceConfig.oauth2Config.refreshTokenEP,
+        refreshTokenPath:salesforceConfig.oauth2Config.refreshTokenPath,
+        useUriParams:true
+    };
+
+    ep.salesforceConnector = {
+                                 oauth2EP:oauth2Endpoint
+                             };
 }
 
 @Description {value:"Register Endpoint"}
