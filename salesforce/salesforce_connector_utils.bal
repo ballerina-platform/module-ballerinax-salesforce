@@ -78,8 +78,7 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
 @Description {value:"Function to check errors and set errors to relevant error types"}
 @Param {value:"response: http response or http connector error with network related errors"}
 @Param {value:"isRequiredJsonPayload: gets true if response should contain a Json body, else false"}
-@Return {value:"Json Payload"}
-@Return {value:"Error occured"}
+@Return {value:"Json Payload or SalesforceConnectorError"}
 function checkAndSetErrors (http:Response|http:HttpConnectorError response, boolean expectPayload)
 returns json|SalesforceConnectorError {
     SalesforceConnectorError connectorError = {};

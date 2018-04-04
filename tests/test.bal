@@ -851,8 +851,8 @@ function setConfParams (string|null confParam) returns string {
             return param;
         }
     null => {
-    io:println("Empty value!");
-    return "";
+        io:println("Empty value!");
+            return "";
         }
     }
 }
