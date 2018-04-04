@@ -20,7 +20,7 @@ package salesforce;
 
 import ballerina/log;
 import ballerina/mime;
-import ballerina/net.http;
+import ballerina/http;
 import ballerina/net.uri;
 
 @Description {value:"Function to set resource URl"}

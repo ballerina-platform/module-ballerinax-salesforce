@@ -18,7 +18,7 @@
 
 package salesforce;
 
-import ballerina/net.http;
+import ballerina/http;
 import wso2/oauth2;
 
 @Description {value:"Salesforce Client Connector"}
@@ -371,7 +371,7 @@ returns json|SalesforceConnectorError {
     request.setJsonPayload(record);
     try {
         http:Response response =? oauth2EP -> patch(path, request);
-        json|SalesforceConnectorError result = checkAndSetErrors(response, true);
+        json|SalesforceConnectorError result = checkAndSetErrors(response, false);
         match result {
             json jsonResult => {
                 payload = jsonResult;
