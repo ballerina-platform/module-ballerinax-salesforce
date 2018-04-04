@@ -477,7 +477,9 @@ function testGetRecordByExternalId () {
 function testUpsertSObjectByExternalId () {
     io:println("\n--------------------- upsertSObjectByExternalId() ------------------------");
     json upsertRecord = {Name:"Sample Org", BillingCity:"Jaffna, Colombo 3"};
-    json|sf:SalesforceConnectorError response = salesforceEP -> upsertSObjectByExternalId(sf:ACCOUNT, "SF_ExternalID__c", externalID, upsertRecord);
+    json|sf:SalesforceConnectorError response = salesforceEP -> upsertSObjectByExternalId(sf:ACCOUNT,
+                                                                                          "SF_ExternalID__c",
+                                                                                          externalID, upsertRecord);
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Expects true on success");

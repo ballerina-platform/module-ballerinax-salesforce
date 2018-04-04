@@ -288,7 +288,8 @@ returns boolean|SalesforceConnectorError {
 @Param {value:"id: The row ID of the required record"}
 @Param {value:"fields: The comma separated set of required fields"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
+public function <SalesforceConnector sfConnector> getFieldValuesFromSObjectRecord (string sObjectName, string id,
+                                                                                   string fields)
 returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     return sfConnector.getRecord(prefixPath + "?fields=" + fields);
@@ -299,7 +300,8 @@ returns json|SalesforceConnectorError {
 @Param {value:"id: The row ID of the required record"}
 @Param {value:"fields: The comma separated set of required fields"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getFieldValuesFromExternalObjectRecord (string externalObjectName, string id, string fields)
+public function <SalesforceConnector sfConnector> getFieldValuesFromExternalObjectRecord (string externalObjectName,
+                                                                                          string id, string fields)
 returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
     return sfConnector.getRecord(prefixPath + "?fields=" + fields);
@@ -338,8 +340,9 @@ returns json|SalesforceConnectorError {
 @Param {value:"fieldName: The external field name"}
 @Param {value:"fieldValue: The external field value"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getRecordByExternalId (string sObjectName, string fieldName, string fieldValue)
-returns json|SalesforceConnectorError {
+public function <SalesforceConnector sfConnector> getRecordByExternalId (string sObjectName, string fieldName,
+                                                                         string fieldValue)
+                                                                        returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, fieldName, fieldValue]);
     return sfConnector.getRecord(path);
 }
@@ -351,13 +354,14 @@ returns json|SalesforceConnectorError {
 @Param {value:"fieldValue: The external field value"}
 @Param {value:"record: json payload containing record data"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> upsertSObjectByExternalId (string sObjectName, string fieldId, string fieldValue, json record)
-returns json|SalesforceConnectorError {
+public function <SalesforceConnector sfConnector> upsertSObjectByExternalId (string sObjectName, string fieldId,
+                                                                             string fieldIdValue, json record)
+                                                                            returns json|SalesforceConnectorError {
     endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
 
     http:Request request = {};
 
-    string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
+    string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldIdValue}}`;
     request.setJsonPayload(record);
 
     http:Response|http:HttpConnectorError response = oauth2EP -> patch(path, request);
@@ -374,23 +378,27 @@ returns json|SalesforceConnectorError {
 
 // ============================ Get updated and deleted records ===================== //
 
-@Description {value:"Retrieves the list of individual records that have been deleted within the given timespan for the specified object"}
+@Description {value:"Retrieves the list of individual records that have been deleted within the given timespan
+                    for the specified object"}
 @Param {value:"sobjectName: The relevant sobject name"}
 @Param {value:"startTime: The start time of the time span"}
 @Param {value:"endTime: The end time of the time span"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getDeletedRecords (string sObjectName, string startTime, string endTime)
+public function <SalesforceConnector sfConnector> getDeletedRecords (string sObjectName, string startTime,
+                                                                     string endTime)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED], [START, END], [startTime, endTime]);
     return sfConnector.getRecord(path);
 }
 
-@Description {value:"Retrieves the list of individual records that have been updated (added or changed) within the given timespan for the specified object"}
+@Description {value:"Retrieves the list of individual records that have been updated (added or changed)
+                    within the given timespan for the specified object"}
 @Param {value:"sobjectName: The relevant sobject name"}
 @Param {value:"startTime: The start time of the time span"}
 @Param {value:"endTime: The end time of the time span"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getUpdatedRecords (string sObjectName, string startTime, string endTime)
+public function <SalesforceConnector sfConnector> getUpdatedRecords (string sObjectName, string startTime,
+                                                                     string endTime)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED], [START, END], [startTime, endTime]);
     return sfConnector.getRecord(path);
@@ -398,7 +406,7 @@ returns json|SalesforceConnectorError {
 
 // ============================ Describe SObjects available and their fields/metadata ===================== //
 
-@Description {value:"Lists the available objects and their metadata for your organization and available to the logged-in user"}
+@Description {value:"Lists the available objects and their metadata for organization & available to the logged-in user"}
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> describeAvailableObjects () returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
