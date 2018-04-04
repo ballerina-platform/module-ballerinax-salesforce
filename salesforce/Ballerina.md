@@ -20,7 +20,7 @@ Visit `test.bal` file to find the way of creating Salesforce endpoint.
 #### Salesforce struct
 ```ballerina
 public struct SalesforceConnector {
-    oauth2:OAuth2Connector oauth2;
+    oauth2:OAuth2Endpoint oauth2EP;
 }
 ```
 #### Salesforce Endpoint
@@ -34,19 +34,33 @@ public struct SalesforceEndpoint {
 #### init() function
 ```ballerina
 public function <SalesforceEndpoint ep> init (SalesforceConfiguration salesforceConfig) {
-    oauth2:OAuth2Configuration oAuth2Configuration = salesforceConfig.oauth2Config;
-    oauth2:OAuth2Connector oAuth2Connector = {accessToken:oAuth2Configuration.accessToken,
-                                          refreshToken:oAuth2Configuration.refreshToken,
-                                          clientId:oAuth2Configuration.clientId,
-                                          clientSecret:oAuth2Configuration.clientSecret,
-                                          refreshTokenEP:oAuth2Configuration.refreshTokenEP,
-                                          refreshTokenPath:oAuth2Configuration.refreshTokenPath,
-                                          useUriParams:oAuth2Configuration.useUriParams,
-                                          httpClient:http:createHttpClient(oAuth2Configuration.baseUrl, oAuth2Configuration.clientConfig)};
-    ep.salesforceConnector = {oauth2:oAuth2Connector};
+    endpoint oauth2:OAuth2Endpoint oauth2Endpoint {
+        baseUrl:salesforceConfig.oauth2Config.baseUrl,
+        accessToken:salesforceConfig.oauth2Config.accessToken,
+        clientConfig:{},
+        refreshToken:salesforceConfig.oauth2Config.refreshToken,
+        clientId:salesforceConfig.oauth2Config.clientId,
+        clientSecret:salesforceConfig.oauth2Config.clientSecret,
+        refreshTokenEP:salesforceConfig.oauth2Config.refreshTokenEP,
+        refreshTokenPath:salesforceConfig.oauth2Config.refreshTokenPath,
+        useUriParams:true
+    };
+
+    ep.salesforceConnector = {
+                                 oauth2EP:oauth2Endpoint
+                             };
 }
 ```
 #### Running the tests
-Go to `ballerina.conf` file in `package-salesforce`, replace  Endpoint, Client Id, Client Secret, Access Token, Refresh Token, Refresh Token Endpoint and Refresh Token Path string values with your data. 
+Create `ballerina.conf` file in `package-salesforce`, with following keys:
+* ENDPOINT
+* ACCESS_TOKEN
+* CLIENT_ID
+* CLIENT_SECRET
+* REFRESH_TOKEN
+* REFRESH_TOKEN_ENDPOINT
+* REFRESH_TOKEN_PATH
+
+Assign relevant string values generated for Salesforce app. 
 
 Go inside `package-salesforce` using terminal and run test.bal file using following command `ballerina test tests`.

@@ -30,15 +30,3 @@ public struct SalesforceConnectorError {
    error[] errors;
    SalesforceError[] salesforceErrors;
 }
-
-public struct QueryResult {
-   boolean done;
-   int totalSize;
-   json[] records;
-   string nextRecordsUrl;
-}
-
-public struct SearchResult {
-   json attributes;
-   string Id;
-}

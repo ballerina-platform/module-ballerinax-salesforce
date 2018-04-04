@@ -18,7 +18,7 @@
 
 package salesforce;
 
-import ballerina/net.http;
+import ballerina/http;
 import wso2/oauth2;
 
 @Description {value:"Salesforce Client Connector"}

@@ -19,7 +19,7 @@
 package salesforce;
 
 import ballerina/log;
-import ballerina/net.http;
+import ballerina/http;
 import ballerina/net.uri;
 import ballerina/mime;
 import ballerina/io;
