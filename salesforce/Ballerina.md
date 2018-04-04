@@ -33,11 +33,11 @@ In order to use the Salesforce connector, first you need to create a SalesforceC
 
 ##### Example
  * Request
- 
-``
+
+ ```ballerina
  import wso2/salesforce as sf;
  import ballerina/io;
-
+ 
     public function main (string[] args) {
         endpoint sf:SalesforceEndpoint salesforceEP {
             oauth2Config:{
@@ -59,10 +59,10 @@ In order to use the Salesforce connector, first you need to create a SalesforceC
                 }
         
                 sf:SalesforceConnectorError err => {
-                    test:assertFail(msg = err.messages[0]);
+                    io:println(err);
                 }
             }
-``
+```
 * Response
 
 JSON response or SalesforceConnectorError struct
