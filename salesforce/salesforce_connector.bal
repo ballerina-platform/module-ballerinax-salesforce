@@ -21,35 +21,116 @@ package salesforce;
 import ballerina/http;
 import wso2/oauth2;
 
-@Description {value:"Salesforce Client Connector"}
-public struct SalesforceConnector {
-    oauth2:OAuth2Endpoint oauth2EP;
-}
+public type SalesforceConnector object {
+    private {
+        oauth2:OAuth2Client oauth2Endpoint;
+    }
+
+    new (oauth2:OAuth2ClientEndpointConfig oauth2Config) {
+        endpoint oauth2:OAuth2Client oauth2EP {
+            baseUrl:oauth2Config.baseUrl,
+            accessToken:oauth2Config.accessToken,
+            clientConfig:{},
+            refreshToken:oauth2Config.refreshToken,
+            clientId:oauth2Config.clientId,
+            clientSecret:oauth2Config.clientSecret,
+            refreshTokenEP:oauth2Config.refreshTokenEP,
+            refreshTokenPath:oauth2Config.refreshTokenPath,
+            useUriParams:true
+        };
+        oauth2Endpoint = oauth2EP;
+    }
+
+    public function getAvailableApiVersions () returns (json|SalesforceConnectorError);
+    public function getResourcesByApiVersion (string apiVersion) returns (json|SalesforceConnectorError);
+    public function getOrganizationLimits () returns (json|SalesforceConnectorError);
+    // Query
+    public function getQueryResult (string receivedQuery) returns (json|SalesforceConnectorError);
+    public function getNextQueryResult (string nextRecordsUrl) returns (json|SalesforceConnectorError);
+    public function getAllQueries (string queryString) returns (json|SalesforceConnectorError);
+    public function explainQueryOrReportOrListview (string queryReportOrListview) returns (json|SalesforceConnectorError);
+    //Search
+    public function searchSOSLString (string searchString) returns (json|SalesforceConnectorError);
+    //Account
+    public function getAccountById (string accountId) returns (json|SalesforceConnectorError);
+    public function createAccount (json accountRecord) returns (string|SalesforceConnectorError);
+    public function deleteAccount (string accountId) returns (boolean|SalesforceConnectorError);
+    public function updateAccount (string accountId, json accountRecord) returns (boolean|SalesforceConnectorError);
+    //Lead
+    public function getLeadById (string leadId) returns (json|SalesforceConnectorError);
+    public function createLead (json leadRecord) returns (string|SalesforceConnectorError);
+    public function deleteLead (string leadId) returns (boolean|SalesforceConnectorError);
+    public function updateLead (string leadId, json leadRecord) returns (boolean|SalesforceConnectorError);
+    //Contact
+    public function getContactById (string contactId) returns (json|SalesforceConnectorError);
+    public function createContact (json contactRecord) returns (string|SalesforceConnectorError);
+    public function deleteContact (json contactId) returns (boolean|SalesforceConnectorError);
+    public function updateContact (string contactId, json contactRecord) returns (boolean|SalesforceConnectorError);
+    //Opportunity
+    public function getOpportunityById (string opportunityId) returns (json|SalesforceConnectorError);
+    public function createOpportunity (json opportunityRecord) returns (string|SalesforceConnectorError);
+    public function deleteOpportunity (string opportunityId) returns (boolean|SalesforceConnectorError);
+    public function updateOpportunity (string opportunityId, json opportunityRecord) returns (boolean|SalesforceConnectorError);
+    //Product
+    public function getProductById (string productId) returns (json|SalesforceConnectorError);
+    public function createProduct (json productRecord) returns (string|SalesforceConnectorError);
+    public function deleteProduct (string productId) returns (boolean|SalesforceConnectorError);
+    public function updateProduct (string productId, json productRecord) returns (boolean|SalesforceConnectorError);
+
+    //Records
+    public function getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
+                    returns (json|SalesforceConnectorError);
+    public function getFieldValuesFromExternalObjectRecord (string externalObjectName, string id,
+                                                            string fields)
+                    returns (json|SalesforceConnectorError);
+    public function createMultipleRecords (string sObjectName, json records)
+                    returns (json|SalesforceConnectorError);
+    public function getRecordByExternalId (string sObjectName, string fieldName, string fieldValue)
+                    returns (json|SalesforceConnectorError);
+    public function upsertSObjectByExternalId (string sObjectName, string fieldId,
+                                               string fieldValue, json record)
+                    returns (json|SalesforceConnectorError);
+    public function getDeletedRecords (string sObjectName, string startTime, string endTime)
+                    returns (json|SalesforceConnectorError);
+    public function getUpdatedRecords (string sObjectName, string startTime, string endTime)
+                    returns (json|SalesforceConnectorError);
+
+    //Describe SObjects
+    public function describeAvailableObjects () returns (json|SalesforceConnectorError);
+    public function getSObjectBasicInfo (string sobjectName) returns (json|SalesforceConnectorError);
+    public function describeSObject (string sObjectName) returns (json|SalesforceConnectorError);
+    public function sObjectPlatformAction () returns (json|SalesforceConnectorError);
+
+    //Basic CURD
+    public function getRecord (string path) returns (json|SalesforceConnectorError);
+    public function createRecord (string sObjectName, json record) returns (string|SalesforceConnectorError);
+    public function updateRecord (string sObjectName, string id, json record)
+                    returns (boolean|SalesforceConnectorError);
+    public function deleteRecord (string sObjectName, string id) returns (boolean|SalesforceConnectorError);
+};
 
 @Description {value:"Lists summary details about each REST API version available"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getAvailableApiVersions ()
-returns json|SalesforceConnectorError {
+public function SalesforceConnector::getAvailableApiVersions () returns json|SalesforceConnectorError {
     string path = prepareUrl([BASE_PATH]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Lists the resources available for the specified API version"}
 @Param {value:"apiVersion: relevant API version for the organisation"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getResourcesByApiVersion (string apiVersion)
+public function SalesforceConnector::getResourcesByApiVersion (string apiVersion)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([BASE_PATH, apiVersion]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
-
 
 @Description {value:"Lists limits information for your organization"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getOrganizationLimits ()
+public function SalesforceConnector::getOrganizationLimits ()
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, LIMITS]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 //=============================== Query =======================================//
@@ -57,36 +138,36 @@ returns json|SalesforceConnectorError {
 @Description {value:"Executes the specified SOQL query"}
 @Param {value:"query: The request SOQL query"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getQueryResult (string receivedQuery)
+public function SalesforceConnector::getQueryResult (string receivedQuery)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"If the query results are too large, retrieve the next batch of results using nextRecordUrl"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getNextQueryResult (string nextRecordsUrl)
+public function SalesforceConnector::getNextQueryResult (string nextRecordsUrl)
 returns json|SalesforceConnectorError {
-    return sfConnector.getRecord(nextRecordsUrl);
+    return getRecord(nextRecordsUrl);
 }
 
 @Description {value:"Returns records that have been deleted because of a merge or delete, archived Task
      and Event records"}
 @Param {value:"queryString: The request SOQL query"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getAllQueries (string queryString)
+public function SalesforceConnector::getAllQueries (string queryString)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERYALL], [Q], [queryString]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Get feedback on how Salesforce will execute the query, report, or list view based on performance"}
 @Param {value:"queryReportOrListview: The parameter to get feedback on"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> explainQueryOrReportOrListview (string queryReportOrListview)
+public function SalesforceConnector::explainQueryOrReportOrListview (string queryReportOrListview)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [EXPLAIN], [queryReportOrListview]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 // ================================= Search ================================ //
@@ -94,10 +175,10 @@ returns json|SalesforceConnectorError {
 @Description {value:"Executes the specified SOSL search"}
 @Param {value:"searchString: The request SOSL string"}
 @Return {value:"Json result  or Error occured."}
-public function <SalesforceConnector sfConnector> searchSOSLString (string searchString)
+public function SalesforceConnector::searchSOSLString (string searchString)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
@@ -105,35 +186,35 @@ returns json|SalesforceConnectorError {
 @Description {value:"Accesses Account SObject records based on the Account object ID"}
 @Param {value:"accountId: The relevant account's id"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getAccountById (string accountId)
+public function SalesforceConnector::getAccountById (string accountId)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, ACCOUNT, accountId]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Creates new Account object record"}
 @Param {value:"accountRecord: json payload containing Account record data"}
 @Return {value:"ID of the account or Error occured."}
-public function <SalesforceConnector sfConnector> createAccount (json accountRecord)
+public function SalesforceConnector::createAccount (json accountRecord)
 returns string|SalesforceConnectorError {
-    return sfConnector.createRecord(ACCOUNT, accountRecord);
+    return createRecord(ACCOUNT, accountRecord);
 }
 
 @Description {value:"Updates existing Account object record"}
 @Param {value:"accountId: Specified account id"}
 @Param {value:"accountRecord: json payload containing Account record data"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> updateAccount (string accountId, json accountRecord)
+public function SalesforceConnector::updateAccount (string accountId, json accountRecord)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.updateRecord(ACCOUNT, accountId, accountRecord);
+    return updateRecord(ACCOUNT, accountId, accountRecord);
 }
 
 @Description {value:"Deletes existing Account's records"}
 @Param {value:"accountId: The id of the relevant Account record supposed to be deleted"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> deleteAccount (string accountId)
+public function SalesforceConnector::deleteAccount (string accountId)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.deleteRecord(ACCOUNT, accountId);
+    return deleteRecord(ACCOUNT, accountId);
 }
 
 // ============================ LEAD SObject: get, create, update, delete ===================== //
@@ -141,18 +222,18 @@ returns boolean|SalesforceConnectorError {
 @Description {value:"Accesses Lead SObject records based on the Lead object ID"}
 @Param {value:"leadId: The relevant lead's id"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getLeadById (string leadId)
+public function SalesforceConnector::getLeadById (string leadId)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, LEAD, leadId]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Creates new Lead object record"}
 @Param {value:"leadRecord: json payload containing Lead record data"}
 @Return {value:"ID of the created Lead or Error occured."}
-public function <SalesforceConnector sfConnector> createLead (json leadRecord)
+public function SalesforceConnector::createLead (json leadRecord)
 returns string|SalesforceConnectorError {
-    return sfConnector.createRecord(LEAD, leadRecord);
+    return createRecord(LEAD, leadRecord);
 
 }
 
@@ -160,17 +241,17 @@ returns string|SalesforceConnectorError {
 @Param {value:"leadId: Specified lead id"}
 @Param {value:"leadRecord: json payload containing Lead record data"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> updateLead (string leadId, json leadRecord)
+public function SalesforceConnector::updateLead (string leadId, json leadRecord)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.updateRecord(LEAD, leadId, leadRecord);
+    return updateRecord(LEAD, leadId, leadRecord);
 }
 
 @Description {value:"Deletes existing Lead's records"}
 @Param {value:"leadId: The id of the relevant Lead record supposed to be deleted"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> deleteLead (string leadId)
+public function SalesforceConnector::deleteLead (string leadId)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.deleteRecord(LEAD, leadId);
+    return deleteRecord(LEAD, leadId);
 }
 
 // ============================ CONTACTS SObject: get, create, update, delete ===================== //
@@ -178,35 +259,35 @@ returns boolean|SalesforceConnectorError {
 @Description {value:"Accesses Contacts SObject records based on the Contact object ID"}
 @Param {value:"contactId: The relevant contact's id"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getContactById (string contactId)
+public function SalesforceConnector::getContactById (string contactId)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, CONTACT, contactId]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Creates new Contact object record"}
 @Param {value:"contactRecord: json payload containing Contact record data"}
 @Return {value:"ID of the created Contact or Error occured."}
-public function <SalesforceConnector sfConnector> createContact (json contactRecord)
+public function SalesforceConnector::createContact (json contactRecord)
 returns string|SalesforceConnectorError {
-    return sfConnector.createRecord(CONTACT, contactRecord);
+    return createRecord(CONTACT, contactRecord);
 }
 
 @Description {value:"Updates existing Contact object record"}
 @Param {value:"contactId: Specified contact id"}
 @Param {value:"contactRecord: json payload containing contact record data"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> updateContact (string contactId, json contactRecord)
+public function SalesforceConnector::updateContact (string contactId, json contactRecord)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.updateRecord(CONTACT, contactId, contactRecord);
+    return updateRecord(CONTACT, contactId, contactRecord);
 }
 
 @Description {value:"Deletes existing Contact's records"}
 @Param {value:"contactId: The id of the relevant Contact record supposed to be deleted"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> deleteContact (string contactId)
+public function SalesforceConnector::deleteContact (string contactID)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.deleteRecord(CONTACT, contactId);
+    return deleteRecord(CONTACT, contactID);
 }
 
 // ============================ OPPORTUNITIES SObject: get, create, update, delete ===================== //
@@ -214,35 +295,35 @@ returns boolean|SalesforceConnectorError {
 @Description {value:"Accesses Opportunities SObject records based on the Opportunity object ID"}
 @Param {value:"opportunityId: The relevant opportunity's id"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getOpportunityById (string opportunityId)
+public function SalesforceConnector::getOpportunityById (string opportunityId)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, OPPORTUNITY, opportunityId]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Creates new Opportunity object record"}
 @Param {value:"opportunityRecord: json payload containing Opportunity record data"}
 @Return {value:"ID of the create Opportunity or Error occured."}
-public function <SalesforceConnector sfConnector> createOpportunity (json opportunityRecord)
+public function SalesforceConnector::createOpportunity (json opportunityRecord)
 returns string|SalesforceConnectorError {
-    return sfConnector.createRecord(OPPORTUNITY, opportunityRecord);
+    return createRecord(OPPORTUNITY, opportunityRecord);
 }
 
 @Description {value:"Updates existing Opportunity object record"}
 @Param {value:"opportunityId: Specified opportunity id"}
 @Param {value:"opportunityRecord: json payload containing Opportunity record data"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> updateOpportunity (string opportunityId, json opportunityRecord)
+public function SalesforceConnector::updateOpportunity (string opportunityId, json opportunityRecord)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
+    return updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
 }
 
 @Description {value:"Deletes existing Opportunity's records"}
 @Param {value:"opportunityId: The id of the relevant Opportunity record supposed to be deleted"}
 @Return {value:"boolean:true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> deleteOpportunity (string opportunityId)
+public function SalesforceConnector::deleteOpportunity (string opportunityId)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.deleteRecord(OPPORTUNITY, opportunityId);
+    return deleteRecord(OPPORTUNITY, opportunityId);
 }
 
 // ============================ PRODUCTS SObject: get, create, update, delete ===================== //
@@ -250,35 +331,35 @@ returns boolean|SalesforceConnectorError {
 @Description {value:"Accesses Products SObject records based on the Product object ID"}
 @Param {value:"productId: The relevant product's id"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getProductById (string productId)
+public function SalesforceConnector::getProductById (string productId)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PRODUCT, productId]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Creates new Product object record"}
 @Param {value:"productRecord: json payload containing Product record data"}
 @Return {value:"ID of the created Product or Error occured."}
-public function <SalesforceConnector sfConnector> createProduct (json productRecord)
+public function SalesforceConnector::createProduct (json productRecord)
 returns string|SalesforceConnectorError {
-    return sfConnector.createRecord(PRODUCT, productRecord);
+    return createRecord(PRODUCT, productRecord);
 }
 
 @Description {value:"Updates existing Product object record"}
 @Param {value:"productId: Specified product id"}
 @Param {value:"productRecord: json payload containing product record data"}
 @Return {value:"boolean: true if success, false otherwise"}
-public function <SalesforceConnector sfConnector> updateProduct (string productId, json productRecord)
+public function SalesforceConnector::updateProduct (string productId, json productRecord)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.updateRecord(PRODUCT, productId, productRecord);
+    return updateRecord(PRODUCT, productId, productRecord);
 }
 
 @Description {value:"Deletes existing product's records"}
 @Param {value:"productId: The id of the relevant Product record supposed to be deleted"}
 @Return {value:"boolen: true if success, false otherwise or Error occured."}
-public function <SalesforceConnector sfConnector> deleteProduct (string productId)
+public function SalesforceConnector::deleteProduct (string productId)
 returns boolean|SalesforceConnectorError {
-    return sfConnector.deleteRecord(PRODUCT, productId);
+    return deleteRecord(PRODUCT, productId);
 }
 
 //===========================================================================================================//
@@ -288,10 +369,10 @@ returns boolean|SalesforceConnectorError {
 @Param {value:"id: The row ID of the required record"}
 @Param {value:"fields: The comma separated set of required fields"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
+public function SalesforceConnector::getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-    return sfConnector.getRecord(prefixPath + "?fields=" + fields);
+    return getRecord(prefixPath + "?fields=" + fields);
 }
 
 @Description {value:"Retrieve field values from an external object record using Salesforce ID or External ID"}
@@ -299,10 +380,10 @@ returns json|SalesforceConnectorError {
 @Param {value:"id: The row ID of the required record"}
 @Param {value:"fields: The comma separated set of required fields"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getFieldValuesFromExternalObjectRecord (string externalObjectName, string id, string fields)
+public function SalesforceConnector::getFieldValuesFromExternalObjectRecord (string externalObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
-    return sfConnector.getRecord(prefixPath + "?fields=" + fields);
+    return getRecord(prefixPath + "?fields=" + fields);
 
 }
 
@@ -310,16 +391,18 @@ returns json|SalesforceConnectorError {
 @Param {value:"sObjectName: The relevant sobject name"}
 @Param {value:"payload: json payload containing record data"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> createMultipleRecords (string sObjectName, json records)
+public function SalesforceConnector::createMultipleRecords (string sObjectName, json records)
 returns json|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
+    endpoint oauth2:OAuth2Client oauth2EP = oauth2EP;
 
     json payload;
-    http:Request request = {};
+    http:Request request = new;
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
     request.setJsonPayload(records);
     try {
-        http:Response response =? oauth2EP -> post(path, request);
+        var res = oauth2EP -> post(path, request);
+        http:Response response = check res;
+
         json|SalesforceConnectorError result = checkAndSetErrors(response, true);
         match result {
             json jsonResult => {
@@ -348,10 +431,10 @@ returns json|SalesforceConnectorError {
 @Param {value:"fieldName: The external field name"}
 @Param {value:"fieldValue: The external field value"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getRecordByExternalId (string sObjectName, string fieldName, string fieldValue)
+public function SalesforceConnector::getRecordByExternalId (string sObjectName, string fieldName, string fieldValue)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, fieldName, fieldValue]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Creates new records or updates existing records (upserts records) based on the value of a
@@ -361,16 +444,17 @@ returns json|SalesforceConnectorError {
 @Param {value:"fieldValue: The external field value"}
 @Param {value:"record: json payload containing record data"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> upsertSObjectByExternalId (string sObjectName, string fieldId, string fieldValue, json record)
+public function SalesforceConnector::upsertSObjectByExternalId (string sObjectName, string fieldId, string fieldValue, json record)
 returns json|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
+    endpoint oauth2:OAuth2Client oauth2EP = oauth2EP;
 
     json payload;
-    http:Request request = {};
+    http:Request request = new;
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     request.setJsonPayload(record);
     try {
-        http:Response response =? oauth2EP -> patch(path, request);
+        var res = oauth2EP -> patch(path, request);
+        http:Response response = check res;
         json|SalesforceConnectorError result = checkAndSetErrors(response, false);
         match result {
             json jsonResult => {
@@ -399,10 +483,10 @@ returns json|SalesforceConnectorError {
 @Param {value:"startTime: The start time of the time span"}
 @Param {value:"endTime: The end time of the time span"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getDeletedRecords (string sObjectName, string startTime, string endTime)
+public function SalesforceConnector::getDeletedRecords (string sObjectName, string startTime, string endTime)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED], [START, END], [startTime, endTime]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Retrieves the list of individual records that have been updated (added or changed) within the given timespan for the specified object"}
@@ -410,61 +494,62 @@ returns json|SalesforceConnectorError {
 @Param {value:"startTime: The start time of the time span"}
 @Param {value:"endTime: The end time of the time span"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getUpdatedRecords (string sObjectName, string startTime, string endTime)
+public function SalesforceConnector::getUpdatedRecords (string sObjectName, string startTime, string endTime)
 returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED], [START, END], [startTime, endTime]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 // ============================ Describe SObjects available and their fields/metadata ===================== //
 
 @Description {value:"Lists the available objects and their metadata for your organization and available to the logged-in user"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> describeAvailableObjects () returns json|SalesforceConnectorError {
+public function SalesforceConnector::describeAvailableObjects () returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Describes the individual metadata for the specified object"}
 @Param {value:"sobjectName: The relevant sobject name"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> getSObjectBasicInfo (string sobjectName)
+public function SalesforceConnector::getSObjectBasicInfo (string sobjectName)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Completely describes the individual metadata at all levels for the specified object.
                         Can be used to retrieve the fields, URLs, and child relationships"}
 @Param {value:"sobjectName: The relevant sobject name"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> describeSObject (string sObjectName)
+public function SalesforceConnector::describeSObject (string sObjectName)
 returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
 @Description {value:"Query for actions displayed in the UI, given a user, a context, device format, and a record ID"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> sObjectPlatformAction () returns json|SalesforceConnectorError {
+public function SalesforceConnector::sObjectPlatformAction () returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
-    return sfConnector.getRecord(path);
+    return getRecord(path);
 }
 
-//==============================================================================//
 //============================ utility functions================================//
 
 @Description {value:"Accesses records based on the specified object ID, can be used with external objects "}
 @Param {value:"path: relevant resource URl"}
 @Return {value:"Response or Error occured."}
-public function <SalesforceConnector sfConnector> getRecord (string path)
+public function SalesforceConnector::getRecord (string path)
 returns json|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
+    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
 
     json payload;
-    http:Request request = {};
+    http:Request request = new;
     try {
-        http:Response response =? oauth2EP -> get(path, request);
+        var res = oauth2EP -> get(path, request);
+        http:Response response = check res;
+
         json|SalesforceConnectorError result = checkAndSetErrors(response, true);
         match result {
             json jsonResult => {
@@ -490,35 +575,44 @@ returns json|SalesforceConnectorError {
 @Param {value:"sObjectName: relevant salesforce object name"}
 @Param {value:"record: json record used to create object record"}
 @Return {value:"Response or Error occured."}
-public function <SalesforceConnector sfConnector> createRecord (string sObjectName, json record)
+public function SalesforceConnector::createRecord (string sObjectName, json record)
 returns string|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
+    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
 
     string id;
-    http:Request request = {};
+    http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     request.setJsonPayload(record);
     try {
-        http:Response response =? oauth2EP -> post(path, request);
+        var res = oauth2EP -> post(path, request);
+        http:Response response = check res;
+
         json|SalesforceConnectorError result = checkAndSetErrors(response, true);
         match result {
             json jsonResult => {
-                id = jsonResult.id.toString();
-            }
-            SalesforceConnectorError err => {
-                return err;
+                var responseId = jsonResult.id.toString();
+                match responseId {
+                    string stringId => {
+                        id = stringId;
+                    }
+                    () => {
+                id = "";
             }
         }
-    } catch (http:HttpConnectorError httpError) {
-        SalesforceConnectorError connectorError =
-        {
-            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
-            errors:httpError.cause
-        };
-        return connectorError;
     }
-
-    return id;
+    SalesforceConnectorError err => {
+    return err;
+}
+}
+} catch (http:HttpConnectorError httpError) {
+SalesforceConnectorError connectorError =
+{
+    messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
+    errors:httpError.cause
+};
+return connectorError;
+       }
+       return id;
 }
 
 @Description {value:"Update records based on relevant object id"}
@@ -526,15 +620,17 @@ returns string|SalesforceConnectorError {
 @Param {value:"id: relevant salesforce object id"}
 @Param {value:"record: json record used to create object record"}
 @Return {value:"boolean: true if success,else false or Error occured."}
-public function <SalesforceConnector sfConnector> updateRecord (string sObjectName, string id, json record)
+public function SalesforceConnector::updateRecord (string sObjectName, string id, json record)
 returns boolean|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
+    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
 
-    http:Request request = {};
+    http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     request.setJsonPayload(record);
     try {
-        http:Response response =? oauth2EP -> patch(path, request);
+        var res = oauth2EP -> patch(path, request);
+        http:Response response = check res;
+
         json|SalesforceConnectorError result = checkAndSetErrors(response, false);
         match result {
             json => {
@@ -560,14 +656,16 @@ returns boolean|SalesforceConnectorError {
 @Param {value:"sObjectName: relevant salesforce object name"}
 @Param {value:"id: relevant salesforce object id"}
 @Return {value:"boolean: true if success,else false or Error occured."}
-public function <SalesforceConnector sfConnector> deleteRecord (string sObjectName, string id)
+public function SalesforceConnector::deleteRecord (string sObjectName, string id)
 returns boolean|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
+    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
 
-    http:Request request = {};
+    http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     try {
-        http:Response response =? oauth2EP -> delete(path, request);
+        var res = oauth2EP -> delete(path, request);
+        http:Response response = check res;
+
         json|SalesforceConnectorError result = checkAndSetErrors(response, false);
         match result {
             json => {

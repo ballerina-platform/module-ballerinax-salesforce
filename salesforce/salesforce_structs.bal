@@ -19,14 +19,14 @@
 package salesforce;
 
 @Description {value:"Represents Salesforce Error"}
-public struct SalesforceError {
-   string message;
-   string errorCode;
-}
+public type SalesforceError {
+            string message;
+            string errorCode;
+};
 
 @Description {value:"Represents all errors"}
-public struct SalesforceConnectorError {
-   string[] messages;
-   error[] errors;
-   SalesforceError[] salesforceErrors;
-}
+public type SalesforceConnectorError {
+            string[] messages;
+            error[] errors;
+            SalesforceError[] salesforceErrors;
+};

@@ -20,59 +20,36 @@ package salesforce;
 
 import wso2/oauth2;
 
-@Description {value:"Represents Salesforce Configuration struct that contains OAuth2 Configuration"}
-public struct SalesforceConfiguration {
-    oauth2:OAuth2Configuration oauth2Config;
+public type SalesforceConfiguration {
+            oauth2:OAuth2ClientEndpointConfig oauth2Config;
+};
+
+public type SalesforceClient object {
+    private {
+        SalesforceConfiguration salesforceConfig;
+        SalesforceConnector salesforceConnector;
+    }
+
+    public function init (SalesforceConfiguration salesforceConfiguration);
+    public function register (typedesc serviceType);
+    public function start ();
+    public function getClient () returns SalesforceConnector;
+    public function stop ();
+};
+
+public function SalesforceClient::init (SalesforceConfiguration salesforceConfig){
+    salesforceConnector = new(salesforceConfig.oauth2Config);
+}
+public function SalesforceClient::register (typedesc serviceType) {
 }
 
-@Description {value:"Function to create Salesforce configuration"}
-public function <SalesforceConfiguration oauth2Config> SalesforceConfiguration () {
-    oauth2Config.oauth2Config = {};
+public function SalesforceClient::start () {
 }
 
-@Description {value:"Represents Salesforce Endpoint"}
-public struct SalesforceEndpoint {
-    SalesforceConfiguration salesforceConfig;
-    SalesforceConnector salesforceConnector;
+public function SalesforceClient::getClient () returns SalesforceConnector {
+    return self.salesforceConnector;
 }
 
-@Description {value:"Initialize Salesforce Endpoint"}
-public function <SalesforceEndpoint ep> init (SalesforceConfiguration salesforceConfig) {
-    endpoint oauth2:OAuth2Endpoint oauth2Endpoint {
-        baseUrl:salesforceConfig.oauth2Config.baseUrl,
-        accessToken:salesforceConfig.oauth2Config.accessToken,
-        clientConfig:{},
-        refreshToken:salesforceConfig.oauth2Config.refreshToken,
-        clientId:salesforceConfig.oauth2Config.clientId,
-        clientSecret:salesforceConfig.oauth2Config.clientSecret,
-        refreshTokenEP:salesforceConfig.oauth2Config.refreshTokenEP,
-        refreshTokenPath:salesforceConfig.oauth2Config.refreshTokenPath,
-        useUriParams:true
-    };
-
-    ep.salesforceConnector = {
-                                 oauth2EP:oauth2Endpoint
-                             };
-}
-
-@Description {value:"Register Endpoint"}
-public function <SalesforceEndpoint ep> register (typedesc serviceType) {
-
-}
-
-@Description {value:"Start Endpoint"}
-public function <SalesforceEndpoint ep> start () {
-
-}
-
-@Description {value:"Returns the connector that client code uses"}
-@Return {value:"The connector that client code uses"}
-public function <SalesforceEndpoint ep> getClient () returns SalesforceConnector {
-    return ep.salesforceConnector;
-}
-
-@Description {value:"Stops the registered service"}
-@Return {value:"Error occured during registration"}
-public function <SalesforceEndpoint ep> stop () {
+public function SalesforceClient::stop () {
 
 }

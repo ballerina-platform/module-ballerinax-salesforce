@@ -21,7 +21,6 @@ package salesforce;
 import ballerina/log;
 import ballerina/mime;
 import ballerina/http;
-import ballerina/net.uri;
 
 @Description {value:"Function to set resource URl"}
 @Param {value:"paths: array of path parameters"}
@@ -54,7 +53,7 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
     foreach i, name in queryParamNames {
         string value = queryParamValues[i];
 
-        var oauth2Response = uri:encode(value, ENCODING_CHARSET);
+        var oauth2Response = http:encode(value, ENCODING_CHARSET);
         match oauth2Response {
             string encoded => {
                 if (first) {
@@ -85,15 +84,18 @@ returns json|SalesforceConnectorError {
         //if success
         if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
             if (expectPayload) {
-                result =? httpResponse.getJsonPayload();
+                var res = httpResponse.getJsonPayload();
+                result = check res;
             }
         } else {
             SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
-            json jsonResponse =? httpResponse.getJsonPayload();
-            json[] errors =? <json[]>jsonResponse;
+            var jsonRes = httpResponse.getJsonPayload();
+            json jsonResponse = check jsonRes;
+            var res = <json[]>jsonResponse;
+            json[] errors = check res;
             foreach i, err in errors {
-                SalesforceError sfError = {message:err.message.toString(), errorCode:err.errorCode.toString()};
-                connectorError.messages[i] = err.message.toString();
+                SalesforceError sfError = {message:err.message.toString()?:"", errorCode:err.errorCode.toString()?:""};
+                connectorError.messages[i] = err.message.toString()?:"";
                 connectorError.salesforceErrors[i] = sfError;
             }
             return connectorError;
