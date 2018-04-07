@@ -16,8 +16,6 @@
 // under the License.
 //
 
-package salesforce;
-
 import ballerina/log;
 import ballerina/mime;
 import ballerina/http;

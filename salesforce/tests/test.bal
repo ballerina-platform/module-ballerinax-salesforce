@@ -1,5 +1,3 @@
-package salesforce.tests;
-
 import ballerina/test;
 import ballerina/config;
 import ballerina/log;

@@ -16,8 +16,6 @@
 // under the License.
 //
 
-package salesforce;
-
 @Description {value:"Represents Salesforce Error"}
 public type SalesforceError {
             string message;

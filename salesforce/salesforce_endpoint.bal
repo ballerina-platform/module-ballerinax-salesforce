@@ -16,8 +16,6 @@
 // under the License.
 //
 
-package salesforce;
-
 import wso2/oauth2;
 
 public type SalesforceConfiguration {

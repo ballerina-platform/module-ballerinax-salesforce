@@ -16,8 +16,6 @@
 // under the License.
 //
 
-package salesforce;
-
 // Ballerina config keys
 @readonly public string ENDPOINT = "ENDPOINT";
 @readonly public string ACCESS_TOKEN = "ACCESS_TOKEN";

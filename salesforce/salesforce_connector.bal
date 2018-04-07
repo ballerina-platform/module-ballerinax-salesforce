@@ -16,8 +16,6 @@
 // under the License.
 //
 
-package salesforce;
-
 import ballerina/http;
 import wso2/oauth2;
 
