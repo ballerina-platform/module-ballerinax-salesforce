@@ -18,14 +18,12 @@
 
 package salesforce;
 
-import ballerina/net.http;
-import ballerina/mime;
-import ballerina/io;
+import ballerina/http;
 import wso2/oauth2;
 
 @Description {value:"Salesforce Client Connector"}
 public struct SalesforceConnector {
-    oauth2:OAuth2Connector oauth2;
+    oauth2:OAuth2Endpoint oauth2EP;
 }
 
 @Description {value:"Lists summary details about each REST API version available"}
@@ -292,8 +290,8 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
-    string path = ([API_BASE_PATH, SOBJECTS, sObjectName, id], [FIELDS], [fields]);
-    return sfConnector.getRecord(path);
+    string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+    return sfConnector.getRecord(prefixPath + "?fields=" + fields);
 }
 
 @Description {value:"Retrieve field values from an external object record using Salesforce ID or External ID"}
@@ -303,8 +301,8 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> getFieldValuesFromExternalObjectRecord (string externalObjectName, string id, string fields)
 returns json|SalesforceConnectorError {
-    string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id], [FIELDS], [fields]);
-    return sfConnector.getRecord(path);
+    string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
+    return sfConnector.getRecord(prefixPath + "?fields=" + fields);
 
 }
 
@@ -312,23 +310,35 @@ returns json|SalesforceConnectorError {
 @Param {value:"sObjectName: The relevant sobject name"}
 @Param {value:"payload: json payload containing record data"}
 @Return {value:"Json result or Error occured."}
-public function <SalesforceConnector sfConnector> createMultipleRecords (string sObjectName, json payload)
+public function <SalesforceConnector sfConnector> createMultipleRecords (string sObjectName, json records)
 returns json|SalesforceConnectorError {
+    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
+
+    json payload;
     http:Request request = {};
-
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
-    request.setJsonPayload(payload);
-
-    http:Response|http:HttpConnectorError response = sfConnector.oauth2.post(path, request);
-    json|SalesforceConnectorError result = checkAndSetErrors(response, true);
-    match result {
-        json jsonResult => {
-            return jsonResult;
+    request.setJsonPayload(records);
+    try {
+        http:Response response =? oauth2EP -> post(path, request);
+        json|SalesforceConnectorError result = checkAndSetErrors(response, true);
+        match result {
+            json jsonResult => {
+                payload = jsonResult;
+            }
+            SalesforceConnectorError err => {
+                return err;
+            }
         }
-        SalesforceConnectorError err => {
-            return err;
-        }
+    } catch (http:HttpConnectorError httpError) {
+        SalesforceConnectorError connectorError =
+        {
+            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
+            errors:httpError.cause
+        };
+        return connectorError;
     }
+
+    return payload;
 }
 
 // ============================ Create, update, delete records by External IDs ===================== //
@@ -353,21 +363,33 @@ returns json|SalesforceConnectorError {
 @Return {value:"Json result or Error occured."}
 public function <SalesforceConnector sfConnector> upsertSObjectByExternalId (string sObjectName, string fieldId, string fieldValue, json record)
 returns json|SalesforceConnectorError {
-    http:Request request = {};
+    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
 
+    json payload;
+    http:Request request = {};
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     request.setJsonPayload(record);
-
-    http:Response|http:HttpConnectorError response = sfConnector.oauth2.patch(path, request);
-    json|SalesforceConnectorError result = checkAndSetErrors(response, true);
-    match result {
-        json jsonResult => {
-            return jsonResult;
+    try {
+        http:Response response =? oauth2EP -> patch(path, request);
+        json|SalesforceConnectorError result = checkAndSetErrors(response, false);
+        match result {
+            json jsonResult => {
+                payload = jsonResult;
+            }
+            SalesforceConnectorError err => {
+                return err;
+            }
         }
-        SalesforceConnectorError err => {
-            return err;
-        }
+    } catch (http:HttpConnectorError httpError) {
+        SalesforceConnectorError connectorError =
+        {
+            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
+            errors:httpError.cause
+        };
+        return connectorError;
     }
+
+    return payload;
 }
 
 // ============================ Get updated and deleted records ===================== //
@@ -437,10 +459,31 @@ public function <SalesforceConnector sfConnector> sObjectPlatformAction () retur
 @Return {value:"Response or Error occured."}
 public function <SalesforceConnector sfConnector> getRecord (string path)
 returns json|SalesforceConnectorError {
-    http:Request request = {};
+    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
 
-    http:Response|http:HttpConnectorError response = sfConnector.oauth2.get(path, request);
-    return checkAndSetErrors(response, true);
+    json payload;
+    http:Request request = {};
+    try {
+        http:Response response =? oauth2EP -> get(path, request);
+        json|SalesforceConnectorError result = checkAndSetErrors(response, true);
+        match result {
+            json jsonResult => {
+                payload = jsonResult;
+            }
+            SalesforceConnectorError err => {
+                return err;
+            }
+        }
+    } catch (http:HttpConnectorError httpError) {
+        SalesforceConnectorError connectorError =
+        {
+            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
+            errors:httpError.cause
+        };
+        return connectorError;
+    }
+
+    return payload;
 }
 
 @Description {value:"Create records based on relevant object type sent with json record"}
@@ -449,21 +492,33 @@ returns json|SalesforceConnectorError {
 @Return {value:"Response or Error occured."}
 public function <SalesforceConnector sfConnector> createRecord (string sObjectName, json record)
 returns string|SalesforceConnectorError {
-    http:Request request = {};
+    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
 
+    string id;
+    http:Request request = {};
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     request.setJsonPayload(record);
-
-    http:Response|http:HttpConnectorError response = sfConnector.oauth2.post(path, request);
-    json|SalesforceConnectorError result = checkAndSetErrors(response, true);
-    match result {
-        json jsonResponse => {
-            return jsonResponse.id.toString();
+    try {
+        http:Response response =? oauth2EP -> post(path, request);
+        json|SalesforceConnectorError result = checkAndSetErrors(response, true);
+        match result {
+            json jsonResult => {
+                id = jsonResult.id.toString();
+            }
+            SalesforceConnectorError err => {
+                return err;
+            }
         }
-        SalesforceConnectorError err => {
-            return err;
-        }
+    } catch (http:HttpConnectorError httpError) {
+        SalesforceConnectorError connectorError =
+        {
+            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
+            errors:httpError.cause
+        };
+        return connectorError;
     }
+
+    return id;
 }
 
 @Description {value:"Update records based on relevant object id"}
@@ -473,21 +528,32 @@ returns string|SalesforceConnectorError {
 @Return {value:"boolean: true if success,else false or Error occured."}
 public function <SalesforceConnector sfConnector> updateRecord (string sObjectName, string id, json record)
 returns boolean|SalesforceConnectorError {
-    http:Request request = {};
+    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
 
+    http:Request request = {};
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     request.setJsonPayload(record);
-
-    http:Response|http:HttpConnectorError response = sfConnector.oauth2.patch(path, request);
-    json|SalesforceConnectorError result = checkAndSetErrors(response, false);
-    match result {
-        json => {
-            return true;
+    try {
+        http:Response response =? oauth2EP -> patch(path, request);
+        json|SalesforceConnectorError result = checkAndSetErrors(response, false);
+        match result {
+            json => {
+                return true;
+            }
+            SalesforceConnectorError err => {
+                return err;
+            }
         }
-        SalesforceConnectorError err => {
-            return err;
-        }
+    } catch (http:HttpConnectorError httpError) {
+        SalesforceConnectorError connectorError =
+        {
+            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
+            errors:httpError.cause
+        };
+        return connectorError;
     }
+
+    return false;
 }
 
 @Description {value:"Delete existing records based on relevant object id"}
@@ -496,17 +562,29 @@ returns boolean|SalesforceConnectorError {
 @Return {value:"boolean: true if success,else false or Error occured."}
 public function <SalesforceConnector sfConnector> deleteRecord (string sObjectName, string id)
 returns boolean|SalesforceConnectorError {
-    http:Request request = {};
+    endpoint oauth2:OAuth2Endpoint oauth2EP = sfConnector.oauth2EP;
 
+    http:Request request = {};
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-    http:Response|http:HttpConnectorError response = sfConnector.oauth2.delete(path, request);
-    json|SalesforceConnectorError result = checkAndSetErrors(response, false);
-    match result {
-        json => {
-            return true;
+    try {
+        http:Response response =? oauth2EP -> delete(path, request);
+        json|SalesforceConnectorError result = checkAndSetErrors(response, false);
+        match result {
+            json => {
+                return true;
+            }
+            SalesforceConnectorError err => {
+                return err;
+            }
         }
-        SalesforceConnectorError err => {
-            return err;
-        }
+    } catch (http:HttpConnectorError httpError) {
+        SalesforceConnectorError connectorError =
+        {
+            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
+            errors:httpError.cause
+        };
+        return connectorError;
     }
+
+    return false;
 }

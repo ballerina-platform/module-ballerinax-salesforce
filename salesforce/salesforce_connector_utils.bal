@@ -19,10 +19,9 @@
 package salesforce;
 
 import ballerina/log;
-import ballerina/net.http;
-import ballerina/net.uri;
 import ballerina/mime;
-import ballerina/io;
+import ballerina/http;
+import ballerina/net.uri;
 
 @Description {value:"Function to set resource URl"}
 @Param {value:"paths: array of path parameters"}
@@ -78,77 +77,39 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
 @Description {value:"Function to check errors and set errors to relevant error types"}
 @Param {value:"response: http response or http connector error with network related errors"}
 @Param {value:"isRequiredJsonPayload: gets true if response should contain a Json body, else false"}
-@Return {value:"Json Payload"}
-@Return {value:"Error occured"}
-function checkAndSetErrors (http:Response|http:HttpConnectorError response, boolean expectPayload)
+@Return {value:"Json Payload or SalesforceConnectorError"}
+function checkAndSetErrors (http:Response httpResponse, boolean expectPayload)
 returns json|SalesforceConnectorError {
-    SalesforceConnectorError connectorError = {};
     json result;
-
-    match response {
-        http:Response httpResponse => {
-            if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 ||
-                httpResponse.statusCode == 204) {
-                if (expectPayload) {
-                    json|mime:EntityError responseBody;
-                    try {
-                        responseBody = httpResponse.getJsonPayload();
-                    } catch (error e) {
-                        connectorError = {messages:[], salesforceErrors:[]};
-                        connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
-                        connectorError.errors[0] = e;
-                        return connectorError;
-                    }
-
-                    match responseBody {
-                        mime:EntityError entityError => {
-                            connectorError = {messages:[entityError.message]};
-                            return connectorError;
-                        }
-                        json jsonResponse => {
-                            result = jsonResponse;
-                        }
-                    }
-                }
-            } else {
-                json|mime:EntityError responseBody;
-                try {
-                    responseBody = httpResponse.getJsonPayload();
-                } catch (error e) {
-                    connectorError = {messages:[], salesforceErrors:[]};
-                    connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
-                    connectorError.errors[0] = e;
-                    return connectorError;
-                }
-
-                json[] errors;
-                match responseBody {
-                    mime:EntityError entityError => {
-                        connectorError = {messages:[entityError.message]};
-                        return connectorError;
-                    }
-                    json jsonResponse => {
-                        errors =? <json[]>jsonResponse;
-                    }
-                }
-
-                connectorError = {messages:[], salesforceErrors:[]};
-                foreach i, err in errors {
-                    SalesforceError sfError = {message:err.message.toString(), errorCode:err.errorCode.toString()};
-                    connectorError.messages[i] = err.message.toString();
-                    connectorError.salesforceErrors[i] = sfError;
-                }
-                return connectorError;
+    try {
+        //if success
+        if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
+            if (expectPayload) {
+                result =? httpResponse.getJsonPayload();
             }
-        }
-        http:HttpConnectorError httpError => {
-            connectorError = {
-                                 messages:["Http error occurred -> status code: " +
-                                           <string>httpError.statusCode + "; message: " + httpError.message],
-                                 errors:httpError.cause
-                             };
+        } else {
+            SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
+            json jsonResponse =? httpResponse.getJsonPayload();
+            json[] errors =? <json[]>jsonResponse;
+            foreach i, err in errors {
+                SalesforceError sfError = {message:err.message.toString(), errorCode:err.errorCode.toString()};
+                connectorError.messages[i] = err.message.toString();
+                connectorError.salesforceErrors[i] = sfError;
+            }
             return connectorError;
         }
+    } catch (mime:EntityError entityError) {
+        SalesforceConnectorError connectorError = {
+                                                      messages:[entityError.message],
+                                                      errors:entityError.cause
+                                                  };
+        return connectorError;
+    } catch (error e) {
+        SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
+        connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
+        connectorError.errors[0] = e;
+        return connectorError;
     }
+
     return result;
 }

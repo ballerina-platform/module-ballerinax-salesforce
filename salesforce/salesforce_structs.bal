@@ -18,25 +18,15 @@
 
 package salesforce;
 
+@Description {value:"Represents Salesforce Error"}
 public struct SalesforceError {
    string message;
    string errorCode;
 }
 
+@Description {value:"Represents all errors"}
 public struct SalesforceConnectorError {
    string[] messages;
    error[] errors;
    SalesforceError[] salesforceErrors;
-}
-
-public struct QueryResult {
-   boolean done;
-   int totalSize;
-   json[] records;
-   string nextRecordsUrl;
-}
-
-public struct SearchResult {
-   json attributes;
-   string Id;
 }
