@@ -1,8 +1,8 @@
-package salesforce;
+package salesforce.tests;
 
 import ballerina/test;
 import ballerina/config;
-import ballerina/io;
+import ballerina/log;
 import ballerina/time;
 import ballerina/util;
 
@@ -38,7 +38,7 @@ endpoint SalesforceClient salesforceEP {
 
 @test:Config
 function testGetAvailableApiVersions () {
-    io:println("\n------------------------ getAvailableApiVersions() ----------------------");
+    log:printInfo("salesforceEP -> getAvailableApiVersions()");
     response = salesforceEP -> getAvailableApiVersions();
     match response {
         json jsonRes => {
@@ -56,7 +56,7 @@ function testGetAvailableApiVersions () {
 
 @test:Config
 function testGetResourcesByApiVersion () {
-    io:println("\n------------------------ getResourcesByApiVersion() ----------------------");
+    log:printInfo("salesforceEP -> getResourcesByApiVersion()");
     string apiVersion = "v37.0";
     response = salesforceEP -> getResourcesByApiVersion(apiVersion);
     match response {
@@ -83,7 +83,7 @@ function testGetResourcesByApiVersion () {
 
 @test:Config
 function testGetOrganizationLimits () {
-    io:println("\n------------------------ getOrganizationLimits () ----------------------");
+    log:printInfo("salesforceEP -> getOrganizationLimits()");
     response = salesforceEP -> getOrganizationLimits();
     match response {
         json jsonRes => {
@@ -108,7 +108,7 @@ function testGetOrganizationLimits () {
 
 @test:Config
 function testCreateRecord () {
-    io:println("\n------------------------ SObjecct Record Information----------------");
+    log:printInfo("salesforceEP -> createRecord()");
     json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3"};
     string|SalesforceConnectorError stringResponse = salesforceEP -> createRecord(ACCOUNT, accountRecord);
     match stringResponse {
@@ -126,7 +126,7 @@ function testCreateRecord () {
     dependsOn:["testCreateRecord"]
 }
 function testGetRecord () {
-    io:println("\nReceived Record details!");
+    log:printInfo("salesforceEP -> getRecord()");
     string path = "/services/data/v37.0/sobjects/Account/" + recordId;
     response = salesforceEP -> getRecord(path);
     match response {
@@ -149,7 +149,7 @@ function testGetRecord () {
     dependsOn:["testCreateRecord"]
 }
 function testUpdateRecord () {
-    io:println("\nUpdated Record!");
+    log:printInfo("salesforceEP -> updateRecord()");
     json account = {Name:"WSO2 Inc", BillingCity:"Jaffna", Phone:"+94110000000"};
     boolean|SalesforceConnectorError response = salesforceEP -> updateRecord(ACCOUNT, recordId, account);
     match response {
@@ -167,7 +167,7 @@ function testUpdateRecord () {
                "testGetRecordByExternalId", "testUpsertSObjectByExternalId"]
 }
 function testDeleteRecord () {
-    io:println("\nDeleted Record! ");
+    log:printInfo("salesforceEP -> deleteRecord()");
     boolean|SalesforceConnectorError response = salesforceEP -> deleteRecord("Account", recordId);
     match response {
         boolean success => {
@@ -183,7 +183,7 @@ function testDeleteRecord () {
 
 @test:Config
 function testGetQueryResult () {
-    io:println("\n-------------------------- getQueryResult () -------------------------");
+    log:printInfo("salesforceEP -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
     response = salesforceEP -> getQueryResult(sampleQuery);
     match response {
@@ -193,10 +193,10 @@ function testGetQueryResult () {
             test:assertNotEquals(jsonRes["records"], null);
 
             if (jsonRes.nextRecordsUrl != null) {
-                io:println("\n-------------------------- getNextQueryResult () -------------------------");
+                log:printInfo("salesforceEP -> getNextQueryResult()");
 
                 while (jsonRes.nextRecordsUrl != null) {
-                    io:println("\nFound new query result set!");
+                    log:printDebug("Found new query result set!");
                     response = salesforceEP -> getNextQueryResult(jsonRes.nextRecordsUrl.toString() ? :"");
                     match response {
                         json jsonNextRes => {
@@ -223,7 +223,7 @@ function testGetQueryResult () {
     dependsOn:["testGetQueryResult"]
 }
 function testGetAllQueries () {
-    io:println("\n-------------------------- getAllQueries () -------------------------");
+    log:printInfo("salesforceEP -> getAllQueries()");
     string sampleQuery = "SELECT Name from Account WHERE isDeleted=TRUE";
     response = salesforceEP -> getAllQueries(sampleQuery);
     match response {
@@ -241,7 +241,7 @@ function testGetAllQueries () {
 
 @test:Config
 function testExplainQueryOrReportOrListview () {
-    io:println("\n------------------ explainQueryOrReportOrListview () ------------------");
+    log:printInfo("salesforceEP -> explainQueryOrReportOrListview()");
     string queryString = "SELECT name FROM Account";
     response = salesforceEP -> explainQueryOrReportOrListview(queryString);
     match response {
@@ -259,7 +259,7 @@ function testExplainQueryOrReportOrListview () {
 
 @test:Config
 function testSearchSOSLString () {
-    io:println("\n------------------------ Executing SOSl Searches ---------------------");
+    log:printInfo("salesforceEP -> searchSOSLString()");
     string searchString = "FIND {ABC Inc}";
     response = salesforceEP -> searchSOSLString(searchString);
     match response {
@@ -277,7 +277,7 @@ function testSearchSOSLString () {
 
 @test:Config
 function testGetSObjectBasicInfo () {
-    io:println("\n----------------------- getSObjectBasicInfo() --------------------------");
+    log:printInfo("salesforceEP -> getSObjectBasicInfo()");
     response = salesforceEP -> getSObjectBasicInfo("Account");
     match response {
         json jsonRes => {
@@ -292,7 +292,7 @@ function testGetSObjectBasicInfo () {
 
 @test:Config
 function testSObjectPlatformAction () {
-    io:println("\n----------------------- sObjectPlatformAction() ---------------------------");
+    log:printInfo("salesforceEP -> sObjectPlatformAction()");
     response = salesforceEP -> sObjectPlatformAction();
     match response {
         json jsonRes => {
@@ -307,7 +307,7 @@ function testSObjectPlatformAction () {
 
 @test:Config
 function testDescribeAvailableObjects () {
-    io:println("\n----------------------- describeAvailableObjects() ---------------------------");
+    log:printInfo("salesforceEP -> describeAvailableObjects()");
     response = salesforceEP -> describeAvailableObjects();
     match response {
         json jsonRes => {
@@ -323,7 +323,7 @@ function testDescribeAvailableObjects () {
 
 @test:Config
 function testDescribeSObject () {
-    io:println("\n----------------------- describeSObject() ---------------------------");
+    log:printInfo("salesforceEP -> describeSObject()");
     response = salesforceEP -> describeSObject(ACCOUNT);
     match response {
         json jsonRes => {
@@ -340,7 +340,7 @@ function testDescribeSObject () {
 
 @test:Config
 function testGetDeletedRecords () {
-    io:println("\n----------------------- getDeletedRecords() ---------------------------");
+    log:printInfo("salesforceEP -> getDeletedRecords()");
 
     time:Time now = time:currentTime();
     string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -361,7 +361,7 @@ function testGetDeletedRecords () {
 
 @test:Config
 function testGetUpdatedRecords () {
-    io:println("\n----------------------- getUpdatedRecords() ---------------------------");
+    log:printInfo("salesforceEP -> getUpdatedRecords()");
 
     time:Time now = time:currentTime();
     string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -382,7 +382,7 @@ function testGetUpdatedRecords () {
 
 @test:Config
 function testCreateMultipleRecords () {
-    io:println("\n------------------------ createMultipleRecords() ----------------");
+    log:printInfo("salesforceEP -> createMultipleRecords()");
 
     json multipleRecords = {"records":[{
                                            "attributes":{"type":"Account", "referenceId":"ref1"},
@@ -416,7 +416,7 @@ function testCreateMultipleRecords () {
     dependsOn:["testCreateRecord"]
 }
 function testGetFieldValuesFromSObjectRecord () {
-    io:println("\n--------------------- getFieldValuesFromSObjectRecord() ------------------------");
+    log:printInfo("salesforceEP -> getFieldValuesFromSObjectRecord()");
     response = salesforceEP -> getFieldValuesFromSObjectRecord("Account", recordId, "Name,BillingCity");
     match response {
         json jsonRes => {
@@ -431,7 +431,7 @@ function testGetFieldValuesFromSObjectRecord () {
 
 @test:Config
 function testCreateRecordWithExternalId () {
-    io:println("\n----------------------- CreateRecordWithExternalId ()---------------");
+    log:printInfo("CreateRecordWithExternalId");
 
     externalID = util:uuid();
     json accountExIdRecord = {Name:"Sample Org", BillingCity:"CA", SF_ExternalID__c:externalID};
@@ -451,7 +451,7 @@ function testCreateRecordWithExternalId () {
     dependsOn:["testCreateRecordWithExternalId"]
 }
 function testGetRecordByExternalId () {
-    io:println("\n--------------------- getRecordByExternalId() ------------------------");
+    log:printInfo("salesforceEP -> getRecordByExternalId()");
 
     response = salesforceEP -> getRecordByExternalId(ACCOUNT, "SF_ExternalID__c", externalID);
     match response {
@@ -475,7 +475,7 @@ function testGetRecordByExternalId () {
     dependsOn:["testCreateRecord"]
 }
 function testUpsertSObjectByExternalId () {
-    io:println("\n--------------------- upsertSObjectByExternalId() ------------------------");
+    log:printInfo("salesforceEP -> upsertSObjectByExternalId()");
     json upsertRecord = {Name:"Sample Org", BillingCity:"Jaffna, Colombo 3"};
     json|SalesforceConnectorError response = salesforceEP -> upsertSObjectByExternalId(ACCOUNT,
                                                                                        "SF_ExternalID__c",
@@ -494,13 +494,13 @@ function testUpsertSObjectByExternalId () {
 
 @test:Config
 function testCreateAccount () {
-    io:println("\n------------------------ACCOUNT SObjecct Information----------------");
+    log:printInfo("salesforceEP -> createAccount()");
     json account = {Name:"ABC Inc", BillingCity:"New York"};
     string|SalesforceConnectorError stringAccount = salesforceEP -> createAccount(account);
     match stringAccount {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
-            io:print("Account id: " + id);
+            log:printDebug("Account id: " + id);
             accountId = id;
         }
         SalesforceConnectorError err => {
@@ -513,7 +513,7 @@ function testCreateAccount () {
     dependsOn:["testCreateAccount"]
 }
 function testGetAccountById () {
-    io:println("\nReceived account details: ");
+    log:printInfo("salesforceEP -> getAccountById()");
     response = salesforceEP -> getAccountById(accountId);
     match response {
         json jsonRes => {
@@ -530,7 +530,7 @@ function testGetAccountById () {
     dependsOn:["testCreateAccount"]
 }
 function testUpdateAccount () {
-    io:println("\nUpdated account: ");
+    log:printInfo("salesforceEP -> updateAccount()");
     json account = {Name:"ABC Inc", BillingCity:"New York-USA"};
     response = salesforceEP -> updateAccount(accountId, account);
     match response {
@@ -548,7 +548,7 @@ function testUpdateAccount () {
     dependsOn:["testCreateAccount", "testUpdateAccount", "testGetAccountById"]
 }
 function testDeleteAccount () {
-    io:println("\nDeleted account: ");
+    log:printInfo("salesforceEP -> deleteAccount()");
     response = salesforceEP -> deleteAccount(accountId);
     match response {
         json jsonRes => {
@@ -565,13 +565,13 @@ function testDeleteAccount () {
 
 @test:Config
 function testCreateLead () {
-    io:println("\n------------------------LEAD SObjecct Information----------------");
+    log:printInfo("salesforceEP -> createLead()");
     json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
     string|SalesforceConnectorError stringLead = salesforceEP -> createLead(lead);
     match stringLead {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
-            io:print("Lead id: " + id);
+            log:printDebug("Lead id: " + id);
             leadId = id;
         }
         SalesforceConnectorError err => {
@@ -584,7 +584,7 @@ function testCreateLead () {
     dependsOn:["testCreateLead"]
 }
 function testGetLeadById () {
-    io:println("\nReceived Lead details: ");
+    log:printInfo("salesforceEP -> getLeadById()");
     response = salesforceEP -> getLeadById(leadId);
     match response {
         json jsonRes => {
@@ -601,7 +601,7 @@ function testGetLeadById () {
     dependsOn:["testCreateLead"]
 }
 function testUpdateLead () {
-    io:println("\nUpdated Lead: ");
+    log:printInfo("salesforceEP -> updateLead()");
     json updateLead = {LastName:"Carmen", Company:"WSO2 Lanka (Pvt) Ltd"};
     response = salesforceEP -> updateLead(leadId, updateLead);
     match response {
@@ -619,7 +619,7 @@ function testUpdateLead () {
     dependsOn:["testCreateLead", "testUpdateLead", "testGetLeadById"]
 }
 function testDeleteLead () {
-    io:println("\nDeleted Lead: ");
+    log:printInfo("salesforceEP -> deleteLead()");
     response = salesforceEP -> deleteLead(leadId);
     match response {
         json jsonRes => {
@@ -636,13 +636,13 @@ function testDeleteLead () {
 
 @test:Config
 function testCreateContact () {
-    io:println("\n------------------------CONTACT SObjecct Information----------------");
+    log:printInfo("salesforceEP -> createContact()");
     json contact = {LastName:"Patson"};
     string|SalesforceConnectorError stringContact = salesforceEP -> createContact(contact);
     match stringContact {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
-            io:print("Contact id: " + id);
+            log:printDebug("Contact id: " + id);
             contactId = id;
         }
         SalesforceConnectorError err => {
@@ -655,7 +655,7 @@ function testCreateContact () {
     dependsOn:["testCreateContact"]
 }
 function testGetContactById () {
-    io:println("\nReceived Contact details: ");
+    log:printInfo("salesforceEP -> getContactById()");
     response = salesforceEP -> getContactById(contactId);
     match response {
         json jsonRes => {
@@ -672,7 +672,7 @@ function testGetContactById () {
     dependsOn:["testCreateContact"]
 }
 function testUpdateContact () {
-    io:println("\nUpdated Contact: ");
+    log:printInfo("salesforceEP -> updateContact()");
     json updateContact = {LastName:"Rebert Patson"};
     response = salesforceEP -> updateContact(contactId, updateContact);
     match response {
@@ -690,7 +690,7 @@ function testUpdateContact () {
     dependsOn:["testCreateContact", "testUpdateContact", "testGetContactById"]
 }
 function testDeleteContact () {
-    io:println("\nDeleted Contact: ");
+    log:printInfo("salesforceEP -> deleteContact()");
     response = salesforceEP -> deleteContact(contactId);
     match response {
         json jsonRes => {
@@ -707,13 +707,13 @@ function testDeleteContact () {
 
 @test:Config
 function testCreateProduct () {
-    io:println("\n------------------------PRODUCTS SObjecct Information----------------");
+    log:printInfo("salesforceEP -> createProduct()");
     json product = {Name:"APIM", Description:"APIM product"};
     string|SalesforceConnectorError stringProduct = salesforceEP -> createProduct(product);
     match stringProduct {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
-            io:print("Product id: " + id);
+            log:printDebug("Product id: " + id);
             productId = id;
         }
         SalesforceConnectorError err => {
@@ -726,7 +726,7 @@ function testCreateProduct () {
     dependsOn:["testCreateProduct"]
 }
 function testGetProductById () {
-    io:println("\nReceived Product details: ");
+    log:printInfo("salesforceEP -> getProductById()");
     response = salesforceEP -> getProductById(productId);
     match response {
         json jsonRes => {
@@ -743,7 +743,7 @@ function testGetProductById () {
     dependsOn:["testCreateProduct"]
 }
 function testUpdateProduct () {
-    io:println("\nUpdated Product: ");
+    log:printInfo("salesforceEP -> updateProduct()");
     json updateProduct = {Name:"APIM", Description:"APIM new product"};
     response = salesforceEP -> updateProduct(productId, updateProduct);
     match response {
@@ -761,7 +761,7 @@ function testUpdateProduct () {
     dependsOn:["testCreateProduct", "testUpdateProduct", "testGetProductById"]
 }
 function testDeleteProduct () {
-    io:println("\nDeleted Product: ");
+    log:printInfo("salesforceEP -> deleteProduct()");
     response = salesforceEP -> deleteProduct(productId);
     match response {
         json jsonRes => {
@@ -778,13 +778,13 @@ function testDeleteProduct () {
 
 @test:Config
 function testCreateOpportunity () {
-    io:println("\n------------------------OPPORTUNITY SObjecct Information----------------");
+    log:printInfo("salesforceEP -> createOpportunity()");
     json createOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
     string|SalesforceConnectorError stringResponse = salesforceEP -> createOpportunity(createOpportunity);
     match stringResponse {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
-            io:print("Opportunity id: " + id);
+            log:printDebug("Opportunity id: " + id);
             opportunityId = id;
         }
         SalesforceConnectorError err => {
@@ -797,7 +797,7 @@ function testCreateOpportunity () {
     dependsOn:["testCreateOpportunity"]
 }
 function testGetOpportunityById () {
-    io:println("\nReceived Opportunity details: ");
+    log:printInfo("salesforceEP -> getOpportunityById()");
     response = salesforceEP -> getOpportunityById(opportunityId);
     match response {
         json jsonRes => {
@@ -814,7 +814,7 @@ function testGetOpportunityById () {
     dependsOn:["testCreateOpportunity"]
 }
 function testUpdateOpportunity () {
-    io:println("\nUpdated Opportunity: ");
+    log:printInfo("salesforceEP -> updateOpportunity()");
     json updateOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
     response = salesforceEP -> updateOpportunity(opportunityId, updateOpportunity);
     match response {
@@ -832,7 +832,7 @@ function testUpdateOpportunity () {
     dependsOn:["testCreateOpportunity", "testUpdateOpportunity", "testGetOpportunityById"]
 }
 function testDeleteOpportunity () {
-    io:println("\nDeleted Opportunity: ");
+    log:printInfo("salesforceEP -> deleteOpportunity()");
     response = salesforceEP -> deleteOpportunity(opportunityId);
     match response {
         json jsonRes => {
@@ -851,7 +851,7 @@ string param => {
                     return param;
                 }
 () => {
-        io:println("Empty value!");
+        log:printInfo("Empty value, found nil!!");
           return "";
        }
    }
