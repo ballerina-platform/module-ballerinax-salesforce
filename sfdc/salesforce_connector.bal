@@ -19,24 +19,10 @@
 import ballerina/http;
 import wso2/oauth2;
 
+@Description {value:"SalesforceConnector client connector"}
 public type SalesforceConnector object {
-    private {
+    public {
         oauth2:OAuth2Client oauth2Endpoint;
-    }
-
-    new (oauth2:OAuth2ClientEndpointConfig oauth2Config) {
-        endpoint oauth2:OAuth2Client oauth2EP {
-            baseUrl:oauth2Config.baseUrl,
-            accessToken:oauth2Config.accessToken,
-            clientConfig:{},
-            refreshToken:oauth2Config.refreshToken,
-            clientId:oauth2Config.clientId,
-            clientSecret:oauth2Config.clientSecret,
-            refreshTokenEP:oauth2Config.refreshTokenEP,
-            refreshTokenPath:oauth2Config.refreshTokenPath,
-            useUriParams:true
-        };
-        oauth2Endpoint = oauth2EP;
     }
 
     public function getAvailableApiVersions () returns (json|SalesforceConnectorError);
@@ -540,7 +526,7 @@ public function SalesforceConnector::sObjectPlatformAction () returns json|Sales
 @Return {value:"Response or Error occured."}
 public function SalesforceConnector::getRecord (string path)
 returns json|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
+    endpoint oauth2:OAuth2Client oauth2EP = self.oauth2Endpoint;
 
     json payload;
     http:Request request = new;
@@ -570,12 +556,12 @@ returns json|SalesforceConnectorError {
 }
 
 @Description {value:"Create records based on relevant object type sent with json record"}
-@Param {value:"sObjectName: relevant salesforce object name"}
+@Param {value:"sObjectName: relevant sfdc object name"}
 @Param {value:"record: json record used to create object record"}
 @Return {value:"Response or Error occured."}
 public function SalesforceConnector::createRecord (string sObjectName, json record)
 returns string|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
+    endpoint oauth2:OAuth2Client oauth2EP = self.oauth2Endpoint;
 
     string id;
     http:Request request = new;
@@ -614,13 +600,13 @@ return connectorError;
 }
 
 @Description {value:"Update records based on relevant object id"}
-@Param {value:"sObjectName: relevant salesforce object name"}
-@Param {value:"id: relevant salesforce object id"}
+@Param {value:"sObjectName: relevant sfdc object name"}
+@Param {value:"id: relevant sfdc object id"}
 @Param {value:"record: json record used to create object record"}
 @Return {value:"boolean: true if success,else false or Error occured."}
 public function SalesforceConnector::updateRecord (string sObjectName, string id, json record)
 returns boolean|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
+    endpoint oauth2:OAuth2Client oauth2EP = self.oauth2Endpoint;
 
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
@@ -651,12 +637,12 @@ returns boolean|SalesforceConnectorError {
 }
 
 @Description {value:"Delete existing records based on relevant object id"}
-@Param {value:"sObjectName: relevant salesforce object name"}
-@Param {value:"id: relevant salesforce object id"}
+@Param {value:"sObjectName: relevant sfdc object name"}
+@Param {value:"id: relevant sfdc object id"}
 @Return {value:"boolean: true if success,else false or Error occured."}
 public function SalesforceConnector::deleteRecord (string sObjectName, string id)
 returns boolean|SalesforceConnectorError {
-    endpoint oauth2:OAuth2Client oauth2EP = oauth2Endpoint;
+    endpoint oauth2:OAuth2Client oauth2EP = self.oauth2Endpoint;
 
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);

@@ -21,7 +21,7 @@ string productId = "";
 string recordId = "";
 string externalID = "";
 
-endpoint SalesforceClient salesforceEP {
+endpoint SalesforceEndpoint salesforceEP {
     oauth2Config:{
                      accessToken:accessToken,
                      baseUrl:url,
@@ -195,7 +195,8 @@ function testGetQueryResult () {
 
                 while (jsonRes.nextRecordsUrl != null) {
                     log:printDebug("Found new query result set!");
-                    response = salesforceEP -> getNextQueryResult(jsonRes.nextRecordsUrl.toString() ? :"");
+                    string nextQueryUrl = jsonRes.nextRecordsUrl.toString()?:"";
+                    response = salesforceEP -> getNextQueryResult(nextQueryUrl);
                     match response {
                         json jsonNextRes => {
                             test:assertNotEquals(jsonNextRes["totalSize"], null);
@@ -386,7 +387,7 @@ function testCreateMultipleRecords () {
                                            "attributes":{"type":"Account", "referenceId":"ref1"},
                                            "name":"SampleAccount1",
                                            "phone":"1111111111",
-                                           "website":"www.salesforce.com",
+                                           "website":"www.sfdc.com",
                                            "numberOfEmployees":"100",
                                            "industry":"Banking"
                                        }, {
