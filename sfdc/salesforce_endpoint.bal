@@ -42,8 +42,9 @@ public type SalesforceEndpoint object {
     @Description {value:"Salesforce connector endpoint initialization function"}
     @Param {value:"salesforceConfig: salesforce connector configuration"}
     public function init (SalesforceConfiguration salesforceConfig) {
+        //salesforceConfig.oauth2Config.useUriParams = true;
         self.oauth2EP.init(salesforceConfig.oauth2Config);
-
+        self.salesforceConnector.oauth2Endpoint = self.oauth2EP;
     }
 
     @Description {value:"Register Salesforce connector endpoint"}
