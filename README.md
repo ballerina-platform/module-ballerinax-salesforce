@@ -59,7 +59,7 @@ public type Client object {
 
     public function init (SalesforceConfiguration salesforceConfig);
     public function register (typedesc serviceType);
-    public function start;
+    public function start();
     public function getClient () returns SalesforceConnector;
     public function stop ();
 };
