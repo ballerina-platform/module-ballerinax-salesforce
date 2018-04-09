@@ -2,7 +2,7 @@
 
 | Ballerina Version         | Connector Version         | API Version |
 | ------------------------- | ------------------------- | ------------|
-|  0.970.0-alpha1-SNAPSHOT  | 0.970.0-alpha1-SNAPSHOT   |   v37.0     |
+|  0.970.0-alpha1-SNAPSHOT  |           0.9.0           |   v37.0     |
 
 ### Prerequisites
 Create a Salesforce developer account and create a connected app by visiting Salesforce (https://www.salesforce.com) and obtain the following parameters:
@@ -20,42 +20,35 @@ Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticat
 
 ### Working with Salesforce REST connector.
 
-In order to use the Salesforce connector, first you need to create a SalesforceConnector endpoint by passing above mentioned parameters.
+In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
 
 Visit `test.bal` file to find the way of creating Salesforce endpoint.
-#### Salesforce struct
+
+#### Salesforce Client Object
 ```ballerina
-public struct SalesforceConnector {
-    oauth2:OAuth2Endpoint oauth2EP;
-}
-```
-#### Salesforce Endpoint
-```ballerina
-public struct SalesforceEndpoint {
-    SalesforceConfiguration salesforceConfig;
-    SalesforceConnector salesforceConnector;
-}
+public type Client object {
+    public {
+        oauth2:Client oauth2EP = new();
+        SalesforceConfiguration salesforceConfig = {};
+        SalesforceConnector salesforceConnector = new();
+    }
+    
+    new () {}
+
+    public function init (SalesforceConfiguration salesforceConfig);
+    public function register (typedesc serviceType);
+    public function start;
+    public function getClient () returns SalesforceConnector;
+    public function stop ();
+};
 ```
 
-#### init() function
+#### SalesforceConfiguration record
 ```ballerina
-public function <SalesforceEndpoint ep> init (SalesforceConfiguration salesforceConfig) {
-    endpoint oauth2:OAuth2Endpoint oauth2Endpoint {
-        baseUrl:salesforceConfig.oauth2Config.baseUrl,
-        accessToken:salesforceConfig.oauth2Config.accessToken,
-        clientConfig:{},
-        refreshToken:salesforceConfig.oauth2Config.refreshToken,
-        clientId:salesforceConfig.oauth2Config.clientId,
-        clientSecret:salesforceConfig.oauth2Config.clientSecret,
-        refreshTokenEP:salesforceConfig.oauth2Config.refreshTokenEP,
-        refreshTokenPath:salesforceConfig.oauth2Config.refreshTokenPath,
-        useUriParams:true
-    };
+public type SalesforceConfiguration {
+            oauth2:OAuth2ClientEndpointConfiguration oauth2Config;
+};
 
-    ep.salesforceConnector = {
-                                 oauth2EP:oauth2Endpoint
-                             };
-}
 ```
 #### Running salesforce tests
 Create `ballerina.conf` file in `package-salesforce`, with following keys:
@@ -69,4 +62,4 @@ Create `ballerina.conf` file in `package-salesforce`, with following keys:
 
 Assign relevant string values generated for Salesforce app. 
 
-Go inside `package-salesforce` using terminal and run test.bal file using following command `ballerina test salesforce`.
+Go inside `package-salesforce` using terminal and run test.bal file using following command `ballerina test sfdc37`.
