@@ -16,27 +16,15 @@
 // under the License.
 //
 
-package salesforce;
+@Description {value:"Represents Salesforce Error"}
+public type SalesforceError {
+            string message;
+            string errorCode;
+};
 
-public struct SalesforceError {
-   string message;
-   string errorCode;
-}
-
-public struct SalesforceConnectorError {
-   string[] messages;
-   error[] errors;
-   SalesforceError[] salesforceErrors;
-}
-
-public struct QueryResult {
-   boolean done;
-   int totalSize;
-   json[] records;
-   string nextRecordsUrl;
-}
-
-public struct SearchResult {
-   json attributes;
-   string Id;
-}
+@Description {value:"Represents all errors"}
+public type SalesforceConnectorError {
+            string[] messages;
+            error[] errors;
+            SalesforceError[] salesforceErrors;
+};
