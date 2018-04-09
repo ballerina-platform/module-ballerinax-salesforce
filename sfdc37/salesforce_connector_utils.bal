@@ -77,7 +77,7 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
 @Return {value:"Json Payload or SalesforceConnectorError"}
 function checkAndSetErrors (http:Response httpResponse, boolean expectPayload)
 returns json|SalesforceConnectorError {
-    json result;
+    json result = {};
     try {
         //if success
         if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
@@ -99,12 +99,14 @@ returns json|SalesforceConnectorError {
             return connectorError;
         }
     } catch (mime:EntityError entityError) {
+        log:printError("Entity error when extracting JSON for checking errors: " + entityError.message);
         SalesforceConnectorError connectorError = {
                                                       messages:[entityError.message],
                                                       errors:entityError.cause
                                                   };
         return connectorError;
     } catch (error e) {
+        log:printError("Error occurred when extracting JSON for checking errors: " + e.message);
         SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
         connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
         connectorError.errors[0] = e;
