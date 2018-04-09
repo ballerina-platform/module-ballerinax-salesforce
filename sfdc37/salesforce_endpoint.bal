@@ -33,10 +33,11 @@ public type SalesforceConfiguration {
 @Field {value:"salesforceConnector: Salesforce Connector object"}
 public type SalesforceEndpoint object {
     public {
-        oauth2:OAuth2Client oauth2EP;
-        SalesforceConfiguration salesforceConfig;
-        SalesforceConnector salesforceConnector;
+        oauth2:OAuth2Client oauth2EP = new();
+        SalesforceConfiguration salesforceConfig={};
+        SalesforceConnector salesforceConnector=new();
     }
+
     new () {}
 
     @Description {value:"Salesforce connector endpoint initialization function"}

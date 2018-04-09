@@ -80,8 +80,8 @@ public function <SalesforceEndpoint ep> init (SalesforceConfiguration salesforce
                              };
 }
 ```
-#### Running sfdc tests
-Create `ballerina.conf` file in `package-sfdc`, with following keys:
+#### Running salesforce tests
+Create `ballerina.conf` file in `package-sfdc37`, with following keys:
 * ENDPOINT
 * ACCESS_TOKEN
 * CLIENT_ID
@@ -92,7 +92,7 @@ Create `ballerina.conf` file in `package-sfdc`, with following keys:
 
 Assign relevant string values generated for Salesforce app. 
 
-Go inside `package-sfdc` using terminal and run test.bal file using following command `ballerina test sfdc`.
+Go inside `package-sfdc37` using terminal and run test.bal file using following command `ballerina test sfdc37`.
 
 
 ##### Example

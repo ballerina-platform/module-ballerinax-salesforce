@@ -145,6 +145,7 @@ function testGetRecord () {
 
 @test:Config {
     dependsOn:["testCreateRecord"]
+
 }
 function testUpdateRecord () {
     log:printInfo("salesforceEP -> updateRecord()");
@@ -155,14 +156,15 @@ function testUpdateRecord () {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
+            log:printError(err==null ? "Null": "Ok");
             test:assertFail(msg = err.messages[0]);
         }
     }
 }
 
 @test:Config {
-    dependsOn:["testCreateRecord", "testGetRecord", "testUpdateRecord", "testGetFieldValuesFromSObjectRecord",
-               "testGetRecordByExternalId", "testUpsertSObjectByExternalId"]
+    dependsOn:["testCreateRecord", "testGetRecord", "testUpdateRecord",
+               "testGetFieldValuesFromSObjectRecord"]
 }
 function testDeleteRecord () {
     log:printInfo("salesforceEP -> deleteRecord()");
@@ -471,7 +473,7 @@ function testGetRecordByExternalId () {
 }
 
 @test:Config {
-    dependsOn:["testCreateRecord"]
+    dependsOn:["testCreateRecordWithExternalId"]
 }
 function testUpsertSObjectByExternalId () {
     log:printInfo("salesforceEP -> upsertSObjectByExternalId()");
