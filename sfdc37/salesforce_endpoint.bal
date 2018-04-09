@@ -31,9 +31,9 @@ public type SalesforceConfiguration {
 @Description {value:"Salesforce connector endpoint"}
 @Field {value:"salesforceConfig: Salesforce connector configurations"}
 @Field {value:"salesforceConnector: Salesforce Connector object"}
-public type SalesforceEndpoint object {
+public type Client object {
     public {
-        oauth2:OAuth2Client oauth2EP = new();
+        oauth2:Client oauth2EP = new();
         SalesforceConfiguration salesforceConfig={};
         SalesforceConnector salesforceConnector=new();
     }
@@ -58,7 +58,7 @@ public type SalesforceEndpoint object {
     }
 
     @Description {value:"Return the Salesforce connector client"}
-    @Return {value:"SalesforceConnector client"}
+    @Return {value:"Client client"}
     public function getClient () returns SalesforceConnector {
         return self.salesforceConnector;
     }
