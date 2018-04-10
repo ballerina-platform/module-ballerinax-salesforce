@@ -20,9 +20,10 @@ import ballerina/log;
 import ballerina/mime;
 import ballerina/http;
 
-@Description {value:"Function to set resource URl"}
-@Param {value:"paths: array of path parameters"}
-@Return {value:"string prepared url"}
+documentation { Returns the prepared URL
+    F{{paths}} an array of paths prefixes
+    R{{url}} the prepared URL
+}
 function prepareUrl (string[] paths) returns string {
     string url = "";
 
@@ -37,11 +38,12 @@ function prepareUrl (string[] paths) returns string {
     return url;
 }
 
-@Description {value:"Function to prepare resource URl with encoded queries"}
-@Param {value:"paths: array of path parameters"}
-@Param {value:"queryParamNames: array of query parameter names"}
-@Param {value:"queryParamValues: array of query parameter values"}
-@Return {value:"string prepared url"}
+documentation { Returns the prepared URL with encoded query
+    F{{paths}} an array of paths prefixes
+    F{{queryParamNames}} an array of query param names
+    F{{queryParamValues}} an array of query param values
+    R{{url}} the prepared URL with encoded query
+}
 function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
 
     string url = prepareUrl(paths);
@@ -71,10 +73,12 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
     return url;
 }
 
-@Description {value:"Function to check errors and set errors to relevant error types"}
-@Param {value:"response: http response or http connector error with network related errors"}
-@Param {value:"isRequiredJsonPayload: gets true if response should contain a Json body, else false"}
-@Return {value:"Json Payload or SalesforceConnectorError"}
+documentation { Returns the JSON result or SalesforceConnectorError
+    F{{httpResponse}} HTTP respone
+    F{{expectPayload}} true if json payload expected in response, if not false
+    R{{result}} JSON result
+    R{{connectorError}} SalesforceConnectorError occured
+}
 function checkAndSetErrors (http:Response httpResponse, boolean expectPayload)
 returns json|SalesforceConnectorError {
     json result = {};
