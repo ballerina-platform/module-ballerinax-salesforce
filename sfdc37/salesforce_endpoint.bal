@@ -18,52 +18,53 @@
 
 import wso2/oauth2;
 
-@Description {value:"Salesforce connector configurations can be setup here. In order to use this connector,
-the user will need to have a Salesforce account and a connected app (visit Salesforce:
-https://www.salesforce.com for more info) and obtain the following parameters:
-Base URl (Endpoint), Client Id, Client Secret, Access Token, Refresh Token, Refresh Token Endpoint,
-Refresh Token Path. Provide the obtained credentials to the SalesforceConnectorConfiguration"}
-@Field {value:"oauth2Config: OAuth2 Client endpoint configurations provided by the user"}
+documentation {
+    F{{oauth2Config}} OAuth2 congiguration
+}
 public type SalesforceConfiguration {
             oauth2:OAuth2ClientEndpointConfiguration oauth2Config;
 };
 
-@Description {value:"Salesforce connector endpoint"}
-@Field {value:"salesforceConfig: Salesforce connector configurations"}
-@Field {value:"salesforceConnector: Salesforce Connector object"}
+documentation {Salesforce Client object
+    F{{oauth2Client}} OAuth2 client
+    F{{salesforceConfig}} Salesforce configration
+    F{{salesforceConnector}} Salesforce connector
+}
 public type Client object {
     public {
-        oauth2:Client oauth2EP = new();
-        SalesforceConfiguration salesforceConfig={};
-        SalesforceConnector salesforceConnector=new();
+        oauth2:Client oauth2Client = new();
+        SalesforceConfiguration salesforceConfig = {};
+        SalesforceConnector salesforceConnector = new();
     }
 
     new () {}
 
-    @Description {value:"Salesforce connector endpoint initialization function"}
-    @Param {value:"salesforceConfig: salesforce connector configuration"}
+    documentation {Salesforce connector endpoint initialization function
+        P{{salesforceConfig}} salesforce connector configuration)
+    }
     public function init (SalesforceConfiguration salesforceConfig) {
-        //salesforceConfig.oauth2Config.useUriParams = true;
-        self.oauth2EP.init(salesforceConfig.oauth2Config);
-        self.salesforceConnector.oauth2Endpoint = self.oauth2EP;
+        self.oauth2Client.init(salesforceConfig.oauth2Config);
+        self.salesforceConnector.oauth2Client = self.oauth2Client;
     }
 
-    @Description {value:"Register Salesforce connector endpoint"}
-    @Param {value:"typedesc: Accepts types of data (int, float, string, boolean, etc)"}
+    documentation {Register Salesforce connector endpoint
+        P{{serviceType}} Accepts types of data (int, float, string, boolean, etc)
+    }
     public function register (typedesc serviceType) {
     }
 
-    @Description {value:"Start Salesforce connector endpoint"}
+    documentation {Start Salesforce connector endpoint}
     public function start () {
     }
 
-    @Description {value:"Return the Salesforce connector client"}
-    @Return {value:"Client client"}
+    documentation {Get Salesforce client
+        returns salesforce connector instance
+    }
     public function getClient () returns SalesforceConnector {
         return self.salesforceConnector;
     }
 
-    @Description {value:"Stop Salesforce connector client"}
+    documentation {Stop Salesforce connector client}
     public function stop () {
 
     }

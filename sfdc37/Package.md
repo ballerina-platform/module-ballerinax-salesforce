@@ -17,7 +17,7 @@ Salesforce connector actions are being invoked by a ballerina main function. The
 
 | Ballerina Version         | Connector Version         | API Version |
 | ------------------------- | ------------------------- | ------------|
-|  0.970.0-alpha1-SNAPSHOT  | 0.970.0-alpha1-SNAPSHOT   |   v37.0     |
+|  0.970.0-alpha1-SNAPSHOT  |          0.9.0            |   v37.0     |
 
 
 ## Getting started
@@ -29,17 +29,17 @@ Salesforce connector actions are being invoked by a ballerina main function. The
 
 ### Working with Salesforce REST connector actions
 
-In order to use the Salesforce connector, first you need to create a SalesforceConnector endpoint by passing above mentioned parameters and initialize it.
+In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
 
 ##### Example
  * Request
 
  ```ballerina
- import wso2/salesforce as sf;
+import wso2/salesforce as sf;
  import ballerina/io;
  
     public function main (string[] args) {
-        endpoint sf:SalesforceEndpoint salesforceEP {
+        endpoint Client salesforceClient {
             oauth2Config:{
                              accessToken:accessToken,
                              baseUrl:url,
@@ -52,7 +52,7 @@ In order to use the Salesforce connector, first you need to create a SalesforceC
                          }
         };
     
-        json|sf:SalesforceConnectorError response = salesforceEP -> getAvailableApiVersions();
+        json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
             match response {
                 json jsonRes => {
                     io:println(jsonRes);
