@@ -33,9 +33,9 @@ public type SalesforceConfiguration {
 @Field {value:"salesforceConnector: Salesforce Connector object"}
 public type Client object {
     public {
-        oauth2:Client oauth2EP = new();
-        SalesforceConfiguration salesforceConfig={};
-        SalesforceConnector salesforceConnector=new();
+        oauth2:Client oauth2Client = new();
+        SalesforceConfiguration salesforceConfig = {};
+        SalesforceConnector salesforceConnector = new();
     }
 
     new () {}
@@ -44,8 +44,8 @@ public type Client object {
     @Param {value:"salesforceConfig: salesforce connector configuration"}
     public function init (SalesforceConfiguration salesforceConfig) {
         //salesforceConfig.oauth2Config.useUriParams = true;
-        self.oauth2EP.init(salesforceConfig.oauth2Config);
-        self.salesforceConnector.oauth2Endpoint = self.oauth2EP;
+        self.oauth2Client.init(salesforceConfig.oauth2Config);
+        self.salesforceConnector.oauth2Client = self.oauth2Client;
     }
 
     @Description {value:"Register Salesforce connector endpoint"}

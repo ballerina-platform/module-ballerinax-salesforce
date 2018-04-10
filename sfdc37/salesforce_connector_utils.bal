@@ -102,7 +102,7 @@ returns json|SalesforceConnectorError {
         log:printError("Entity error when extracting JSON for checking errors: " + entityError.message);
         SalesforceConnectorError connectorError = {
                                                       messages:[entityError.message],
-                                                      errors:entityError.cause
+                                                      errors:[entityError.cause ?: {}]
                                                   };
         return connectorError;
     } catch (error e) {
