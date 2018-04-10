@@ -21,7 +21,7 @@ import ballerina/mime;
 import ballerina/http;
 
 documentation { Returns the prepared URL
-    F{{paths}} an array of paths prefixes
+    P{{paths}} an array of paths prefixes
     R{{url}} the prepared URL
 }
 function prepareUrl (string[] paths) returns string {
@@ -39,9 +39,9 @@ function prepareUrl (string[] paths) returns string {
 }
 
 documentation { Returns the prepared URL with encoded query
-    F{{paths}} an array of paths prefixes
-    F{{queryParamNames}} an array of query param names
-    F{{queryParamValues}} an array of query param values
+    P{{paths}} an array of paths prefixes
+    P{{queryParamNames}} an array of query param names
+    P{{queryParamValues}} an array of query param values
     R{{url}} the prepared URL with encoded query
 }
 function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
@@ -74,8 +74,8 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
 }
 
 documentation { Returns the JSON result or SalesforceConnectorError
-    F{{httpResponse}} HTTP respone
-    F{{expectPayload}} true if json payload expected in response, if not false
+    P{{httpResponse}} HTTP respone
+    P{{expectPayload}} true if json payload expected in response, if not false
     R{{result}} JSON result
     R{{connectorError}} SalesforceConnectorError occured
 }

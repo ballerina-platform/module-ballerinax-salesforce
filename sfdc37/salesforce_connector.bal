@@ -18,14 +18,13 @@
 
 import ballerina/http;
 import wso2/oauth2;
-import log;
 
 documentation {Salesforce Connector
     F{{oauth2Client}} OAuth2 client endpoint
 }
 public type SalesforceConnector object {
     public {
-        oauth2:Client oauth2Client;
+        oauth2:APIClient oauth2Client;
     }
 
     documentation {Test Connector action getAvailableApiVersions
@@ -466,7 +465,7 @@ returns json|SalesforceConnectorError {
 
 public function SalesforceConnector::createMultipleRecords (string sObjectName, json records)
 returns json|SalesforceConnectorError {
-    endpoint oauth2:Client oauth2EP = self.oauth2Client;
+    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
 
     json payload;
     http:Request request = new;
@@ -507,7 +506,7 @@ returns json|SalesforceConnectorError {
 
 public function SalesforceConnector::upsertSObjectByExternalId (string sObjectName, string fieldId, string fieldValue, json record)
 returns json|SalesforceConnectorError {
-    endpoint oauth2:Client oauth2EP = self.oauth2Client;
+    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
     json payload;
     http:Request request = new;
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
@@ -578,7 +577,7 @@ public function SalesforceConnector::sObjectPlatformAction () returns json|Sales
 
 public function SalesforceConnector::getRecord (string path)
 returns json|SalesforceConnectorError {
-    endpoint oauth2:Client oauth2EP = self.oauth2Client;
+    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
 
     json payload;
     http:Request request = new;
@@ -609,7 +608,7 @@ returns json|SalesforceConnectorError {
 
 public function SalesforceConnector::createRecord (string sObjectName, json record)
 returns string|SalesforceConnectorError {
-    endpoint oauth2:Client oauth2EP = self.oauth2Client;
+    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
 
     string id;
     http:Request request = new;
@@ -649,7 +648,7 @@ return connectorError;
 
 public function SalesforceConnector::updateRecord (string sObjectName, string id, json record)
 returns boolean|SalesforceConnectorError {
-    endpoint oauth2:Client oauth2EP = self.oauth2Client;
+    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     request.setJsonPayload(record);
@@ -680,7 +679,7 @@ returns boolean|SalesforceConnectorError {
 
 public function SalesforceConnector::deleteRecord (string sObjectName, string id)
 returns boolean|SalesforceConnectorError {
-    endpoint oauth2:Client oauth2EP = self.oauth2Client;
+    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
 
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);

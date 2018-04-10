@@ -32,7 +32,7 @@ documentation {Salesforce Client object
 }
 public type Client object {
     public {
-        oauth2:Client oauth2Client = new();
+        oauth2:APIClient oauth2Client = new();
         SalesforceConfiguration salesforceConfig = {};
         SalesforceConnector salesforceConnector = new();
     }
