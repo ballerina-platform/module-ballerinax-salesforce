@@ -24,7 +24,7 @@ documentation { Returns the prepared URL
     P{{paths}} an array of paths prefixes
     R{{url}} the prepared URL
 }
-function prepareUrl (string[] paths) returns string {
+function prepareUrl(string[] paths) returns string {
     string url = "";
 
     if (paths != null) {
@@ -44,7 +44,7 @@ documentation { Returns the prepared URL with encoded query
     P{{queryParamValues}} an array of query param values
     R{{url}} the prepared URL with encoded query
 }
-function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
+function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
 
     string url = prepareUrl(paths);
 
@@ -79,8 +79,8 @@ documentation { Returns the JSON result or SalesforceConnectorError
     R{{result}} JSON result
     R{{connectorError}} SalesforceConnectorError occured
 }
-function checkAndSetErrors (http:Response httpResponse, boolean expectPayload)
-returns json|SalesforceConnectorError {
+function checkAndSetErrors(http:Response httpResponse, boolean expectPayload)
+    returns json|SalesforceConnectorError {
     json result = {};
     try {
         //if success
@@ -93,11 +93,11 @@ returns json|SalesforceConnectorError {
             SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
             var jsonRes = httpResponse.getJsonPayload();
             json jsonResponse = check jsonRes;
-            var res = <json[]>jsonResponse;
+            var res = < json[]>jsonResponse;
             json[] errors = check res;
             foreach i, err in errors {
-                SalesforceError sfError = {message:err.message.toString()?:"", errorCode:err.errorCode.toString()?:""};
-                connectorError.messages[i] = err.message.toString()?:"";
+                SalesforceError sfError = {message:err.message.toString() ?: "", errorCode:err.errorCode.toString() ?: ""};
+                connectorError.messages[i] = err.message.toString() ?: "";
                 connectorError.salesforceErrors[i] = sfError;
             }
             return connectorError;
@@ -105,9 +105,9 @@ returns json|SalesforceConnectorError {
     } catch (mime:EntityError entityError) {
         log:printError("Entity error when extracting JSON for checking errors: " + entityError.message);
         SalesforceConnectorError connectorError = {
-                                                      messages:[entityError.message],
-                                                      errors:[entityError.cause ?: {}]
-                                                  };
+            messages:[entityError.message],
+            errors:[entityError.cause ?: {}]
+        };
         return connectorError;
     } catch (error e) {
         log:printError("Error occurred when extracting JSON for checking errors: " + e.message);

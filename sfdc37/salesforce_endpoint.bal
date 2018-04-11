@@ -22,7 +22,7 @@ documentation {
     F{{oauth2Config}} OAuth2 congiguration
 }
 public type SalesforceConfiguration {
-            oauth2:OAuth2ClientEndpointConfiguration oauth2Config;
+    oauth2:OAuth2ClientEndpointConfiguration oauth2Config;
 };
 
 documentation {Salesforce Client object
@@ -37,7 +37,7 @@ public type Client object {
         SalesforceConnector salesforceConnector = new();
     }
 
-    new () {}
+    new() {}
 
     documentation {Salesforce connector endpoint initialization function
         P{{salesforceConfig}} salesforce connector configuration)
