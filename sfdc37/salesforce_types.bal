@@ -21,8 +21,8 @@ documentation {
     F{{errorCode}} Error code
 }
 public type SalesforceError {
-            string message;
-            string errorCode;
+    string message;
+    string errorCode;
 };
 
 documentation {
@@ -31,7 +31,7 @@ documentation {
     F{{salesforceErrors}} Array of SalesforceError type errors
 }
 public type SalesforceConnectorError {
-            string[] messages;
-            error[] errors;
-            SalesforceError[] salesforceErrors;
+    string[] messages;
+    error[] errors;
+    SalesforceError[] salesforceErrors;
 };

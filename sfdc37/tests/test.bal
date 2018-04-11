@@ -23,19 +23,19 @@ string externalID = "";
 
 endpoint Client salesforceClient {
     oauth2Config:{
-                     accessToken:accessToken,
-                     baseUrl:url,
-                     clientId:clientId,
-                     clientSecret:clientSecret,
-                     refreshToken:refreshToken,
-                     refreshTokenEP:refreshTokenEndpoint,
-                     refreshTokenPath:refreshTokenPath,
-                     clientConfig:{}
-                 }
+        accessToken:accessToken,
+        baseUrl:url,
+        clientId:clientId,
+        clientSecret:clientSecret,
+        refreshToken:refreshToken,
+        refreshTokenEP:refreshTokenEndpoint,
+        refreshTokenPath:refreshTokenPath,
+        clientConfig:{}
+    }
 };
 
 @test:Config
-function testGetAvailableApiVersions () {
+function testGetAvailableApiVersions() {
     log:printInfo("salesforceClient -> getAvailableApiVersions()");
     response = salesforceClient -> getAvailableApiVersions();
     match response {
@@ -53,7 +53,7 @@ function testGetAvailableApiVersions () {
 }
 
 @test:Config
-function testGetResourcesByApiVersion () {
+function testGetResourcesByApiVersion() {
     log:printInfo("salesforceClient -> getResourcesByApiVersion()");
     string apiVersion = "v37.0";
     response = salesforceClient -> getResourcesByApiVersion(apiVersion);
@@ -80,7 +80,7 @@ function testGetResourcesByApiVersion () {
 }
 
 @test:Config
-function testGetOrganizationLimits () {
+function testGetOrganizationLimits() {
     log:printInfo("salesforceClient -> getOrganizationLimits()");
     response = salesforceClient -> getOrganizationLimits();
     match response {
@@ -105,7 +105,7 @@ function testGetOrganizationLimits () {
 //============================ Basic functions================================//
 
 @test:Config
-function testCreateRecord () {
+function testCreateRecord() {
     log:printInfo("salesforceClient -> createRecord()");
     json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3"};
     string|SalesforceConnectorError stringResponse = salesforceClient -> createRecord(ACCOUNT, accountRecord);
@@ -123,7 +123,7 @@ function testCreateRecord () {
 @test:Config {
     dependsOn:["testCreateRecord"]
 }
-function testGetRecord () {
+function testGetRecord() {
     log:printInfo("salesforceClient -> getRecord()");
     string path = "/services/data/v37.0/sobjects/Account/" + recordId;
     response = salesforceClient -> getRecord(path);
@@ -147,7 +147,7 @@ function testGetRecord () {
     dependsOn:["testCreateRecord"]
 
 }
-function testUpdateRecord () {
+function testUpdateRecord() {
     log:printInfo("salesforceClient -> updateRecord()");
     json account = {Name:"WSO2 Inc", BillingCity:"Jaffna", Phone:"+94110000000"};
     boolean|SalesforceConnectorError response = salesforceClient -> updateRecord(ACCOUNT, recordId, account);
@@ -156,7 +156,7 @@ function testUpdateRecord () {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            log:printError(err==null ? "Null": "Ok");
+            log:printError(err == null ? "Null": "Ok");
             test:assertFail(msg = err.messages[0]);
         }
     }
@@ -164,9 +164,9 @@ function testUpdateRecord () {
 
 @test:Config {
     dependsOn:["testCreateRecord", "testGetRecord", "testUpdateRecord",
-               "testGetFieldValuesFromSObjectRecord"]
+    "testGetFieldValuesFromSObjectRecord"]
 }
-function testDeleteRecord () {
+function testDeleteRecord() {
     log:printInfo("salesforceClient -> deleteRecord()");
     boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord("Account", recordId);
     match response {
@@ -182,7 +182,7 @@ function testDeleteRecord () {
 //=============================== Query ==================================//
 
 @test:Config
-function testGetQueryResult () {
+function testGetQueryResult() {
     log:printInfo("salesforceClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
     response = salesforceClient -> getQueryResult(sampleQuery);
@@ -197,7 +197,7 @@ function testGetQueryResult () {
 
                 while (jsonRes.nextRecordsUrl != null) {
                     log:printDebug("Found new query result set!");
-                    string nextQueryUrl = jsonRes.nextRecordsUrl.toString()?:"";
+                    string nextQueryUrl = jsonRes.nextRecordsUrl.toString() ?: "";
                     response = salesforceClient -> getNextQueryResult(nextQueryUrl);
                     match response {
                         json jsonNextRes => {
@@ -223,7 +223,7 @@ function testGetQueryResult () {
 @test:Config {
     dependsOn:["testGetQueryResult"]
 }
-function testGetAllQueries () {
+function testGetAllQueries() {
     log:printInfo("salesforceClient -> getAllQueries()");
     string sampleQuery = "SELECT Name from Account WHERE isDeleted=TRUE";
     response = salesforceClient -> getAllQueries(sampleQuery);
@@ -241,7 +241,7 @@ function testGetAllQueries () {
 }
 
 @test:Config
-function testExplainQueryOrReportOrListview () {
+function testExplainQueryOrReportOrListview() {
     log:printInfo("salesforceClient -> explainQueryOrReportOrListview()");
     string queryString = "SELECT name FROM Account";
     response = salesforceClient -> explainQueryOrReportOrListview(queryString);
@@ -259,7 +259,7 @@ function testExplainQueryOrReportOrListview () {
 //=============================== Search ==================================//
 
 @test:Config
-function testSearchSOSLString () {
+function testSearchSOSLString() {
     log:printInfo("salesforceClient -> searchSOSLString()");
     string searchString = "FIND {ABC Inc}";
     response = salesforceClient -> searchSOSLString(searchString);
@@ -277,7 +277,7 @@ function testSearchSOSLString () {
 //============================ SObject Information ===============================//
 
 @test:Config
-function testGetSObjectBasicInfo () {
+function testGetSObjectBasicInfo() {
     log:printInfo("salesforceClient -> getSObjectBasicInfo()");
     response = salesforceClient -> getSObjectBasicInfo("Account");
     match response {
@@ -292,7 +292,7 @@ function testGetSObjectBasicInfo () {
 }
 
 @test:Config
-function testSObjectPlatformAction () {
+function testSObjectPlatformAction() {
     log:printInfo("salesforceClient -> sObjectPlatformAction()");
     response = salesforceClient -> sObjectPlatformAction();
     match response {
@@ -307,7 +307,7 @@ function testSObjectPlatformAction () {
 }
 
 @test:Config
-function testDescribeAvailableObjects () {
+function testDescribeAvailableObjects() {
     log:printInfo("salesforceClient -> describeAvailableObjects()");
     response = salesforceClient -> describeAvailableObjects();
     match response {
@@ -323,7 +323,7 @@ function testDescribeAvailableObjects () {
 
 
 @test:Config
-function testDescribeSObject () {
+function testDescribeSObject() {
     log:printInfo("salesforceClient -> describeSObject()");
     response = salesforceClient -> describeSObject(ACCOUNT);
     match response {
@@ -340,7 +340,7 @@ function testDescribeSObject () {
 //=============================== Records Related ==================================//
 
 @test:Config
-function testGetDeletedRecords () {
+function testGetDeletedRecords() {
     log:printInfo("salesforceClient -> getDeletedRecords()");
 
     time:Time now = time:currentTime();
@@ -361,7 +361,7 @@ function testGetDeletedRecords () {
 }
 
 @test:Config
-function testGetUpdatedRecords () {
+function testGetUpdatedRecords() {
     log:printInfo("salesforceClient -> getUpdatedRecords()");
 
     time:Time now = time:currentTime();
@@ -382,25 +382,25 @@ function testGetUpdatedRecords () {
 }
 
 @test:Config
-function testCreateMultipleRecords () {
+function testCreateMultipleRecords() {
     log:printInfo("salesforceClient -> createMultipleRecords()");
 
     json multipleRecords = {"records":[{
-                                           "attributes":{"type":"Account", "referenceId":"ref1"},
-                                           "name":"SampleAccount1",
-                                           "phone":"1111111111",
-                                           "website":"www.sfdc.com",
-                                           "numberOfEmployees":"100",
-                                           "industry":"Banking"
-                                       }, {
-                                              "attributes":{"type":"Account", "referenceId":"ref2"},
-                                              "name":"SampleAccount2",
-                                              "phone":"2222222222",
-                                              "website":"www.salesforce2.com",
-                                              "numberOfEmployees":"250",
-                                              "industry":"Banking"
-                                          }]
-                           };
+        "attributes":{"type":"Account", "referenceId":"ref1"},
+        "name":"SampleAccount1",
+        "phone":"1111111111",
+        "website":"www.sfdc.com",
+        "numberOfEmployees":"100",
+        "industry":"Banking"
+    }, {
+        "attributes":{"type":"Account", "referenceId":"ref2"},
+        "name":"SampleAccount2",
+        "phone":"2222222222",
+        "website":"www.salesforce2.com",
+        "numberOfEmployees":"250",
+        "industry":"Banking"
+    }]
+    };
 
     response = salesforceClient -> createMultipleRecords(ACCOUNT, multipleRecords);
     match response {
@@ -416,7 +416,7 @@ function testCreateMultipleRecords () {
 @test:Config {
     dependsOn:["testCreateRecord"]
 }
-function testGetFieldValuesFromSObjectRecord () {
+function testGetFieldValuesFromSObjectRecord() {
     log:printInfo("salesforceClient -> getFieldValuesFromSObjectRecord()");
     response = salesforceClient -> getFieldValuesFromSObjectRecord("Account", recordId, "Name,BillingCity");
     match response {
@@ -431,7 +431,7 @@ function testGetFieldValuesFromSObjectRecord () {
 }
 
 @test:Config
-function testCreateRecordWithExternalId () {
+function testCreateRecordWithExternalId() {
     log:printInfo("CreateRecordWithExternalId");
 
     externalID = util:uuid();
@@ -451,7 +451,7 @@ function testCreateRecordWithExternalId () {
 @test:Config {
     dependsOn:["testCreateRecordWithExternalId"]
 }
-function testGetRecordByExternalId () {
+function testGetRecordByExternalId() {
     log:printInfo("salesforceClient -> getRecordByExternalId()");
 
     response = salesforceClient -> getRecordByExternalId(ACCOUNT, "SF_ExternalID__c", externalID);
@@ -475,12 +475,12 @@ function testGetRecordByExternalId () {
 @test:Config {
     dependsOn:["testCreateRecordWithExternalId"]
 }
-function testUpsertSObjectByExternalId () {
+function testUpsertSObjectByExternalId() {
     log:printInfo("salesforceClient -> upsertSObjectByExternalId()");
     json upsertRecord = {Name:"Sample Org", BillingCity:"Jaffna, Colombo 3"};
     json|SalesforceConnectorError response = salesforceClient -> upsertSObjectByExternalId(ACCOUNT,
-                                                                                       "SF_ExternalID__c",
-                                                                                       externalID, upsertRecord);
+        "SF_ExternalID__c",
+        externalID, upsertRecord);
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Expects true on success");
@@ -494,7 +494,7 @@ function testUpsertSObjectByExternalId () {
 // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
 @test:Config
-function testCreateAccount () {
+function testCreateAccount() {
     log:printInfo("salesforceClient -> createAccount()");
     json account = {Name:"ABC Inc", BillingCity:"New York"};
     string|SalesforceConnectorError stringAccount = salesforceClient -> createAccount(account);
@@ -513,7 +513,7 @@ function testCreateAccount () {
 @test:Config {
     dependsOn:["testCreateAccount"]
 }
-function testGetAccountById () {
+function testGetAccountById() {
     log:printInfo("salesforceClient -> getAccountById()");
     response = salesforceClient -> getAccountById(accountId);
     match response {
@@ -530,7 +530,7 @@ function testGetAccountById () {
 @test:Config {
     dependsOn:["testCreateAccount"]
 }
-function testUpdateAccount () {
+function testUpdateAccount() {
     log:printInfo("salesforceClient -> updateAccount()");
     json account = {Name:"ABC Inc", BillingCity:"New York-USA"};
     response = salesforceClient -> updateAccount(accountId, account);
@@ -548,7 +548,7 @@ function testUpdateAccount () {
 @test:Config {
     dependsOn:["testCreateAccount", "testUpdateAccount", "testGetAccountById"]
 }
-function testDeleteAccount () {
+function testDeleteAccount() {
     log:printInfo("salesforceClient -> deleteAccount()");
     response = salesforceClient -> deleteAccount(accountId);
     match response {
@@ -565,7 +565,7 @@ function testDeleteAccount () {
 // ============================ LEAD SObject: get, create, update, delete ===================== //
 
 @test:Config
-function testCreateLead () {
+function testCreateLead() {
     log:printInfo("salesforceClient -> createLead()");
     json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
     string|SalesforceConnectorError stringLead = salesforceClient -> createLead(lead);
@@ -584,7 +584,7 @@ function testCreateLead () {
 @test:Config {
     dependsOn:["testCreateLead"]
 }
-function testGetLeadById () {
+function testGetLeadById() {
     log:printInfo("salesforceClient -> getLeadById()");
     response = salesforceClient -> getLeadById(leadId);
     match response {
@@ -601,7 +601,7 @@ function testGetLeadById () {
 @test:Config {
     dependsOn:["testCreateLead"]
 }
-function testUpdateLead () {
+function testUpdateLead() {
     log:printInfo("salesforceClient -> updateLead()");
     json updateLead = {LastName:"Carmen", Company:"WSO2 Lanka (Pvt) Ltd"};
     response = salesforceClient -> updateLead(leadId, updateLead);
@@ -619,7 +619,7 @@ function testUpdateLead () {
 @test:Config {
     dependsOn:["testCreateLead", "testUpdateLead", "testGetLeadById"]
 }
-function testDeleteLead () {
+function testDeleteLead() {
     log:printInfo("salesforceClient -> deleteLead()");
     response = salesforceClient -> deleteLead(leadId);
     match response {
@@ -636,7 +636,7 @@ function testDeleteLead () {
 // ============================ CONTACTS SObject: get, create, update, delete ===================== //
 
 @test:Config
-function testCreateContact () {
+function testCreateContact() {
     log:printInfo("salesforceClient -> createContact()");
     json contact = {LastName:"Patson"};
     string|SalesforceConnectorError stringContact = salesforceClient -> createContact(contact);
@@ -655,7 +655,7 @@ function testCreateContact () {
 @test:Config {
     dependsOn:["testCreateContact"]
 }
-function testGetContactById () {
+function testGetContactById() {
     log:printInfo("salesforceClient -> getContactById()");
     response = salesforceClient -> getContactById(contactId);
     match response {
@@ -672,7 +672,7 @@ function testGetContactById () {
 @test:Config {
     dependsOn:["testCreateContact"]
 }
-function testUpdateContact () {
+function testUpdateContact() {
     log:printInfo("salesforceClient -> updateContact()");
     json updateContact = {LastName:"Rebert Patson"};
     response = salesforceClient -> updateContact(contactId, updateContact);
@@ -690,7 +690,7 @@ function testUpdateContact () {
 @test:Config {
     dependsOn:["testCreateContact", "testUpdateContact", "testGetContactById"]
 }
-function testDeleteContact () {
+function testDeleteContact() {
     log:printInfo("salesforceClient -> deleteContact()");
     response = salesforceClient -> deleteContact(contactId);
     match response {
@@ -707,7 +707,7 @@ function testDeleteContact () {
 // ============================ PRODUCTS SObject: get, create, update, delete ===================== //
 
 @test:Config
-function testCreateProduct () {
+function testCreateProduct() {
     log:printInfo("salesforceClient -> createProduct()");
     json product = {Name:"APIM", Description:"APIM product"};
     string|SalesforceConnectorError stringProduct = salesforceClient -> createProduct(product);
@@ -726,7 +726,7 @@ function testCreateProduct () {
 @test:Config {
     dependsOn:["testCreateProduct"]
 }
-function testGetProductById () {
+function testGetProductById() {
     log:printInfo("salesforceClient -> getProductById()");
     response = salesforceClient -> getProductById(productId);
     match response {
@@ -743,7 +743,7 @@ function testGetProductById () {
 @test:Config {
     dependsOn:["testCreateProduct"]
 }
-function testUpdateProduct () {
+function testUpdateProduct() {
     log:printInfo("salesforceClient -> updateProduct()");
     json updateProduct = {Name:"APIM", Description:"APIM new product"};
     response = salesforceClient -> updateProduct(productId, updateProduct);
@@ -761,7 +761,7 @@ function testUpdateProduct () {
 @test:Config {
     dependsOn:["testCreateProduct", "testUpdateProduct", "testGetProductById"]
 }
-function testDeleteProduct () {
+function testDeleteProduct() {
     log:printInfo("salesforceClient -> deleteProduct()");
     response = salesforceClient -> deleteProduct(productId);
     match response {
@@ -778,7 +778,7 @@ function testDeleteProduct () {
 // ============================ OPPORTUNITY SObject: get, create, update, delete ===================== //
 
 @test:Config
-function testCreateOpportunity () {
+function testCreateOpportunity() {
     log:printInfo("salesforceClient -> createOpportunity()");
     json createOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
     string|SalesforceConnectorError stringResponse = salesforceClient -> createOpportunity(createOpportunity);
@@ -797,7 +797,7 @@ function testCreateOpportunity () {
 @test:Config {
     dependsOn:["testCreateOpportunity"]
 }
-function testGetOpportunityById () {
+function testGetOpportunityById() {
     log:printInfo("salesforceClient -> getOpportunityById()");
     response = salesforceClient -> getOpportunityById(opportunityId);
     match response {
@@ -814,7 +814,7 @@ function testGetOpportunityById () {
 @test:Config {
     dependsOn:["testCreateOpportunity"]
 }
-function testUpdateOpportunity () {
+function testUpdateOpportunity() {
     log:printInfo("salesforceClient -> updateOpportunity()");
     json updateOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
     response = salesforceClient -> updateOpportunity(opportunityId, updateOpportunity);
@@ -832,7 +832,7 @@ function testUpdateOpportunity () {
 @test:Config {
     dependsOn:["testCreateOpportunity", "testUpdateOpportunity", "testGetOpportunityById"]
 }
-function testDeleteOpportunity () {
+function testDeleteOpportunity() {
     log:printInfo("salesforceClient -> deleteOpportunity()");
     response = salesforceClient -> deleteOpportunity(opportunityId);
     match response {
@@ -846,14 +846,14 @@ function testDeleteOpportunity () {
     }
 }
 
-function setConfParams (string|() confParam) returns string {
-                                                     match confParam {
-string param => {
-                    return param;
-                }
-() => {
-        log:printInfo("Empty value, found nil!!");
-          return "";
-       }
-   }
+function setConfParams(string|() confParam) returns string {
+    match confParam {
+        string param => {
+            return param;
+        }
+        () => {
+            log:printInfo("Empty value, found nil!!");
+            return "";
+        }
+    }
 }
