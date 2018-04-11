@@ -16,16 +16,14 @@
 // under the License.
 //
 
-package salesforce;
-
 import ballerina/log;
 import ballerina/mime;
 import ballerina/http;
-import ballerina/net.uri;
 
-@Description {value:"Function to set resource URl"}
-@Param {value:"paths: array of path parameters"}
-@Return {value:"string prepared url"}
+documentation { Returns the prepared URL
+    P{{paths}} an array of paths prefixes
+    R{{url}} the prepared URL
+}
 function prepareUrl (string[] paths) returns string {
     string url = "";
 
@@ -40,11 +38,12 @@ function prepareUrl (string[] paths) returns string {
     return url;
 }
 
-@Description {value:"Function to prepare resource URl with encoded queries"}
-@Param {value:"paths: array of path parameters"}
-@Param {value:"queryParamNames: array of query parameter names"}
-@Param {value:"queryParamValues: array of query parameter values"}
-@Return {value:"string prepared url"}
+documentation { Returns the prepared URL with encoded query
+    P{{paths}} an array of paths prefixes
+    P{{queryParamNames}} an array of query param names
+    P{{queryParamValues}} an array of query param values
+    R{{url}} the prepared URL with encoded query
+}
 function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
 
     string url = prepareUrl(paths);
@@ -54,7 +53,7 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
     foreach i, name in queryParamNames {
         string value = queryParamValues[i];
 
-        var oauth2Response = uri:encode(value, ENCODING_CHARSET);
+        var oauth2Response = http:encode(value, ENCODING_CHARSET);
         match oauth2Response {
             string encoded => {
                 if (first) {
@@ -74,37 +73,44 @@ function prepareQueryUrl (string[] paths, string[] queryParamNames, string[] que
     return url;
 }
 
-@Description {value:"Function to check errors and set errors to relevant error types"}
-@Param {value:"response: http response or http connector error with network related errors"}
-@Param {value:"isRequiredJsonPayload: gets true if response should contain a Json body, else false"}
-@Return {value:"Json Payload or SalesforceConnectorError"}
+documentation { Returns the JSON result or SalesforceConnectorError
+    P{{httpResponse}} HTTP respone
+    P{{expectPayload}} true if json payload expected in response, if not false
+    R{{result}} JSON result
+    R{{connectorError}} SalesforceConnectorError occured
+}
 function checkAndSetErrors (http:Response httpResponse, boolean expectPayload)
 returns json|SalesforceConnectorError {
-    json result;
+    json result = {};
     try {
         //if success
         if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
             if (expectPayload) {
-                result =? httpResponse.getJsonPayload();
+                var res = httpResponse.getJsonPayload();
+                result = check res;
             }
         } else {
             SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
-            json jsonResponse =? httpResponse.getJsonPayload();
-            json[] errors =? <json[]>jsonResponse;
+            var jsonRes = httpResponse.getJsonPayload();
+            json jsonResponse = check jsonRes;
+            var res = <json[]>jsonResponse;
+            json[] errors = check res;
             foreach i, err in errors {
-                SalesforceError sfError = {message:err.message.toString(), errorCode:err.errorCode.toString()};
-                connectorError.messages[i] = err.message.toString();
+                SalesforceError sfError = {message:err.message.toString()?:"", errorCode:err.errorCode.toString()?:""};
+                connectorError.messages[i] = err.message.toString()?:"";
                 connectorError.salesforceErrors[i] = sfError;
             }
             return connectorError;
         }
     } catch (mime:EntityError entityError) {
+        log:printError("Entity error when extracting JSON for checking errors: " + entityError.message);
         SalesforceConnectorError connectorError = {
                                                       messages:[entityError.message],
-                                                      errors:entityError.cause
+                                                      errors:[entityError.cause ?: {}]
                                                   };
         return connectorError;
     } catch (error e) {
+        log:printError("Error occurred when extracting JSON for checking errors: " + e.message);
         SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
         connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
         connectorError.errors[0] = e;
