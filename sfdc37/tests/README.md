@@ -2,7 +2,7 @@
 
 | Ballerina Version         | Connector Version         | API Version |
 | ------------------------- | ------------------------- | ------------|
-|  0.970.0-alpha1-SNAPSHOT  |           0.9.0           |   v37.0     |
+|  0.970.0-alpha4           |           0.9.0           |   v37.0     |
 
 ### Prerequisites
 Create a Salesforce developer account and create a connected app by visiting Salesforce (https://www.salesforce.com) and obtain the following parameters:
