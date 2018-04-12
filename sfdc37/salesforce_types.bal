@@ -26,12 +26,12 @@ public type SalesforceError {
 };
 
 documentation {
-    F{{messages}} Array of string error messages
-    F{{errors}} Array of errors
+    F{{message}} Array of string error messages
+    F{{err}} Array of errors
     F{{salesforceErrors}} Array of SalesforceError type errors
 }
 public type SalesforceConnectorError {
-    string[] messages;
-    error[] errors;
+    string? message;
+    error err;
     SalesforceError[] salesforceErrors;
 };
