@@ -90,14 +90,14 @@ function checkAndSetErrors(http:Response httpResponse, boolean expectPayload)
                 result = check res;
             }
         } else {
-            SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
+            SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
             var jsonRes = httpResponse.getJsonPayload();
             json jsonResponse = check jsonRes;
             var res = < json[]>jsonResponse;
             json[] errors = check res;
             foreach i, err in errors {
                 SalesforceError sfError = {message:err.message.toString() ?: "", errorCode:err.errorCode.toString() ?: ""};
-                connectorError.messages[i] = err.message.toString() ?: "";
+                connectorError.message = err.message.toString() ?: "";
                 connectorError.salesforceErrors[i] = sfError;
             }
             return connectorError;
@@ -105,15 +105,15 @@ function checkAndSetErrors(http:Response httpResponse, boolean expectPayload)
     } catch (mime:EntityError entityError) {
         log:printError("Entity error when extracting JSON for checking errors: " + entityError.message);
         SalesforceConnectorError connectorError = {
-            messages:[entityError.message],
-            errors:[entityError.cause ?: {}]
+            message:entityError.message,
+            err:entityError.cause ?: {}
         };
         return connectorError;
     } catch (error e) {
         log:printError("Error occurred when extracting JSON for checking errors: " + e.message);
-        SalesforceConnectorError connectorError = {messages:[], salesforceErrors:[]};
-        connectorError.messages[0] = "Error occured while receiving Json payload: Found null!";
-        connectorError.errors[0] = e;
+        SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+        connectorError.message = "Error occured while receiving Json payload: Found null!";
+        connectorError.err = e;
         return connectorError;
     }
 
