@@ -16,23 +16,22 @@
 // under the License.
 //
 
-import wso2/oauth2;
+import ballerina/http;
 
 documentation {
-    F{{oauth2Config}} OAuth2 congiguration
+    F{{clientConfig}} OAuth2 congiguration
 }
 public type SalesforceConfiguration {
-    oauth2:OAuth2ClientEndpointConfiguration oauth2Config;
+    string baseUrl;
+    http:ClientEndpointConfig clientConfig;
 };
 
 documentation {Salesforce Client object
-    F{{oauth2Client}} OAuth2 client
     F{{salesforceConfig}} Salesforce configration
     F{{salesforceConnector}} Salesforce connector
 }
 public type Client object {
     public {
-        oauth2:APIClient oauth2Client = new();
         SalesforceConfiguration salesforceConfig = {};
         SalesforceConnector salesforceConnector = new();
     }
@@ -43,8 +42,8 @@ public type Client object {
         P{{salesforceConfig}} salesforce connector configuration)
     }
     public function init (SalesforceConfiguration salesforceConfig) {
-        self.oauth2Client.init(salesforceConfig.oauth2Config);
-        self.salesforceConnector.oauth2Client = self.oauth2Client;
+        salesforceConfig.clientConfig.targets = [{url:salesforceConfig.baseUrl}];
+        self.salesforceConnector.httpClient.init(salesforceConfig.clientConfig);
     }
 
     documentation {Register Salesforce connector endpoint

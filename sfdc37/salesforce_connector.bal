@@ -17,14 +17,13 @@
 //
 
 import ballerina/http;
-import wso2/oauth2;
 
 documentation {Salesforce Connector
-    F{{oauth2Client}} OAuth2 client endpoint
+    F{{httpClient}} OAuth2 client endpoint
 }
 public type SalesforceConnector object {
     public {
-        oauth2:APIClient oauth2Client;
+        http:Client httpClient;
     }
 
     documentation {Test Connector action getAvailableApiVersions
@@ -465,14 +464,14 @@ public function SalesforceConnector::getFieldValuesFromExternalObjectRecord(stri
 
 public function SalesforceConnector::createMultipleRecords(string sObjectName, json records)
     returns json|SalesforceConnectorError {
-    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
+    endpoint http:Client httpClient = self.httpClient;
 
     json payload;
     http:Request request = new;
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
     request.setJsonPayload(records);
     try {
-        var res = oauth2EP -> post(path, request);
+        var res = httpClient -> post(path, request);
         http:Response response = check res;
 
         json|SalesforceConnectorError result = checkAndSetErrors(response, true);
@@ -487,8 +486,8 @@ public function SalesforceConnector::createMultipleRecords(string sObjectName, j
     } catch (http:HttpConnectorError httpError) {
         SalesforceConnectorError connectorError =
         {
-            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
-            errors:[httpError.cause ?: {}]
+            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
+            err:httpError.cause ?: {}
         };
         return connectorError;
     }
@@ -506,13 +505,13 @@ public function SalesforceConnector::getRecordByExternalId(string sObjectName, s
 
 public function SalesforceConnector::upsertSObjectByExternalId(string sObjectName, string fieldId, string fieldValue, json record)
     returns json|SalesforceConnectorError {
-    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
+    endpoint http:Client httpClient = self.httpClient;
     json payload;
     http:Request request = new;
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     request.setJsonPayload(record);
     try {
-        var res = oauth2EP -> patch(path, request);
+        var res = httpClient -> patch(path, request);
         http:Response response = check res;
         json|SalesforceConnectorError result = checkAndSetErrors(response, false);
         match result {
@@ -526,8 +525,8 @@ public function SalesforceConnector::upsertSObjectByExternalId(string sObjectNam
     } catch (http:HttpConnectorError httpError) {
         SalesforceConnectorError connectorError =
         {
-            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
-            errors:[httpError.cause ?: {}]
+            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
+            err:httpError.cause ?: {}
         };
         return connectorError;
     }
@@ -577,12 +576,12 @@ public function SalesforceConnector::sObjectPlatformAction() returns json|Salesf
 
 public function SalesforceConnector::getRecord(string path)
     returns json|SalesforceConnectorError {
-    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
+    endpoint http:Client httpClient = self.httpClient;
 
     json payload;
     http:Request request = new;
     try {
-        var res = oauth2EP -> get(path, request);
+        var res = httpClient -> get(path, request);
         http:Response response = check res;
 
         json|SalesforceConnectorError result = checkAndSetErrors(response, true);
@@ -597,8 +596,8 @@ public function SalesforceConnector::getRecord(string path)
     } catch (http:HttpConnectorError httpError) {
         SalesforceConnectorError connectorError =
         {
-            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
-            errors:[httpError.cause ?: {}]
+            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
+            err:httpError.cause ?: {}
         };
         return connectorError;
     }
@@ -608,14 +607,14 @@ public function SalesforceConnector::getRecord(string path)
 
 public function SalesforceConnector::createRecord(string sObjectName, json record)
     returns string|SalesforceConnectorError {
-    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
+    endpoint http:Client httpClient = self.httpClient;
 
     string id;
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     request.setJsonPayload(record);
     try {
-        var res = oauth2EP -> post(path, request);
+        var res = httpClient -> post(path, request);
         http:Response response = check res;
 
         json|SalesforceConnectorError result = checkAndSetErrors(response, true);
@@ -638,8 +637,8 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
     } catch (http:HttpConnectorError httpError) {
         SalesforceConnectorError connectorError =
         {
-            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
-            errors:[httpError.cause ?: {}]
+            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
+            err:httpError.cause ?: {}
         };
         return connectorError;
     }
@@ -648,12 +647,12 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
 
 public function SalesforceConnector::updateRecord(string sObjectName, string id, json record)
     returns boolean|SalesforceConnectorError {
-    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
+    endpoint http:Client httpClient = self.httpClient;
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     request.setJsonPayload(record);
     try {
-        var res = oauth2EP -> patch(path, request);
+        var res = httpClient -> patch(path, request);
         http:Response response = check res;
 
         json|SalesforceConnectorError result = checkAndSetErrors(response, false);
@@ -668,8 +667,8 @@ public function SalesforceConnector::updateRecord(string sObjectName, string id,
     } catch (http:HttpConnectorError httpError) {
         SalesforceConnectorError connectorError =
         {
-            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
-            errors:[httpError.cause ?: {}]
+            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
+            err:httpError.cause ?: {}
         };
         return connectorError;
     }
@@ -679,12 +678,12 @@ public function SalesforceConnector::updateRecord(string sObjectName, string id,
 
 public function SalesforceConnector::deleteRecord(string sObjectName, string id)
     returns boolean|SalesforceConnectorError {
-    endpoint oauth2:APIClient oauth2EP = self.oauth2Client;
+    endpoint http:Client httpClient = self.httpClient;
 
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     try {
-        var res = oauth2EP -> delete(path, request);
+        var res = httpClient -> delete(path, request);
         http:Response response = check res;
 
         json|SalesforceConnectorError result = checkAndSetErrors(response, false);
@@ -699,8 +698,8 @@ public function SalesforceConnector::deleteRecord(string sObjectName, string id)
     } catch (http:HttpConnectorError httpError) {
         SalesforceConnectorError connectorError =
         {
-            messages:["Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message],
-            errors:[httpError.cause ?: {}]
+            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
+            err:httpError.cause ?: {}
         };
         return connectorError;
     }

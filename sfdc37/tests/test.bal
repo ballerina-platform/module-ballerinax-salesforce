@@ -22,15 +22,16 @@ string recordId = "";
 string externalID = "";
 
 endpoint Client salesforceClient {
-    oauth2Config:{
-        accessToken:accessToken,
-        baseUrl:url,
-        clientId:clientId,
-        clientSecret:clientSecret,
-        refreshToken:refreshToken,
-        refreshTokenEP:refreshTokenEndpoint,
-        refreshTokenPath:refreshTokenPath,
-        clientConfig:{}
+    baseUrl:url,
+    clientConfig:{
+        auth:{
+            scheme:"oauth",
+            accessToken:accessToken,
+            refreshToken:refreshToken,
+            clientId:clientId,
+            clientSecret:clientSecret,
+            refreshUrl:refreshTokenEndpoint + refreshTokenPath
+        }
     }
 };
 
@@ -47,7 +48,7 @@ function testGetAvailableApiVersions() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -74,7 +75,7 @@ function testGetResourcesByApiVersion() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -97,7 +98,7 @@ function testGetOrganizationLimits() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -115,7 +116,7 @@ function testCreateRecord() {
             recordId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -138,7 +139,7 @@ function testGetRecord() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -156,8 +157,8 @@ function testUpdateRecord() {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            log:printError(err == null ? "Null": "Ok");
-            test:assertFail(msg = err.messages[0]);
+            log:printError(err==null ? "Null": "Ok");
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -174,7 +175,7 @@ function testDeleteRecord() {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -208,14 +209,14 @@ function testGetQueryResult() {
                             jsonRes = jsonNextRes;
                         }
                         SalesforceConnectorError err => {
-                            test:assertFail(msg = err.messages[0]);
+                            test:assertFail(msg = err.message?:"");
                         }
                     }
                 }
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -235,7 +236,7 @@ function testGetAllQueries() {
             test:assertNotEquals(jsonRes["records"], null);
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -251,7 +252,7 @@ function testExplainQueryOrReportOrListview() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -269,7 +270,7 @@ function testSearchSOSLString() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -286,7 +287,7 @@ function testGetSObjectBasicInfo() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -301,7 +302,7 @@ function testSObjectPlatformAction() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -316,7 +317,7 @@ function testDescribeAvailableObjects() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -332,7 +333,7 @@ function testDescribeSObject() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -355,7 +356,7 @@ function testGetDeletedRecords() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -376,7 +377,7 @@ function testGetUpdatedRecords() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -408,7 +409,7 @@ function testCreateMultipleRecords() {
             test:assertEquals(jsonRes.hasErrors.toString(), "false", msg = "Found null JSON response!");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -425,7 +426,7 @@ function testGetFieldValuesFromSObjectRecord() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -443,7 +444,7 @@ function testCreateRecordWithExternalId() {
             test:assertNotEquals(id, "", msg = "Found empty response!");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -467,7 +468,7 @@ function testGetRecordByExternalId() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -486,7 +487,7 @@ function testUpsertSObjectByExternalId() {
             test:assertNotEquals(jsonRes, null, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -505,7 +506,7 @@ function testCreateAccount() {
             accountId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -522,7 +523,7 @@ function testGetAccountById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -540,7 +541,7 @@ function testUpdateAccount() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -557,7 +558,7 @@ function testDeleteAccount() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -576,7 +577,7 @@ function testCreateLead() {
             leadId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -593,7 +594,7 @@ function testGetLeadById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -611,7 +612,7 @@ function testUpdateLead() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -628,7 +629,7 @@ function testDeleteLead() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -647,7 +648,7 @@ function testCreateContact() {
             contactId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -664,7 +665,7 @@ function testGetContactById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -682,7 +683,7 @@ function testUpdateContact() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -699,7 +700,7 @@ function testDeleteContact() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -718,7 +719,7 @@ function testCreateProduct() {
             productId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -735,7 +736,7 @@ function testGetProductById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -753,7 +754,7 @@ function testUpdateProduct() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -770,7 +771,7 @@ function testDeleteProduct() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -789,7 +790,7 @@ function testCreateOpportunity() {
             opportunityId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -806,7 +807,7 @@ function testGetOpportunityById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -824,7 +825,7 @@ function testUpdateOpportunity() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
@@ -841,7 +842,7 @@ function testDeleteOpportunity() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.messages[0]);
+            test:assertFail(msg = err.message?:"");
         }
     }
 }
