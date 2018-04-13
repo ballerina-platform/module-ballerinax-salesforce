@@ -11,8 +11,7 @@ Create a Salesforce developer account and create a connected app by visiting Sal
 * Client Secret
 * Access Token
 * Refresh Token
-* Refresh Token Endpoint
-* Refresh Token Path
+* Refresh URL
 
 IMPORTANT: This access token and refresh token can be used to make API requests on your own account's behalf. Do not share your access token, client secret with anyone.
 
@@ -22,34 +21,26 @@ Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticat
 
 In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
 
-Visit `test.bal` file to find the way of creating Salesforce endpoint.
+Find the way of creating Salesforce endpoint as following. 
 
-#### Salesforce Client Object
 ```ballerina
-public type Client object {
-    public {
-        oauth2:Client oauth2EP = new();
-        SalesforceConfiguration salesforceConfig = {};
-        SalesforceConnector salesforceConnector = new();
+
+endpoint Client salesforceClient {
+    baseUrl:url,
+    clientConfig:{
+        auth:{
+            scheme:"oauth",
+            accessToken:accessToken,
+            refreshToken:refreshToken,
+            clientId:clientId,
+            clientSecret:clientSecret,
+            refreshUrl:refreshUrl
+        }
     }
-    
-    new () {}
-
-    public function init (SalesforceConfiguration salesforceConfig);
-    public function register (typedesc serviceType);
-    public function start;
-    public function getClient () returns SalesforceConnector;
-    public function stop ();
-};
-```
-
-#### SalesforceConfiguration record
-```ballerina
-public type SalesforceConfiguration {
-            oauth2:OAuth2ClientEndpointConfiguration oauth2Config;
 };
 
 ```
+
 #### Running salesforce tests
 Create `ballerina.conf` file in `package-salesforce`, with following keys:
 * ENDPOINT
@@ -57,9 +48,62 @@ Create `ballerina.conf` file in `package-salesforce`, with following keys:
 * CLIENT_ID
 * CLIENT_SECRET
 * REFRESH_TOKEN
-* REFRESH_TOKEN_ENDPOINT
-* REFRESH_TOKEN_PATH
+* REFRESH_URL
 
 Assign relevant string values generated for Salesforce app. 
 
 Go inside `package-salesforce` using terminal and run test.bal file using following command `ballerina test sfdc37`.
+
+* Sample Test Function
+
+```ballerina
+
+@test:Config
+function testGetResourcesByApiVersion() {
+    log:printInfo("salesforceClient -> getResourcesByApiVersion()");
+    string apiVersion = "v37.0";
+    response = salesforceClient -> getResourcesByApiVersion(apiVersion);
+    match response {
+        json jsonRes => {
+            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            try {
+                test:assertNotEquals(jsonRes["sobjects"], null);
+                test:assertNotEquals(jsonRes["search"], null);
+                test:assertNotEquals(jsonRes["query"], null);
+                test:assertNotEquals(jsonRes["licensing"], null);
+                test:assertNotEquals(jsonRes["connect"], null);
+                test:assertNotEquals(jsonRes["tooling"], null);
+                test:assertNotEquals(jsonRes["chatter"], null);
+                test:assertNotEquals(jsonRes["recent"], null);
+            } catch (error e) {
+                test:assertFail(msg = "Response doesn't have required keys");
+            }
+        }
+        SalesforceConnectorError err => {
+            test:assertFail(msg = err.message?:"");
+        }
+    }
+}
+
+```
+
+* Sample Result 
+
+```ballerina
+
+---------------------------------------------------------------------------
+    T E S T S
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+Running Tests of Package: sfdc37
+---------------------------------------------------------------------------
+
+...
+2018-04-13 13:35:19,154 INFO  [sfdc37] - salesforceClient -> getResourcesByApiVersion() 
+
+...
+
+sfdc37............................................................. SUCCESS
+---------------------------------------------------------------------------
+
+```

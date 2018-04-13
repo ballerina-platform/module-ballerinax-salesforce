@@ -33,10 +33,7 @@ documentation { Constant field 'REFRESH_TOKEN'. Holds the value for the refresh 
 @readonly public string REFRESH_TOKEN = "REFRESH_TOKEN";
 
 documentation { Constant field 'REFRESH_TOKEN_ENDPOINT'. Holds the value for Salesforce refresh token endpoint}
-@readonly public string REFRESH_TOKEN_ENDPOINT = "REFRESH_TOKEN_ENDPOINT";
-
-documentation { Constant field 'REFRESH_TOKEN_PATH'. Holds the value for the Salesforce refresh token path}
-@readonly public string REFRESH_TOKEN_PATH = "REFRESH_TOKEN_PATH";
+@readonly public string REFRESH_TOKEN_ENDPOINT = "REFRESH_URL";
 
 //Latest API Version
 documentation { Constant field 'API_VERSION'. Holds the value for the Salesforce API version}

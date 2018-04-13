@@ -34,8 +34,7 @@ Create a Salesforce account and create a connected app by visiting Salesforce (h
 * Client Secret
 * Access Token
 * Refresh Token
-* Refresh Token Endpoint
-* Refresh Token Path
+* Refresh URL
 
 IMPORTANT: This access token and refresh token can be used to make API requests on your own account's behalf. Do not share your access token, client secret with anyone.
 
@@ -44,16 +43,16 @@ Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticat
 ### Working with Salesforce REST connector.
 
 In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
+(Visit `test.bal` file to find the way of creating Salesforce Client endpoint.)
 
-Visit `test.bal` file to find the way of creating Salesforce Client endpoint.
 #### Salesforce Client Object
+
 ```ballerina
 public type Client object {
     public {
-        oauth2:Client oauth2EP = new();
-        SalesforceConfiguration salesforceConfig = {};
-        SalesforceConnector salesforceConnector = new();
-    }
+            SalesforceConfiguration salesforceConfig = {};
+            SalesforceConnector salesforceConnector = new();
+        }
     
     new () {}
 
@@ -63,12 +62,14 @@ public type Client object {
     public function getClient () returns SalesforceConnector;
     public function stop ();
 };
+
 ```
 
 #### SalesforceConfiguration record
 ```ballerina
 public type SalesforceConfiguration {
-            oauth2:OAuth2ClientEndpointConfiguration oauth2Config;
+    string baseUrl;
+    http:ClientEndpointConfig clientConfig;
 };
 
 ```
@@ -79,8 +80,7 @@ Create `ballerina.conf` file in `package-salesforce`, with following keys:
 * CLIENT_ID
 * CLIENT_SECRET
 * REFRESH_TOKEN
-* REFRESH_TOKEN_ENDPOINT
-* REFRESH_TOKEN_PATH
+* REFRESH_URL
 
 Assign relevant string values generated for Salesforce app. 
 
@@ -91,21 +91,22 @@ Go inside `package-sfdc37` using terminal and run test.bal file using following 
  * Request
 
  ```ballerina
- import wso2/salesforce as sf;
+ import wso2/sfdc37 as sf;
  import ballerina/io;
  
     public function main (string[] args) {
         endpoint Client salesforceClient {
-            oauth2Config:{
-                             accessToken:accessToken,
-                             baseUrl:url,
-                             clientId:clientId,
-                             clientSecret:clientSecret,
-                             refreshToken:refreshToken,
-                             refreshTokenEP:refreshTokenEndpoint,
-                             refreshTokenPath:refreshTokenPath,
-                             clientConfig:{}
-                         }
+            baseUrl:url,
+            clientConfig:{
+                auth:{
+                    scheme:"oauth",
+                    accessToken:accessToken,
+                    refreshToken:refreshToken,
+                    clientId:clientId,
+                    clientSecret:clientSecret,
+                    refreshUrl:refreshUrl
+                }
+            }
         };
     
         json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();

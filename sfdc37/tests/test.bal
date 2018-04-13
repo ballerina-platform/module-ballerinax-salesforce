@@ -9,8 +9,7 @@ string accessToken = setConfParams(config:getAsString("ACCESS_TOKEN"));
 string clientId = setConfParams(config:getAsString("CLIENT_ID"));
 string clientSecret = setConfParams(config:getAsString("CLIENT_SECRET"));
 string refreshToken = setConfParams(config:getAsString("REFRESH_TOKEN"));
-string refreshTokenEndpoint = setConfParams(config:getAsString("REFRESH_TOKEN_ENDPOINT"));
-string refreshTokenPath = setConfParams(config:getAsString("REFRESH_TOKEN_PATH"));
+string refreshUrl = setConfParams(config:getAsString("REFRESH_URL"));
 
 json|SalesforceConnectorError response;
 string accountId = "";
@@ -30,7 +29,7 @@ endpoint Client salesforceClient {
             refreshToken:refreshToken,
             clientId:clientId,
             clientSecret:clientSecret,
-            refreshUrl:refreshTokenEndpoint + refreshTokenPath
+            refreshUrl:refreshUrl
         }
     }
 };
