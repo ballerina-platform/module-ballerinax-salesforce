@@ -41,13 +41,17 @@ function testGetAvailableApiVersions() {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-            //json[] versions = <json[]>jsonRes;
-            //test:assertTrue(lengthof versions > 0, msg = "Found 0 or No API versions");
-            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
+            try{
+                var res = <json[]>jsonRes;
+                json[] versions = check res;
+                test:assertTrue(lengthof versions > 0, msg = "Found 0 or No API versions");
+            } catch(error err){
+                test:assertFail(msg = err.message);
+            }
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -74,7 +78,7 @@ function testGetResourcesByApiVersion() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -86,7 +90,8 @@ function testGetOrganizationLimits() {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-            //test:assertTrue(lengthof jsonRes.getKeys() > 0, msg = "Response doesn't have enough keys");
+            string[] keys = jsonRes.getKeys()?:[];
+            test:assertTrue(lengthof keys > 0, msg = "Response doesn't have enough keys");
             foreach key in jsonRes {
                 try {
                     test:assertNotEquals(key["Max"], null, msg = "Max limit not found");
@@ -97,7 +102,7 @@ function testGetOrganizationLimits() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -115,7 +120,7 @@ function testCreateRecord() {
             recordId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -138,7 +143,7 @@ function testGetRecord() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -157,7 +162,7 @@ function testUpdateRecord() {
         }
         SalesforceConnectorError err => {
             log:printError(err==null ? "Null": "Ok");
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -174,7 +179,7 @@ function testDeleteRecord() {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -208,14 +213,14 @@ function testGetQueryResult() {
                             jsonRes = jsonNextRes;
                         }
                         SalesforceConnectorError err => {
-                            test:assertFail(msg = err.message?:"");
+                            test:assertFail(msg = err.message);
                         }
                     }
                 }
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -235,7 +240,7 @@ function testGetAllQueries() {
             test:assertNotEquals(jsonRes["records"], null);
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -251,7 +256,7 @@ function testExplainQueryOrReportOrListview() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -269,7 +274,7 @@ function testSearchSOSLString() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -286,7 +291,7 @@ function testGetSObjectBasicInfo() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -301,7 +306,7 @@ function testSObjectPlatformAction() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -316,7 +321,7 @@ function testDescribeAvailableObjects() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -332,7 +337,7 @@ function testDescribeSObject() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -355,7 +360,7 @@ function testGetDeletedRecords() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -376,7 +381,7 @@ function testGetUpdatedRecords() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -408,7 +413,7 @@ function testCreateMultipleRecords() {
             test:assertEquals(jsonRes.hasErrors.toString(), "false", msg = "Found null JSON response!");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -425,7 +430,7 @@ function testGetFieldValuesFromSObjectRecord() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -443,7 +448,7 @@ function testCreateRecordWithExternalId() {
             test:assertNotEquals(id, "", msg = "Found empty response!");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -467,7 +472,7 @@ function testGetRecordByExternalId() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -486,7 +491,7 @@ function testUpsertSObjectByExternalId() {
             test:assertNotEquals(jsonRes, null, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -505,7 +510,7 @@ function testCreateAccount() {
             accountId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -522,7 +527,7 @@ function testGetAccountById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -540,7 +545,7 @@ function testUpdateAccount() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -557,7 +562,7 @@ function testDeleteAccount() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -576,7 +581,7 @@ function testCreateLead() {
             leadId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -593,7 +598,7 @@ function testGetLeadById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -611,7 +616,7 @@ function testUpdateLead() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -628,7 +633,7 @@ function testDeleteLead() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -647,7 +652,7 @@ function testCreateContact() {
             contactId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -664,7 +669,7 @@ function testGetContactById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -682,7 +687,7 @@ function testUpdateContact() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -699,7 +704,7 @@ function testDeleteContact() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -718,7 +723,7 @@ function testCreateProduct() {
             productId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -735,7 +740,7 @@ function testGetProductById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -753,7 +758,7 @@ function testUpdateProduct() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -770,7 +775,7 @@ function testDeleteProduct() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -789,7 +794,7 @@ function testCreateOpportunity() {
             opportunityId = id;
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -806,7 +811,7 @@ function testGetOpportunityById() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -824,7 +829,7 @@ function testUpdateOpportunity() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -841,10 +846,29 @@ function testDeleteOpportunity() {
         }
 
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
+
+//================================== Test Error ==============================================//
+
+@test:Config
+function testCheckUpdateRecordWithInvalidId() {
+    log:printInfo("salesforceClient -> CheckUpdateRecordWithInvalidId");
+    json account = {Name:"WSO2 Inc", BillingCity:"Jaffna", Phone:"+94110000000"};
+    boolean|SalesforceConnectorError response = salesforceClient -> updateRecord(ACCOUNT, "000", account);
+    match response {
+        boolean success => {
+            test:assertFail(msg = "Invalid account ID. But successful test!");
+        }
+        SalesforceConnectorError err => {
+            test:assertNotEquals(err.message, "", msg = "Error message found null!");
+        }
+    }
+}
+
+//================================================================================================//
 
 function setConfParams(string|() confParam) returns string {
     match confParam {

@@ -31,7 +31,7 @@ documentation {
     F{{salesforceErrors}} Array of SalesforceError type errors
 }
 public type SalesforceConnectorError {
-    string? message;
-    error err;
+    string message;
+    error? err;
     SalesforceError[] salesforceErrors;
 };
