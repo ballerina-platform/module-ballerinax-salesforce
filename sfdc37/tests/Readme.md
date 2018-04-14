@@ -80,7 +80,7 @@ function testGetResourcesByApiVersion() {
             }
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message?:"");
+            test:assertFail(msg = err.message);
         }
     }
 }
@@ -97,12 +97,9 @@ function testGetResourcesByApiVersion() {
 ---------------------------------------------------------------------------
 Running Tests of Package: sfdc37
 ---------------------------------------------------------------------------
-
 ...
 2018-04-13 13:35:19,154 INFO  [sfdc37] - salesforceClient -> getResourcesByApiVersion() 
-
 ...
-
 sfdc37............................................................. SUCCESS
 ---------------------------------------------------------------------------
 
