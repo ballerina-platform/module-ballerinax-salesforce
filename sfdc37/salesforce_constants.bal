@@ -96,7 +96,7 @@ documentation { Constant field 'q'. Holds the value q for query resource prefix}
 documentation { Constant field 'EXPLAIN'. Holds the value explain for resource prefix}
 @readonly public string EXPLAIN = "explain";
 
-//=================================  SObjects  ==========================================//
+//  SObjects
 documentation { Constant field 'ACCOUNT'. Holds the value Account for account object}
 @readonly public string ACCOUNT = "Account";
 
@@ -111,3 +111,19 @@ documentation { Constant field 'OPPORTUNITY'. Holds the value Opportunity for op
 
 documentation { Constant field 'PRODUCT'. Holds the value Product2 for product object}
 @readonly public string PRODUCT = "Product2";
+
+//========================================================================================//
+documentation { Constant field 'QUESTION_MARK'. Holds the value of "?"}
+@readonly public string QUESTION_MARK = "?";
+
+documentation { Constant field 'EQUAL_SIGN'. Holds the value of "="}
+@readonly public string EQUAL_SIGN = "=";
+
+documentation { Constant field 'EMPTY_STRING'. Holds the value of ""}
+@readonly public string EMPTY_STRING = "";
+
+documentation { Constant field 'AMPERSAND'. Holds the value of "&"}
+@readonly public string AMPERSAND = "&";
+
+documentation { Constant field 'FORWARD_SLASH'. Holds the value of "/"}
+@readonly public string FORWARD_SLASH = "/";

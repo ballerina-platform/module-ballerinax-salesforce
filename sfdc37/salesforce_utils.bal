@@ -25,12 +25,12 @@ documentation { Returns the prepared URL
     R{{url}} the prepared URL
 }
 function prepareUrl(string[] paths) returns string {
-    string url = "";
+    string url = EMPTY_STRING;
 
     if (paths != null) {
         foreach path in paths {
-            if (!path.hasPrefix("/")) {
-                url = url + "/";
+            if (!path.hasPrefix(FORWARD_SLASH)) {
+                url = url + FORWARD_SLASH;
             }
             url = url + path;
         }
@@ -48,7 +48,7 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
 
     string url = prepareUrl(paths);
 
-    url = url + "?";
+    url = url + QUESTION_MARK;
     boolean first = true;
     foreach i, name in queryParamNames {
         string value = queryParamValues[i];
@@ -57,10 +57,10 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
         match oauth2Response {
             string encoded => {
                 if (first) {
-                    url = url + name + "=" + encoded;
+                    url = url + name + EQUAL_SIGN + encoded;
                     first = false;
                 } else {
-                    url = url + "&" + name + "=" + encoded;
+                    url = url + AMPERSAND + name + EQUAL_SIGN + encoded;
                 }
             }
             error e => {
@@ -74,49 +74,78 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
 }
 
 documentation { Returns the JSON result or SalesforceConnectorError
-    P{{httpResponse}} HTTP respone
+    P{{response}} HTTP respone or HttpConnectorError
     P{{expectPayload}} true if json payload expected in response, if not false
     R{{result}} JSON result
     R{{connectorError}} SalesforceConnectorError occured
 }
-function checkAndSetErrors(http:Response httpResponse, boolean expectPayload)
+function checkAndSetErrors(http:Response|http:HttpConnectorError response, boolean expectPayload)
     returns json|SalesforceConnectorError {
     json result = {};
-    try {
-        //if success
-        if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
-            if (expectPayload) {
-                var res = httpResponse.getJsonPayload();
-                result = check res;
+
+    match response {
+        http:Response httpResponse => {
+            //if success
+            if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
+                if (expectPayload) {
+                    match httpResponse.getJsonPayload() {
+                        json jsonResponse => {
+                            return jsonResponse;
+                        }
+                        http:PayloadError payloadErr => {
+                            log:printError("Error occurred when extracting JSON payload. Error: " + payloadErr.message);
+                            SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+                            connectorError.message = "Error occured while extracting Json payload!";
+                            connectorError.cause = payloadErr;
+                            return connectorError;
+                        }
+                    }
+                }
+            } else {
+                SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+
+                match httpResponse.getJsonPayload() {
+                    json jsonResponse => {
+                        json[]|error res = < json[]>jsonResponse;
+
+                        match res {
+                            json[] errors => {
+                                foreach i, err in errors {
+                                    SalesforceError sfError = {message:err.message.toString() ?: "", errorCode:err.errorCode.toString() ?: ""};
+                                    connectorError.message = err.message.toString() ?: "";
+                                    connectorError.cause = {message:err.message.toString() ?: ""};
+                                    connectorError.salesforceErrors[i] = sfError;
+                                }
+                                return connectorError;
+                            }
+                            error e => {
+                                log:printError("Error occurred when extracting JSON payload. Error: " + e.message);
+                                SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+                                connectorError.message = "Error occured while extracting Json payload!";
+                                connectorError.cause = e;
+                                return connectorError;
+                            }
+                        }
+                    }
+                    http:PayloadError payloadErr => {
+                        log:printError("Error occurred when extracting errors from payload. Error: " + payloadErr.message);
+                        SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+                        connectorError.message = "Error occured while extracting errors from payload!";
+                        connectorError.cause = payloadErr;
+                        return connectorError;
+                    }
+                }
+
             }
-        } else {
-            SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
-            var jsonRes = httpResponse.getJsonPayload();
-            json jsonResponse = check jsonRes;
-            var res = < json[]>jsonResponse;
-            json[] errors = check res;
-            foreach i, err in errors {
-                SalesforceError sfError = {message:err.message.toString() ?: "", errorCode:err.errorCode.toString() ?: ""};
-                connectorError.message = err.message.toString() ?: "";
-                connectorError.err = {message:err.message.toString()?:""};
-                connectorError.salesforceErrors[i] = sfError;
-            }
+        }
+        http:HttpConnectorError httpError => {
+            SalesforceConnectorError connectorError =
+            {
+                message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
+                cause:httpError.cause ?: {}
+            };
             return connectorError;
         }
-    } catch (mime:EntityError entityError) {
-        log:printError("Entity error when extracting JSON for checking errors: " + entityError.message);
-        SalesforceConnectorError connectorError = {
-            message:entityError.message,
-            err:entityError.cause ?: {}
-        };
-        return connectorError;
-    } catch (error e) {
-        log:printError("Error occurred when extracting JSON for checking errors: " + e.message);
-        SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
-        connectorError.message = "Error occured while receiving Json payload: Found null!";
-        connectorError.err = e;
-        return connectorError;
     }
-
     return result;
 }

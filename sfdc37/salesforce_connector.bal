@@ -28,154 +28,154 @@ public type SalesforceConnector object {
 
     documentation {Test Connector action getAvailableApiVersions
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getAvailableApiVersions () returns (json|SalesforceConnectorError);
+    public function getAvailableApiVersions() returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getResourcesByApiVersion
         P{{apiVersion}} API version (v37)
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getResourcesByApiVersion (string apiVersion) returns (json|SalesforceConnectorError);
+    public function getResourcesByApiVersion(string apiVersion) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getOrganizationLimits
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getOrganizationLimits () returns (json|SalesforceConnectorError);
+    public function getOrganizationLimits() returns (json|SalesforceConnectorError);
 
     // Query
     documentation {Test Connector action getQueryResult
         P{{receivedQuery}} sent SOQL query
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getQueryResult (string receivedQuery) returns (json|SalesforceConnectorError);
+    public function getQueryResult(string receivedQuery) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getNextQueryResult
         P{{nextRecordsUrl}} url to get next query results
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getNextQueryResult (string nextRecordsUrl) returns (json|SalesforceConnectorError);
+    public function getNextQueryResult(string nextRecordsUrl) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getAllQueries
         P{{queryString}} sent SOQL query
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getAllQueries (string queryString) returns (json|SalesforceConnectorError);
+    public function getAllQueries(string queryString) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action explainQueryOrReportOrListview
         P{{queryReportOrListview}} sent query
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function explainQueryOrReportOrListview (string queryReportOrListview)
+    public function explainQueryOrReportOrListview(string queryReportOrListview)
         returns (json|SalesforceConnectorError);
 
     //Search
     documentation {Test Connector action searchSOSLString
         P{{searchString}} sent SOSL search query
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function searchSOSLString (string searchString) returns (json|SalesforceConnectorError);
+    public function searchSOSLString(string searchString) returns (json|SalesforceConnectorError);
 
     //Account
     documentation {Test Connector action getAccountById
         P{{accountId}} account ID
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getAccountById (string accountId) returns (json|SalesforceConnectorError);
+    public function getAccountById(string accountId) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action createAccount
         P{{accountRecord}} account JSON record to be inserted
         returns string account ID if successful else SalesforceConnectorError occured.}
-    public function createAccount (json accountRecord) returns (string|SalesforceConnectorError);
+    public function createAccount(json accountRecord) returns (string|SalesforceConnectorError);
 
     documentation {Test Connector action deleteAccount
         P{{accountId}} account ID
         returns true if successful false otherwise, or SalesforceConnectorError occured.}
-    public function deleteAccount (string accountId) returns (boolean|SalesforceConnectorError);
+    public function deleteAccount(string accountId) returns (boolean|SalesforceConnectorError);
 
     documentation {Test Connector action updateAccount
         P{{accountId}} account ID
         P{{accountRecord}} Json record
         returns true if successful, false otherwise or SalesforceConnectorError occured.}
-    public function updateAccount (string accountId, json accountRecord) returns (boolean|SalesforceConnectorError);
+    public function updateAccount(string accountId, json accountRecord) returns (boolean|SalesforceConnectorError);
 
     //Lead
     documentation {Test Connector action getLeadById
         P{{leadId}} lead ID
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getLeadById (string leadId) returns (json|SalesforceConnectorError);
+    public function getLeadById(string leadId) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action createLead
         P{{leadRecord}} lead JSON record to be inserted
         returns string lead ID result if successful else SalesforceConnectorError occured.}
-    public function createLead (json leadRecord) returns (string|SalesforceConnectorError);
+    public function createLead(json leadRecord) returns (string|SalesforceConnectorError);
 
     documentation {Test Connector action deleteLead
         P{{leadId}} lead ID
         returns true  if successful, flase otherwise or SalesforceConnectorError occured.}
-    public function deleteLead (string leadId) returns (boolean|SalesforceConnectorError);
+    public function deleteLead(string leadId) returns (boolean|SalesforceConnectorError);
 
     documentation {Test Connector action updateLead
         P{{leadId}} lead ID
         P{{leadRecord}} lead JSON record
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function updateLead (string leadId, json leadRecord) returns (boolean|SalesforceConnectorError);
+    public function updateLead(string leadId, json leadRecord) returns (boolean|SalesforceConnectorError);
 
     //Contact
     documentation {Test Connector action getContactById
         P{{contactId}} contact ID
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getContactById (string contactId) returns (json|SalesforceConnectorError);
+    public function getContactById(string contactId) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action createContact
         P{{contactRecord}} JSON contact record
         returns string ID if successful else SalesforceConnectorError occured.}
-    public function createContact (json contactRecord) returns (string|SalesforceConnectorError);
+    public function createContact(json contactRecord) returns (string|SalesforceConnectorError);
 
     documentation {Test Connector action deleteContact
         P{{contactId}} contact ID
         returns true if successful else false, or SalesforceConnectorError occured.}
-    public function deleteContact (string contactId) returns (boolean|SalesforceConnectorError);
+    public function deleteContact(string contactId) returns (boolean|SalesforceConnectorError);
 
     documentation {Test Connector action updateContact
         P{{contactId}} contact ID
         P{{contactRecord}} JSON contact record
         returns true if successful else false or SalesforceConnectorError occured.}
-    public function updateContact (string contactId, json contactRecord) returns (boolean|SalesforceConnectorError);
+    public function updateContact(string contactId, json contactRecord) returns (boolean|SalesforceConnectorError);
 
     //Opportunity
     documentation {Test Connector action getOpportunityById
         P{{opportunityId}} opportunity ID
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getOpportunityById (string opportunityId) returns (json|SalesforceConnectorError);
+    public function getOpportunityById(string opportunityId) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action createOpportunity
         P{{opportunityRecord}} JSON opportunity record
         returns opportunity ID if successful else SalesforceConnectorError occured.}
-    public function createOpportunity (json opportunityRecord) returns (string|SalesforceConnectorError);
+    public function createOpportunity(json opportunityRecord) returns (string|SalesforceConnectorError);
 
     documentation {Test Connector action deleteOpportunity
         P{{opportunityId}} opportunity ID
         returns true if successful else false or SalesforceConnectorError occured.}
-    public function deleteOpportunity (string opportunityId) returns (boolean|SalesforceConnectorError);
+    public function deleteOpportunity(string opportunityId) returns (boolean|SalesforceConnectorError);
 
     documentation {Test Connector action updateOpportunity
         P{{opportunityId}} opportunity ID
         returns true if successful else false or SalesforceConnectorError occured.}
-    public function updateOpportunity (string opportunityId, json opportunityRecord)
+    public function updateOpportunity(string opportunityId, json opportunityRecord)
         returns (boolean|SalesforceConnectorError);
 
     //Product
     documentation {Test Connector action getProductById
         P{{productId}} product ID
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getProductById (string productId) returns (json|SalesforceConnectorError);
+    public function getProductById(string productId) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action createProduct
         P{{productRecord}} JSON product record
         returns product ID if successful else SalesforceConnectorError occured.}
-    public function createProduct (json productRecord) returns (string|SalesforceConnectorError);
+    public function createProduct(json productRecord) returns (string|SalesforceConnectorError);
 
     documentation {Test Connector action deleteProduct
         P{{productId}} product ID
         returns true if successful else false or SalesforceConnectorError occured.}
-    public function deleteProduct (string productId) returns (boolean|SalesforceConnectorError);
+    public function deleteProduct(string productId) returns (boolean|SalesforceConnectorError);
 
     documentation {Test Connector action updateProduct
         P{{productId}} product ID
         P{{productRecord}} JSON product record
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function updateProduct (string productId, json productRecord) returns (boolean|SalesforceConnectorError);
+    public function updateProduct(string productId, json productRecord) returns (boolean|SalesforceConnectorError);
 
     //Records
     documentation {Test Connector action getFieldValuesFromSObjectRecord
@@ -183,7 +183,7 @@ public type SalesforceConnector object {
         P{{id}} SObject id
         P{{fields}} relevant fields
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getFieldValuesFromSObjectRecord (string sObjectName, string id, string fields)
+    public function getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
         returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getFieldValuesFromExternalObjectRecord
@@ -191,7 +191,7 @@ public type SalesforceConnector object {
         P{{id}} external SObject id
         P{{fields}} relevant fields
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getFieldValuesFromExternalObjectRecord (string externalObjectName, string id,
+    public function getFieldValuesFromExternalObjectRecord(string externalObjectName, string id,
     string fields)
         returns (json|SalesforceConnectorError);
 
@@ -199,7 +199,7 @@ public type SalesforceConnector object {
         P{{sObjectName}} SObject name value
         P{{records}} JSON records
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function createMultipleRecords (string sObjectName, json records)
+    public function createMultipleRecords(string sObjectName, json records)
         returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getRecordByExternalId
@@ -207,7 +207,7 @@ public type SalesforceConnector object {
         P{{fieldName}} relevant field name
         P{{fieldValue}} relevant field value
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getRecordByExternalId (string sObjectName, string fieldName, string fieldValue)
+    public function getRecordByExternalId(string sObjectName, string fieldName, string fieldValue)
         returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action upsertSObjectByExternalId
@@ -216,7 +216,7 @@ public type SalesforceConnector object {
         P{{fieldValue}} relevant field value
         P{{record}} JSON record
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function upsertSObjectByExternalId (string sObjectName, string fieldId,
+    public function upsertSObjectByExternalId(string sObjectName, string fieldId,
     string fieldValue, json record)
         returns (json|SalesforceConnectorError);
 
@@ -225,7 +225,7 @@ public type SalesforceConnector object {
         P{{startTime}} start time relevant to records
         P{{endTime}} end time relevant to records
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getDeletedRecords (string sObjectName, string startTime, string endTime)
+    public function getDeletedRecords(string sObjectName, string startTime, string endTime)
         returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getUpdatedRecords
@@ -233,52 +233,52 @@ public type SalesforceConnector object {
         P{{startTime}} start time relevant to records
         P{{endTime}} end time relevant to records
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getUpdatedRecords (string sObjectName, string startTime, string endTime)
+    public function getUpdatedRecords(string sObjectName, string startTime, string endTime)
         returns (json|SalesforceConnectorError);
 
     //Describe SObjects
     documentation {Test Connector action describeAvailableObjects
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function describeAvailableObjects () returns (json|SalesforceConnectorError);
+    public function describeAvailableObjects() returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action getSObjectBasicInfo
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getSObjectBasicInfo (string sobjectName) returns (json|SalesforceConnectorError);
+    public function getSObjectBasicInfo(string sobjectName) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action describeSObject
         P{{sObjectName}} SObject name value
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function describeSObject (string sObjectName) returns (json|SalesforceConnectorError);
+    public function describeSObject(string sObjectName) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action sObjectPlatformAction
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function sObjectPlatformAction () returns (json|SalesforceConnectorError);
+    public function sObjectPlatformAction() returns (json|SalesforceConnectorError);
 
     //Basic CURD
     documentation {Test Connector action getRecord
         P{{path}} resource path
         returns Json result if successful else SalesforceConnectorError occured.}
-    public function getRecord (string path) returns (json|SalesforceConnectorError);
+    public function getRecord(string path) returns (json|SalesforceConnectorError);
 
     documentation {Test Connector action createRecord
         P{{sObjectName}} SObject name value
         P{{record}} JSON record to be inserted
         returns created entity ID if successful else SalesforceConnectorError occured.}
-    public function createRecord (string sObjectName, json record) returns (string|SalesforceConnectorError);
+    public function createRecord(string sObjectName, json record) returns (string|SalesforceConnectorError);
 
     documentation {Test Connector action updateRecord
         P{{sObjectName}} SObject name value
         P{{id}} SObject id
         P{{record}} JSON record to be updated
         returns true if successful else false or SalesforceConnectorError occured.}
-    public function updateRecord (string sObjectName, string id, json record)
+    public function updateRecord(string sObjectName, string id, json record)
         returns (boolean|SalesforceConnectorError);
 
     documentation {Test Connector action deleteRecord
         P{{sObjectName}} SObject name value
         P{{id}} SObject id
         returns true if successful else false or SalesforceConnectorError occured.}
-    public function deleteRecord (string sObjectName, string id) returns (boolean|SalesforceConnectorError);
+    public function deleteRecord(string sObjectName, string id) returns (boolean|SalesforceConnectorError);
 };
 
 public function SalesforceConnector::getAvailableApiVersions() returns json|SalesforceConnectorError {
@@ -452,13 +452,13 @@ public function SalesforceConnector::deleteProduct(string productId)
 public function SalesforceConnector::getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
     returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-    return self.getRecord(prefixPath + "?fields=" + fields);
+    return self.getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 }
 
 public function SalesforceConnector::getFieldValuesFromExternalObjectRecord(string externalObjectName, string id, string fields)
     returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
-    return self.getRecord(prefixPath + "?fields=" + fields);
+    return self.getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 
 }
 
@@ -470,29 +470,10 @@ public function SalesforceConnector::createMultipleRecords(string sObjectName, j
     http:Request request = new;
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
     request.setJsonPayload(records);
-    try {
-        var res = httpClient -> post(path, request);
-        http:Response response = check res;
 
-        json|SalesforceConnectorError result = checkAndSetErrors(response, true);
-        match result {
-            json jsonResult => {
-                payload = jsonResult;
-            }
-            SalesforceConnectorError err => {
-                return err;
-            }
-        }
-    } catch (http:HttpConnectorError httpError) {
-        SalesforceConnectorError connectorError =
-        {
-            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
-            err:httpError.cause ?: {}
-        };
-        return connectorError;
-    }
+    http:Response|http:HttpConnectorError response = httpClient -> post(path, request);
 
-    return payload;
+    return checkAndSetErrors(response, true);
 }
 
 // ============================ Create, update, delete records by External IDs ===================== //
@@ -510,28 +491,10 @@ public function SalesforceConnector::upsertSObjectByExternalId(string sObjectNam
     http:Request request = new;
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     request.setJsonPayload(record);
-    try {
-        var res = httpClient -> patch(path, request);
-        http:Response response = check res;
-        json|SalesforceConnectorError result = checkAndSetErrors(response, false);
-        match result {
-            json jsonResult => {
-                payload = jsonResult;
-            }
-            SalesforceConnectorError err => {
-                return err;
-            }
-        }
-    } catch (http:HttpConnectorError httpError) {
-        SalesforceConnectorError connectorError =
-        {
-            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
-            err:httpError.cause ?: {}
-        };
-        return connectorError;
-    }
 
-    return payload;
+    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request);
+
+    return checkAndSetErrors(response, false);
 }
 
 // ============================ Get updated and deleted records ===================== //
@@ -578,31 +541,10 @@ public function SalesforceConnector::getRecord(string path)
     returns json|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
 
-    json payload;
     http:Request request = new;
-    try {
-        var res = httpClient -> get(path, request);
-        http:Response response = check res;
+    http:Response|http:HttpConnectorError response = httpClient -> get(path, request);
 
-        json|SalesforceConnectorError result = checkAndSetErrors(response, true);
-        match result {
-            json jsonResult => {
-                payload = jsonResult;
-            }
-            SalesforceConnectorError err => {
-                return err;
-            }
-        }
-    } catch (http:HttpConnectorError httpError) {
-        SalesforceConnectorError connectorError =
-        {
-            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
-            err:httpError.cause ?: {}
-        };
-        return connectorError;
-    }
-
-    return payload;
+    return checkAndSetErrors(response, true);
 }
 
 public function SalesforceConnector::createRecord(string sObjectName, json record)
@@ -613,34 +555,25 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     request.setJsonPayload(record);
-    try {
-        var res = httpClient -> post(path, request);
-        http:Response response = check res;
 
-        json|SalesforceConnectorError result = checkAndSetErrors(response, true);
-        match result {
-            json jsonResult => {
-                var responseId = jsonResult.id.toString();
-                match responseId {
-                    string stringId => {
-                        id = stringId;
-                    }
-                    () => {
-                        id = "";
-                    }
+    http:Response|http:HttpConnectorError response = httpClient -> post(path, request);
+
+    json|SalesforceConnectorError result = checkAndSetErrors(response, true);
+    match result {
+        json jsonResult => {
+            var responseId = jsonResult.id.toString();
+            match responseId {
+                string stringId => {
+                    id = stringId;
+                }
+                () => {
+                    id = "";
                 }
             }
-            SalesforceConnectorError err => {
-                return err;
-            }
         }
-    } catch (http:HttpConnectorError httpError) {
-        SalesforceConnectorError connectorError =
-        {
-            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
-            err:httpError.cause ?: {}
-        };
-        return connectorError;
+        SalesforceConnectorError err => {
+            return err;
+        }
     }
     return id;
 }
@@ -651,29 +584,18 @@ public function SalesforceConnector::updateRecord(string sObjectName, string id,
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     request.setJsonPayload(record);
-    try {
-        var res = httpClient -> patch(path, request);
-        http:Response response = check res;
 
-        json|SalesforceConnectorError result = checkAndSetErrors(response, false);
-        match result {
-            json => {
-                return true;
-            }
-            SalesforceConnectorError err => {
-                return err;
-            }
+    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request);
+
+    json|SalesforceConnectorError result = checkAndSetErrors(response, false);
+    match result {
+        json => {
+            return true;
         }
-    } catch (http:HttpConnectorError httpError) {
-        SalesforceConnectorError connectorError =
-        {
-            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
-            err:httpError.cause ?: {}
-        };
-        return connectorError;
+        SalesforceConnectorError err => {
+            return err;
+        }
     }
-
-    return false;
 }
 
 public function SalesforceConnector::deleteRecord(string sObjectName, string id)
@@ -682,27 +604,16 @@ public function SalesforceConnector::deleteRecord(string sObjectName, string id)
 
     http:Request request = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-    try {
-        var res = httpClient -> delete(path, request);
-        http:Response response = check res;
 
-        json|SalesforceConnectorError result = checkAndSetErrors(response, false);
-        match result {
-            json => {
-                return true;
-            }
-            SalesforceConnectorError err => {
-                return err;
-            }
+    http:Response|http:HttpConnectorError response = httpClient -> delete(path, request);
+
+    json|SalesforceConnectorError result = checkAndSetErrors(response, false);
+    match result {
+        json => {
+            return true;
         }
-    } catch (http:HttpConnectorError httpError) {
-        SalesforceConnectorError connectorError =
-        {
-            message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
-            err:httpError.cause ?: {}
-        };
-        return connectorError;
+        SalesforceConnectorError err => {
+            return err;
+        }
     }
-
-    return false;
 }
