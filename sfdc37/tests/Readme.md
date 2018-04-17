@@ -1,6 +1,6 @@
 ## Compatibility
 
-| Ballerina Version         | Endpoint Version         | API Version |
+| Ballerina Version         | Endpoint Version          | API Version |
 | ------------------------- | ------------------------- | ------------|
 |  0.970.0-alpha4           |           0.9.0           |   v37.0     |
 
