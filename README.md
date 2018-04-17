@@ -23,18 +23,18 @@ The following section provides you the details on how to use Ballerina Salesforc
 
 | Ballerina Version         | Endpoint Version          | API Version |
 | ------------------------- | ------------------------- | ------------|
-|  0.970.0-alpha4           |          0.9.0            |   v37.0     |
+|   0.970.0-beta1-SNAPSHOT  |          0.9.9            |   v37.0     |
 
 
 ## Getting started
 
-1. Download the Ballerina tools distribution by navigating to https://ballerinalang.org/downloads/ and setup the SDK
+1. Download the Ballerina tools distribution by navigating to [Ballerina downloads](https://ballerinalang.org/downloads/) and setup the SDK
 2. Clone the repository by running the following command,
   `git clone https://github.com/wso2-ballerina/package-salesforce.git` and
    Import the package to your ballerina project.
 
 ### Prerequisites
-Create a Salesforce account and create a connected app by visiting Salesforce (https://www.salesforce.com) 
+Create a Salesforce account and create a connected app by visiting [Salesforce](https://www.salesforce.com) 
 and obtain the following parameters:
 * Base URl (Endpoint)
 * Client Id
