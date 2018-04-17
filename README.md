@@ -1,13 +1,13 @@
-# Salesforce Connector
+# Salesforce Endpoint
 
 ## Salesforce
 Salesforce is the world’s #1 CRM platform that employees can access entirely over the Internet (https://www.salesforce.com)
 
-The Salesforce connector which is implemented in ballerina allows you to access the Salesforce REST API. SalesforceConnector covers the basic functionalities as well as the high level functionalities of the REST API. (https://developer.salesforce.com/page/REST_API)
+The Salesforce Endpoint which is implemented in ballerina allows you to access the Salesforce REST API. Salesforce Endpoint covers the basic functionality as well as the high level functionality of the REST API. (https://developer.salesforce.com/page/REST_API)
 
-Ballerina is a strong and flexible language. Also it is JSON friendly. It provides an integration tool which can be used to integrate the Salesforce API with other endpoints.  It is easy to write programs for the Salesforce API by having a connector for Salesforce. Therefor the Salesforce connector allows you to access the Salesforce REST API through Ballerina easily. 
+Ballerina is a strong and flexible language. Also it is JSON friendly. It provides an integration tool which can be used to integrate the Salesforce API with other endpoints.  It is easy to write programs for the Salesforce API by having an endpoint for Salesforce. Therefor the this allows you to access the Salesforce REST API through Ballerina easily. 
 
-Salesforce connector actions are being invoked by a ballerina main function. The following section provides you the details on how to use Ballerina Salesforce connector.
+Salesforce endpoint actions are being invoked by a ballerina main function. The following section provides you the details on how to use Ballerina Salesforce endpoint.
 
 
 ![alt text](sfdc37/resources/salesforce.png)
@@ -15,7 +15,7 @@ Salesforce connector actions are being invoked by a ballerina main function. The
 
 ## Compatibility
 
-| Ballerina Version         | Connector Version         | API Version |
+| Ballerina Version         | Endpoint Version          | API Version |
 | ------------------------- | ------------------------- | ------------|
 |  0.970.0-alpha4           |          0.9.0            |   v37.0     |
 
@@ -40,9 +40,9 @@ IMPORTANT: This access token and refresh token can be used to make API requests 
 
 Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm) for more information on obtaining OAuth2 credentials.
 
-### Working with Salesforce REST connector.
+### Working with Salesforce REST endpoint.
 
-In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
+In order to use the Salesforce endpoint, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
 (Visit `test.bal` file to find the way of creating Salesforce Client endpoint.)
 
 #### Salesforce Client Object

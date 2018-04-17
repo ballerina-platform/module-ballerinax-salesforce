@@ -1,13 +1,13 @@
-# Salesforce Connector
+# Salesforce Endpoint
 
 ## Salesforce
 Salesforce is the world’s #1 CRM platform that employees can access entirely over the Internet (https://www.salesforce.com)
 
-The Salesforce connector which is implemented in ballerina allows you to access the Salesforce REST API. SalesforceConnector covers the basic functionalities as well as the high level functionalities of the REST API. (https://developer.salesforce.com/page/REST_API)
+The Salesforce endpoint which is implemented in ballerina allows you to access the Salesforce REST API. Salesforce Endpoint covers the basic functionality as well as the high level functionality of the REST API. (https://developer.salesforce.com/page/REST_API)
 
-Ballerina is a strong and flexible language. Also it is JSON friendly. It provides an integration tool which can be used to integrate the Salesforce API with other endpoints.  It is easy to write programs for the Salesforce API by having a connector for Salesforce. Therefor the Salesforce connector allows you to access the Salesforce REST API through Ballerina easily. 
+Ballerina is a strong and flexible language. Also it is JSON friendly. It provides an integration tool which can be used to integrate the Salesforce API with other endpoints.  It is easy to write programs for the Salesforce API by having an endpoint for Salesforce. Therefor it allows you to access the Salesforce REST API through Ballerina easily. 
 
-Salesforce connector actions are being invoked by a ballerina main function. The following section provides you the details on how to use Ballerina Salesforce connector.
+Salesforce endpoint actions are being invoked by a ballerina main function. The following section provides you the details on how to use Ballerina Salesforce endpoint.
 
 
 ![alt text](resources/salesforce.png)
@@ -15,7 +15,7 @@ Salesforce connector actions are being invoked by a ballerina main function. The
 
 ## Compatibility
 
-| Ballerina Version         | Connector Version         | API Version |
+| Ballerina Version         | Endpoint Version         | API Version |
 | ------------------------- | ------------------------- | ------------|
 |  0.970.0-alpha4           |          0.9.0            |   v37.0     |
 
@@ -27,9 +27,9 @@ Salesforce connector actions are being invoked by a ballerina main function. The
   `git clone https://github.com/wso2-ballerina/package-salesforce.git` and
    Import the package to your ballerina project.
 
-### Working with Salesforce REST connector actions
+### Working with Salesforce REST endpoint actions
 
-In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
+In order to use the Salesforce endpoint, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
 
 ##### Example
  * Request

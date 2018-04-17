@@ -1,6 +1,6 @@
 ## Compatibility
 
-| Ballerina Version         | Connector Version         | API Version |
+| Ballerina Version         | Endpoint Version         | API Version |
 | ------------------------- | ------------------------- | ------------|
 |  0.970.0-alpha4           |           0.9.0           |   v37.0     |
 
@@ -17,9 +17,9 @@ IMPORTANT: This access token and refresh token can be used to make API requests 
 
 Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm) for more information on obtaining OAuth2 credentials.
 
-### Working with Salesforce REST connector.
+### Working with Salesforce REST endpoint.
 
-In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
+In order to use the Salesforce endpoint, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
 
 Find the way of creating Salesforce endpoint as following. 
 
