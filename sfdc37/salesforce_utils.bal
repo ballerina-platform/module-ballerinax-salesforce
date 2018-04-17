@@ -98,6 +98,7 @@ function checkAndSetErrors(http:Response httpResponse, boolean expectPayload)
             foreach i, err in errors {
                 SalesforceError sfError = {message:err.message.toString() ?: "", errorCode:err.errorCode.toString() ?: ""};
                 connectorError.message = err.message.toString() ?: "";
+                connectorError.err = {message:err.message.toString()?:""};
                 connectorError.salesforceErrors[i] = sfError;
             }
             return connectorError;

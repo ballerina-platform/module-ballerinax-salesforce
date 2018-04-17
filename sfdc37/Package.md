@@ -10,7 +10,7 @@ Ballerina is a strong and flexible language. Also it is JSON friendly. It provid
 Salesforce connector actions are being invoked by a ballerina main function. The following section provides you the details on how to use Ballerina Salesforce connector.
 
 
-![alt text](https://github.com/erandiganepola/package-salesforce/blob/master/salesforce.png)
+![alt text](resources/salesforce.png)
 
 
 ## Compatibility
@@ -35,21 +35,22 @@ In order to use the Salesforce connector, first you need to create a Salesforce 
  * Request
 
  ```ballerina
-import wso2/salesforce as sf;
+import wso2/sfdc37 as sf;
  import ballerina/io;
  
     public function main (string[] args) {
         endpoint Client salesforceClient {
-            oauth2Config:{
-                             accessToken:accessToken,
-                             baseUrl:url,
-                             clientId:clientId,
-                             clientSecret:clientSecret,
-                             refreshToken:refreshToken,
-                             refreshTokenEP:refreshTokenEndpoint,
-                             refreshTokenPath:refreshTokenPath,
-                             clientConfig:{}
-                         }
+            baseUrl:url,
+            clientConfig:{
+                auth:{
+                    scheme:"oauth",
+                    accessToken:accessToken,
+                    refreshToken:refreshToken,
+                    clientId:clientId,
+                    clientSecret:clientSecret,
+                    refreshUrl:refreshUrl
+                }
+            }
         };
     
         json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
@@ -62,6 +63,7 @@ import wso2/salesforce as sf;
                     io:println(err);
                 }
             }
+            
 ```
 * Response
 
