@@ -10,7 +10,7 @@ Ballerina is a strong and flexible language. Also it is JSON friendly. It provid
 Salesforce connector actions are being invoked by a ballerina main function. The following section provides you the details on how to use Ballerina Salesforce connector.
 
 
-![alt text](docs/resources/salesforce.png)
+![alt text](sfdc37/resources/salesforce.png)
 
 
 ## Compatibility
