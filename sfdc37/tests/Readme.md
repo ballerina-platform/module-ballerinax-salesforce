@@ -1,11 +1,11 @@
 ## Compatibility
 
-| Ballerina Version         | Connector Version         | API Version |
+| Ballerina Version         | Endpoint Version          | API Version |
 | ------------------------- | ------------------------- | ------------|
-|  0.970.0-alpha4           |           0.9.0           |   v37.0     |
+|  0.970.0-beta1-SNAPSHOT   |           0.9.9           |   v37.0     |
 
 ### Prerequisites
-Create a Salesforce developer account and create a connected app by visiting Salesforce (https://www.salesforce.com) and obtain the following parameters:
+Create a Salesforce developer account and create a connected app by visiting [Salesforce](https://www.salesforce.com) and obtain the following parameters:
 * Base URl (Endpoint)
 * Client Id
 * Client Secret
@@ -13,13 +13,15 @@ Create a Salesforce developer account and create a connected app by visiting Sal
 * Refresh Token
 * Refresh URL
 
-IMPORTANT: This access token and refresh token can be used to make API requests on your own account's behalf. Do not share your access token, client secret with anyone.
+IMPORTANT: This access token and refresh token can be used to make API requests on your own account's behalf. 
+Do not share your access token, client secret with anyone.
 
 Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm) for more information on obtaining OAuth2 credentials.
 
-### Working with Salesforce REST connector.
+### Working with Salesforce REST endpoint.
 
-In order to use the Salesforce connector, first you need to create a Salesforce Client endpoint by passing above mentioned parameters.
+In order to use the Salesforce endpoint, first you need to create a 
+Salesforce Client endpoint by passing above mentioned parameters.
 
 Find the way of creating Salesforce endpoint as following. 
 
@@ -52,7 +54,8 @@ Create `ballerina.conf` file in `package-salesforce`, with following keys:
 
 Assign relevant string values generated for Salesforce app. 
 
-Go inside `package-salesforce` using terminal and run test.bal file using following command `ballerina test sfdc37`.
+Go inside `package-salesforce` using terminal and run test.bal file 
+using following command `ballerina test sfdc37`.
 
 * Sample Test Function
 
