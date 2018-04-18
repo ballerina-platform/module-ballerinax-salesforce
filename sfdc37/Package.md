@@ -13,7 +13,6 @@ It provides an integration tool which can be used to integrate the Salesforce AP
 It is easy to write programs for the Salesforce API by having an endpoint for Salesforce. 
 Therefor it allows you to access the Salesforce REST API through Ballerina easily. 
 
-Salesforce endpoint actions are being invoked by a ballerina main function. 
 The following section provides you the details on how to use Ballerina Salesforce endpoint.
 
 
