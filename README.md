@@ -51,51 +51,8 @@ for more information on obtaining OAuth2 credentials.
 
 ### Working with Salesforce REST endpoint.
 
-In order to use the Salesforce endpoint, first you need to create a Salesforce Client endpoint by passing 
-above mentioned parameters.
-(Visit `test.bal` file to find the way of creating Salesforce Client endpoint.)
-
-#### Salesforce Client Object
-
-```ballerina
-public type Client object {
-    public {
-            SalesforceConfiguration salesforceConfig = {};
-            SalesforceConnector salesforceConnector = new();
-        }
-    
-    new () {}
-
-    public function init (SalesforceConfiguration salesforceConfig);
-    public function register (typedesc serviceType);
-    public function start();
-    public function getClient () returns SalesforceConnector;
-    public function stop ();
-};
-
-```
-
-#### SalesforceConfiguration record
-```ballerina
-public type SalesforceConfiguration {
-    string baseUrl;
-    http:ClientEndpointConfig clientConfig;
-};
-
-```
-#### Running salesforce tests
-Create `ballerina.conf` file in `package-salesforce`, with following keys:
-* ENDPOINT
-* ACCESS_TOKEN
-* CLIENT_ID
-* CLIENT_SECRET
-* REFRESH_TOKEN
-* REFRESH_URL
-
-Assign relevant string values generated for Salesforce app. 
-
-Go inside `package-sfdc37` using terminal and run test.bal file using following command `ballerina test sfdc37`.
-
+All the actions return JSON or sfdc37:SalesforceConnectorError. If the action is a success, 
+then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnectorError will be null and vice-versa.
 
 ##### Example
  * Request
