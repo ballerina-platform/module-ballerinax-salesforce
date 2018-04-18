@@ -45,7 +45,7 @@ public type Client object {
     }
 
     documentation {Get Salesforce client
-        returns salesforce connector instance
+        R{{}} returns salesforce connector instance
     }
     public function getClient() returns SalesforceConnector {
         return self.salesforceConnector;
