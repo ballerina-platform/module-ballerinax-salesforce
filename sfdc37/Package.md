@@ -29,7 +29,6 @@ The following section provides you the details on how to use Ballerina Salesforc
 ## Getting started
 
 1. Download the Ballerina tools distribution by navigating to https://ballerinalang.org/downloads/ and setup the SDK
-2. Go inside `package-salesforce` and give the command `ballerina init`using terminal.
 
 ### Working with Salesforce REST endpoint actions
 
