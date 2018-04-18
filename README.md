@@ -12,7 +12,6 @@ used to integrate the Salesforce API with other endpoints.
 It is easy to write programs for the Salesforce API by having an endpoint for Salesforce. 
 Therefor this allows you to access the Salesforce REST API through Ballerina easily. 
 
-Salesforce endpoint actions are being invoked by a ballerina main function. 
 The following section provides you the details on how to use Ballerina Salesforce endpoint.
 
 
