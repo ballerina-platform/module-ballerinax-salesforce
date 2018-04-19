@@ -111,9 +111,9 @@ function checkAndSetErrors(http:Response|http:HttpConnectorError response, boole
                         match res {
                             json[] errors => {
                                 foreach i, err in errors {
-                                    SalesforceError sfError = {message:err.message.toString() ?: "", errorCode:err.errorCode.toString() ?: ""};
-                                    connectorError.message = err.message.toString() ?: "";
-                                    connectorError.cause = {message:err.message.toString() ?: ""};
+                                    SalesforceError sfError = {message:err.message.toString(), errorCode:err.errorCode.toString()};
+                                    connectorError.message = err.message.toString();
+                                    connectorError.cause = {message:err.message.toString()};
                                     connectorError.salesforceErrors[i] = sfError;
                                 }
                                 return connectorError;

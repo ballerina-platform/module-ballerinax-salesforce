@@ -90,7 +90,7 @@ function testGetOrganizationLimits() {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-            string[] keys = jsonRes.getKeys() ?: [];
+            string[] keys = jsonRes.getKeys();
             test:assertTrue(lengthof keys > 0, msg = "Response doesn't have enough keys");
             foreach key in jsonRes {
                 try {
@@ -202,7 +202,7 @@ function testGetQueryResult() {
 
                 while (jsonRes.nextRecordsUrl != null) {
                     log:printDebug("Found new query result set!");
-                    string nextQueryUrl = jsonRes.nextRecordsUrl.toString() ?: "";
+                    string nextQueryUrl = jsonRes.nextRecordsUrl.toString();
                     response = salesforceClient -> getNextQueryResult(nextQueryUrl);
                     match response {
                         json jsonNextRes => {
