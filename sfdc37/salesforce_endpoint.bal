@@ -36,8 +36,6 @@ public type Client object {
         SalesforceConnector salesforceConnector = new();
     }
 
-    new() {}
-
     documentation {Salesforce connector endpoint initialization function
         P{{salesforceConfig}} salesforce connector configuration)
     }
@@ -46,25 +44,10 @@ public type Client object {
         self.salesforceConnector.httpClient.init(salesforceConfig.clientConfig);
     }
 
-    documentation {Register Salesforce connector endpoint
-        P{{serviceType}} Accepts types of data (int, float, string, boolean, etc)
-    }
-    public function register(typedesc serviceType) {
-    }
-
-    documentation {Start Salesforce connector endpoint}
-    public function start() {
-    }
-
     documentation {Get Salesforce client
-        returns salesforce connector instance
+        R{{}} returns salesforce connector instance
     }
     public function getClient() returns SalesforceConnector {
         return self.salesforceConnector;
-    }
-
-    documentation {Stop Salesforce connector client}
-    public function stop() {
-
     }
 };

@@ -41,11 +41,11 @@ function testGetAvailableApiVersions() {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-            try{
-                var res = <json[]>jsonRes;
+            try {
+                var res = < json[]>jsonRes;
                 json[] versions = check res;
                 test:assertTrue(lengthof versions > 0, msg = "Found 0 or No API versions");
-            } catch(error err){
+            } catch (error err){
                 test:assertFail(msg = err.message);
             }
         }
@@ -90,7 +90,7 @@ function testGetOrganizationLimits() {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-            string[] keys = jsonRes.getKeys()?:[];
+            string[] keys = jsonRes.getKeys() ?: [];
             test:assertTrue(lengthof keys > 0, msg = "Response doesn't have enough keys");
             foreach key in jsonRes {
                 try {
@@ -161,7 +161,7 @@ function testUpdateRecord() {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            log:printError(err==null ? "Null": "Ok");
+            log:printError(err == null ? "Null": "Ok");
             test:assertFail(msg = err.message);
         }
     }
@@ -864,6 +864,7 @@ function testCheckUpdateRecordWithInvalidId() {
         }
         SalesforceConnectorError err => {
             test:assertNotEquals(err.message, "", msg = "Error message found null!");
+            test:assertEquals(err.salesforceErrors[0].errorCode, "NOT_FOUND", msg = "Invalid account ID. But successful test!");
         }
     }
 }

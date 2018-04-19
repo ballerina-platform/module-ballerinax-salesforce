@@ -29,9 +29,14 @@ The following section provides you the details on how to use Ballerina Salesforc
 ## Getting started
 
 1. Download the Ballerina tools distribution by navigating to https://ballerinalang.org/downloads/ and setup the SDK
-2. Clone the repository by running the following command,
-  `git clone https://github.com/wso2-ballerina/package-salesforce.git` and
-   Import the package to your ballerina project.
+
+2. Import the package to your ballerina project.
+
+```
+import wso2/sfdc37;
+```
+
+This will download the sfdc37 artifacts from the central repository to your local repository.
 
 ### Working with Salesforce REST endpoint actions
 

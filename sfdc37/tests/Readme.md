@@ -54,8 +54,8 @@ Create `ballerina.conf` file in `package-salesforce`, with following keys:
 
 Assign relevant string values generated for Salesforce app. 
 
-Go inside `package-salesforce` using terminal and run test.bal file 
-using following command `ballerina test sfdc37`.
+Go inside `package-salesforce` and give the command `ballerina init`using terminal and run test.bal file 
+using `ballerina test sfdc37` command.
 
 * Sample Test Function
 
