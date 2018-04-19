@@ -185,7 +185,6 @@ function testDeleteRecord() {
 }
 
 //=============================== Query ==================================//
-
 @test:Config
 function testGetQueryResult() {
     log:printInfo("salesforceClient -> getQueryResult()");
@@ -197,24 +196,20 @@ function testGetQueryResult() {
             test:assertNotEquals(jsonRes["done"], null);
             test:assertNotEquals(jsonRes["records"], null);
 
-            if (jsonRes.nextRecordsUrl != null) {
-                log:printInfo("salesforceClient -> getNextQueryResult()");
+            while (jsonRes.nextRecordsUrl != null) {
+                log:printDebug("Found new query result set!");
+                string nextQueryUrl = jsonRes.nextRecordsUrl.toString();
+                response = salesforceClient -> getNextQueryResult(nextQueryUrl);
 
-                while (jsonRes.nextRecordsUrl != null) {
-                    log:printDebug("Found new query result set!");
-                    string nextQueryUrl = jsonRes.nextRecordsUrl.toString();
-                    response = salesforceClient -> getNextQueryResult(nextQueryUrl);
-                    match response {
-                        json jsonNextRes => {
-                            test:assertNotEquals(jsonNextRes["totalSize"], null);
-                            test:assertNotEquals(jsonNextRes["done"], null);
-                            test:assertNotEquals(jsonNextRes["records"], null);
-
-                            jsonRes = jsonNextRes;
-                        }
-                        SalesforceConnectorError err => {
-                            test:assertFail(msg = err.message);
-                        }
+                match response {
+                    json jsonNextRes => {
+                        test:assertNotEquals(jsonNextRes["totalSize"], null);
+                        test:assertNotEquals(jsonNextRes["done"], null);
+                        test:assertNotEquals(jsonNextRes["records"], null);
+                        jsonRes = jsonNextRes;
+                    }
+                    SalesforceConnectorError err => {
+                        test:assertFail(msg = err.message);
                     }
                 }
             }
