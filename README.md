@@ -6,9 +6,9 @@ It handles [OAuth2.0](http://tools.ietf.org/html/rfc6749), provides auto complet
 
 ## Compatibility
 
-| Endpoint Version          | API Version |
+| Ballerina Version         | API Version |
 | ------------------------- | ------------|
-|          0.9.11           |   v37.0     |
+|   0.970.0-beta3           |   v37.0     |
  
 
 ## Getting started
@@ -42,7 +42,7 @@ import wso2/sfdc37;
 
 ```
 
-### Working with Salesforce REST endpoint.
+### Working with Salesforce REST connector.
 
 All the actions return JSON or sfdc37:SalesforceConnectorError. If the action is a success, 
 then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnectorError will be null and vice-versa.
@@ -78,7 +78,7 @@ then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnect
             }
         };
     
-         //Call the Salesforce endpoint function getAvailableApiVersions().
+         //Call the Salesforce connector function getAvailableApiVersions().
         json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
             match response {
                 //if successful, returns JSON result
