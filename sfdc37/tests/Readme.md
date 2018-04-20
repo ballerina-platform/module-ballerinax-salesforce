@@ -1,8 +1,8 @@
 ## Compatibility
 
-| Ballerina Version         | Endpoint Version          | API Version |
-| ------------------------- | ------------------------- | ------------|
-|  0.970.0-beta3            |           0.9.11          |   v37.0     |
+| Ballerina Version         | API Version |
+| ------------------------- | ------------|
+|  0.970.0-beta3            |   v37.0     |
 
 ### Prerequisites
 Create a Salesforce developer account and create a connected app by visiting [Salesforce](https://www.salesforce.com) and obtain the following parameters:

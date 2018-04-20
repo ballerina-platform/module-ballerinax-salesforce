@@ -2,18 +2,18 @@
 
 Salesforce connector provides a Ballerina API to access the 
 [Salesforce REST API](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm). 
-It handles [OAuth2.0](http://tools.ietf.org/html/rfc6749), provides auto completion and type safety.
+It handles [OAuth2.0](http://tools.ietf.org/html/rfc6749), provides auto completion and type conversions.
 
 ## Compatibility
 
-| Ballerina Version         | Endpoint Version          | API Version |
-| ------------------------- | ------------------------- | ------------|
-|   0.970.0-beta3           |          0.9.11           |   v37.0     |
+| Ballerina Version         | API Version |
+| ------------------------- | ------------|
+|   0.970.0-beta3           |   v37.0     |
  
 
 ## Getting started
 
-1. Refer https://ballerina.io/learn/getting-started/ to download and install Ballerina.
+1. Refer to [Getting Started guide](https://ballerina.io/learn/getting-started/) to download and install Ballerina.
 
 2. Create a Salesforce account and create a connected app by visiting [Salesforce](https://www.salesforce.com) 
 and obtain the following parameters:
