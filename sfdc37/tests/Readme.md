@@ -2,7 +2,7 @@
 
 | Ballerina Version         | Endpoint Version          | API Version |
 | ------------------------- | ------------------------- | ------------|
-|  0.970.0-beta1-SNAPSHOT   |           0.9.10          |   v37.0     |
+|  0.970.0-beta3            |           0.9.11          |   v37.0     |
 
 ### Prerequisites
 Create a Salesforce developer account and create a connected app by visiting [Salesforce](https://www.salesforce.com) and obtain the following parameters:
@@ -55,7 +55,7 @@ Create `ballerina.conf` file in `package-salesforce`, with following keys:
 Assign relevant string values generated for Salesforce app. 
 
 Go inside `package-salesforce` and give the command `ballerina init`using terminal and run test.bal file 
-using `ballerina test sfdc37` command.
+using `ballerina test sfdc37 --config ballerina.conf` command.
 
 * Sample Test Function
 

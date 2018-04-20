@@ -1,56 +1,69 @@
-# Salesforce Endpoint
+# Salesforce Connector
 
-## Salesforce
-[Salesforce](https://www.salesforce.com) is the world’s #1 CRM platform 
-that employees can access entirely over the Internet
-
-The Salesforce endpoint which is implemented in ballerina allows you to access the Salesforce REST API. 
-Salesforce Endpoint covers the basic functionality as well as the high level functionality 
-of the [REST API](https://developer.salesforce.com/page/REST_API).
-
-Ballerina is a strong and flexible language. Also it is JSON friendly. 
-It provides an integration tool which can be used to integrate the Salesforce API with other endpoints. 
-It is easy to write programs for the Salesforce API by having an endpoint for Salesforce. 
-Therefor it allows you to access the Salesforce REST API through Ballerina easily. 
-
-The following section provides you the details on how to use Ballerina Salesforce endpoint.
-
-
-![alt text](resources/salesforce.png)
-
+Salesforce connector provides a Ballerina API to access the 
+[Salesforce REST API](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm). 
+It handles [OAuth2.0](http://tools.ietf.org/html/rfc6749), provides auto completion and type safety.
 
 ## Compatibility
 
 | Ballerina Version         | Endpoint Version          | API Version |
 | ------------------------- | ------------------------- | ------------|
-|  0.970.0-beta1-SNAPSHOT   |          0.9.10           |   v37.0     |
-
+|   0.970.0-beta3           |          0.9.11           |   v37.0     |
+ 
 
 ## Getting started
 
-1. Download the Ballerina tools distribution by navigating to https://ballerinalang.org/downloads/ and setup the SDK
+1. Refer https://ballerina.io/learn/getting-started/ to download and install Ballerina.
 
-2. Import the package to your ballerina project.
+2. Create a Salesforce account and create a connected app by visiting [Salesforce](https://www.salesforce.com) 
+and obtain the following parameters:
+* Base URl (Endpoint)
+* Client Id
+* Client Secret
+* Access Token
+* Refresh Token
+* Refresh URL
 
-```
+IMPORTANT: This access token and refresh token can be used to make API requests on your own account's behalf. 
+Do not share your access token, client secret with anyone.
+
+Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm) 
+for more information on obtaining OAuth2 credentials.
+
+3. Create a new Ballerina project by executing the following command.
+
+      ``<PROJECT_ROOT_DIRECTORY>$ ballerina init``
+
+4. Import the Salesforce package(sfdc37) to your Ballerina program as follows.
+
+```ballerina
+
 import wso2/sfdc37;
+
 ```
 
-This will download the sfdc37 artifacts from the central repository to your local repository.
+### Working with Salesforce REST endpoint.
 
-### Working with Salesforce REST endpoint actions
-
-In order to use the Salesforce endpoint, first you need to create a Salesforce Client endpoint 
-by passing above mentioned parameters.
+All the actions return JSON or sfdc37:SalesforceConnectorError. If the action is a success, 
+then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnectorError will be null and vice-versa.
 
 ##### Example
  * Request
 
  ```ballerina
-import wso2/sfdc37 as sf;
+ import wso2/sfdc37 as sf;
  import ballerina/io;
  
-    public function main (string[] args) {
+ //User credentials to access Salesforce API
+ string url = "<base_url>";
+ string accessToken = "<access_token>";
+ string refreshToken = "<refresh_token>";
+ string clientId = "<client_id>";
+ string clientSecret = "<client_secret>";
+ string refreshUrl = "<refreshUrl>";
+ 
+ 
+    public function main (string... args) {
         endpoint Client salesforceClient {
             baseUrl:url,
             clientConfig:{
@@ -65,17 +78,20 @@ import wso2/sfdc37 as sf;
             }
         };
     
+         //Call the Salesforce endpoint function getAvailableApiVersions().
         json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
             match response {
+                //if successful, returns JSON result
                 json jsonRes => {
                     io:println(jsonRes);
                 }
         
+                //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
                 sf:SalesforceConnectorError err => {
                     io:println(err);
                 }
             }
-            
+    }
 ```
 * Response
 
