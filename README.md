@@ -8,7 +8,7 @@ It handles [OAuth2.0](http://tools.ietf.org/html/rfc6749), provides auto complet
 
 | Ballerina Version         | API Version |
 | ------------------------- | ------------|
-|   0.970.0-beta3           |   v37.0     |
+|   0.970.0-beta4           |   v37.0     |
  
 
 ## Getting started
