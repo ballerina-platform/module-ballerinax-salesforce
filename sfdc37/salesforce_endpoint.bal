@@ -27,6 +27,7 @@ public type SalesforceConfiguration {
 };
 
 documentation {Salesforce Client object
+    E{{}}
     F{{salesforceConfig}} Salesforce configration
     F{{salesforceConnector}} Salesforce connector
 }
@@ -40,14 +41,14 @@ public type Client object {
         P{{salesforceConfig}} salesforce connector configuration)
     }
     public function init(SalesforceConfiguration salesforceConfig) {
-        salesforceConfig.clientConfig.targets = [{url:salesforceConfig.baseUrl}];
+        salesforceConfig.clientConfig.url = salesforceConfig.baseUrl;
         self.salesforceConnector.httpClient.init(salesforceConfig.clientConfig);
     }
 
     documentation {Get Salesforce client
         R{{}} returns salesforce connector instance
     }
-    public function getClient() returns SalesforceConnector {
+    public function getCallerActions() returns SalesforceConnector {
         return self.salesforceConnector;
     }
 };

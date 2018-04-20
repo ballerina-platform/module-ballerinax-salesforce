@@ -1,3 +1,6 @@
 [project]
 org-name = "wso2"
-version = "0.9.8"
+version = "0.9.11 "
+authors = ["WSO2"]
+repository = "https://github.com/wso2-ballerina/package-salesforce"
+keywords = ["ballerina", "salesforce","sfdc"]
