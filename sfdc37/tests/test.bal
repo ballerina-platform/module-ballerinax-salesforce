@@ -2,7 +2,7 @@ import ballerina/test;
 import ballerina/config;
 import ballerina/log;
 import ballerina/time;
-import ballerina/util;
+import ballerina/system;
 
 string url = setConfParams(config:getAsString("ENDPOINT"));
 string accessToken = setConfParams(config:getAsString("ACCESS_TOKEN"));
@@ -434,7 +434,7 @@ function testGetFieldValuesFromSObjectRecord() {
 function testCreateRecordWithExternalId() {
     log:printInfo("CreateRecordWithExternalId");
 
-    externalID = util:uuid();
+    externalID = system:uuid();
     json accountExIdRecord = {Name:"Sample Org", BillingCity:"CA", SF_ExternalID__c:externalID};
 
     string|SalesforceConnectorError stringResponse = salesforceClient -> createRecord(ACCOUNT, accountExIdRecord);
