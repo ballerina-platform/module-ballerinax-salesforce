@@ -64,7 +64,7 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
                 }
             }
             error e => {
-                log:printErrorCause("Unable to encode value: " + value, e);
+                log:printError("Unable to encode value: " + value, err = e);
                 break;
             }
         }
