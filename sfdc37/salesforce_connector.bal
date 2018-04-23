@@ -476,11 +476,11 @@ public function SalesforceConnector::createMultipleRecords(string sObjectName, j
     endpoint http:Client httpClient = self.httpClient;
 
     json payload;
-    http:Request request = new;
+    http:Request req = new;
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
-    request.setJsonPayload(records);
+    req.setJsonPayload(records);
 
-    http:Response|http:HttpConnectorError response = httpClient -> post(path, request = request);
+    http:Response|http:HttpConnectorError response = httpClient -> post(path, request = req);
 
     return checkAndSetErrors(response, true);
 }
@@ -497,11 +497,11 @@ public function SalesforceConnector::upsertSObjectByExternalId(string sObjectNam
     returns json|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
     json payload;
-    http:Request request = new;
+    http:Request req = new;
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
-    request.setJsonPayload(record);
+    req.setJsonPayload(record);
 
-    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request = request);
+    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request = req);
 
     return checkAndSetErrors(response, false);
 }
@@ -560,11 +560,11 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
     endpoint http:Client httpClient = self.httpClient;
 
     string id = "";
-    http:Request request = new;
+    http:Request req = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
-    request.setJsonPayload(record);
+    req.setJsonPayload(record);
 
-    http:Response|http:HttpConnectorError response = httpClient -> post(path, request = request);
+    http:Response|http:HttpConnectorError response = httpClient -> post(path, request = req);
 
     json|SalesforceConnectorError result = checkAndSetErrors(response, true);
     match result {
@@ -581,11 +581,11 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
 public function SalesforceConnector::updateRecord(string sObjectName, string id, json record)
     returns boolean|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
-    http:Request request = new;
+    http:Request req = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-    request.setJsonPayload(record);
+    req.setJsonPayload(record);
 
-    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request = request);
+    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request = req);
 
     json|SalesforceConnectorError result = checkAndSetErrors(response, false);
     match result {
