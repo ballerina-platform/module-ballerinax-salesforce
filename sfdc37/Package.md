@@ -1,7 +1,11 @@
 # Salesforce Connector
 
+Allows connecting the Salesforce REST API.
+
+
 Salesforce connector provides a Ballerina API to access the Salesforce REST API. 
-It handles OAuth2.0, provides auto completion and type conversions.
+It simplifies coding by handling OAuth 2.0 and performing type conversions.
+The following section provides you the details on how to use Ballerina Salesforce connector.
 
 ## Compatibility
 
