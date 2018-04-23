@@ -31,66 +31,67 @@ for more information on obtaining OAuth2 credentials.
 
 3. Create a new Ballerina project by executing the following command.
 
-      ``<PROJECT_ROOT_DIRECTORY>$ ballerina init``
+   ```shell   
+   
+      <PROJECT_ROOT_DIRECTORY>$ ballerina init
+      
+   ```
 
-4. Import the Salesforce package(sfdc37) to your Ballerina program as follows.
-
-```ballerina
-
-import wso2/sfdc37;
-
-```
-
-5. Working with Salesforce REST connector.
+4. Working with Salesforce REST connector.
 
 All the actions return JSON or sfdc37:SalesforceConnectorError. If the action is a success, 
 then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnectorError will be null and vice-versa.
+
+You can import the Salesforce package(sfdc37) to your Ballerina program as follows.
+```ballerina
+    import wso2/sfdc37;
+```
 
 ##### Example
  * Request
 
  ```ballerina
- import wso2/sfdc37 as sf;
- import ballerina/io;
+    import wso2/sfdc37 as sf;
+    import ballerina/io;
  
  //User credentials to access Salesforce API
- string url = "<base_url>";
- string accessToken = "<access_token>";
- string refreshToken = "<refresh_token>";
- string clientId = "<client_id>";
- string clientSecret = "<client_secret>";
- string refreshUrl = "<refreshUrl>";
+    string url = "<base_url>";
+    string accessToken = "<access_token>";
+    string refreshToken = "<refresh_token>";
+    string clientId = "<client_id>";
+    string clientSecret = "<client_secret>";
+    string refreshUrl = "<refreshUrl>";
  
  
-    public function main (string... args) {
-        endpoint Client salesforceClient {
-            baseUrl:url,
-            clientConfig:{
-                auth:{
-                    scheme:"oauth",
-                    accessToken:accessToken,
-                    refreshToken:refreshToken,
-                    clientId:clientId,
-                    clientSecret:clientSecret,
-                    refreshUrl:refreshUrl
+        public function main (string... args) {
+            endpoint Client salesforceClient {
+                baseUrl:url,
+                clientConfig:{
+                    auth:{
+                        scheme:"oauth",
+                        accessToken:accessToken,
+                        refreshToken:refreshToken,
+                        clientId:clientId,
+                        clientSecret:clientSecret,
+                        refreshUrl:refreshUrl
+                    }
                 }
-            }
-        };
-    
-         //Call the Salesforce connector function getAvailableApiVersions().
-        json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
-            match response {
-                //if successful, returns JSON result
-                json jsonRes => {
-                    io:println(jsonRes);
-                }
+            };
         
-                //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
-                sf:SalesforceConnectorError err => {
-                    io:println(err);
+             //Call the Salesforce connector function getAvailableApiVersions().
+            json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
+                match response {
+                    //if successful, returns JSON result
+                    json jsonRes => {
+                        io:println(jsonRes);
+                    }
+            
+                    //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
+                    sf:SalesforceConnectorError err => {
+                        io:println(err);
+                    }
                 }
-            }
-    }
+        }
 ```
 * Response
 
