@@ -16,6 +16,9 @@ Create a Salesforce developer account and create a connected app by visiting [Sa
 IMPORTANT: This access token and refresh token can be used to make API requests on your own account's behalf. 
 Do not share your access token, client secret with anyone.
 
+Create an external id field under "Account" SObject, named with `"SF_ExternalID__c"` in your connected app. 
+This field will be used in the test cases related with external id. 
+
 Visit [here](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm) for more information on obtaining OAuth2 credentials.
 
 ### Working with Salesforce REST endpoint.
