@@ -1,14 +1,13 @@
 # Salesforce Connector
 
-Salesforce connector provides a Ballerina API to access the 
-[Salesforce REST API](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm). 
-It handles [OAuth2.0](http://tools.ietf.org/html/rfc6749), provides auto completion and type conversions.
+Salesforce connector provides a Ballerina API to access the Salesforce REST API. 
+It handles OAuth2.0, provides auto completion and type conversions.
 
 ## Compatibility
 
 | Ballerina Version         | API Version |
 | ------------------------- | ------------|
-|   0.970.0-beta10           |   v37.0     |
+|   0.970.0-beta10          |   v37.0     |
  
 
 ## Getting started
@@ -42,7 +41,7 @@ import wso2/sfdc37;
 
 ```
 
-### Working with Salesforce REST connector.
+5. Working with Salesforce REST connector.
 
 All the actions return JSON or sfdc37:SalesforceConnectorError. If the action is a success, 
 then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnectorError will be null and vice-versa.
