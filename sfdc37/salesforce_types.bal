@@ -16,7 +16,7 @@
 // under the License.
 //
 
-documentation {
+documentation { Errors by Salesforce
     F{{message}} Salesforce error message
     F{{errorCode}} Error code
 }
@@ -25,7 +25,7 @@ public type SalesforceError {
     string errorCode;
 };
 
-documentation {
+documentation {Errors by HTTP or Salesforce
     F{{message}} Array of string error messages
     F{{cause}} Array of errors
     F{{salesforceErrors}} Array of SalesforceError type errors

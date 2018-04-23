@@ -18,8 +18,8 @@
 
 import ballerina/http;
 
-documentation {
-    F{{clientConfig}} OAuth2 congiguration
+documentation { Salesforce client configuration
+    F{{clientConfig}} HTTP configuration
 }
 public type SalesforceConfiguration {
     string baseUrl;
