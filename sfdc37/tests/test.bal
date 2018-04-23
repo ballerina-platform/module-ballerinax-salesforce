@@ -19,6 +19,7 @@ string opportunityId = "";
 string productId = "";
 string recordId = "";
 string externalID = "";
+string idOfSampleOrg = "";
 
 endpoint Client salesforceClient {
     baseUrl:url,
@@ -115,9 +116,9 @@ function testCreateRecord() {
     json accountRecord = {Name:"John Keells Holdings", BillingCity:"Colombo 3"};
     string|SalesforceConnectorError stringResponse = salesforceClient -> createRecord(ACCOUNT, accountRecord);
     match stringResponse {
-        string id => {
-            test:assertNotEquals(id, "", msg = "Found empty response!");
-            recordId = id;
+        string createdRecordId => {
+            test:assertNotEquals(createdRecordId, "", msg = "Found empty response!");
+            recordId = createdRecordId;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -173,13 +174,12 @@ function testUpdateRecord() {
 }
 function testDeleteRecord() {
     log:printInfo("salesforceClient -> deleteRecord()");
-    boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord("Account", recordId);
+    boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord(ACCOUNT, recordId);
     match response {
         boolean success => {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
-            test:assertFail(msg = err.message);
         }
     }
 }
@@ -434,13 +434,16 @@ function testGetFieldValuesFromSObjectRecord() {
 function testCreateRecordWithExternalId() {
     log:printInfo("CreateRecordWithExternalId");
 
-    externalID = system:uuid();
+    string uuidString = system:uuid();
+    externalID = uuidString.substring(0,32);
+
     json accountExIdRecord = {Name:"Sample Org", BillingCity:"CA", SF_ExternalID__c:externalID};
 
     string|SalesforceConnectorError stringResponse = salesforceClient -> createRecord(ACCOUNT, accountExIdRecord);
     match stringResponse {
-        string id => {
-            test:assertNotEquals(id, "", msg = "Found empty response!");
+        string createdExternalId => {
+            test:assertNotEquals(createdExternalId, "", msg = "Found empty response!");
+            idOfSampleOrg = createdExternalId;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -484,6 +487,23 @@ function testUpsertSObjectByExternalId() {
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Expects true on success");
+        }
+        SalesforceConnectorError err => {
+            test:assertFail(msg = err.message);
+        }
+    }
+}
+
+
+@test:Config {
+    dependsOn:["testCreateRecordWithExternalId", "testUpsertSObjectByExternalId", "testGetRecordByExternalId"]
+}
+function testDeleteRecordWithExternalId() {
+    log:printInfo("salesforceClient -> DeleteRecordWithExternalID");
+    boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord(ACCOUNT, idOfSampleOrg);
+    match response {
+        boolean success => {
+            test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
