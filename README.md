@@ -67,35 +67,35 @@ You can import the Salesforce package(sfdc37) to your Ballerina program as follo
     string refreshUrl = "<refreshUrl>";
  
  
-        public function main (string... args) {
-            endpoint Client salesforceClient {
-                baseUrl:url,
-                clientConfig:{
-                    auth:{
-                        scheme:"oauth",
-                        accessToken:accessToken,
-                        refreshToken:refreshToken,
-                        clientId:clientId,
-                        clientSecret:clientSecret,
-                        refreshUrl:refreshUrl
-                    }
+    public function main (string... args) {
+        endpoint Client salesforceClient {
+            baseUrl:url,
+            clientConfig:{
+                auth:{
+                    scheme:"oauth",
+                    accessToken:accessToken,
+                    refreshToken:refreshToken,
+                    clientId:clientId,
+                    clientSecret:clientSecret,
+                    refreshUrl:refreshUrl
                 }
-            };
+            }
+        };
+    
+         //Call the Salesforce connector function getAvailableApiVersions().
+        json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
+            match response {
+                //if successful, returns JSON result
+                json jsonRes => {
+                    io:println(jsonRes);
+                }
         
-             //Call the Salesforce connector function getAvailableApiVersions().
-            json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
-                match response {
-                    //if successful, returns JSON result
-                    json jsonRes => {
-                        io:println(jsonRes);
-                    }
-            
-                    //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
-                    sf:SalesforceConnectorError err => {
-                        io:println(err);
-                    }
+                //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
+                sf:SalesforceConnectorError err => {
+                    io:println(err);
                 }
-        }
+            }
+    }
 ```
 * Response
 
