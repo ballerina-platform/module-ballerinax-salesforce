@@ -28,7 +28,6 @@ limitations for organizations.
 |Salesforce REST API |    v37.0      |  
 
 ## Sample
-The Salesforce connector can be used to create an Account SObject, execute a SOQL query, and create a Lead SObject. 
 First, import the `wso2/sfdc37` package into the Ballerina project.
 ```ballerina
 import wso2/sfdc37;
@@ -89,7 +88,7 @@ string sampleQuery = "SELECT name FROM Account";
 response = salesforceEP->getQueryResult(sampleQuery);
 ```
 The response from `getQueryResult` is either a JSON object with total size, execution status, resulting records, and 
-url to get next record set (if query execution was successful) or a `SalesforceConnectorError` 
+URL to get next record set (if query execution was successful) or a `SalesforceConnectorError` 
 (if the query execution was unsuccessful). The `match` operation can be used to handle the response if an error occurs.
 ```ballerina
 match response {
