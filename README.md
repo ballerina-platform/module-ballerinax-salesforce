@@ -11,7 +11,7 @@ The following section provides you the details on how to use Ballerina Salesforc
 
 | Ballerina Version         | API Version |
 | ------------------------- | ------------|
-|   0.970.0-beta15          |   v37.0     |
+| 0.970.0-beta15            |   v37.0     |
  
 
 ## Getting started
