@@ -559,7 +559,6 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
     returns string|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
 
-    string id = "";
     http:Request req = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     req.setJsonPayload(record);
@@ -569,13 +568,12 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
     json|SalesforceConnectorError result = checkAndSetErrors(response, true);
     match result {
         json jsonResult => {
-            id = jsonResult.id.toString();
+            return jsonResult.id.toString();
         }
         SalesforceConnectorError err => {
             return err;
         }
     }
-    return id;
 }
 
 public function SalesforceConnector::updateRecord(string sObjectName, string id, json record)
