@@ -78,7 +78,7 @@ documentation { Returns the JSON result or SalesforceConnectorError
     P{{expectPayload}} true if json payload expected in response, if not false
     R{{result}} JSON result if successful, else SalesforceConnectorError occured
 }
-function checkAndSetErrors(http:Response|http:HttpConnectorError response, boolean expectPayload)
+function checkAndSetErrors(http:Response|error response, boolean expectPayload)
     returns json|SalesforceConnectorError {
     json result = {};
 
@@ -137,11 +137,11 @@ function checkAndSetErrors(http:Response|http:HttpConnectorError response, boole
 
             }
         }
-        http:HttpConnectorError httpError => {
+        error err => {
             SalesforceConnectorError connectorError =
             {
-                message:"Http error -> status code: " + <string>httpError.statusCode + "; message: " + httpError.message,
-                cause:httpError.cause ?: {}
+                message:"Http error -> message: " + err.message,
+                cause:err.cause ?: {}
             };
             return connectorError;
         }

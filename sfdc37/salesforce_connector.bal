@@ -480,7 +480,7 @@ public function SalesforceConnector::createMultipleRecords(string sObjectName, j
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
     req.setJsonPayload(records);
 
-    http:Response|http:HttpConnectorError response = httpClient -> post(path, request = req);
+    http:Response|error response = httpClient -> post(path, request = req);
 
     return checkAndSetErrors(response, true);
 }
@@ -501,7 +501,7 @@ public function SalesforceConnector::upsertSObjectByExternalId(string sObjectNam
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     req.setJsonPayload(record);
 
-    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request = req);
+    http:Response|error response = httpClient -> patch(path, request = req);
 
     return checkAndSetErrors(response, false);
 }
@@ -550,7 +550,7 @@ public function SalesforceConnector::getRecord(string path)
     returns json|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
 
-    http:Response|http:HttpConnectorError response = httpClient -> get(path);
+    http:Response|error response = httpClient -> get(path);
 
     return checkAndSetErrors(response, true);
 }
@@ -563,7 +563,7 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     req.setJsonPayload(record);
 
-    http:Response|http:HttpConnectorError response = httpClient -> post(path, request = req);
+    http:Response|error response = httpClient -> post(path, request = req);
 
     json|SalesforceConnectorError result = checkAndSetErrors(response, true);
     match result {
@@ -583,7 +583,7 @@ public function SalesforceConnector::updateRecord(string sObjectName, string id,
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     req.setJsonPayload(record);
 
-    http:Response|http:HttpConnectorError response = httpClient -> patch(path, request = req);
+    http:Response|error response = httpClient -> patch(path, request = req);
 
     json|SalesforceConnectorError result = checkAndSetErrors(response, false);
     match result {
@@ -602,7 +602,7 @@ public function SalesforceConnector::deleteRecord(string sObjectName, string id)
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
 
-    http:Response|http:HttpConnectorError response = httpClient -> delete(path);
+    http:Response|error response = httpClient -> delete(path);
 
     json|SalesforceConnectorError result = checkAndSetErrors(response, false);
     match result {
