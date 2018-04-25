@@ -41,7 +41,6 @@ public type Client object {
         P{{salesforceConfig}} salesforce connector configuration)
     }
     public function init(SalesforceConfiguration salesforceConfig) {
-        salesforceConfig.clientConfig.url = salesforceConfig.baseUrl;
         self.salesforceConnector.httpClient.init(salesforceConfig.clientConfig);
     }
 

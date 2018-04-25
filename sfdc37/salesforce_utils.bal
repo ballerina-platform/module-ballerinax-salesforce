@@ -76,8 +76,7 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
 documentation { Returns the JSON result or SalesforceConnectorError
     P{{response}} HTTP respone or HttpConnectorError
     P{{expectPayload}} true if json payload expected in response, if not false
-    R{{result}} JSON result
-    R{{connectorError}} SalesforceConnectorError occured
+    R{{result}} JSON result if successful, else SalesforceConnectorError occured
 }
 function checkAndSetErrors(http:Response|http:HttpConnectorError response, boolean expectPayload)
     returns json|SalesforceConnectorError {
@@ -92,11 +91,11 @@ function checkAndSetErrors(http:Response|http:HttpConnectorError response, boole
                         json jsonResponse => {
                             return jsonResponse;
                         }
-                        http:PayloadError payloadErr => {
-                            log:printError("Error occurred when extracting JSON payload. Error: " + payloadErr.message);
+                        error err => {
+                            log:printError("Error occurred when extracting JSON payload. Error: " + err.message);
                             SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
                             connectorError.message = "Error occured while extracting Json payload!";
-                            connectorError.cause = payloadErr;
+                            connectorError.cause = err;
                             return connectorError;
                         }
                     }
@@ -127,11 +126,11 @@ function checkAndSetErrors(http:Response|http:HttpConnectorError response, boole
                             }
                         }
                     }
-                    http:PayloadError payloadErr => {
-                        log:printError("Error occurred when extracting errors from payload. Error: " + payloadErr.message);
+                    error err => {
+                        log:printError("Error occurred when extracting errors from payload. Error: " + err.message);
                         SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
                         connectorError.message = "Error occured while extracting errors from payload!";
-                        connectorError.cause = payloadErr;
+                        connectorError.cause = err;
                         return connectorError;
                     }
                 }

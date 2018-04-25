@@ -4,12 +4,12 @@ import ballerina/log;
 import ballerina/time;
 import ballerina/system;
 
-string url = setConfParams(config:getAsString("ENDPOINT"));
-string accessToken = setConfParams(config:getAsString("ACCESS_TOKEN"));
-string clientId = setConfParams(config:getAsString("CLIENT_ID"));
-string clientSecret = setConfParams(config:getAsString("CLIENT_SECRET"));
-string refreshToken = setConfParams(config:getAsString("REFRESH_TOKEN"));
-string refreshUrl = setConfParams(config:getAsString("REFRESH_URL"));
+string url = config:getAsString("ENDPOINT");
+string accessToken = config:getAsString("ACCESS_TOKEN");
+string clientId = config:getAsString("CLIENT_ID");
+string clientSecret = config:getAsString("CLIENT_SECRET");
+string refreshToken = config:getAsString("REFRESH_TOKEN");
+string refreshUrl = config:getAsString("REFRESH_URL");
 
 json|SalesforceConnectorError response;
 string accountId = "";
@@ -22,8 +22,8 @@ string externalID = "";
 string idOfSampleOrg = "";
 
 endpoint Client salesforceClient {
-    baseUrl:url,
     clientConfig:{
+        url:url,
         auth:{
             scheme:"oauth",
             accessToken:accessToken,
@@ -880,20 +880,6 @@ function testCheckUpdateRecordWithInvalidId() {
         SalesforceConnectorError err => {
             test:assertNotEquals(err.message, "", msg = "Error message found null!");
             test:assertEquals(err.salesforceErrors[0].errorCode, "NOT_FOUND", msg = "Invalid account ID. But successful test!");
-        }
-    }
-}
-
-//================================================================================================//
-
-function setConfParams(string|() confParam) returns string {
-    match confParam {
-        string param => {
-            return param;
-        }
-        () => {
-            log:printInfo("Empty value, found nil!!");
-            return "";
         }
     }
 }

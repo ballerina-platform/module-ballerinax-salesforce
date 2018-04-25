@@ -1,14 +1,17 @@
 # Salesforce Connector
 
-Salesforce connector provides a Ballerina API to access the 
-[Salesforce REST API](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest/intro_what_is_rest_api.htm). 
-It handles [OAuth2.0](http://tools.ietf.org/html/rfc6749), provides auto completion and type conversions.
+Allows connecting the Salesforce REST API.
+
+
+Salesforce connector provides a Ballerina API to access the Salesforce REST API. 
+It simplifies coding by handling OAuth 2.0 and performing type conversions.
+The following section provides you the details on how to use Ballerina Salesforce connector.
 
 ## Compatibility
 
 | Ballerina Version         | API Version |
 | ------------------------- | ------------|
-|   0.970.0-beta10           |   v37.0     |
+|   0.970.0-beta15          |   v37.0     |
  
 
 ## Getting started
@@ -32,41 +35,42 @@ for more information on obtaining OAuth2 credentials.
 
 3. Create a new Ballerina project by executing the following command.
 
-      ``<PROJECT_ROOT_DIRECTORY>$ ballerina init``
+   ```shell   
+   
+      <PROJECT_ROOT_DIRECTORY>$ ballerina init
+      
+   ```
 
-4. Import the Salesforce package(sfdc37) to your Ballerina program as follows.
-
-```ballerina
-
-import wso2/sfdc37;
-
-```
-
-### Working with Salesforce REST connector.
+4. Working with Salesforce REST connector.
 
 All the actions return JSON or sfdc37:SalesforceConnectorError. If the action is a success, 
 then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnectorError will be null and vice-versa.
+
+You can import the Salesforce package(sfdc37) to your Ballerina program as follows.
+```ballerina
+    import wso2/sfdc37;
+```
 
 ##### Example
  * Request
 
  ```ballerina
- import wso2/sfdc37 as sf;
- import ballerina/io;
+    import wso2/sfdc37 as sf;
+    import ballerina/io;
  
  //User credentials to access Salesforce API
- string url = "<base_url>";
- string accessToken = "<access_token>";
- string refreshToken = "<refresh_token>";
- string clientId = "<client_id>";
- string clientSecret = "<client_secret>";
- string refreshUrl = "<refreshUrl>";
+    string url = "<base_url>";
+    string accessToken = "<access_token>";
+    string refreshToken = "<refresh_token>";
+    string clientId = "<client_id>";
+    string clientSecret = "<client_secret>";
+    string refreshUrl = "<refreshUrl>";
  
  
-    public function main (string... args) {
+    public function main (string... args) {      
         endpoint Client salesforceClient {
-            baseUrl:url,
             clientConfig:{
+                url:url,
                 auth:{
                     scheme:"oauth",
                     accessToken:accessToken,
