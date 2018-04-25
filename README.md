@@ -69,8 +69,8 @@ You can import the Salesforce package(sfdc37) to your Ballerina program as follo
  
     public function main (string... args) {
         endpoint Client salesforceClient {
-            baseUrl:url,
             clientConfig:{
+                url:url,
                 auth:{
                     scheme:"oauth",
                     accessToken:accessToken,

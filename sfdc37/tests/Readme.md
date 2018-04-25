@@ -31,8 +31,8 @@ Find the way of creating Salesforce endpoint as following.
 ```ballerina
 
 endpoint Client salesforceClient {
-    baseUrl:url,
     clientConfig:{
+        url:url,
         auth:{
             scheme:"oauth",
             accessToken:accessToken,

@@ -22,8 +22,8 @@ string externalID = "";
 string idOfSampleOrg = "";
 
 endpoint Client salesforceClient {
-    baseUrl:url,
     clientConfig:{
+        url:url,
         auth:{
             scheme:"oauth",
             accessToken:accessToken,
