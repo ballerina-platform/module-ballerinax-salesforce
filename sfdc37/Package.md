@@ -2,9 +2,8 @@ Connects to Salesforce from Ballerina.
 
 # Package Overview
 
-This package provides a Ballerina API for the Salesforce REST API. It provides the ability to do CRUD operations for 
-SObjects, query using SOQL, search using SOSL, describe SObjects and organizational data, etc. It handles OAuth 2.0 and 
-provides auto completion and type conversions.
+The Salesforce connector allows you to CRUD operations for SObjects, query using SOQL, search using SOSL, describe
+SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
 
 **SObject Operations**
 
@@ -22,10 +21,10 @@ The `wso2/sfdc37` package contains operations that describe SObjects, organizati
 limitations for organizations.
 
 ## Compatibility
-|                    |    Version     |  
-| :-----------------:|:--------------:| 
-| Ballerina Language | 0.970.0-beta15 |
-|Salesforce REST API |    v37.0      |  
+|                     |    Version     |
+| :------------------:|:--------------:|
+| Ballerina Language  | 0.970.0-rc1    |
+| Salesforce REST API | v37.0          |
 
 ## Sample
 First, import the `wso2/sfdc37` package into the Ballerina project.
