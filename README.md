@@ -5,9 +5,9 @@ SObjects and organizational data through the Salesforce REST API. It handles OAu
 
 ## Compatibility
 
-| Ballerina Version         | API Version |
-| ------------------------- | ------------|
-| 0.970.0-rc1               |   v37.0     |
+| Ballerina Version  | API Version  |
+| ------------------ | ------------ |
+| 0.970.0            |   v37.0      |
  
 
 ## Getting started
