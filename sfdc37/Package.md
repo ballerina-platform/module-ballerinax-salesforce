@@ -2,8 +2,8 @@ Connects to Salesforce from Ballerina.
 
 # Package Overview
 
-The Salesforce connector allows you to CRUD operations for SObjects, query using SOQL, search using SOSL, describe
-SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
+The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
+describe SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
 
 **SObject Operations**
 
@@ -23,7 +23,7 @@ limitations for organizations.
 ## Compatibility
 |                     |    Version     |
 | :------------------:|:--------------:|
-| Ballerina Language  | 0.970.0-rc1    |
+| Ballerina Language  | 0.970.0        |
 | Salesforce REST API | v37.0          |
 
 ## Sample
@@ -92,11 +92,11 @@ URL to get next record set (if query execution was successful) or a `SalesforceC
 ```ballerina
 match response {
     json jsonRes => {
-                        io:println(“TotalSize:  ” + jsonRes["totalSize"]);
-                        io:println(“Done:  ” + jsonRes["done"]);
-                        io:println(“Records:  ” + jsonRes["records"]);
-                        io:println(“Next response url:”  + jsonRes["nextRecordsUrl"]); 
-                    }
+        io:println(“TotalSize:  ” + jsonRes["totalSize"]);
+        io:println(“Done:  ” + jsonRes["done"]);
+        io:println(“Records:  ” + jsonRes["records"]);
+        io:println(“Next response url:”  + jsonRes["nextRecordsUrl"]);
+    }
     sfdc37:SalesforceConnectorError err => io:println(err);
 }
 ```
