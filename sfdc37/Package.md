@@ -3,7 +3,7 @@ Connects to Salesforce from Ballerina.
 # Package Overview
 
 The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
-describe SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication
+describe SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
 
 **SObject Operations**
 

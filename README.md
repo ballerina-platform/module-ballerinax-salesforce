@@ -1,7 +1,7 @@
 # Salesforce Connector
 
-The Salesforce connector allows you to CRUD operations for SObjects, query using SOQL, search using SOSL, describe
-SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
+The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
+describe SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
 
 ## Compatibility
 
