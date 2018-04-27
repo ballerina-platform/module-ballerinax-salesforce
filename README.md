@@ -1,17 +1,13 @@
 # Salesforce Connector
 
-Allows connecting the Salesforce REST API.
-
-
-Salesforce connector provides a Ballerina API to access the Salesforce REST API. 
-It simplifies coding by handling OAuth 2.0 and performing type conversions.
-The following section provides you the details on how to use Ballerina Salesforce connector.
+The Salesforce connector allows you to CRUD operations for SObjects, query using SOQL, search using SOSL, describe
+SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
 
 ## Compatibility
 
 | Ballerina Version         | API Version |
 | ------------------------- | ------------|
-| 0.970.0-beta15            |   v37.0     |
+| 0.970.0-rc1               |   v37.0     |
  
 
 ## Getting started
