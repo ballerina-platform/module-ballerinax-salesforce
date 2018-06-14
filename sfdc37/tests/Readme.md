@@ -2,7 +2,7 @@
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.970.0            |   v37.0      |
+| 0.974.1            |   v37.0      |
 
 ### Prerequisites
 
@@ -35,7 +35,7 @@ endpoint Client salesforceClient {
     clientConfig:{
         url:url,
         auth:{
-            scheme:"oauth",
+            scheme:http:OAUTH2,
             accessToken:accessToken,
             refreshToken:refreshToken,
             clientId:clientId,

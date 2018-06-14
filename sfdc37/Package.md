@@ -23,7 +23,7 @@ limitations for organizations.
 ## Compatibility
 |                     |    Version     |
 | :------------------:|:--------------:|
-| Ballerina Language  | 0.970.0        |
+| Ballerina Language  | 0.974.1        |
 | Salesforce REST API | v37.0          |
 
 ## Sample
@@ -55,7 +55,7 @@ endpoint sfdc37:Client salesforceEP {
    clientConfig:{
        url:url,
        auth:{
-           scheme:"oauth",
+           scheme:http:OAUTH2,
            accessToken:accessToken,
            refreshToken:refreshToken,
            clientId:clientId,
