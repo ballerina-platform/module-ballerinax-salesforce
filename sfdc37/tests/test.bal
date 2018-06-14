@@ -25,7 +25,7 @@ endpoint Client salesforceClient {
     clientConfig:{
         url:url,
         auth:{
-            scheme:"oauth",
+            scheme:http:OAUTH2,
             accessToken:accessToken,
             refreshToken:refreshToken,
             clientId:clientId,

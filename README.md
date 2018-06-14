@@ -7,7 +7,7 @@ describe SObjects and organizational data through the Salesforce REST API. It ha
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.970.0            |   v37.0      |
+| 0.974.1            |   v37.0      |
  
 
 ## Getting started
@@ -68,7 +68,7 @@ You can import the Salesforce package(sfdc37) to your Ballerina program as follo
             clientConfig:{
                 url:url,
                 auth:{
-                    scheme:"oauth",
+                    scheme:http:OAUTH2,
                     accessToken:accessToken,
                     refreshToken:refreshToken,
                     clientId:clientId,
