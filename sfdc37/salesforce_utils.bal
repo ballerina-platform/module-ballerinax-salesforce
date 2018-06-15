@@ -119,7 +119,7 @@ function checkAndSetErrors(http:Response|error response, boolean expectPayload)
                             }
                             error e => {
                                 log:printError("Error occurred when extracting JSON payload. Error: " + e.message);
-                                SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+                                connectorError = {message:"", salesforceErrors:[]};
                                 connectorError.message = "Error occured while extracting Json payload!";
                                 connectorError.cause = e;
                                 return connectorError;
@@ -128,7 +128,7 @@ function checkAndSetErrors(http:Response|error response, boolean expectPayload)
                     }
                     error err => {
                         log:printError("Error occurred when extracting errors from payload. Error: " + err.message);
-                        SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+                        connectorError = {message:"", salesforceErrors:[]};
                         connectorError.message = "Error occured while extracting errors from payload!";
                         connectorError.cause = err;
                         return connectorError;

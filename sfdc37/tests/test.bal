@@ -4,26 +4,26 @@ import ballerina/log;
 import ballerina/time;
 import ballerina/system;
 
-string url = config:getAsString("ENDPOINT");
+string endpointUrl = config:getAsString("ENDPOINT");
 string accessToken = config:getAsString("ACCESS_TOKEN");
 string clientId = config:getAsString("CLIENT_ID");
 string clientSecret = config:getAsString("CLIENT_SECRET");
 string refreshToken = config:getAsString("REFRESH_TOKEN");
 string refreshUrl = config:getAsString("REFRESH_URL");
 
-json|SalesforceConnectorError response;
-string accountId = "";
-string leadId = "";
-string contactId = "";
-string opportunityId = "";
-string productId = "";
-string recordId = "";
-string externalID = "";
-string idOfSampleOrg = "";
+json|SalesforceConnectorError resp;
+string tmpAccountId = "";
+string tmpLeadId = "";
+string tmpContactId = "";
+string tmpOpportunityId = "";
+string tmpProductId = "";
+string tmpRecordId = "";
+string tmpExternalID = "";
+string tmpIdOfSampleOrg = "";
 
 endpoint Client salesforceClient {
     clientConfig:{
-        url:url,
+        url: endpointUrl,
         auth:{
             scheme:http:OAUTH2,
             accessToken:accessToken,
@@ -38,8 +38,8 @@ endpoint Client salesforceClient {
 @test:Config
 function testGetAvailableApiVersions() {
     log:printInfo("salesforceClient -> getAvailableApiVersions()");
-    response = salesforceClient -> getAvailableApiVersions();
-    match response {
+    resp = salesforceClient -> getAvailableApiVersions();
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
             try {
@@ -61,8 +61,8 @@ function testGetAvailableApiVersions() {
 function testGetResourcesByApiVersion() {
     log:printInfo("salesforceClient -> getResourcesByApiVersion()");
     string apiVersion = "v37.0";
-    response = salesforceClient -> getResourcesByApiVersion(apiVersion);
-    match response {
+    resp = salesforceClient -> getResourcesByApiVersion(apiVersion);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
             try {
@@ -87,8 +87,8 @@ function testGetResourcesByApiVersion() {
 @test:Config
 function testGetOrganizationLimits() {
     log:printInfo("salesforceClient -> getOrganizationLimits()");
-    response = salesforceClient -> getOrganizationLimits();
-    match response {
+    resp = salesforceClient -> getOrganizationLimits();
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
             string[] keys = jsonRes.getKeys();
@@ -118,7 +118,7 @@ function testCreateRecord() {
     match stringResponse {
         string createdRecordId => {
             test:assertNotEquals(createdRecordId, "", msg = "Found empty response!");
-            recordId = createdRecordId;
+            tmpRecordId = createdRecordId;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -131,9 +131,9 @@ function testCreateRecord() {
 }
 function testGetRecord() {
     log:printInfo("salesforceClient -> getRecord()");
-    string path = "/services/data/v37.0/sobjects/Account/" + recordId;
-    response = salesforceClient -> getRecord(path);
-    match response {
+    string path = "/services/data/v37.0/sobjects/Account/" + tmpRecordId;
+    resp = salesforceClient -> getRecord(path);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
             try {
@@ -156,7 +156,7 @@ function testGetRecord() {
 function testUpdateRecord() {
     log:printInfo("salesforceClient -> updateRecord()");
     json account = {Name:"WSO2 Inc", BillingCity:"Jaffna", Phone:"+94110000000"};
-    boolean|SalesforceConnectorError response = salesforceClient -> updateRecord(ACCOUNT, recordId, account);
+    boolean|SalesforceConnectorError response = salesforceClient -> updateRecord(ACCOUNT, tmpRecordId, account);
     match response {
         boolean success => {
             test:assertTrue(success, msg = "Expects true on success");
@@ -174,7 +174,7 @@ function testUpdateRecord() {
 }
 function testDeleteRecord() {
     log:printInfo("salesforceClient -> deleteRecord()");
-    boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord(ACCOUNT, recordId);
+    boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord(ACCOUNT, tmpRecordId);
     match response {
         boolean success => {
             test:assertTrue(success, msg = "Expects true on success");
@@ -189,8 +189,8 @@ function testDeleteRecord() {
 function testGetQueryResult() {
     log:printInfo("salesforceClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
-    response = salesforceClient -> getQueryResult(sampleQuery);
-    match response {
+    resp = salesforceClient -> getQueryResult(sampleQuery);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes["totalSize"], null);
             test:assertNotEquals(jsonRes["done"], null);
@@ -199,9 +199,9 @@ function testGetQueryResult() {
             while (jsonRes.nextRecordsUrl != null) {
                 log:printDebug("Found new query result set!");
                 string nextQueryUrl = jsonRes.nextRecordsUrl.toString();
-                response = salesforceClient -> getNextQueryResult(nextQueryUrl);
+                resp = salesforceClient -> getNextQueryResult(nextQueryUrl);
 
-                match response {
+                match resp {
                     json jsonNextRes => {
                         test:assertNotEquals(jsonNextRes["totalSize"], null);
                         test:assertNotEquals(jsonNextRes["done"], null);
@@ -226,8 +226,8 @@ function testGetQueryResult() {
 function testGetAllQueries() {
     log:printInfo("salesforceClient -> getAllQueries()");
     string sampleQuery = "SELECT Name from Account WHERE isDeleted=TRUE";
-    response = salesforceClient -> getAllQueries(sampleQuery);
-    match response {
+    resp = salesforceClient -> getAllQueries(sampleQuery);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes["totalSize"], null);
             test:assertNotEquals(jsonRes["done"], null);
@@ -244,8 +244,8 @@ function testGetAllQueries() {
 function testExplainQueryOrReportOrListview() {
     log:printInfo("salesforceClient -> explainQueryOrReportOrListview()");
     string queryString = "SELECT name FROM Account";
-    response = salesforceClient -> explainQueryOrReportOrListview(queryString);
-    match response {
+    resp = salesforceClient -> explainQueryOrReportOrListview(queryString);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -262,8 +262,8 @@ function testExplainQueryOrReportOrListview() {
 function testSearchSOSLString() {
     log:printInfo("salesforceClient -> searchSOSLString()");
     string searchString = "FIND {ABC Inc}";
-    response = salesforceClient -> searchSOSLString(searchString);
-    match response {
+    resp = salesforceClient -> searchSOSLString(searchString);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -279,8 +279,8 @@ function testSearchSOSLString() {
 @test:Config
 function testGetSObjectBasicInfo() {
     log:printInfo("salesforceClient -> getSObjectBasicInfo()");
-    response = salesforceClient -> getSObjectBasicInfo("Account");
-    match response {
+    resp = salesforceClient -> getSObjectBasicInfo("Account");
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -294,8 +294,8 @@ function testGetSObjectBasicInfo() {
 @test:Config
 function testSObjectPlatformAction() {
     log:printInfo("salesforceClient -> sObjectPlatformAction()");
-    response = salesforceClient -> sObjectPlatformAction();
-    match response {
+    resp = salesforceClient -> sObjectPlatformAction();
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -309,8 +309,8 @@ function testSObjectPlatformAction() {
 @test:Config
 function testDescribeAvailableObjects() {
     log:printInfo("salesforceClient -> describeAvailableObjects()");
-    response = salesforceClient -> describeAvailableObjects();
-    match response {
+    resp = salesforceClient -> describeAvailableObjects();
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -325,8 +325,8 @@ function testDescribeAvailableObjects() {
 @test:Config
 function testDescribeSObject() {
     log:printInfo("salesforceClient -> describeSObject()");
-    response = salesforceClient -> describeSObject(ACCOUNT);
-    match response {
+    resp = salesforceClient -> describeSObject(ACCOUNT);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -348,8 +348,8 @@ function testGetDeletedRecords() {
     time:Time weekAgo = now.subtractDuration(0, 0, 1, 0, 0, 0, 0);
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
-    response = salesforceClient -> getDeletedRecords("Account", startDateTime, endDateTime);
-    match response {
+    resp = salesforceClient -> getDeletedRecords("Account", startDateTime, endDateTime);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -369,8 +369,8 @@ function testGetUpdatedRecords() {
     time:Time weekAgo = now.subtractDuration(0, 0, 1, 0, 0, 0, 0);
     string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
 
-    response = salesforceClient -> getUpdatedRecords("Account", startDateTime, endDateTime);
-    match response {
+    resp = salesforceClient -> getUpdatedRecords("Account", startDateTime, endDateTime);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -402,8 +402,8 @@ function testCreateMultipleRecords() {
     }]
     };
 
-    response = salesforceClient -> createMultipleRecords(ACCOUNT, multipleRecords);
-    match response {
+    resp = salesforceClient -> createMultipleRecords(ACCOUNT, multipleRecords);
+    match resp {
         json jsonRes => {
             test:assertEquals(jsonRes.hasErrors.toString(), "false", msg = "Found null JSON response!");
         }
@@ -418,8 +418,8 @@ function testCreateMultipleRecords() {
 }
 function testGetFieldValuesFromSObjectRecord() {
     log:printInfo("salesforceClient -> getFieldValuesFromSObjectRecord()");
-    response = salesforceClient -> getFieldValuesFromSObjectRecord("Account", recordId, "Name,BillingCity");
-    match response {
+    resp = salesforceClient -> getFieldValuesFromSObjectRecord("Account", tmpRecordId, "Name,BillingCity");
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -435,15 +435,15 @@ function testCreateRecordWithExternalId() {
     log:printInfo("CreateRecordWithExternalId");
 
     string uuidString = system:uuid();
-    externalID = uuidString.substring(0,32);
+    tmpExternalID = uuidString.substring(0,32);
 
-    json accountExIdRecord = {Name:"Sample Org", BillingCity:"CA", SF_ExternalID__c:externalID};
+    json accountExIdRecord = {Name:"Sample Org", BillingCity:"CA", SF_ExternalID__c: tmpExternalID };
 
     string|SalesforceConnectorError stringResponse = salesforceClient -> createRecord(ACCOUNT, accountExIdRecord);
     match stringResponse {
         string createdExternalId => {
             test:assertNotEquals(createdExternalId, "", msg = "Found empty response!");
-            idOfSampleOrg = createdExternalId;
+            tmpIdOfSampleOrg = createdExternalId;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -457,8 +457,8 @@ function testCreateRecordWithExternalId() {
 function testGetRecordByExternalId() {
     log:printInfo("salesforceClient -> getRecordByExternalId()");
 
-    response = salesforceClient -> getRecordByExternalId(ACCOUNT, "SF_ExternalID__c", externalID);
-    match response {
+    resp = salesforceClient -> getRecordByExternalId(ACCOUNT, "SF_ExternalID__c", tmpExternalID);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
             try {
@@ -483,7 +483,7 @@ function testUpsertSObjectByExternalId() {
     json upsertRecord = {Name:"Sample Org", BillingCity:"Jaffna, Colombo 3"};
     json|SalesforceConnectorError response = salesforceClient -> upsertSObjectByExternalId(ACCOUNT,
         "SF_ExternalID__c",
-        externalID, upsertRecord);
+        tmpExternalID, upsertRecord);
     match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Expects true on success");
@@ -500,7 +500,7 @@ function testUpsertSObjectByExternalId() {
 }
 function testDeleteRecordWithExternalId() {
     log:printInfo("salesforceClient -> DeleteRecordWithExternalID");
-    boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord(ACCOUNT, idOfSampleOrg);
+    boolean|SalesforceConnectorError response = salesforceClient -> deleteRecord(ACCOUNT, tmpIdOfSampleOrg);
     match response {
         boolean success => {
             test:assertTrue(success, msg = "Expects true on success");
@@ -522,7 +522,7 @@ function testCreateAccount() {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
             log:printDebug("Account id: " + id);
-            accountId = id;
+            tmpAccountId = id;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -535,8 +535,8 @@ function testCreateAccount() {
 }
 function testGetAccountById() {
     log:printInfo("salesforceClient -> getAccountById()");
-    response = salesforceClient -> getAccountById(accountId);
-    match response {
+    resp = salesforceClient -> getAccountById(tmpAccountId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -553,8 +553,8 @@ function testGetAccountById() {
 function testUpdateAccount() {
     log:printInfo("salesforceClient -> updateAccount()");
     json account = {Name:"ABC Inc", BillingCity:"New York-USA"};
-    response = salesforceClient -> updateAccount(accountId, account);
-    match response {
+    resp = salesforceClient -> updateAccount(tmpAccountId, account);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -570,8 +570,8 @@ function testUpdateAccount() {
 }
 function testDeleteAccount() {
     log:printInfo("salesforceClient -> deleteAccount()");
-    response = salesforceClient -> deleteAccount(accountId);
-    match response {
+    resp = salesforceClient -> deleteAccount(tmpAccountId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -593,7 +593,7 @@ function testCreateLead() {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
             log:printDebug("Lead id: " + id);
-            leadId = id;
+            tmpLeadId = id;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -606,8 +606,8 @@ function testCreateLead() {
 }
 function testGetLeadById() {
     log:printInfo("salesforceClient -> getLeadById()");
-    response = salesforceClient -> getLeadById(leadId);
-    match response {
+    resp = salesforceClient -> getLeadById(tmpLeadId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -624,8 +624,8 @@ function testGetLeadById() {
 function testUpdateLead() {
     log:printInfo("salesforceClient -> updateLead()");
     json updateLead = {LastName:"Carmen", Company:"WSO2 Lanka (Pvt) Ltd"};
-    response = salesforceClient -> updateLead(leadId, updateLead);
-    match response {
+    resp = salesforceClient -> updateLead(tmpLeadId, updateLead);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -641,8 +641,8 @@ function testUpdateLead() {
 }
 function testDeleteLead() {
     log:printInfo("salesforceClient -> deleteLead()");
-    response = salesforceClient -> deleteLead(leadId);
-    match response {
+    resp = salesforceClient -> deleteLead(tmpLeadId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -664,7 +664,7 @@ function testCreateContact() {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
             log:printDebug("Contact id: " + id);
-            contactId = id;
+            tmpContactId = id;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -677,8 +677,8 @@ function testCreateContact() {
 }
 function testGetContactById() {
     log:printInfo("salesforceClient -> getContactById()");
-    response = salesforceClient -> getContactById(contactId);
-    match response {
+    resp = salesforceClient -> getContactById(tmpContactId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -695,8 +695,8 @@ function testGetContactById() {
 function testUpdateContact() {
     log:printInfo("salesforceClient -> updateContact()");
     json updateContact = {LastName:"Rebert Patson"};
-    response = salesforceClient -> updateContact(contactId, updateContact);
-    match response {
+    resp = salesforceClient -> updateContact(tmpContactId, updateContact);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -712,8 +712,8 @@ function testUpdateContact() {
 }
 function testDeleteContact() {
     log:printInfo("salesforceClient -> deleteContact()");
-    response = salesforceClient -> deleteContact(contactId);
-    match response {
+    resp = salesforceClient -> deleteContact(tmpContactId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -735,7 +735,7 @@ function testCreateProduct() {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
             log:printDebug("Product id: " + id);
-            productId = id;
+            tmpProductId = id;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -748,8 +748,8 @@ function testCreateProduct() {
 }
 function testGetProductById() {
     log:printInfo("salesforceClient -> getProductById()");
-    response = salesforceClient -> getProductById(productId);
-    match response {
+    resp = salesforceClient -> getProductById(tmpProductId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -766,8 +766,8 @@ function testGetProductById() {
 function testUpdateProduct() {
     log:printInfo("salesforceClient -> updateProduct()");
     json updateProduct = {Name:"APIM", Description:"APIM new product"};
-    response = salesforceClient -> updateProduct(productId, updateProduct);
-    match response {
+    resp = salesforceClient -> updateProduct(tmpProductId, updateProduct);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -783,8 +783,8 @@ function testUpdateProduct() {
 }
 function testDeleteProduct() {
     log:printInfo("salesforceClient -> deleteProduct()");
-    response = salesforceClient -> deleteProduct(productId);
-    match response {
+    resp = salesforceClient -> deleteProduct(tmpProductId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -806,7 +806,7 @@ function testCreateOpportunity() {
         string id => {
             test:assertNotEquals(id, "", msg = "Found empty response!");
             log:printDebug("Opportunity id: " + id);
-            opportunityId = id;
+            tmpOpportunityId = id;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -819,8 +819,8 @@ function testCreateOpportunity() {
 }
 function testGetOpportunityById() {
     log:printInfo("salesforceClient -> getOpportunityById()");
-    response = salesforceClient -> getOpportunityById(opportunityId);
-    match response {
+    resp = salesforceClient -> getOpportunityById(tmpOpportunityId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         }
@@ -837,8 +837,8 @@ function testGetOpportunityById() {
 function testUpdateOpportunity() {
     log:printInfo("salesforceClient -> updateOpportunity()");
     json updateOpportunity = {Name:"DevServices", StageName:"30 - Proposal/Price Quote", CloseDate:"2019-01-01"};
-    response = salesforceClient -> updateOpportunity(opportunityId, updateOpportunity);
-    match response {
+    resp = salesforceClient -> updateOpportunity(tmpOpportunityId, updateOpportunity);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
@@ -854,8 +854,8 @@ function testUpdateOpportunity() {
 }
 function testDeleteOpportunity() {
     log:printInfo("salesforceClient -> deleteOpportunity()");
-    response = salesforceClient -> deleteOpportunity(opportunityId);
-    match response {
+    resp = salesforceClient -> deleteOpportunity(tmpOpportunityId);
+    match resp {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Failed!");
         }
