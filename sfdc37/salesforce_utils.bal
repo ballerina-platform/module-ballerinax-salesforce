@@ -79,7 +79,7 @@ documentation { Returns the JSON result or SalesforceConnectorError
     R{{result}} JSON result if successful, else SalesforceConnectorError occured
 }
 function checkAndSetErrors(http:Response|error response, boolean expectPayload)
-    returns json|SalesforceConnectorError {
+             returns json|SalesforceConnectorError {
     json result = {};
 
     match response {
@@ -93,7 +93,7 @@ function checkAndSetErrors(http:Response|error response, boolean expectPayload)
                         }
                         error err => {
                             log:printError("Error occurred when extracting JSON payload. Error: " + err.message);
-                            SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+                            SalesforceConnectorError connectorError = { message: "", salesforceErrors: [] };
                             connectorError.message = "Error occured while extracting Json payload!";
                             connectorError.cause = err;
                             return connectorError;
@@ -101,25 +101,26 @@ function checkAndSetErrors(http:Response|error response, boolean expectPayload)
                     }
                 }
             } else {
-                SalesforceConnectorError connectorError = {message:"", salesforceErrors:[]};
+                SalesforceConnectorError connectorError = { message: "", salesforceErrors: [] };
 
                 match httpResponse.getJsonPayload() {
                     json jsonResponse => {
-                        json[]|error res = < json[]>jsonResponse;
+                        json[]|error res = <json[]>jsonResponse;
 
                         match res {
                             json[] errors => {
                                 foreach i, err in errors {
-                                    SalesforceError sfError = {message:err.message.toString(), errorCode:err.errorCode.toString()};
+                                    SalesforceError sfError = { message: err.message.toString(), errorCode:err.errorCode
+                                    .toString() };
                                     connectorError.message = err.message.toString();
-                                    connectorError.cause = {message:err.message.toString()};
+                                    connectorError.cause = { message: err.message.toString() };
                                     connectorError.salesforceErrors[i] = sfError;
                                 }
                                 return connectorError;
                             }
                             error e => {
                                 log:printError("Error occurred when extracting JSON payload. Error: " + e.message);
-                                connectorError = {message:"", salesforceErrors:[]};
+                                connectorError = { message: "", salesforceErrors: [] };
                                 connectorError.message = "Error occured while extracting Json payload!";
                                 connectorError.cause = e;
                                 return connectorError;
@@ -128,7 +129,7 @@ function checkAndSetErrors(http:Response|error response, boolean expectPayload)
                     }
                     error err => {
                         log:printError("Error occurred when extracting errors from payload. Error: " + err.message);
-                        connectorError = {message:"", salesforceErrors:[]};
+                        connectorError = { message: "", salesforceErrors: [] };
                         connectorError.message = "Error occured while extracting errors from payload!";
                         connectorError.cause = err;
                         return connectorError;
@@ -140,8 +141,8 @@ function checkAndSetErrors(http:Response|error response, boolean expectPayload)
         error err => {
             SalesforceConnectorError connectorError =
             {
-                message:"Http error -> message: " + err.message,
-                cause:err.cause ?: {}
+                message: "Http error -> message: " + err.message,
+                cause: err.cause ?: {}
             };
             return connectorError;
         }
