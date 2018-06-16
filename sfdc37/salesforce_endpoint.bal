@@ -38,10 +38,10 @@ public type Client object {
     }
 
     documentation {Salesforce connector endpoint initialization function
-        P{{salesforceConfig}} salesforce connector configuration)
+        P{{config}} salesforce connector configuration
     }
-    public function init(SalesforceConfiguration salesforceConfig) {
-        self.salesforceConnector.httpClient.init(salesforceConfig.clientConfig);
+    public function init(SalesforceConfiguration config) {
+        self.salesforceConnector.httpClient.init(config.clientConfig);
     }
 
     documentation {Get Salesforce client

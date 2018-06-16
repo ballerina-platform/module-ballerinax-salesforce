@@ -23,7 +23,7 @@ limitations for organizations.
 ## Compatibility
 |                     |    Version     |
 | :------------------:|:--------------:|
-| Ballerina Language  | 0.974.1        |
+| Ballerina Language  | 0.975.0        |
 | Salesforce REST API | v37.0          |
 
 ## Sample

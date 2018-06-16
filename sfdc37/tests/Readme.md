@@ -2,7 +2,7 @@
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.974.1            |   v37.0      |
+| 0.975.0            |   v37.0      |
 
 ### Prerequisites
 
