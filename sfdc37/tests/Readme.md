@@ -30,7 +30,6 @@ Salesforce Client endpoint by passing above mentioned parameters.
 Find the way of creating Salesforce endpoint as following. 
 
 ```ballerina
-
 endpoint Client salesforceClient {
     clientConfig:{
         url:url,
@@ -64,7 +63,6 @@ using `ballerina test sfdc37 --config ballerina.conf` command.
 * Sample Test Function
 
 ```ballerina
-
 @test:Config
 function testGetResourcesByApiVersion() {
     log:printInfo("salesforceClient -> getResourcesByApiVersion()");
@@ -97,7 +95,6 @@ function testGetResourcesByApiVersion() {
 * Sample Result 
 
 ```ballerina
-
 ---------------------------------------------------------------------------
     T E S T S
 ---------------------------------------------------------------------------
@@ -109,5 +106,4 @@ Running Tests of Package: sfdc37
 ...
 sfdc37............................................................. SUCCESS
 ---------------------------------------------------------------------------
-
 ```
