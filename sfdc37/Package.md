@@ -69,7 +69,7 @@ The `createAccount` function creates an Account SObject. Pass a JSON object with
 SObject Account.
 ```ballerina
 json account = {Name:"ABC Inc", BillingCity:"New York"};
-var createReponse = salesforceEP -> createAccount(account);
+var createReponse = salesforceEP->createAccount(account);
 ```
 The response from `createAccount` is either a string ID of the created account (if the account was created successfully) 
 or a `SalesforceConnectorError` (if the account creation was unsuccessful). The `match` operation can be used to handle 
@@ -81,7 +81,7 @@ match createReponse {
 }
 ```
 The `getQueryResult` function executes a SOQL query that returns all the results in a single response, or, if it exceeds 
-the maximum record limit, it returns part of the results and an identifier used to retrieve the remaining results. 
+the maximum record limit, it returns part of the results and an identifier used to retrieve the remaining results.
 ```ballerina
 string sampleQuery = "SELECT name FROM Account";
 response = salesforceEP->getQueryResult(sampleQuery);
@@ -104,7 +104,7 @@ The `createLead` function creates a Lead SObject. It returns the lead ID if succ
 unsuccessful.
 ```ballerina
 json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
-var createResponse = salesforceEP -> createLead(lead);
+var createResponse = salesforceEP->createLead(lead);
 match createResponse {
     string id => io:println("Lead id: " + id);
     sfdc37:SalesforceConnectorError err => io:println(err);
