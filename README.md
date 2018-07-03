@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/wso2-ballerina/package-salesforce.svg?branch=master)](https://travis-ci.org/wso2-ballerina/package-salesforce)
+
 # Salesforce Connector
 
 The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
