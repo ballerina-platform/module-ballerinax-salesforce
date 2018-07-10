@@ -21,7 +21,7 @@ import ballerina/http;
 documentation { Salesforce client configuration
     F{{clientConfig}} HTTP configuration
 }
-public type SalesforceConfiguration {
+public type SalesforceConfiguration record {
     string baseUrl;
     http:ClientEndpointConfig clientConfig;
 };
@@ -32,10 +32,8 @@ documentation {Salesforce Client object
     F{{salesforceConnector}} Salesforce connector
 }
 public type Client object {
-    public {
-        SalesforceConfiguration salesforceConfig = {};
-        SalesforceConnector salesforceConnector = new();
-    }
+    public SalesforceConfiguration salesforceConfig = {};
+    public SalesforceConnector salesforceConnector = new();
 
     documentation {Salesforce connector endpoint initialization function
         P{{config}} salesforce connector configuration
