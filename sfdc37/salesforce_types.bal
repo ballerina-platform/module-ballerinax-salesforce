@@ -20,7 +20,7 @@ documentation { Errors by Salesforce
     F{{message}} Salesforce error message
     F{{errorCode}} Error code
 }
-public type SalesforceError {
+public type SalesforceError record {
     string message;
     string errorCode;
 };
@@ -30,7 +30,7 @@ documentation {Errors by HTTP or Salesforce
     F{{cause}} Array of errors
     F{{salesforceErrors}} Array of SalesforceError type errors
 }
-public type SalesforceConnectorError {
+public type SalesforceConnectorError record {
     string message;
     error? cause;
     SalesforceError[] salesforceErrors;

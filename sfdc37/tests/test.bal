@@ -46,9 +46,8 @@ function testGetAvailableApiVersions() {
                 var res = <json[]>jsonRes;
                 json[] versions = check res;
                 test:assertTrue(lengthof versions > 0, msg = "Found 0 or No API versions");
-            } catch (error err){
-                test:
-                assertFail(msg = err.message);
+            } catch (error err) {
+                test:assertFail(msg = err.message);
             }
         }
 
@@ -181,6 +180,7 @@ function testDeleteRecord() {
             test:assertTrue(success, msg = "Expects true on success");
         }
         SalesforceConnectorError err => {
+            test:assertFail(msg = err.message);
         }
     }
 }

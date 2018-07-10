@@ -22,9 +22,7 @@ documentation {Salesforce Connector
     F{{httpClient}} OAuth2 client endpoint
 }
 public type SalesforceConnector object {
-    public {
-        http:Client httpClient;
-    }
+    public http:Client httpClient;
 
     documentation {Lists summary details about each REST API version available
         R{{}} Json result if successful else SalesforceConnectorError occured.}
@@ -289,40 +287,40 @@ public type SalesforceConnector object {
     public function deleteRecord(string sObjectName, string id) returns (boolean|SalesforceConnectorError);
 };
 
-public function SalesforceConnector::getAvailableApiVersions() returns json|SalesforceConnectorError {
+function SalesforceConnector::getAvailableApiVersions() returns json|SalesforceConnectorError {
     string path = prepareUrl([BASE_PATH]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::getResourcesByApiVersion(string apiVersion) returns json|SalesforceConnectorError {
+function SalesforceConnector::getResourcesByApiVersion(string apiVersion) returns json|SalesforceConnectorError {
     string path = prepareUrl([BASE_PATH, apiVersion]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::getOrganizationLimits() returns json|SalesforceConnectorError {
+function SalesforceConnector::getOrganizationLimits() returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, LIMITS]);
     return self.getRecord(path);
 }
 
 //=============================== Query =======================================//
 
-public function SalesforceConnector::getQueryResult(string receivedQuery)
+function SalesforceConnector::getQueryResult(string receivedQuery)
                                          returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::getNextQueryResult(string nextRecordsUrl)
+function SalesforceConnector::getNextQueryResult(string nextRecordsUrl)
                                          returns json|SalesforceConnectorError {
     return self.getRecord(nextRecordsUrl);
 }
 
-public function SalesforceConnector::getAllQueries(string queryString) returns json|SalesforceConnectorError {
+function SalesforceConnector::getAllQueries(string queryString) returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERYALL], [Q], [queryString]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::explainQueryOrReportOrListview(string queryReportOrListview)
+function SalesforceConnector::explainQueryOrReportOrListview(string queryReportOrListview)
                                          returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [EXPLAIN], [queryReportOrListview]);
     return self.getRecord(path);
@@ -330,127 +328,127 @@ public function SalesforceConnector::explainQueryOrReportOrListview(string query
 
 // ================================= Search ================================ //
 
-public function SalesforceConnector::searchSOSLString(string searchString) returns json|SalesforceConnectorError {
+function SalesforceConnector::searchSOSLString(string searchString) returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
     return self.getRecord(path);
 }
 
 // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
-public function SalesforceConnector::getAccountById(string accountId) returns json|SalesforceConnectorError {
+function SalesforceConnector::getAccountById(string accountId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, ACCOUNT, accountId]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::createAccount(json accountRecord) returns string|SalesforceConnectorError {
+function SalesforceConnector::createAccount(json accountRecord) returns string|SalesforceConnectorError {
     return self.createRecord(ACCOUNT, accountRecord);
 }
 
-public function SalesforceConnector::updateAccount(string accountId, json accountRecord)
+function SalesforceConnector::updateAccount(string accountId, json accountRecord)
                                          returns boolean|SalesforceConnectorError {
     return self.updateRecord(ACCOUNT, accountId, accountRecord);
 }
 
-public function SalesforceConnector::deleteAccount(string accountId) returns boolean|SalesforceConnectorError {
+function SalesforceConnector::deleteAccount(string accountId) returns boolean|SalesforceConnectorError {
     return self.deleteRecord(ACCOUNT, accountId);
 }
 
 // ============================ LEAD SObject: get, create, update, delete ===================== //
 
-public function SalesforceConnector::getLeadById(string leadId) returns json|SalesforceConnectorError {
+function SalesforceConnector::getLeadById(string leadId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, LEAD, leadId]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::createLead(json leadRecord) returns string|SalesforceConnectorError {
+function SalesforceConnector::createLead(json leadRecord) returns string|SalesforceConnectorError {
     return self.createRecord(LEAD, leadRecord);
 }
 
-public function SalesforceConnector::updateLead(string leadId, json leadRecord)
+function SalesforceConnector::updateLead(string leadId, json leadRecord)
                                          returns boolean|SalesforceConnectorError {
     return self.updateRecord(LEAD, leadId, leadRecord);
 }
 
-public function SalesforceConnector::deleteLead(string leadId) returns boolean|SalesforceConnectorError {
+function SalesforceConnector::deleteLead(string leadId) returns boolean|SalesforceConnectorError {
     return self.deleteRecord(LEAD, leadId);
 }
 
 // ============================ CONTACTS SObject: get, create, update, delete ===================== //
 
-public function SalesforceConnector::getContactById(string contactId) returns json|SalesforceConnectorError {
+function SalesforceConnector::getContactById(string contactId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, CONTACT, contactId]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::createContact(json contactRecord) returns string|SalesforceConnectorError {
+function SalesforceConnector::createContact(json contactRecord) returns string|SalesforceConnectorError {
     return self.createRecord(CONTACT, contactRecord);
 }
 
-public function SalesforceConnector::updateContact(string contactId, json contactRecord)
+function SalesforceConnector::updateContact(string contactId, json contactRecord)
                                          returns boolean|SalesforceConnectorError {
     return self.updateRecord(CONTACT, contactId, contactRecord);
 }
 
-public function SalesforceConnector::deleteContact(string contactId) returns boolean|SalesforceConnectorError {
+function SalesforceConnector::deleteContact(string contactId) returns boolean|SalesforceConnectorError {
     return self.deleteRecord(CONTACT, contactId);
 }
 
 // ============================ OPPORTUNITIES SObject: get, create, update, delete ===================== //
 
-public function SalesforceConnector::getOpportunityById(string opportunityId) returns json|SalesforceConnectorError {
+function SalesforceConnector::getOpportunityById(string opportunityId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, OPPORTUNITY, opportunityId]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::createOpportunity(json opportunityRecord) returns string|SalesforceConnectorError {
+function SalesforceConnector::createOpportunity(json opportunityRecord) returns string|SalesforceConnectorError {
     return self.createRecord(OPPORTUNITY, opportunityRecord);
 }
 
-public function SalesforceConnector::updateOpportunity(string opportunityId, json opportunityRecord)
+function SalesforceConnector::updateOpportunity(string opportunityId, json opportunityRecord)
                                          returns boolean|SalesforceConnectorError {
     return self.updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
 }
 
-public function SalesforceConnector::deleteOpportunity(string opportunityId) returns boolean|SalesforceConnectorError {
+function SalesforceConnector::deleteOpportunity(string opportunityId) returns boolean|SalesforceConnectorError {
     return self.deleteRecord(OPPORTUNITY, opportunityId);
 }
 
 // ============================ PRODUCTS SObject: get, create, update, delete ===================== //
 
-public function SalesforceConnector::getProductById(string productId) returns json|SalesforceConnectorError {
+function SalesforceConnector::getProductById(string productId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PRODUCT, productId]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::createProduct(json productRecord) returns string|SalesforceConnectorError {
+function SalesforceConnector::createProduct(json productRecord) returns string|SalesforceConnectorError {
     return self.createRecord(PRODUCT, productRecord);
 }
 
-public function SalesforceConnector::updateProduct(string productId, json productRecord)
+function SalesforceConnector::updateProduct(string productId, json productRecord)
                                          returns boolean|SalesforceConnectorError {
     return self.updateRecord(PRODUCT, productId, productRecord);
 }
 
-public function SalesforceConnector::deleteProduct(string productId) returns boolean|SalesforceConnectorError {
+function SalesforceConnector::deleteProduct(string productId) returns boolean|SalesforceConnectorError {
     return self.deleteRecord(PRODUCT, productId);
 }
 
 //===========================================================================================================//
 
-public function SalesforceConnector::getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
+function SalesforceConnector::getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
                                          returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     return self.getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 }
 
-public function SalesforceConnector::getFieldValuesFromExternalObjectRecord(string externalObjectName, string id, string fields)
+function SalesforceConnector::getFieldValuesFromExternalObjectRecord(string externalObjectName, string id, string fields)
                                          returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
     return self.getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 
 }
 
-public function SalesforceConnector::createMultipleRecords(string sObjectName, json records)
+function SalesforceConnector::createMultipleRecords(string sObjectName, json records)
                                          returns json|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
 
@@ -466,13 +464,13 @@ public function SalesforceConnector::createMultipleRecords(string sObjectName, j
 
 // ============================ Create, update, delete records by External IDs ===================== //
 
-public function SalesforceConnector::getRecordByExternalId(string sObjectName, string fieldName, string fieldValue)
+function SalesforceConnector::getRecordByExternalId(string sObjectName, string fieldName, string fieldValue)
                                          returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, fieldName, fieldValue]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::upsertSObjectByExternalId(string sObjectName, string fieldId, string fieldValue,
+function SalesforceConnector::upsertSObjectByExternalId(string sObjectName, string fieldId, string fieldValue,
                                                                json recordPayload) returns json|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
     json payload;
@@ -487,13 +485,13 @@ public function SalesforceConnector::upsertSObjectByExternalId(string sObjectNam
 
 // ============================ Get updated and deleted records ===================== //
 
-public function SalesforceConnector::getDeletedRecords(string sObjectName, string startTime, string endTime)
+function SalesforceConnector::getDeletedRecords(string sObjectName, string startTime, string endTime)
                                          returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED], [START, END], [startTime, endTime]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::getUpdatedRecords(string sObjectName, string startTime, string endTime)
+function SalesforceConnector::getUpdatedRecords(string sObjectName, string startTime, string endTime)
                                          returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED], [START, END], [startTime, endTime]);
     return self.getRecord(path);
@@ -501,35 +499,35 @@ public function SalesforceConnector::getUpdatedRecords(string sObjectName, strin
 
 // ============================ Describe SObjects available and their fields/metadata ===================== //
 
-public function SalesforceConnector::describeAvailableObjects() returns json|SalesforceConnectorError {
+function SalesforceConnector::describeAvailableObjects() returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::getSObjectBasicInfo(string sobjectName) returns json|SalesforceConnectorError {
+function SalesforceConnector::getSObjectBasicInfo(string sobjectName) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::describeSObject(string sObjectName) returns json|SalesforceConnectorError {
+function SalesforceConnector::describeSObject(string sObjectName) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
     return self.getRecord(path);
 }
 
-public function SalesforceConnector::sObjectPlatformAction() returns json|SalesforceConnectorError {
+function SalesforceConnector::sObjectPlatformAction() returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
     return self.getRecord(path);
 }
 
 //============================ utility functions================================//
 
-public function SalesforceConnector::getRecord(string path) returns json|SalesforceConnectorError {
+function SalesforceConnector::getRecord(string path) returns json|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
     http:Response|error response = httpClient->get(path);
     return checkAndSetErrors(response, true);
 }
 
-public function SalesforceConnector::createRecord(string sObjectName, json recordPayload)
+function SalesforceConnector::createRecord(string sObjectName, json recordPayload)
                                          returns string|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
     http:Request req = new;
@@ -549,7 +547,7 @@ public function SalesforceConnector::createRecord(string sObjectName, json recor
     }
 }
 
-public function SalesforceConnector::updateRecord(string sObjectName, string id, json recordPayload)
+function SalesforceConnector::updateRecord(string sObjectName, string id, json recordPayload)
                                          returns boolean|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
     http:Request req = new;
@@ -569,7 +567,7 @@ public function SalesforceConnector::updateRecord(string sObjectName, string id,
     }
 }
 
-public function SalesforceConnector::deleteRecord(string sObjectName, string id)
+function SalesforceConnector::deleteRecord(string sObjectName, string id)
                                          returns boolean|SalesforceConnectorError {
     endpoint http:Client httpClient = self.httpClient;
     http:Request req = new;
