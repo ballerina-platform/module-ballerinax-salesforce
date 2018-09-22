@@ -16,20 +16,18 @@
 // under the License.
 //
 
-documentation { Errors by Salesforce
-    F{{message}} Salesforce error message
-    F{{errorCode}} Error code
-}
+# Errors by Salesforce.
+# + message - Salesforce error message
+# + errorCode - Error code
 public type SalesforceError record {
     string message;
     string errorCode;
 };
 
-documentation {Errors by HTTP or Salesforce
-    F{{message}} Array of string error messages
-    F{{cause}} Array of errors
-    F{{salesforceErrors}} Array of SalesforceError type errors
-}
+# Errors by HTTP or Salesforce.
+# + message - Array of string error messages
+# + cause - Array of errors
+# + salesforceErrors - Array of SalesforceError type errors
 public type SalesforceConnectorError record {
     string message;
     error? cause;

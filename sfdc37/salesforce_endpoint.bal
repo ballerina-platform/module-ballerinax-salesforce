@@ -18,33 +18,28 @@
 
 import ballerina/http;
 
-documentation { Salesforce client configuration
-    F{{clientConfig}} HTTP configuration
-}
+# Salesforce client configuration.
+# + clientConfig - HTTP configuration
 public type SalesforceConfiguration record {
     string baseUrl;
     http:ClientEndpointConfig clientConfig;
 };
 
-documentation {Salesforce Client object
-    E{{}}
-    F{{salesforceConfig}} Salesforce configration
-    F{{salesforceConnector}} Salesforce connector
-}
+# Salesforce Client object.
+# + salesforceConfig - Salesforce configration
+# + salesforceConnector - Salesforce connector
 public type Client object {
     public SalesforceConfiguration salesforceConfig = {};
     public SalesforceConnector salesforceConnector = new();
 
-    documentation {Salesforce connector endpoint initialization function
-        P{{config}} salesforce connector configuration
-    }
+    # Salesforce connector endpoint initialization function.
+    # + config - salesforce connector configuration
     public function init(SalesforceConfiguration config) {
         self.salesforceConnector.httpClient.init(config.clientConfig);
     }
 
-    documentation {Get Salesforce client
-        R{{}} returns salesforce connector instance
-    }
+    # Get Salesforce client.
+    # + return - returns salesforce connector instance
     public function getCallerActions() returns SalesforceConnector {
         return self.salesforceConnector;
     }

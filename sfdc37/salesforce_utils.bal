@@ -20,10 +20,9 @@ import ballerina/log;
 import ballerina/mime;
 import ballerina/http;
 
-documentation { Returns the prepared URL
-    P{{paths}} an array of paths prefixes
-    R{{url}} the prepared URL
-}
+# Returns the prepared URL.
+# + paths - an array of paths prefixes
+# + return - the prepared URL
 function prepareUrl(string[] paths) returns string {
     string url = EMPTY_STRING;
 
@@ -38,12 +37,11 @@ function prepareUrl(string[] paths) returns string {
     return url;
 }
 
-documentation { Returns the prepared URL with encoded query
-    P{{paths}} an array of paths prefixes
-    P{{queryParamNames}} an array of query param names
-    P{{queryParamValues}} an array of query param values
-    R{{url}} the prepared URL with encoded query
-}
+# Returns the prepared URL with encoded query.
+# + paths - an array of paths prefixes
+# + queryParamNames - an array of query param names
+# + queryParamValues - an array of query param values
+# + return - the prepared URL with encoded query
 function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
 
     string url = prepareUrl(paths);
@@ -73,11 +71,10 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
     return url;
 }
 
-documentation { Returns the JSON result or SalesforceConnectorError
-    P{{response}} HTTP respone or HttpConnectorError
-    P{{expectPayload}} true if json payload expected in response, if not false
-    R{{result}} JSON result if successful, else SalesforceConnectorError occured
-}
+# Returns the JSON result or SalesforceConnectorError.
+# + response - HTTP respone or HttpConnectorError
+# + expectPayload - true if json payload expected in response, if not false
+# + return - JSON result if successful, else SalesforceConnectorError occured
 function checkAndSetErrors(http:Response|error response, boolean expectPayload)
              returns json|SalesforceConnectorError {
     json result = {};
