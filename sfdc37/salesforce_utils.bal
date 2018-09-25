@@ -21,8 +21,8 @@ import ballerina/mime;
 import ballerina/http;
 
 # Returns the prepared URL.
-# + paths - an array of paths prefixes
-# + return - the prepared URL
+# + paths - An array of paths prefixes
+# + return - The prepared URL
 function prepareUrl(string[] paths) returns string {
     string url = EMPTY_STRING;
 
@@ -38,10 +38,10 @@ function prepareUrl(string[] paths) returns string {
 }
 
 # Returns the prepared URL with encoded query.
-# + paths - an array of paths prefixes
-# + queryParamNames - an array of query param names
-# + queryParamValues - an array of query param values
-# + return - the prepared URL with encoded query
+# + paths - An array of paths prefixes
+# + queryParamNames - An array of query param names
+# + queryParamValues - An array of query param values
+# + return - The prepared URL with encoded query
 function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
 
     string url = prepareUrl(paths);

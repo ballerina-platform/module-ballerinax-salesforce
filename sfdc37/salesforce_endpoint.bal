@@ -27,19 +27,19 @@ public type SalesforceConfiguration record {
 
 # Salesforce Client object.
 # + salesforceConfig - Salesforce configration
-# + salesforceConnector - Salesforce connector
+# + salesforceConnector - Salesforce Connector
 public type Client object {
     public SalesforceConfiguration salesforceConfig = {};
     public SalesforceConnector salesforceConnector = new();
 
-    # Salesforce connector endpoint initialization function.
-    # + config - salesforce connector configuration
+    # Salesforce Connector endpoint initialization function.
+    # + config - Salesforce Connector configuration
     public function init(SalesforceConfiguration config) {
         self.salesforceConnector.httpClient.init(config.clientConfig);
     }
 
     # Get Salesforce client.
-    # + return - returns salesforce connector instance
+    # + return - returns Salesforce connector instance
     public function getCallerActions() returns SalesforceConnector {
         return self.salesforceConnector;
     }
