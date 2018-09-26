@@ -18,272 +18,266 @@
 
 import ballerina/http;
 
-documentation {Salesforce Connector
-    F{{httpClient}} OAuth2 client endpoint
-}
+# Salesforce Connector.
+# + httpClient - OAuth2 client endpoint
 public type SalesforceConnector object {
     public http:Client httpClient;
 
-    documentation {Lists summary details about each REST API version available
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Lists summary details about each REST API version available.
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getAvailableApiVersions() returns (json|SalesforceConnectorError);
 
-    documentation {Lists the resources available for the specified API version
-        P{{apiVersion}} API version (v37)
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Lists the resources available for the specified API version.
+    # + apiVersion - API version (v37)
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getResourcesByApiVersion(string apiVersion) returns (json|SalesforceConnectorError);
 
-    documentation {Lists limits information for your organization
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Lists limits information for your organization.
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getOrganizationLimits() returns (json|SalesforceConnectorError);
 
     // Query
-    documentation {Executes the specified SOQL query
-        P{{receivedQuery}} Sent SOQL query
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Executes the specified SOQL query.
+    # + receivedQuery - Sent SOQL query
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getQueryResult(string receivedQuery) returns (json|SalesforceConnectorError);
 
-    documentation {If the query results are too large, retrieve the next batch of results using nextRecordUrl
-        P{{nextRecordsUrl}} URL to get next query results
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # If the query results are too large, retrieve the next batch of results using nextRecordUrl.
+    # + nextRecordsUrl - URL to get next query results
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getNextQueryResult(string nextRecordsUrl) returns (json|SalesforceConnectorError);
 
-    documentation {Returns records that have been deleted because of a merge or delete, archived Task
-                    and Event records
-        P{{queryString}} Sent SOQL query
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Returns records that have been deleted because of a merge or delete, archived Task
+    # and Event records.
+    # + queryString - Sent SOQL query
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getAllQueries(string queryString) returns (json|SalesforceConnectorError);
 
-    documentation {Get feedback on how Salesforce will execute the query, report,
-                    or list view based on performance
-        P{{queryReportOrListview}} sent query
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Get feedback on how Salesforce will execute the query, report, or list view based on performance.
+    # + queryReportOrListview - Sent query
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function explainQueryOrReportOrListview(string queryReportOrListview)
                         returns (json|SalesforceConnectorError);
 
     //Search
-    documentation {Executes the specified SOSL search
-        P{{searchString}} Sent SOSL search query
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Executes the specified SOSL search.
+    # + searchString - Sent SOSL search query
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function searchSOSLString(string searchString) returns (json|SalesforceConnectorError);
 
     //Account
-    documentation {Accesses Account SObject records based on the Account object ID
-        P{{accountId}} Account ID
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Accesses Account SObject records based on the Account object ID.
+    # + accountId - Account ID
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getAccountById(string accountId) returns (json|SalesforceConnectorError);
 
-    documentation {Creates new Account object record
-        P{{accountRecord}} Account JSON record to be inserted
-        R{{}} string account ID if successful else SalesforceConnectorError occured.}
+    # Creates new Account object record.
+    # + accountRecord - Account JSON record to be inserted
+    # + return - If successful return account ID, else SalesforceConnectorError occured
     public function createAccount(json accountRecord) returns (string|SalesforceConnectorError);
 
-    documentation {Deletes existing Account's records
-        P{{accountId}} Account ID
-        R{{}} true if successful false otherwise, or SalesforceConnectorError occured.}
+    # Deletes existing Account's records.
+    # + accountId - Account ID
+    # + return - true if successful false otherwise, or SalesforceConnectorError occured
     public function deleteAccount(string accountId) returns (boolean|SalesforceConnectorError);
 
-    documentation {Updates existing Account object record
-        P{{accountId}} Account ID
-        P{{accountRecord}} Json record
-        R{{}} true if successful, false otherwise or SalesforceConnectorError occured.}
+    # Updates existing Account object record.
+    # + accountId - Account ID
+    # + return - true if successful, false otherwise or SalesforceConnectorError occured
     public function updateAccount(string accountId, json accountRecord) returns (boolean|SalesforceConnectorError);
 
     //Lead
-    documentation {Accesses Lead SObject records based on the Lead object ID
-        P{{leadId}} Lead ID
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Accesses Lead SObject records based on the Lead object ID.
+    # + leadId - Lead ID
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getLeadById(string leadId) returns (json|SalesforceConnectorError);
 
-    documentation {Creates new Lead object record
-        P{{leadRecord}} lead JSON record to be inserted
-        R{{}} string lead ID result if successful else SalesforceConnectorError occured.}
+    # Creates new Lead object record.
+    # + leadRecord - Lead JSON record to be inserted
+    # + return - string lead ID result if successful else SalesforceConnectorError occured
     public function createLead(json leadRecord) returns (string|SalesforceConnectorError);
 
-    documentation {Deletes existing Lead's records
-        P{{leadId}} Lead ID
-        R{{}} true  if successful, flase otherwise or SalesforceConnectorError occured.}
+    # Deletes existing Lead's records.
+    # + leadId - Lead ID
+    # + return - true  if successful, flase otherwise or SalesforceConnectorError occured
     public function deleteLead(string leadId) returns (boolean|SalesforceConnectorError);
 
-    documentation {Updates existing Lead object record
-        P{{leadId}} Lead ID
-        P{{leadRecord}} Lead JSON record
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Updates existing Lead object record.
+    # + leadId - Lead ID
+    # + leadRecord - Lead JSON record
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function updateLead(string leadId, json leadRecord) returns (boolean|SalesforceConnectorError);
 
     //Contact
-    documentation {Accesses Contacts SObject records based on the Contact object ID
-        P{{contactId}} Contact ID
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Accesses Contacts SObject records based on the Contact object ID.
+    # + contactId - Contact ID
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getContactById(string contactId) returns (json|SalesforceConnectorError);
 
-    documentation {Creates new Contact object record
-        P{{contactRecord}} JSON contact record
-        R{{}} string ID if successful else SalesforceConnectorError occured.}
+    # Creates new Contact object record.
+    # + contactRecord - JSON contact record
+    # + return - string ID if successful else SalesforceConnectorError occured
     public function createContact(json contactRecord) returns (string|SalesforceConnectorError);
 
-    documentation {Deletes existing Contact's records
-        P{{contactId}} Contact ID
-        R{{}} true if successful else false, or SalesforceConnectorError occured.}
+    # Deletes existing Contact's records.
+    # + contactId - Contact ID
+    # + return - true if successful else false, or SalesforceConnectorError occured
     public function deleteContact(string contactId) returns (boolean|SalesforceConnectorError);
 
-    documentation {Updates existing Contact object record
-        P{{contactId}} Contact ID
-        P{{contactRecord}} JSON contact record
-        R{{}} true if successful else false or SalesforceConnectorError occured.}
+    # Updates existing Contact object record.
+    # + contactId - Contact ID
+    # + contactRecord - JSON contact record
+    # + return - true if successful else false or SalesforceConnectorError occured
     public function updateContact(string contactId, json contactRecord) returns (boolean|SalesforceConnectorError);
 
     //Opportunity
-    documentation {Accesses Opportunities SObject records based on the Opportunity object ID
-        P{{opportunityId}} Opportunity ID
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Accesses Opportunities SObject records based on the Opportunity object ID.
+    # + opportunityId - Opportunity ID
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getOpportunityById(string opportunityId) returns (json|SalesforceConnectorError);
 
-    documentation {Creates new Opportunity object record
-        P{{opportunityRecord}} JSON opportunity record
-        R{{}} Opportunity ID if successful else SalesforceConnectorError occured.}
+    # Creates new Opportunity object record.
+    # + opportunityRecord - JSON opportunity record
+    # + return - Opportunity ID if successful else SalesforceConnectorError occured
     public function createOpportunity(json opportunityRecord) returns (string|SalesforceConnectorError);
 
-    documentation {Deletes existing Opportunity's records
-        P{{opportunityId}} Opportunity ID
-        R{{}} true if successful else false or SalesforceConnectorError occured.}
+    # Deletes existing Opportunity's records.
+    # + opportunityId - Opportunity ID
+    # + return - true if successful else false or SalesforceConnectorError occured
     public function deleteOpportunity(string opportunityId) returns (boolean|SalesforceConnectorError);
 
-    documentation {Updates existing Opportunity object record
-        P{{opportunityId}} Opportunity ID
-        R{{}} true if successful else false or SalesforceConnectorError occured.}
+    # Updates existing Opportunity object record.
+    # + opportunityId - Opportunity ID
+    # + return - true if successful else false or SalesforceConnectorError occured
     public function updateOpportunity(string opportunityId, json opportunityRecord)
                         returns (boolean|SalesforceConnectorError);
 
     //Product
-    documentation {Accesses Products SObject records based on the Product object ID
-        P{{productId}} Product ID
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Accesses Products SObject records based on the Product object ID.
+    # + productId - Product ID
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getProductById(string productId) returns (json|SalesforceConnectorError);
 
-    documentation {Creates new Product object record
-        P{{productRecord}} JSON product record
-        R{{}} Product ID if successful else SalesforceConnectorError occured.}
+    # Creates new Product object record.
+    # + productRecord - JSON product record
+    # + return - Product ID if successful else SalesforceConnectorError occured
     public function createProduct(json productRecord) returns (string|SalesforceConnectorError);
 
-    documentation {Deletes existing product's records
-        P{{productId}} Product ID
-        R{{}} true if successful else false or SalesforceConnectorError occured.}
+    # Deletes existing product's records.
+    # + productId - Product ID
+    # + return - true if successful else false or SalesforceConnectorError occured
     public function deleteProduct(string productId) returns (boolean|SalesforceConnectorError);
 
-    documentation {Updates existing Product object record
-        P{{productId}} Product ID
-        P{{productRecord}} JSON product record
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Updates existing Product object record.
+    # + productId - Product ID
+    # + productRecord - JSON product record
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function updateProduct(string productId, json productRecord) returns (boolean|SalesforceConnectorError);
 
     //Records
-    documentation {Retrieve field values from a standard object record for a specified SObject ID
-        P{{sObjectName}} SObject name value
-        P{{id}} SObject id
-        P{{fields}} Relevant fields
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Retrieve field values from a standard object record for a specified SObject ID.
+    # + sObjectName - SObject name value
+    # + id - SObject id
+    # + fields - Relevant fields
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
                         returns (json|SalesforceConnectorError);
 
-    documentation {Retrieve field values from an external object record using
-                    Salesforce ID or External ID
-        P{{externalObjectName}} External SObject name value
-        P{{id}} External SObject id
-        P{{fields}} Relevant fields
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Retrieve field values from an external object record using Salesforce ID or External ID.
+    # + externalObjectName - External SObject name value
+    # + id - External SObject id
+    # + fields - Relevant fields
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getFieldValuesFromExternalObjectRecord(string externalObjectName, string id,
                                                            string fields) returns (json|SalesforceConnectorError);
 
-    documentation {Allows to create multiple records
-        P{{sObjectName}} SObject name value
-        P{{records}} JSON records
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Allows to create multiple records.
+    # + sObjectName - SObject name value
+    # + records - JSON records
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function createMultipleRecords(string sObjectName, json records)
                         returns (json|SalesforceConnectorError);
 
-    documentation {Accesses records based on the value of a specified external ID field
-        P{{sObjectName}} SObject name value
-        P{{fieldName}} Relevant field name
-        P{{fieldValue}} Relevant field value
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Accesses records based on the value of a specified external ID field.
+    # + sObjectName - SObject name value
+    # + fieldName - Relevant field name
+    # + fieldValue - Relevant field value
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getRecordByExternalId(string sObjectName, string fieldName, string fieldValue)
                         returns (json|SalesforceConnectorError);
 
-    documentation {Creates new records or updates existing records (upserts records) based on the value of a
-                    specified external ID field
-        P{{sObjectName}} SObject name value
-        P{{fieldId}} Field id
-        P{{fieldValue}} Relevant field value
-        P{{recordPayload}} JSON record
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Creates new records or updates existing records (upserts records) based on the value of a specified
+    # external ID field.
+    # + sObjectName - SObject name value
+    # + fieldId - Field id
+    # + fieldValue - Relevant field value
+    # + recordPayload - JSON record
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function upsertSObjectByExternalId(string sObjectName, string fieldId,
                                               string fieldValue, json recordPayload)
                         returns (json|SalesforceConnectorError);
 
-    documentation {Retrieves the list of individual records that have been deleted
-                    within the given timespan for the specified object
-        P{{sObjectName}} SObject name value
-        P{{startTime}} Start time relevant to records
-        P{{endTime}} End time relevant to records
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Retrieves the list of individual records that have been deleted within the given timespan for the specified object
+    # + sObjectName - SObject name value
+    # + startTime - Start time relevant to records
+    # + endTime - End time relevant to records
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getDeletedRecords(string sObjectName, string startTime, string endTime)
                         returns (json|SalesforceConnectorError);
 
-    documentation {Retrieves the list of individual records that have been updated (added or changed)
-                    within the given timespan for the specified object
-        P{{sObjectName}} SObject name value
-        P{{startTime}} Start time relevant to records
-        P{{endTime}} End time relevant to records
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Retrieves the list of individual records that have been updated (added or changed) within the given timespan for
+    # the specified object.
+    # + sObjectName - SObject name value
+    # + startTime - Start time relevant to records
+    # + endTime - End time relevant to records
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getUpdatedRecords(string sObjectName, string startTime, string endTime)
                         returns (json|SalesforceConnectorError);
 
     //Describe SObjects
-    documentation {Lists the available objects and their metadata for your organization
-                    and available to the logged-in user
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Lists the available objects and their metadata for your organization and available to the logged-in user.
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function describeAvailableObjects() returns (json|SalesforceConnectorError);
 
-    documentation {Describes the individual metadata for the specified object
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Describes the individual metadata for the specified object.
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getSObjectBasicInfo(string sobjectName) returns (json|SalesforceConnectorError);
 
-    documentation {Completely describes the individual metadata at all levels for the specified object.
-                    Can be used to retrieve the fields, URLs, and child relationships
-        P{{sObjectName}} SObject name value
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Completely describes the individual metadata at all levels for the specified object. Can be used to retrieve
+    # the fields, URLs, and child relationships.
+    # + sObjectName - SObject name value
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function describeSObject(string sObjectName) returns (json|SalesforceConnectorError);
 
-    documentation {Query for actions displayed in the UI, given a user, a context, device format,
-                    and a record ID
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function sObjectPlatformAction() returns (json|SalesforceConnectorError);
 
     //Basic CURD
-    documentation {Accesses records based on the specified object ID, can be used with external objects
-        P{{path}} Resource path
-        R{{}} Json result if successful else SalesforceConnectorError occured.}
+    # Accesses records based on the specified object ID, can be used with external objects.
+    # + path - Resource path
+    # + return - `json` result if successful else SalesforceConnectorError occured
     public function getRecord(string path) returns (json|SalesforceConnectorError);
 
-    documentation {Create records based on relevant object type sent with json record
-        P{{sObjectName}} SObject name value
-        P{{recordPayload}} JSON record to be inserted
-        R{{}} created entity ID if successful else SalesforceConnectorError occured.}
+    # Create records based on relevant object type sent with json record.
+    # + sObjectName - SObject name value
+    # + recordPayload - JSON record to be inserted
+    # + return - created entity ID if successful else SalesforceConnectorError occured
+
     public function createRecord(string sObjectName, json recordPayload) returns (string|SalesforceConnectorError);
 
-    documentation {Update records based on relevant object id
-        P{{sObjectName}} SObject name value
-        P{{id}} SObject id
-        P{{recordPayload}} JSON record to be updated
-        R{{}} true if successful else false or SalesforceConnectorError occured.}
+    # Update records based on relevant object id.
+    # + sObjectName - SObject name value
+    # + id - SObject id
+    # + recordPayload - JSON record to be updated
+    # + return - true if successful else false or SalesforceConnectorError occured
     public function updateRecord(string sObjectName, string id, json recordPayload)
                         returns (boolean|SalesforceConnectorError);
 
-    documentation {Delete existing records based on relevant object id
-        P{{sObjectName}} SObject name value
-        P{{id}} SObject id
-        R{{}} true if successful else false or SalesforceConnectorError occured.}
+    # Delete existing records based on relevant object id.
+    # + sObjectName - SObject name value
+    # + id - SObject id
+    # + return - true if successful else false or SalesforceConnectorError occured
     public function deleteRecord(string sObjectName, string id) returns (boolean|SalesforceConnectorError);
 };
 
