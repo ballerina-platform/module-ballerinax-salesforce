@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/wso2-ballerina/package-salesforce.svg?branch=master)](https://travis-ci.org/wso2-ballerina/package-salesforce)
+[![Build Status](https://travis-ci.org/wso2-ballerina/module-salesforce.svg?branch=master)](https://travis-ci.org/wso2-ballerina/module-salesforce)
 
 # Salesforce Connector
 
@@ -9,7 +9,7 @@ describe SObjects and organizational data through the Salesforce REST API. It ha
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.982.0            |   v37.0      |
+| 0.983.0            |   v37.0      |
  
 
 ## Getting started
@@ -42,7 +42,7 @@ for more information on obtaining OAuth2 credentials.
 All the actions return JSON or sfdc37:SalesforceConnectorError. If the action is a success, 
 then result (non-empty) JSON will be returned while the sfdc37:SalesforceConnectorError will be null and vice-versa.
 
-You can import the Salesforce package(sfdc37) to your Ballerina program as follows.
+You can import the Salesforce module(sfdc37) to your Ballerina program as follows.
 
 ```ballerina
 import wso2/sfdc37;
