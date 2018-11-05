@@ -1,33 +1,33 @@
 Connects to Salesforce from Ballerina. 
 
-# Package Overview
+# Module Overview
 
 The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
 describe SObjects and organizational data through the Salesforce REST API. It handles OAuth 2.0 authentication.
 
 **SObject Operations**
 
-The `wso2/sfdc37` package contains operations to do CRUD operations for standard and customized SObjects. It can create, 
+The `wso2/sfdc37` module contains operations to do CRUD operations for standard and customized SObjects. It can create, 
 get, update, and delete SObjects via SObject IDs, and upsert via external IDs.
 
 **SOQL & SOSL Operations**
 
-The `wso2/sfdc37` package contains operations that query using SOQL and search using SOSL. This allows for complex 
+The `wso2/sfdc37` module contains operations that query using SOQL and search using SOSL. This allows for complex 
 operations using SObjects relationships.
 
 **Describe Operations**
 
-The `wso2/sfdc37` package contains operations that describe SObjects, organizational data, available resources, APIs, and 
+The `wso2/sfdc37` module contains operations that describe SObjects, organizational data, available resources, APIs, and 
 limitations for organizations.
 
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 0.982.0        |
+| Ballerina Language  | 0.983.0        |
 | Salesforce REST API | v37.0          |
 
 ## Sample
-First, import the `wso2/sfdc37` package into the Ballerina project.
+First, import the `wso2/sfdc37` module into the Ballerina project.
 ```ballerina
 import wso2/sfdc37;
 ```

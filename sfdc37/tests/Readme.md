@@ -2,7 +2,7 @@
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.982.0            |   v37.0      |
+| 0.983.0            |   v37.0      |
 
 ### Prerequisites
 
@@ -47,7 +47,7 @@ endpoint Client salesforceClient {
 ```
 
 #### Running salesforce tests
-Create `ballerina.conf` file in `package-salesforce`, with following keys:
+Create `ballerina.conf` file in `module-salesforce`, with following keys:
 * ENDPOINT
 * ACCESS_TOKEN
 * CLIENT_ID
@@ -57,7 +57,7 @@ Create `ballerina.conf` file in `package-salesforce`, with following keys:
 
 Assign relevant string values generated for Salesforce app. 
 
-Go inside `package-salesforce` and give the command `ballerina init`using terminal and run test.bal file 
+Go inside `module-salesforce` and give the command `ballerina init`using terminal and run test.bal file 
 using `ballerina test sfdc37 --config ballerina.conf` command.
 
 * Sample Test Function
@@ -99,7 +99,7 @@ function testGetResourcesByApiVersion() {
     T E S T S
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
-Running Tests of Package: sfdc37
+Running Tests of module: sfdc37
 ---------------------------------------------------------------------------
 ...
 2018-04-13 13:35:19,154 INFO  [sfdc37] - salesforceClient -> getResourcesByApiVersion() 

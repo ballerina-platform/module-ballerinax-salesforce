@@ -118,7 +118,7 @@ function testCreateRecord() {
     match stringResponse {
         string createdRecordId => {
             test:assertNotEquals(createdRecordId, "", msg = "Found empty response!");
-            testRecordId = createdRecordId;
+            testRecordId = untaint createdRecordId;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);
@@ -130,10 +130,11 @@ function testCreateRecord() {
     dependsOn: ["testCreateRecord"]
 }
 function testGetRecord() {
+    json|SalesforceConnectorError response;
     log:printInfo("salesforceClient -> getRecord()");
     string path = "/services/data/v37.0/sobjects/Account/" + testRecordId;
-    resp = salesforceClient->getRecord(path);
-    match resp {
+    response = salesforceClient->getRecord(path);
+    match response {
         json jsonRes => {
             test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
             try {
@@ -385,6 +386,7 @@ function testGetUpdatedRecords() {
 @test:Config
 function testCreateMultipleRecords() {
     log:printInfo("salesforceClient -> createMultipleRecords()");
+    json|SalesforceConnectorError response;
 
     json multipleRecords = { "records": [{
         "attributes": { "type": "Account", "referenceId": "ref1" },
@@ -403,8 +405,8 @@ function testCreateMultipleRecords() {
     }]
     };
 
-    resp = salesforceClient->createMultipleRecords(ACCOUNT, multipleRecords);
-    match resp {
+    response = salesforceClient-> createMultipleRecords(ACCOUNT, multipleRecords);
+    match response {
         json jsonRes => {
             test:assertEquals(jsonRes.hasErrors.toString(), "false", msg = "Found null JSON response!");
         }
@@ -444,7 +446,7 @@ function testCreateRecordWithExternalId() {
     match stringResponse {
         string createdExternalId => {
             test:assertNotEquals(createdExternalId, "", msg = "Found empty response!");
-            testIdOfSampleOrg = createdExternalId;
+            testIdOfSampleOrg = untaint createdExternalId;
         }
         SalesforceConnectorError err => {
             test:assertFail(msg = err.message);

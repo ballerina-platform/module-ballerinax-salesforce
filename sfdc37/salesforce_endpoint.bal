@@ -20,6 +20,7 @@ import ballerina/http;
 
 # Salesforce client configuration.
 # + clientConfig - HTTP configuration
+# + baseUrl - The Salesforce API URL
 public type SalesforceConfiguration record {
     string baseUrl;
     http:ClientEndpointConfig clientConfig;
