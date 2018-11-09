@@ -138,8 +138,7 @@ function checkAndSetErrors(http:Response|error response, boolean expectPayload)
         error err => {
             SalesforceConnectorError connectorError =
             {
-                message: "Http error -> message: " + err.message,
-                cause: err.cause ?: {}
+                message: "Http error -> message: " + err.message
             };
             return connectorError;
         }
