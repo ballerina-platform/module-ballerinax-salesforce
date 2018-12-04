@@ -9,7 +9,7 @@ describe SObjects and organizational data through the Salesforce REST API. It ha
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.983.0            |   v37.0      |
+| 0.990.0            |   v37.0      |
  
 
 ## Getting started
@@ -65,33 +65,32 @@ string clientSecret = "<client_secret>";
 string refreshUrl = "<refreshUrl>";
 
 function main (string... args) {
-    endpoint sf:Client salesforceClient {
-        clientConfig:{
-            url:url,
-            auth:{
-                scheme:http:OAUTH2,
-                accessToken:accessToken,
-                refreshToken:refreshToken,
-                clientId:clientId,
-                clientSecret:clientSecret,
-                refreshUrl:refreshUrl
+    SalesforceConfiguration salesforceConfig = {
+        baseUrl: endpointUrl,
+        clientConfig: {
+            auth: {
+                scheme: http:OAUTH2,
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                clientId: clientId,
+                clientSecret: clientSecret,
+                refreshUrl: refreshUrl
             }
         }
     };
 
+    Client salesforceClient = new(salesforceConfig);
+
     //Call the Salesforce connector function getAvailableApiVersions().
     json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
-        match response {
-            //if successful, returns JSON result
-            json jsonRes => {
-                io:println(jsonRes);
-            }
 
-            //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
-            sf:SalesforceConnectorError err => {
-                io:println(err);
-            }
-        }
+    if (response is json) {
+        //if successful, returns JSON result
+        io:println(response);
+    } else {
+        //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
+        io:println(response.message);
+    }
 }
 ```
 

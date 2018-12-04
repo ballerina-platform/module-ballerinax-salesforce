@@ -26,10 +26,8 @@ public type SalesforceError record {
 
 # Errors by HTTP or Salesforce.
 # + message - Array of string error messages
-# + cause - Array of errors
 # + salesforceErrors - Array of SalesforceError type errors
 public type SalesforceConnectorError record {
     string message;
-    error? cause;
     SalesforceError[] salesforceErrors;
 };
