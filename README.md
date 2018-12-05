@@ -64,7 +64,7 @@ string clientId = "<client_id>";
 string clientSecret = "<client_secret>";
 string refreshUrl = "<refreshUrl>";
 
-function main (string... args) {
+public function main() {
     SalesforceConfiguration salesforceConfig = {
         baseUrl: endpointUrl,
         clientConfig: {
