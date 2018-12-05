@@ -312,8 +312,7 @@ remote function Client.getOrganizationLimits() returns json|SalesforceConnectorE
 
 //=============================== Query =======================================//
 
-remote function Client.getQueryResult(string receivedQuery)
-    returns json|SalesforceConnectorError {
+remote function Client.getQueryResult(string receivedQuery) returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
     return self->getRecord(path);
 }
@@ -324,8 +323,8 @@ remote function Client.getNextQueryResult(string nextRecordsUrl)
 }
 
 remote function Client.getAllQueries(string queryString) returns json|SalesforceConnectorError {
-string path = prepareQueryUrl([API_BASE_PATH, QUERYALL], [Q], [queryString]);
-return self->getRecord(path);
+    string path = prepareQueryUrl([API_BASE_PATH, QUERYALL], [Q], [queryString]);
+    return self->getRecord(path);
 }
 
 remote function Client.explainQueryOrReportOrListview(string queryReportOrListview)
@@ -449,16 +448,14 @@ remote function Client.getFieldValuesFromSObjectRecord(string sObjectName, strin
     return self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 }
 
-remote function Client.getFieldValuesFromExternalObjectRecord(string externalObjectName, string id,
-    string fields) returns json|SalesforceConnectorError {
+remote function Client.getFieldValuesFromExternalObjectRecord(string externalObjectName, string id, string fields)
+    returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
     return self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 }
 
-remote function Client.createMultipleRecords(string sObjectName, json records)
-    returns json|SalesforceConnectorError {
+remote function Client.createMultipleRecords(string sObjectName, json records) returns json|SalesforceConnectorError {
 
-    json payload;
     http:Request req = new;
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
     req.setJsonPayload(records);
@@ -479,7 +476,6 @@ remote function Client.getRecordByExternalId(string sObjectName, string fieldNam
 remote function Client.upsertSObjectByExternalId(string sObjectName, string fieldId, string fieldValue,
     json recordPayload) returns json|SalesforceConnectorError {
 
-    json payload;
     http:Request req = new;
     string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
     req.setJsonPayload(recordPayload);
@@ -532,8 +528,7 @@ remote function Client.getRecord(string path) returns json|SalesforceConnectorEr
     return checkAndSetErrors(response, true);
 }
 
-remote function Client.createRecord(string sObjectName, json recordPayload)
-    returns string|SalesforceConnectorError {
+remote function Client.createRecord(string sObjectName, json recordPayload) returns string|SalesforceConnectorError {
     http:Request req = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     req.setJsonPayload(recordPayload);
@@ -565,12 +560,10 @@ remote function Client.updateRecord(string sObjectName, string id, json recordPa
     }
 }
 
-remote function Client.deleteRecord(string sObjectName, string id)
-    returns boolean|SalesforceConnectorError {
-    http:Request req = new;
-    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+remote function Client.deleteRecord(string sObjectName, string id) returns boolean|SalesforceConnectorError {
 
-    var response = self.salesforceClient->delete(path, req);
+    string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+    var response = self.salesforceClient->delete(path, ());
 
     json|SalesforceConnectorError result = checkAndSetErrors(response, false);
 
