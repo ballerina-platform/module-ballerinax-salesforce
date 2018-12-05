@@ -27,7 +27,7 @@ function prepareUrl(string[] paths) returns string {
     string url = EMPTY_STRING;
 
     if (paths.length() > 0) {
-        foreach path in paths {
+        foreach var path in paths {
             if (!path.hasPrefix(FORWARD_SLASH)) {
                 url = url + FORWARD_SLASH;
             }
@@ -48,7 +48,8 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
 
     url = url + QUESTION_MARK;
     boolean first = true;
-    foreach i, name in queryParamNames {
+    int i = 0;
+    foreach var name in queryParamNames {
         string value = queryParamValues[i];
 
         var encoded = http:encode(value, ENCODING_CHARSET);
@@ -64,6 +65,7 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
             log:printError("Unable to encode value: " + value, err = encoded);
             break;
         }
+        i = i + 1;
     }
 
     return url;
@@ -105,11 +107,13 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
                     connectorError.message = "Error occured while extracting Json payload!";
                     return connectorError;
                 } else {
-                    foreach i, err in errors {
+                    int i = 0;
+                    foreach var err in errors {
                         SalesforceError sfError = { message: err.message.toString(), errorCode:err.errorCode
                         .toString() };
                         connectorError.message = err.message.toString();
                         connectorError.salesforceErrors[i] = sfError;
+                        i = i + 1;
                     }
                     return connectorError;
                 }

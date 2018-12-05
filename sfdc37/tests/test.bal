@@ -80,9 +80,9 @@ function testGetOrganizationLimits() {
         test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
         string[] keys = jsonRes.getKeys();
         test:assertTrue(keys.length() > 0, msg = "Response doesn't have enough keys");
-        foreach key in jsonRes {
-            test:assertNotEquals(key["Max"], null, msg = "Max limit not found");
-            test:assertNotEquals(key["Remaining"], null, msg = "Remaining resources not found");
+        foreach var key in keys {
+            test:assertNotEquals(jsonRes[key]["Max"], null, msg = "Max limit not found");
+            test:assertNotEquals(jsonRes[key]["Remaining"], null, msg = "Remaining resources not found");
         }
     } else {
         test:assertFail(msg = jsonRes.message);
