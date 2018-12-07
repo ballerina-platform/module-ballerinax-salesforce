@@ -2,7 +2,7 @@
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.983.0            |   v37.0      |
+| 0.990.0            |   v37.0      |
 
 ### Prerequisites
 
@@ -30,19 +30,21 @@ Salesforce Client endpoint by passing above mentioned parameters.
 Find the way of creating Salesforce endpoint as following. 
 
 ```ballerina
-endpoint Client salesforceClient {
-    clientConfig:{
-        url:url,
-        auth:{
-            scheme:http:OAUTH2,
-            accessToken:accessToken,
-            refreshToken:refreshToken,
-            clientId:clientId,
-            clientSecret:clientSecret,
-            refreshUrl:refreshUrl
+SalesforceConfiguration salesforceConfig = {
+    baseUrl: endpointUrl,
+    clientConfig: {
+        auth: {
+            scheme: http:OAUTH2,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshUrl: refreshUrl
         }
     }
 };
+
+Client salesforceClient = new(salesforceConfig);
 
 ```
 
@@ -67,26 +69,20 @@ using `ballerina test sfdc37 --config ballerina.conf` command.
 function testGetResourcesByApiVersion() {
     log:printInfo("salesforceClient -> getResourcesByApiVersion()");
     string apiVersion = "v37.0";
-    response = salesforceClient -> getResourcesByApiVersion(apiVersion);
-    match response {
-        json jsonRes => {
-            test:assertNotEquals(jsonRes, null, msg = "Found null JSON response!");
-            try {
-                test:assertNotEquals(jsonRes["sobjects"], null);
-                test:assertNotEquals(jsonRes["search"], null);
-                test:assertNotEquals(jsonRes["query"], null);
-                test:assertNotEquals(jsonRes["licensing"], null);
-                test:assertNotEquals(jsonRes["connect"], null);
-                test:assertNotEquals(jsonRes["tooling"], null);
-                test:assertNotEquals(jsonRes["chatter"], null);
-                test:assertNotEquals(jsonRes["recent"], null);
-            } catch (error e) {
-                test:assertFail(msg = "Response doesn't have required keys");
-            }
-        }
-        SalesforceConnectorError err => {
-            test:assertFail(msg = err.message);
-        }
+    json|SalesforceConnectorError response = salesforceClient -> getResourcesByApiVersion(apiVersion);
+
+    if (response is json) {
+        test:assertNotEquals(response, null, msg = "Found null JSON response!");
+        test:assertNotEquals(response["sobjects"], null);
+        test:assertNotEquals(response["search"], null);
+        test:assertNotEquals(response["query"], null);
+        test:assertNotEquals(response["licensing"], null);
+        test:assertNotEquals(response["connect"], null);
+        test:assertNotEquals(response["tooling"], null);
+        test:assertNotEquals(response["chatter"], null);
+        test:assertNotEquals(response["recent"], null);
+    } else {
+        test:assertFail(msg = response.message);
     }
 }
 

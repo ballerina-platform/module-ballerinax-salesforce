@@ -23,7 +23,7 @@ limitations for organizations.
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 0.983.0        |
+| Ballerina Language  | 0.990.0        |
 | Salesforce REST API | v37.0          |
 
 ## Sample
@@ -51,19 +51,22 @@ on obtaining OAuth2 credentials.
 
 You can now enter the credentials in the HTTP client config. 
 ```ballerina
-endpoint sfdc37:Client salesforceEP {
-   clientConfig:{
-       url:url,
-       auth:{
-           scheme:http:OAUTH2,
-           accessToken:accessToken,
-           refreshToken:refreshToken,
-           clientId:clientId,
-           clientSecret:clientSecret,
-           refreshUrl:refreshUrl
-       }
-   }
+SalesforceConfiguration salesforceConfig = {
+    baseUrl: endpointUrl,
+    clientConfig: {
+        auth: {
+            scheme: http:OAUTH2,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshUrl: refreshUrl
+        }
+    }
 };
+
+Client salesforceClient = new(salesforceConfig);
+
 ```
 The `createAccount` function creates an Account SObject. Pass a JSON object with the relevant fields needed for the 
 SObject Account.
@@ -75,9 +78,10 @@ The response from `createAccount` is either a string ID of the created account (
 or a `SalesforceConnectorError` (if the account creation was unsuccessful). The `match` operation can be used to handle 
 the response if an error occurs.
 ```ballerina
-match createReponse {
-    string id => io:println("Account id:  " + id);
-    sfdc37:SalesforceConnectorError err => io:println(err);
+if (createReponse is string) {
+    io:println("Account id:  " + createReponse);
+} else {
+    io:println(createReponse.message);
 }
 ```
 The `getQueryResult` function executes a SOQL query that returns all the results in a single response, or, if it exceeds 
@@ -90,14 +94,13 @@ The response from `getQueryResult` is either a JSON object with total size, exec
 URL to get next record set (if query execution was successful) or a `SalesforceConnectorError` 
 (if the query execution was unsuccessful). The `match` operation can be used to handle the response if an error occurs.
 ```ballerina
-match response {
-    json jsonRes => {
-        io:println(“TotalSize:  ” + jsonRes["totalSize"]);
-        io:println(“Done:  ” + jsonRes["done"]);
-        io:println(“Records:  ” + jsonRes["records"]);
-        io:println(“Next response url:”  + jsonRes["nextRecordsUrl"]);
-    }
-    sfdc37:SalesforceConnectorError err => io:println(err);
+if (response is json) {
+    io:println(“TotalSize:  ” + response["totalSize"]);
+    io:println(“Done:  ” + response["done"]);
+    io:println(“Records:  ” + response["records"]);
+    io:println(“Next response url:”  + response["nextRecordsUrl"]);
+} else {
+    io:println(response.message);
 }
 ```
 The `createLead` function creates a Lead SObject. It returns the lead ID if successful or `SalesforceConnectorError` if 
@@ -105,9 +108,10 @@ unsuccessful.
 ```ballerina
 json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
 var createResponse = salesforceEP->createLead(lead);
-match createResponse {
-    string id => io:println("Lead id: " + id);
-    sfdc37:SalesforceConnectorError err => io:println(err);
+if (createResponse is string) {
+    io:println("Lead id: " + createResponse);
+} else {
+    io:println(createResponse.message);
 }
 ```
 
