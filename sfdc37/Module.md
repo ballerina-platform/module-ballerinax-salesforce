@@ -51,7 +51,7 @@ on obtaining OAuth2 credentials.
 
 You can now enter the credentials in the HTTP client config. 
 ```ballerina
-SalesforceConfiguration salesforceConfig = {
+sfdc37:SalesforceConfiguration salesforceConfig = {
     baseUrl: endpointUrl,
     clientConfig: {
         auth: {
@@ -65,8 +65,7 @@ SalesforceConfiguration salesforceConfig = {
     }
 };
 
-Client salesforceClient = new(salesforceConfig);
-
+sfdc37:Client salesforceClient = new(salesforceConfig);
 ```
 The `createAccount` function creates an Account SObject. Pass a JSON object with the relevant fields needed for the 
 SObject Account.

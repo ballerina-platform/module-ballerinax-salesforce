@@ -30,7 +30,7 @@ Salesforce Client endpoint by passing above mentioned parameters.
 Find the way of creating Salesforce endpoint as following. 
 
 ```ballerina
-SalesforceConfiguration salesforceConfig = {
+sfdc37:SalesforceConfiguration salesforceConfig = {
     baseUrl: endpointUrl,
     clientConfig: {
         auth: {
@@ -44,8 +44,7 @@ SalesforceConfiguration salesforceConfig = {
     }
 };
 
-Client salesforceClient = new(salesforceConfig);
-
+sfdc37:Client salesforceClient = new(salesforceConfig);
 ```
 
 #### Running salesforce tests
@@ -69,7 +68,7 @@ using `ballerina test sfdc37 --config ballerina.conf` command.
 function testGetResourcesByApiVersion() {
     log:printInfo("salesforceClient -> getResourcesByApiVersion()");
     string apiVersion = "v37.0";
-    json|SalesforceConnectorError response = salesforceClient -> getResourcesByApiVersion(apiVersion);
+    json|SalesforceConnectorError response = salesforceClient->getResourcesByApiVersion(apiVersion);
 
     if (response is json) {
         test:assertNotEquals(response, null, msg = "Found null JSON response!");
@@ -85,7 +84,6 @@ function testGetResourcesByApiVersion() {
         test:assertFail(msg = response.message);
     }
 }
-
 ```
 
 * Sample Result 
