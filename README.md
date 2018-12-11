@@ -52,7 +52,7 @@ import wso2/sfdc37;
  * Request
 
 ```ballerina
-import wso2/sfdc37 as sf;
+import wso2/sfdc37;
 import ballerina/http;
 import ballerina/io;
 
@@ -65,7 +65,7 @@ string clientSecret = "<client_secret>";
 string refreshUrl = "<refreshUrl>";
 
 public function main() {
-    SalesforceConfiguration salesforceConfig = {
+    sfdc37:SalesforceConfiguration salesforceConfig = {
         baseUrl: endpointUrl,
         clientConfig: {
             auth: {
@@ -79,10 +79,10 @@ public function main() {
         }
     };
 
-    Client salesforceClient = new(salesforceConfig);
+    sfdc37:Client salesforceClient = new(salesforceConfig);
 
     //Call the Salesforce connector function getAvailableApiVersions().
-    json|sf:SalesforceConnectorError response = salesforceClient -> getAvailableApiVersions();
+    json|sfdc37:SalesforceConnectorError response = salesforceClient->getAvailableApiVersions();
 
     if (response is json) {
         //if successful, returns JSON result
