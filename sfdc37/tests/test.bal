@@ -290,9 +290,9 @@ function testGetDeletedRecords() {
     log:printInfo("salesforceClient -> getDeletedRecords()");
 
     time:Time now = time:currentTime();
-    string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
-    time:Time weekAgo = now.subtractDuration(0, 0, 1, 0, 0, 0, 0);
-    string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
+    string endDateTime = time:format(now, "yyyy-MM-dd'T'HH:mm:ssZ");
+    time:Time weekAgo = time:subtractDuration(now, 0, 0, 1, 0, 0, 0, 0);
+    string startDateTime = time:format(weekAgo, "yyyy-MM-dd'T'HH:mm:ssZ");
 
     json|SalesforceConnectorError jsonRes = salesforceClient->getDeletedRecords("Account", startDateTime, endDateTime);
 
@@ -308,9 +308,9 @@ function testGetUpdatedRecords() {
     log:printInfo("salesforceClient -> getUpdatedRecords()");
 
     time:Time now = time:currentTime();
-    string endDateTime = now.format("yyyy-MM-dd'T'HH:mm:ssZ");
-    time:Time weekAgo = now.subtractDuration(0, 0, 1, 0, 0, 0, 0);
-    string startDateTime = weekAgo.format("yyyy-MM-dd'T'HH:mm:ssZ");
+    string endDateTime = time:format(now, "yyyy-MM-dd'T'HH:mm:ssZ");
+    time:Time weekAgo = time:subtractDuration(now, 0, 0, 1, 0, 0, 0, 0);
+    string startDateTime = time:format(weekAgo, "yyyy-MM-dd'T'HH:mm:ssZ");
 
     json|SalesforceConnectorError jsonRes = salesforceClient->getUpdatedRecords("Account", startDateTime, endDateTime);
 

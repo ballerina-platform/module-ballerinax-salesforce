@@ -295,39 +295,39 @@ public type SalesforceConfiguration record {
     http:ClientEndpointConfig clientConfig;
 };
 
-remote function Client.getAvailableApiVersions() returns json|SalesforceConnectorError {
+public remote function Client.getAvailableApiVersions() returns json|SalesforceConnectorError {
     string path = prepareUrl([BASE_PATH]);
     return self->getRecord(path);
 }
 
-remote function Client.getResourcesByApiVersion(string apiVersion) returns json|SalesforceConnectorError {
+public remote function Client.getResourcesByApiVersion(string apiVersion) returns json|SalesforceConnectorError {
     string path = prepareUrl([BASE_PATH, apiVersion]);
     return self->getRecord(path);
 }
 
-remote function Client.getOrganizationLimits() returns json|SalesforceConnectorError {
+public remote function Client.getOrganizationLimits() returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, LIMITS]);
     return self->getRecord(path);
 }
 
 //=============================== Query =======================================//
 
-remote function Client.getQueryResult(string receivedQuery) returns json|SalesforceConnectorError {
+public remote function Client.getQueryResult(string receivedQuery) returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
     return self->getRecord(path);
 }
 
-remote function Client.getNextQueryResult(string nextRecordsUrl)
+public remote function Client.getNextQueryResult(string nextRecordsUrl)
     returns json|SalesforceConnectorError {
     return self->getRecord(nextRecordsUrl);
 }
 
-remote function Client.getAllQueries(string queryString) returns json|SalesforceConnectorError {
+public remote function Client.getAllQueries(string queryString) returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERYALL], [Q], [queryString]);
     return self->getRecord(path);
 }
 
-remote function Client.explainQueryOrReportOrListview(string queryReportOrListview)
+public remote function Client.explainQueryOrReportOrListview(string queryReportOrListview)
     returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, QUERY], [EXPLAIN], [queryReportOrListview]);
     return self->getRecord(path);
@@ -335,126 +335,126 @@ remote function Client.explainQueryOrReportOrListview(string queryReportOrListvi
 
 // ================================= Search ================================ //
 
-remote function Client.searchSOSLString(string searchString) returns json|SalesforceConnectorError {
+public remote function Client.searchSOSLString(string searchString) returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
     return self->getRecord(path);
 }
 
 // ============================ ACCOUNT SObject: get, create, update, delete ===================== //
 
-remote function Client.getAccountById(string accountId) returns json|SalesforceConnectorError {
+public remote function Client.getAccountById(string accountId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, ACCOUNT, accountId]);
     return self->getRecord(path);
 }
 
-remote function Client.createAccount(json accountRecord) returns string|SalesforceConnectorError {
+public remote function Client.createAccount(json accountRecord) returns string|SalesforceConnectorError {
     return self->createRecord(ACCOUNT, accountRecord);
 }
 
-remote function Client.updateAccount(string accountId, json accountRecord)
+public remote function Client.updateAccount(string accountId, json accountRecord)
     returns boolean|SalesforceConnectorError {
     return self->updateRecord(ACCOUNT, accountId, accountRecord);
 }
 
-remote function Client.deleteAccount(string accountId) returns boolean|SalesforceConnectorError {
+public remote function Client.deleteAccount(string accountId) returns boolean|SalesforceConnectorError {
     return self->deleteRecord(ACCOUNT, accountId);
 }
 
 // ============================ LEAD SObject: get, create, update, delete ===================== //
 
-remote function Client.getLeadById(string leadId) returns json|SalesforceConnectorError {
+public remote function Client.getLeadById(string leadId) returns json|SalesforceConnectorError {
 string path = prepareUrl([API_BASE_PATH, SOBJECTS, LEAD, leadId]);
     return self->getRecord(path);
 }
 
-remote function Client.createLead(json leadRecord) returns string|SalesforceConnectorError {
+public remote function Client.createLead(json leadRecord) returns string|SalesforceConnectorError {
     return self->createRecord(LEAD, leadRecord);
 }
 
-remote function Client.updateLead(string leadId, json leadRecord)
+public remote function Client.updateLead(string leadId, json leadRecord)
     returns boolean|SalesforceConnectorError {
     return self->updateRecord(LEAD, leadId, leadRecord);
 }
 
-remote function Client.deleteLead(string leadId) returns boolean|SalesforceConnectorError {
+public remote function Client.deleteLead(string leadId) returns boolean|SalesforceConnectorError {
     return self->deleteRecord(LEAD, leadId);
 }
 
 // ============================ CONTACTS SObject: get, create, update, delete ===================== //
 
-remote function Client.getContactById(string contactId) returns json|SalesforceConnectorError {
+public remote function Client.getContactById(string contactId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, CONTACT, contactId]);
     return self->getRecord(path);
 }
 
-remote function Client.createContact(json contactRecord) returns string|SalesforceConnectorError {
+public remote function Client.createContact(json contactRecord) returns string|SalesforceConnectorError {
     return self->createRecord(CONTACT, contactRecord);
 }
 
-remote function Client.updateContact(string contactId, json contactRecord)
+public remote function Client.updateContact(string contactId, json contactRecord)
     returns boolean|SalesforceConnectorError {
     return self->updateRecord(CONTACT, contactId, contactRecord);
 }
 
-remote function Client.deleteContact(string contactId) returns boolean|SalesforceConnectorError {
+public remote function Client.deleteContact(string contactId) returns boolean|SalesforceConnectorError {
     return self->deleteRecord(CONTACT, contactId);
 }
 
 // ============================ OPPORTUNITIES SObject: get, create, update, delete ===================== //
 
-remote function Client.getOpportunityById(string opportunityId) returns json|SalesforceConnectorError {
+public remote function Client.getOpportunityById(string opportunityId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, OPPORTUNITY, opportunityId]);
     return self->getRecord(path);
 }
 
-remote function Client.createOpportunity(json opportunityRecord) returns string|SalesforceConnectorError {
+public remote function Client.createOpportunity(json opportunityRecord) returns string|SalesforceConnectorError {
     return self->createRecord(OPPORTUNITY, opportunityRecord);
 }
 
-remote function Client.updateOpportunity(string opportunityId, json opportunityRecord)
+public remote function Client.updateOpportunity(string opportunityId, json opportunityRecord)
     returns boolean|SalesforceConnectorError {
     return self->updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
 }
 
-remote function Client.deleteOpportunity(string opportunityId) returns boolean|SalesforceConnectorError {
+public remote function Client.deleteOpportunity(string opportunityId) returns boolean|SalesforceConnectorError {
     return self->deleteRecord(OPPORTUNITY, opportunityId);
 }
 
 // ============================ PRODUCTS SObject: get, create, update, delete ===================== //
 
-remote function Client.getProductById(string productId) returns json|SalesforceConnectorError {
+public remote function Client.getProductById(string productId) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PRODUCT, productId]);
     return self->getRecord(path);
 }
 
-remote function Client.createProduct(json productRecord) returns string|SalesforceConnectorError {
+public remote function Client.createProduct(json productRecord) returns string|SalesforceConnectorError {
     return self->createRecord(PRODUCT, productRecord);
 }
 
-remote function Client.updateProduct(string productId, json productRecord)
+public remote function Client.updateProduct(string productId, json productRecord)
     returns boolean|SalesforceConnectorError {
     return self->updateRecord(PRODUCT, productId, productRecord);
 }
 
-remote function Client.deleteProduct(string productId) returns boolean|SalesforceConnectorError {
+public remote function Client.deleteProduct(string productId) returns boolean|SalesforceConnectorError {
     return self->deleteRecord(PRODUCT, productId);
 }
 
 //===========================================================================================================//
 
-remote function Client.getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
+public remote function Client.getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
     returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     return self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 }
 
-remote function Client.getFieldValuesFromExternalObjectRecord(string externalObjectName, string id, string fields)
+public remote function Client.getFieldValuesFromExternalObjectRecord(string externalObjectName, string id, string fields)
     returns json|SalesforceConnectorError {
     string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
     return self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
 }
 
-remote function Client.createMultipleRecords(string sObjectName, json records) returns json|SalesforceConnectorError {
+public remote function Client.createMultipleRecords(string sObjectName, json records) returns json|SalesforceConnectorError {
 
     http:Request req = new;
     string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
@@ -467,13 +467,13 @@ remote function Client.createMultipleRecords(string sObjectName, json records) r
 
 // ============================ Create, update, delete records by External IDs ===================== //
 
-remote function Client.getRecordByExternalId(string sObjectName, string fieldName, string fieldValue)
+public remote function Client.getRecordByExternalId(string sObjectName, string fieldName, string fieldValue)
     returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, fieldName, fieldValue]);
     return self->getRecord(path);
 }
 
-remote function Client.upsertSObjectByExternalId(string sObjectName, string fieldId, string fieldValue,
+public remote function Client.upsertSObjectByExternalId(string sObjectName, string fieldId, string fieldValue,
     json recordPayload) returns json|SalesforceConnectorError {
 
     http:Request req = new;
@@ -487,13 +487,13 @@ remote function Client.upsertSObjectByExternalId(string sObjectName, string fiel
 
 // ============================ Get updated and deleted records ===================== //
 
-remote function Client.getDeletedRecords(string sObjectName, string startTime, string endTime)
+public remote function Client.getDeletedRecords(string sObjectName, string startTime, string endTime)
     returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED], [START, END], [startTime, endTime]);
     return self->getRecord(path);
 }
 
-remote function Client.getUpdatedRecords(string sObjectName, string startTime, string endTime)
+public remote function Client.getUpdatedRecords(string sObjectName, string startTime, string endTime)
     returns json|SalesforceConnectorError {
     string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED], [START, END], [startTime, endTime]);
     return self->getRecord(path);
@@ -501,34 +501,34 @@ remote function Client.getUpdatedRecords(string sObjectName, string startTime, s
 
 // ============================ Describe SObjects available and their fields/metadata ===================== //
 
-remote function Client.describeAvailableObjects() returns json|SalesforceConnectorError {
+public remote function Client.describeAvailableObjects() returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
     return self->getRecord(path);
 }
 
-remote function Client.getSObjectBasicInfo(string sobjectName) returns json|SalesforceConnectorError {
+public remote function Client.getSObjectBasicInfo(string sobjectName) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
     return self->getRecord(path);
 }
 
-remote function Client.describeSObject(string sObjectName) returns json|SalesforceConnectorError {
+public remote function Client.describeSObject(string sObjectName) returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
     return self->getRecord(path);
 }
 
-remote function Client.sObjectPlatformAction() returns json|SalesforceConnectorError {
+public remote function Client.sObjectPlatformAction() returns json|SalesforceConnectorError {
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
     return self->getRecord(path);
 }
 
 //============================ utility functions================================//
 
-remote function Client.getRecord(string path) returns json|SalesforceConnectorError {
+public remote function Client.getRecord(string path) returns json|SalesforceConnectorError {
     http:Response|error response = self.salesforceClient->get(path);
     return checkAndSetErrors(response, true);
 }
 
-remote function Client.createRecord(string sObjectName, json recordPayload) returns string|SalesforceConnectorError {
+public remote function Client.createRecord(string sObjectName, json recordPayload) returns string|SalesforceConnectorError {
     http:Request req = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
     req.setJsonPayload(recordPayload);
@@ -543,7 +543,7 @@ remote function Client.createRecord(string sObjectName, json recordPayload) retu
     }
 }
 
-remote function Client.updateRecord(string sObjectName, string id, json recordPayload)
+public remote function Client.updateRecord(string sObjectName, string id, json recordPayload)
     returns boolean|SalesforceConnectorError {
     http:Request req = new;
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
@@ -560,7 +560,7 @@ remote function Client.updateRecord(string sObjectName, string id, json recordPa
     }
 }
 
-remote function Client.deleteRecord(string sObjectName, string id) returns boolean|SalesforceConnectorError {
+public remote function Client.deleteRecord(string sObjectName, string id) returns boolean|SalesforceConnectorError {
 
     string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
     var response = self.salesforceClient->delete(path, ());
