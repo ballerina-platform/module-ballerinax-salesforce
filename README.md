@@ -63,23 +63,25 @@ string refreshToken = "<refresh_token>";
 string clientId = "<client_id>";
 string clientSecret = "<client_secret>";
 string refreshUrl = "<refreshUrl>";
+string endpointUrl = "<endpointUrl>";
+
+sfdc37:SalesforceConfiguration salesforceConfig = {
+    baseUrl: endpointUrl,
+    clientConfig: {
+        auth: {
+            scheme: http:OAUTH2,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshUrl: refreshUrl
+        }
+    }
+};
+
+sfdc37:Client salesforceClient = new(salesforceConfig);
 
 public function main() {
-    sfdc37:SalesforceConfiguration salesforceConfig = {
-        baseUrl: endpointUrl,
-        clientConfig: {
-            auth: {
-                scheme: http:OAUTH2,
-                accessToken: accessToken,
-                refreshToken: refreshToken,
-                clientId: clientId,
-                clientSecret: clientSecret,
-                refreshUrl: refreshUrl
-            }
-        }
-    };
-
-    sfdc37:Client salesforceClient = new(salesforceConfig);
 
     //Call the Salesforce connector function getAvailableApiVersions().
     json|sfdc37:SalesforceConnectorError response = salesforceClient->getAvailableApiVersions();
