@@ -68,14 +68,14 @@ sfdc37:SalesforceConfiguration salesforceConfig = {
 sfdc37:Client salesforceClient = new(salesforceConfig);
 ```
 
-The `createAccount` function creates an Account SObject. Pass a JSON object with the relevant fields needed for the SObject Account.
+The `createAccount` remote function creates an Account SObject. Pass a JSON object with the relevant fields needed for the SObject Account.
 
 ```ballerina
 json account = {Name:"ABC Inc", BillingCity:"New York"};
 var createReponse = salesforceClient->createAccount(account);
 ```
 
-The response from `createAccount` is either a string ID of the created account (if the account was created successfully) 
+The response from `createAccount` is either the string ID of the created account (if the account was created successfully)
 or `SalesforceConnectorError` (if the account creation was unsuccessful).
 
 ```ballerina
@@ -86,7 +86,7 @@ if (createReponse is string) {
 }
 ```
 
-The `getQueryResult` function executes a SOQL query that returns all the results in a single response or if it exceeds
+The `getQueryResult` remote function executes a SOQL query that returns all the results in a single response or if it exceeds
 the maximum record limit, it returns part of the results and an identifier used to retrieve the remaining results.
 
 ```ballerina
@@ -102,13 +102,12 @@ if (response is json) {
     io:println("TotalSize:  ", response["totalSize"]);
     io:println("Done:  ", response["done"]);
     io:println("Records: ", response["records"]);
-    io:println();
     io:println("Next response url: ", response["nextRecordsUrl"]);
 } else {
     io:println("Error: ", response.message);
 }
 ```
-The `createLead` function creates a Lead SObject. It returns the lead ID if successful or `SalesforceConnectorError` if unsuccessful.
+The `createLead` remote function creates a Lead SObject. It returns the lead ID if successful or `SalesforceConnectorError` if unsuccessful.
 
 ```ballerina
 json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
