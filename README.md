@@ -83,7 +83,7 @@ sfdc37:Client salesforceClient = new(salesforceConfig);
 
 public function main() {
 
-    //Call the Salesforce connector function getAvailableApiVersions().
+    // Call the Salesforce connector function getAvailableApiVersions().
     json|sfdc37:SalesforceConnectorError response = salesforceClient->getAvailableApiVersions();
 
     if (response is json) {
