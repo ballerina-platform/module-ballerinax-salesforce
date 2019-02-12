@@ -87,7 +87,7 @@ if (createReponse is string) {
 ```
 
 The `getQueryResult` remote function executes a SOQL query that returns all the results in a single response or if it exceeds
-the maximum record limit, it returns part of the results and an identifier used to retrieve the remaining results.
+the maximum record limit, it returns part of the results and an identifier that can be used to retrieve the remaining results.
 
 ```ballerina
 string sampleQuery = "SELECT name FROM Account";

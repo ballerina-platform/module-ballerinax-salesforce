@@ -52,9 +52,9 @@ import wso2/sfdc37;
  * Request
 
 ```ballerina
-import wso2/sfdc37;
 import ballerina/http;
 import ballerina/io;
+import wso2/sfdc37;
 
 //User credentials to access Salesforce API
 string url = "<base_url>";
@@ -83,15 +83,15 @@ sfdc37:Client salesforceClient = new(salesforceConfig);
 
 public function main() {
 
-    // Call the Salesforce connector function getAvailableApiVersions().
+    // Call the `getAvailableApiVersions()` remote function of the Salesforce connector.
     json|sfdc37:SalesforceConnectorError response = salesforceClient->getAvailableApiVersions();
 
     if (response is json) {
-        //if successful, returns JSON result
-        io:println(response);
+        // If successful, print JSON result
+        io:println("Available Api versions: ", response);
     } else {
-        //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
-        io:println(response.message);
+        // If unsuccessful, print an error of type sfdc37:SalesforceConnectorError
+        io:println("Error: ", response.message);
     }
 }
 ```
