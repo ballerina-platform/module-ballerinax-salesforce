@@ -87,10 +87,10 @@ public function main() {
     json|sfdc37:SalesforceConnectorError response = salesforceClient->getAvailableApiVersions();
 
     if (response is json) {
-        // If successful, print JSON result
-        io:println("Available Api versions: ", response);
+        // If successful, print the JSON result
+        io:println("Available API versions: ", response);
     } else {
-        // If unsuccessful, print an error of type sfdc37:SalesforceConnectorError
+        // If unsuccessful, print the error of type `sfdc37:SalesforceConnectorError`
         io:println("Error: ", response.message);
     }
 }
