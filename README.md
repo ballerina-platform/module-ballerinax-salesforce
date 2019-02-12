@@ -52,9 +52,9 @@ import wso2/sfdc37;
  * Request
 
 ```ballerina
-import wso2/sfdc37;
 import ballerina/http;
 import ballerina/io;
+import wso2/sfdc37;
 
 //User credentials to access Salesforce API
 string url = "<base_url>";
@@ -63,33 +63,35 @@ string refreshToken = "<refresh_token>";
 string clientId = "<client_id>";
 string clientSecret = "<client_secret>";
 string refreshUrl = "<refreshUrl>";
+string endpointUrl = "<endpointUrl>";
+
+sfdc37:SalesforceConfiguration salesforceConfig = {
+    baseUrl: endpointUrl,
+    clientConfig: {
+        auth: {
+            scheme: http:OAUTH2,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshUrl: refreshUrl
+        }
+    }
+};
+
+sfdc37:Client salesforceClient = new(salesforceConfig);
 
 public function main() {
-    sfdc37:SalesforceConfiguration salesforceConfig = {
-        baseUrl: endpointUrl,
-        clientConfig: {
-            auth: {
-                scheme: http:OAUTH2,
-                accessToken: accessToken,
-                refreshToken: refreshToken,
-                clientId: clientId,
-                clientSecret: clientSecret,
-                refreshUrl: refreshUrl
-            }
-        }
-    };
 
-    sfdc37:Client salesforceClient = new(salesforceConfig);
-
-    //Call the Salesforce connector function getAvailableApiVersions().
+    // Call the `getAvailableApiVersions()` remote function of the Salesforce connector.
     json|sfdc37:SalesforceConnectorError response = salesforceClient->getAvailableApiVersions();
 
     if (response is json) {
-        //if successful, returns JSON result
-        io:println(response);
+        // If successful, print the JSON result
+        io:println("Available API versions: ", response);
     } else {
-        //if unsuccessful, returns an error of type sfdc37:SalesforceConnectorError
-        io:println(response.message);
+        // If unsuccessful, print the error of type `sfdc37:SalesforceConnectorError`
+        io:println("Error: ", response.message);
     }
 }
 ```
