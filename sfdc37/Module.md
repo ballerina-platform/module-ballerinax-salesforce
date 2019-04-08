@@ -23,7 +23,7 @@ limitations for organizations.
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 0.990.3        |
+| Ballerina Language  | 0.991.0        |
 | Salesforce REST API | v37.0          |
 
 ## Sample
@@ -56,11 +56,18 @@ sfdc37:SalesforceConfiguration salesforceConfig = {
     clientConfig: {
         auth: {
             scheme: http:OAUTH2,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            clientId: clientId,
-            clientSecret: clientSecret,
-            refreshUrl: refreshUrl
+            config: {
+                grantType: http:DIRECT_TOKEN,
+                config: {
+                    accessToken: accessToken,
+                    refreshConfig: {
+                        refreshUrl: refreshUrl,
+                        refreshToken: refreshToken,
+                        clientId: clientId,
+                        clientSecret: clientSecret
+                    }
+                }
+            }
         }
     }
 };

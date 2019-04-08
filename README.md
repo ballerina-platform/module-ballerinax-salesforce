@@ -9,7 +9,7 @@ describe SObjects and organizational data through the Salesforce REST API. It ha
 
 | Ballerina Version  | API Version  |
 | ------------------ | ------------ |
-| 0.990.3            |   v37.0      |
+| 0.991.0            |   v37.0      |
  
 
 ## Getting started
@@ -68,14 +68,21 @@ string endpointUrl = "<endpointUrl>";
 sfdc37:SalesforceConfiguration salesforceConfig = {
     baseUrl: endpointUrl,
     clientConfig: {
-        auth: {
-            scheme: http:OAUTH2,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            clientId: clientId,
-            clientSecret: clientSecret,
-            refreshUrl: refreshUrl
-        }
+       auth: {
+           scheme: http:OAUTH2,
+           config: {
+               grantType: http:DIRECT_TOKEN,
+               config: {
+                   accessToken: accessToken,
+                   refreshConfig: {
+                       refreshUrl: refreshUrl,
+                       refreshToken: refreshToken,
+                       clientId: clientId,
+                       clientSecret: clientSecret
+                   }
+               }
+           }
+       }
     }
 };
 
