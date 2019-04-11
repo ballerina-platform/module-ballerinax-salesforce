@@ -49,7 +49,7 @@ function testGetAvailableApiVersions() {
     json|SalesforceConnectorError jsonRes = salesforceClient->getAvailableApiVersions();
 
     if (jsonRes is json) {
-        test:assertNotEquals(jsonRes, (), msg = "Found null JSON response!");
+        test:assertTrue(msg = "Found JSON response with API versions!", jsonRes.length() > 0);
         json[] versions = <json[]>jsonRes;
         test:assertTrue(versions.length() > 0, msg = "Found 0 or No API versions");
     } else {
@@ -298,10 +298,20 @@ function testGetDeletedRecords() {
 
     time:Time now = time:currentTime();
     string|error time1 = time:format(now, "yyyy-MM-dd'T'HH:mm:ssZ");
-    string endDateTime = (time1 is string) ? time1 : "";
+    string endDateTime = "";
+    if (time1 is string) {
+        endDateTime = time1;
+    } else {
+        test:assertFail(msg = <string>time1.detail().messge);
+    }
     time:Time weekAgo = time:subtractDuration(now, 0, 0, 1, 0, 0, 0, 0);
     string|error time2 = time:format(weekAgo, "yyyy-MM-dd'T'HH:mm:ssZ");
-    string startDateTime = (time2 is string) ? time2 : "";
+    string startDateTime = "";
+    if (time2 is string) {
+        startDateTime = time2;
+    } else {
+        test:assertFail(msg = <string>time2.detail().messge);
+    }
 
     json|SalesforceConnectorError jsonRes = salesforceClient->getDeletedRecords("Account", startDateTime, endDateTime);
 
