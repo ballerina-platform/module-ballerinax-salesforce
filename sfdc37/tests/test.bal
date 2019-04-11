@@ -3,7 +3,6 @@ import ballerina/config;
 import ballerina/log;
 import ballerina/time;
 import ballerina/system;
-import ballerina/io;
 
 string endpointUrl = config:getAsString("ENDPOINT");
 string accessToken = config:getAsString("ACCESS_TOKEN");
@@ -693,7 +692,7 @@ function testCreateOpportunity() {
     log:printInfo("salesforceClient -> createOpportunity()");
     json createOpportunity = { Name: "DevServices", StageName: "30 - Proposal/Price Quote", CloseDate: "2019-01-01" };
     string|SalesforceConnectorError stringResponse = salesforceClient->createOpportunity(createOpportunity);
-    io:println("stringResponse: ", stringResponse);
+
     if (stringResponse is string) {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
         log:printDebug("Opportunity id: " + stringResponse);
