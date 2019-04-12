@@ -49,7 +49,7 @@ function testGetAvailableApiVersions() {
     json|SalesforceConnectorError jsonRes = salesforceClient->getAvailableApiVersions();
 
     if (jsonRes is json) {
-        test:assertTrue(msg = "Found JSON response with API versions!", jsonRes.length() > 0);
+        test:assertTrue(jsonRes.length() > 0, msg = "Found JSON response with API versions!");
         json[] versions = <json[]>jsonRes;
         test:assertTrue(versions.length() > 0, msg = "Found 0 or No API versions");
     } else {
