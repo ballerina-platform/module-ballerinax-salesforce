@@ -457,7 +457,7 @@ public remote function Client.getFieldValuesFromExternalObjectRecord(string exte
 public remote function Client.createMultipleRecords(string sObjectName, json records) returns json|SalesforceConnectorError {
 
     http:Request req = new;
-    string path = string `{{API_BASE_PATH}}/{{MULTIPLE_RECORDS}}/{{sObjectName}}`;
+    string path = string `${API_BASE_PATH}/${MULTIPLE_RECORDS}/${sObjectName}`;
     req.setJsonPayload(records);
 
     http:Response|error response = self.salesforceClient->post(path, req);
@@ -477,7 +477,7 @@ public remote function Client.upsertSObjectByExternalId(string sObjectName, stri
     json recordPayload) returns json|SalesforceConnectorError {
 
     http:Request req = new;
-    string path = string `{{API_BASE_PATH}}/{{SOBJECTS}}/{{sObjectName}}/{{fieldId}}/{{fieldValue}}`;
+    string path = string `${API_BASE_PATH}/${SOBJECTS}/${sObjectName}/${fieldId}/${fieldValue}`;
     req.setJsonPayload(recordPayload);
 
     http:Response|error response = self.salesforceClient->patch(path, req);

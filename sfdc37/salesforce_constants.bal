@@ -48,7 +48,7 @@ final string ENCODING_CHARSET = "utf-8";
 final string BASE_PATH = "/services/data";
 
 # Constant field `API_BASE_PATH`. Holds the value for the Salesforce API base path/URL.
-final string API_BASE_PATH = string `{{BASE_PATH}}/{{API_VERSION}}`;
+final string API_BASE_PATH = string `${BASE_PATH}/${API_VERSION}`;
 
 # Constant field `SOBJECTS`. Holds the value sobjects for get sobject resource prefix.
 final string SOBJECTS = "sobjects";
