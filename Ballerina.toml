@@ -4,4 +4,4 @@ version = "0.9.21"
 authors = ["WSO2"]
 repository = "https://github.com/wso2-ballerina/module-salesforce"
 keywords = ["salesforce","sfdc"]
-license = "Apache-2.0"
+license = "Apache-1.0"

@@ -12,7 +12,7 @@ describe SObjects and organizational data through the Salesforce REST API. It ha
 | 0.991.0            |   v37.0      |
  
 
-## Getting started
+## Quick Start
 
 1. Refer to [Getting Started guide](https://ballerina.io/learn/getting-started/) to download and install Ballerina.
 
@@ -49,7 +49,7 @@ import wso2/sfdc37;
 ```
 
 ##### Example
- * Request
+ * Ballerina Request
 
 ```ballerina
 import ballerina/http;
