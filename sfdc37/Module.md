@@ -45,9 +45,13 @@ token. Give the scheme of the HTTP client config as “oauth” and provide the 
     * Client Secret
     * Refresh Token URL
 
-3. Provide the client ID and client secret to obtain the refresh token and access token. Visit 
-[here](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm) for more information 
-on obtaining OAuth2 credentials.
+Note:- When you are setting up the connected app, select the following scopes under Selected OAuth Scopes:
+
+* Access and manage your data (api)
+* Perform requests on your behalf at any time (refresh_token, offline_access)
+* Provide access to your data via the Web (web)
+
+3. Provide the client ID and client secret to obtain the refresh token and access token. For more information on obtaining OAuth2 credentials, go to [Salesforce documentation] (https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
 You can now enter the credentials in the HTTP client config. 
 ```ballerina
