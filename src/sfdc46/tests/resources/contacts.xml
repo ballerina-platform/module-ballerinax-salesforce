@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Alwin</FirstName>
+    <LastName>Kirk</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>238-691-1950</Phone>
+    <Email>akirkqk@census.gov</Email>
+    <My_External_Id__c>c57f3292-e6df-4a35-95e0-857b47c6a72e</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Tallou</FirstName>
+    <LastName>Frankcom</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>965-261-6539</Phone>
+    <Email>tfrankcomql@qq.com</Email>
+    <My_External_Id__c>204fbab7-6431-48f9-bcaa-63e4665ed90d</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Benedicto</FirstName>
+    <LastName>Gabbatiss</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>670-698-8148</Phone>
+    <Email>bgabbatissqm@toplist.cz</Email>
+    <My_External_Id__c>f1f81110-5c49-4342-80de-2a57bc7c5833</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Petrina</FirstName>
+    <LastName>Beaven</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>214-673-1966</Phone>
+    <Email>pbeavenqn@house.gov</Email>
+    <My_External_Id__c>df182abb-31a7-4392-bdab-4d41783c636c</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Andi</FirstName>
+    <LastName>Tildesley</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>151-794-4416</Phone>
+    <Email>atildesleyqo@jugem.jp</Email>
+    <My_External_Id__c>8f3bb565-ed5f-43bf-8632-f4fc77eb1322</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Chane</FirstName>
+    <LastName>Sloam</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>408-615-1866</Phone>
+    <Email>csloamqp@earthlink.net</Email>
+    <My_External_Id__c>7d1b569c-7179-4423-adeb-21cc98d8e5b7</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Court</FirstName>
+    <LastName>Dawes</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>821-831-6303</Phone>
+    <Email>cdawesqq@wunderground.com</Email>
+    <My_External_Id__c>485e57ea-2816-4ac1-b462-cdf6dfd2c4e7</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Richmound</FirstName>
+    <LastName>Donisi</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>513-787-8587</Phone>
+    <Email>rdonisiqr@thetimes.co.uk</Email>
+    <My_External_Id__c>4447845a-5e41-4fee-bed1-ba5ef0e0bbc2</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Vivyanne</FirstName>
+    <LastName>Ellerby</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>571-393-9345</Phone>
+    <Email>vellerbyqs@springer.com</Email>
+    <My_External_Id__c>14f6fd98-9412-4435-9f04-7a8ffa84ee18</My_External_Id__c>
+  </sObject>
+  <sObject>
+    <description>Created_from_Ballerina_Sf_Bulk_API</description>
+    <FirstName>Lee</FirstName>
+    <LastName>Pendlebury</LastName>
+    <Title>Professor Grade 05</Title>
+    <Phone>646-932-0864</Phone>
+    <Email>lpendleburyqt@about.com</Email>
+    <My_External_Id__c>6b96acda-dd2d-4c76-8c8f-f1dc59e71135</My_External_Id__c>
+  </sObject>
+</sObjects>

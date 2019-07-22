@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -28,13 +28,13 @@ function prepareUrl(string[] paths) returns string {
 
     if (paths.length() > 0) {
         foreach var path in paths {
-            if (!path.hasPrefix(FORWARD_SLASH)) {
+            if (!path.startsWith(FORWARD_SLASH)) {
                 url = url + FORWARD_SLASH;
             }
             url = url + path;
         }
     }
-    return url;
+    return <@untainted> url;
 }
 
 # Returns the prepared URL with encoded query.
@@ -70,13 +70,12 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
 
     return url;
 }
-
 # Returns the JSON result or SalesforceConnectorError.
 # + httpResponse - HTTP respone or HttpConnectorError
 # + expectPayload - true if json payload expected in response, if not false
 # + return - JSON result if successful, else SalesforceConnectorError occured
 function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload)
-             returns json|SalesforceConnectorError {
+returns @tainted json|SalesforceConnectorError {
     json result = {};
 
     if (httpResponse is http:Response) {
@@ -88,7 +87,7 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
                     return jsonResponse;
                 } else {
                     log:printError("Error occurred when extracting JSON payload. Error: "
-                    + <string> jsonResponse.detail().message);
+                    + <string> jsonResponse.detail()["message"]);
                     SalesforceConnectorError connectorError = { message: "", salesforceErrors: [] };
                     connectorError.message = "Error occured while extracting Json payload!";
                     return connectorError;
@@ -102,7 +101,7 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
 
                 if (errors is error) {
                     log:printError("Error occurred when extracting JSON payload. Error: "
-                    + <string> errors.detail().message);
+                    + <string> errors.detail()["message"]);
                     connectorError = { message: "", salesforceErrors: [] };
                     connectorError.message = "Error occured while extracting Json payload!";
                     return connectorError;
@@ -119,7 +118,7 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
                 }
             } else {
                 log:printError("Error occurred when extracting errors from payload. Error: "
-                + <string> jsonResponse.detail().message);
+                + <string> jsonResponse.detail()["message"]);
                 connectorError = { message: "", salesforceErrors: [] };
                 connectorError.message = "Error occured while extracting errors from payload!";
                 return connectorError;
@@ -127,7 +126,7 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
         }
     } else {
         SalesforceConnectorError connectorError = {
-                message: "Http error -> message: " + <string> httpResponse.detail().message, salesforceErrors: []
+                message: "Http error -> message: " + <string> httpResponse.detail()["message"], salesforceErrors: []
         };
         return connectorError;
     }
