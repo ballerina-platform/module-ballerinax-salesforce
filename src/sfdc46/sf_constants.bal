@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -37,7 +37,7 @@ final string REFRESH_TOKEN_ENDPOINT = "REFRESH_URL";
 
 //Latest API Version
 # Constant field `API_VERSION`. Holds the value for the Salesforce API version.
-final string API_VERSION = "v37.0";
+final string API_VERSION = "v46.0";
 
 // For URL encoding
 # Constant field `ENCODING_CHARSET`. Holds the value for the encoding charset.
@@ -65,7 +65,7 @@ final string UPDATED = "updated";
 # Constant field `DESCRIBE`. Holds the value describe for describe resource prefix.
 final string DESCRIBE = "describe";
 
-# Constant field `QUERY`. Holds the value query for SOQL query resource prefix.
+# Constant field `QUERY`. Holds the value query for SOQL query resource prefix and bulk API query operator.
 final string QUERY = "query";
 
 # Constant field `search`. Holds the value search for SOSL search resource prefix.
@@ -112,7 +112,6 @@ final string OPPORTUNITY = "Opportunity";
 # Constant field `PRODUCT`. Holds the value Product2 for product object.
 final string PRODUCT = "Product2";
 
-//========================================================================================//
 # Constant field `QUESTION_MARK`. Holds the value of "?".
 final string QUESTION_MARK = "?";
 
@@ -130,3 +129,116 @@ final string FORWARD_SLASH = "/";
 
 // Error Codes
 final string SALESFORCE_ERROR_CODE = "(wso2/sfdc37)SalesforceConnectorError";
+
+// ================ Salesforce bulk client constants =======================================
+
+# Constant field `BULK_API_VERSION`. Holds the value for the Salesforce Bulk API version.
+const BULK_API_VERSION = "46.0";
+
+# Constant field `SERVICES`. Holds the value of "services".
+const SERVICES = "services";
+
+# Constant field `ASYNC`. Holds the value of "async".
+const ASYNC = "async";
+
+// Bulk API Operators
+
+# Constant field `INSERT`. Holds the value of "insert" for insert operator.
+const INSERT = "insert";
+
+# Constant field `UPSERT`. Holds the value of "upsert" for upsert operator.
+const UPSERT = "upsert";
+
+# Constant field `UPDATE`. Holds the value of "update" for update operator.
+const UPDATE = "update";
+
+# Constant field `DELETE`. Holds the value of "delete" for delete operator.
+const DELETE = "delete";
+
+// Content types allowed by Bulk API
+
+# Constant field `CSV`. Holds the value of "CSV".
+const CSV = "CSV";
+
+# Constant field `XML`. Holds the value of "XML".
+const XML = "XML";
+
+# Constant field `JSON`. Holds the value of "JSON".
+const JSON = "JSON";
+
+// Salesforce bulk API terms
+
+# Constant field `JOB`. Holds the value of "job".
+const JOB = "job";
+
+# Constant field `BATCH`. Holds the value of "batch".
+const BATCH = "batch";
+
+# Constant field `REQUEST`. Holds the value of "request".
+const REQUEST = "request";
+
+# Constant field `RESULT`. Holds the value of "result".
+const RESULT = "result";
+
+// XML namespace used by salesforce responses
+
+# Constant field `XML_NAMESPACE`. Holds the value of XML namespace used by salesforce bulk API.
+const XML_NAMESPACE = "http://www.force.com/2009/06/asyncapi/dataload";
+
+// Content types
+
+# Constant field `APP_XML`. Holds the value of "application/xml".
+const APP_XML =  "application/xml";
+
+# Constant field `APP_JSON`. Holds the value of "application/xml".
+const APP_JSON =  "application/json";
+
+# Constant field `TEXT_CSV`. Holds the value of "text/csv".
+const TEXT_CSV = "text/csv";
+
+# Constant field `APP_OCT_STREAM`. Holds the value of "application/octet-stream".
+const APP_OCT_STREAM = "application/octet-stream";
+
+// characters and words
+
+# Constant field `OPEN_CURLY_BRACKET`. Holds the value of "{".
+const OPEN_CURLY_BRACKET = "{";
+
+# Constant field `CLOSE_CURLY_BRACKET`. Holds the value of "}".
+const CLOSE_CURLY_BRACKET = "}";
+
+# Constant field `TRUE`. Holds the value of "true".
+const TRUE = "true";
+
+# Constant field `CONTENT_TYPE`. Holds the value of "Content-Type".
+const CONTENT_TYPE = "Content-Type";
+
+# Constant field `X_SFDC_SESSION`. 
+# Holds the value of "X-SFDC-Session" which used as Authorization header name of bulk API.
+const X_SFDC_SESSION = "X-SFDC-Session";
+
+# Constant field `ENABLE_PK_CHUNKING`. 
+# Holds the value of "Sforce-Enable-PKChunking" which used to handle large data set extracts.
+const ENABLE_PK_CHUNKING = "Sforce-Enable-PKChunking";
+
+# Constant field `INVALID_SESSION_ID`. 
+# Holds the value of "InvalidSessionId" which used to identify Unauthorized 401 response.
+const INVALID_SESSION_ID = "InvalidSessionId";
+
+// Payloads
+
+# Constant field `JSON_STATE_CLOSED_PAYLOAD`. Holds the value of JSON body which needs to close the job.
+final json JSON_STATE_CLOSED_PAYLOAD = { state : "Closed" };
+
+# Constant field `JSON_STATE_ABORTED_PAYLOAD`. Holds the value of JSON body which needs to abort the job.
+final json JSON_STATE_ABORTED_PAYLOAD = { state : "Aborted" };
+
+# Constant field `XML_STATE_CLOSED_PAYLOAD`. Holds the value of XML body which needs to close the job.
+final xml XML_STATE_CLOSED_PAYLOAD = xml `<jobInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+    <state>Closed</state>
+</jobInfo>`;
+
+# Constant field `XML_STATE_ABORTED_PAYLOAD`. Holds the value of XML body which needs to abort the job.
+final xml XML_STATE_ABORTED_PAYLOAD = xml `<jobInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+    <state>Aborted</state>
+</jobInfo>`;
