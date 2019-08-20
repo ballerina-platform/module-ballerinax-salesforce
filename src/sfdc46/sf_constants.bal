@@ -242,3 +242,11 @@ final xml XML_STATE_CLOSED_PAYLOAD = xml `<jobInfo xmlns="http://www.force.com/2
 final xml XML_STATE_ABORTED_PAYLOAD = xml `<jobInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload">
     <state>Aborted</state>
 </jobInfo>`;
+
+// Salesforce bulk API batch states
+
+# Constant field `COMPLETED`. Holds the value of completed batch state.
+const COMPLETED = "Completed";
+
+# Constant field `Failed`. Holds the value of failed batch state.
+const FAILED = "Failed";

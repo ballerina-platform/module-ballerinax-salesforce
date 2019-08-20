@@ -113,7 +113,7 @@ function getDeleteContacts() returns @tainted json {
                 if (closedJob.state == "Closed") {
 
                     // Get the result list.
-                    ResultList|SalesforceError resultList = getQueryResultList(jsonQueryOperator, batchId, 5);
+                    ResultList|SalesforceError resultList = jsonQueryOperator->getResultList(batchId, noOfRetries);
 
                     if (resultList is ResultList) {
                         test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed.");
@@ -182,7 +182,7 @@ function getDeleteContactsAsText() returns @tainted string {
                 if (closedJob.state == "Closed") {
 
                     // Get the result list.
-                    ResultList|SalesforceError resultList = getQueryResultList(jsonQueryOperator, batchId, 5);
+                    ResultList|SalesforceError resultList = jsonQueryOperator->getResultList(batchId, noOfRetries);
 
                     if (resultList is ResultList) {
                         test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed.");
@@ -248,7 +248,7 @@ function getDeleteContactsAsXml() returns @tainted xml {
                 if (closedJob.state == "Closed") {
 
                     // Get the result list.
-                    ResultList|SalesforceError resultList = getXmlQueryResultList(xmlQueryOperator, batchId, 5);
+                    ResultList|SalesforceError resultList = xmlQueryOperator->getResultList(batchId, noOfRetries);
 
                     if (resultList is ResultList) {
                         test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed, "

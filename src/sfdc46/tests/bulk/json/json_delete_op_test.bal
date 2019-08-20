@@ -53,14 +53,6 @@ function testJsonDeleteOperator() {
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = jsonDeleteOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = jsonDeleteOperator->getBatchInfo(batchId);
         if (batchInfo is Batch) {
@@ -87,7 +79,7 @@ function testJsonDeleteOperator() {
         }
 
         // Get batch results.
-        json|SalesforceError batchResults = getJsonDeleteBatchResults(jsonDeleteOperator, batchId, 5);
+        json|SalesforceError batchResults = jsonDeleteOperator->getBatchResults(batchId, noOfRetries);
 
         if (batchResults is json) {
             json[] batchResultsArr = <json[]> batchResults;
@@ -95,23 +87,15 @@ function testJsonDeleteOperator() {
         } else {
             test:assertFail(msg = batchResults.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = jsonDeleteOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = jsonDeleteOperator.message);
-    }
-}
-
-function getJsonDeleteBatchResults(JsonDeleteOperator jsonDeleteOperator, string batchId, int numberOfTries) 
-    returns @tainted json|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        json|SalesforceError batchResult = jsonDeleteOperator->getBatchResults(batchId);
-        if (batchResult is json) {
-            json[] batchResArr = <json[]> batchResult;
-            if (batchResArr.length() > 0) {
-                return batchResult;
-            }
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
     }
 }

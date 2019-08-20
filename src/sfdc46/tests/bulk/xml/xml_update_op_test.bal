@@ -77,14 +77,6 @@ function testXmlUpdateOperator() {
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = xmlUpdateOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = xmlUpdateOperator->getBatchInfo(batchIdUsingXml);
         if (batchInfo is Batch) {
@@ -119,32 +111,22 @@ function testXmlUpdateOperator() {
         }
 
         // Get the results of the batch
-        xml|SalesforceError batchResult = getXmlUpdateBatchResults(xmlUpdateOperator, batchIdUsingXml, 5);
+        xml|SalesforceError batchResult = xmlUpdateOperator->getBatchResults(batchIdUsingXml, noOfRetries);
 
         if (batchResult is xml) {
             test:assertTrue(validateXmlBatchResult(batchResult), msg = "Invalid batch result.");                
         } else {
             test:assertFail(msg = batchResult.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = xmlUpdateOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = xmlUpdateOperator.message);
     }
-}
-
-function getXmlUpdateBatchResults(@tainted XmlUpdateOperator xmlUpdateOperator, string batchId, int numberOfTries) 
-    returns @tainted xml|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        xml|SalesforceError batchResult = xmlUpdateOperator->getBatchResults(batchId);
-        if (batchResult is xml) {
-            string|error result = 
-                batchResult[getElementNameWithNamespace("result")][getElementNameWithNamespace("Id")].getTextValue();
-            if (result is string) {
-                return batchResult;
-            }
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return xmlUpdateOperator->getBatchResults(batchId);
 }

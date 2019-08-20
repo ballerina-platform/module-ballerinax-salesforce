@@ -114,17 +114,41 @@ public type JsonQueryOperator client object {
     # Get result IDs as a list.
     #
     # + batchId - batch ID
+    # + numberOfTries - number of times checking the batch state
+    # + waitTime - time between two tries in ms
     # + return - ResultList record if successful else SalesforceError occured
-    public remote function getResultList(string batchId) returns @tainted ResultList | SalesforceError {
-        json | SalesforceError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, 
-        <@untainted> BATCH, batchId, <@untainted> RESULT]);
-        if (payload is json) {
-            ResultList | SalesforceError resultList = getResultList(payload);
-            return resultList;
-        } else {
-            return payload;
+    public remote function getResultList(string batchId, int numberOfTries = 1, int waitTime = 3000) 
+        returns @tainted ResultList | SalesforceError {
+        int counter = 0;
+        while (counter < numberOfTries) {
+            Batch|SalesforceError batch = self->getBatchInfo(batchId);
+            
+            if (batch is Batch) {
+
+                if (batch.state == COMPLETED) {
+                    json | SalesforceError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, 
+                        <@untainted> BATCH, batchId, <@untainted> RESULT]);
+                    if (payload is json) {
+                        ResultList | SalesforceError resultList = getResultList(payload);
+                        return resultList;
+                    } else {
+                        return payload;
+                    }
+                } else if (batch.state == FAILED) {
+                    return getFailedBatchError(batch);
+                } else {
+                    printWaitingMessage(batch);
+                }
+            } else {
+                return batch;
+            }
+
+            runtime:sleep(waitTime); // Sleep 3s.
+            counter = counter + 1;
         }
+        return getResultTimeoutError(batchId, numberOfTries, waitTime);
     }
+
 
     # Get query results.
     #

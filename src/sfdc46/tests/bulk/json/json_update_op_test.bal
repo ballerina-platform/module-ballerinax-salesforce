@@ -77,14 +77,6 @@ function testJsonUpdateOperator() {
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = jsonUpdateOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = jsonUpdateOperator->getBatchInfo(batchIdUsingJson);
         if (batchInfo is Batch) {
@@ -115,7 +107,7 @@ function testJsonUpdateOperator() {
         }
 
         // Get the results of the batch
-        json|SalesforceError batchResult = getJsonUpdateBatchResults(jsonUpdateOperator, batchIdUsingJson, 5);
+        json|SalesforceError batchResult = jsonUpdateOperator->getBatchResults(batchIdUsingJson, noOfRetries);
 
         if (batchResult is json) {
             json[]|error batchResultArr = <json[]> batchResult;
@@ -128,24 +120,15 @@ function testJsonUpdateOperator() {
         } else {
             test:assertFail(msg = batchResult.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = jsonUpdateOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = jsonUpdateOperator.message);
     }
-}
-
-function getJsonUpdateBatchResults(JsonUpdateOperator jsonUpdateOperator, string batchId, int numberOfTries) 
-    returns @tainted json|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        json|SalesforceError batchResult = jsonUpdateOperator->getBatchResults(batchId);
-        if (batchResult is json) {
-            json[] batchResArr = <json[]> batchResult;
-            if (batchResArr.length() > 0) {
-                return batchResult;
-            }
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return jsonUpdateOperator->getBatchResults(batchId);
 }

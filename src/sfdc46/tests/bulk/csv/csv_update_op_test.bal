@@ -58,14 +58,6 @@ function testCsvUpdateOperator() {
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = csvUpdateOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = csvUpdateOperator->getBatchInfo(batchId);
         if (batchInfo is Batch) {
@@ -91,28 +83,22 @@ function testCsvUpdateOperator() {
         }
 
         // Get the results of the batch
-        string|SalesforceError batchResult = getCsvUpsertBatchResults(csvUpdateOperator, batchId, 5);
+        string|SalesforceError batchResult = csvUpdateOperator->getBatchResults(batchId, noOfRetries);
         if (batchResult is string) {
             test:assertTrue(batchResult.length() > 0, msg = "Getting batch results failed.");
             test:assertTrue(checkCsvBatchResult(batchResult), "Insert result was not successful.");
         } else {
             test:assertFail(msg = batchResult.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = csvUpdateOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = csvUpdateOperator.message);
     }
-}
-
-function getCsvUpdateBatchResults(@tainted CsvUpdateOperator csvUpdateOperator, string batchId, int numberOfTries) 
-    returns @tainted string|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        string|SalesforceError batchResult = csvUpdateOperator->getBatchResults(batchId);
-        if (batchResult is string) {
-            return batchResult;
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return csvUpdateOperator->getBatchResults(batchId);
 }

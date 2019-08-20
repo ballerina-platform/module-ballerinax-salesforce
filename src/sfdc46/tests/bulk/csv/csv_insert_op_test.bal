@@ -67,14 +67,6 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = csvInsertOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = csvInsertOperator->getBatchInfo(batchIdUsingCsv);
         if (batchInfo is Batch) {
@@ -100,29 +92,22 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
         }
 
         // Get the results of the batch
-        string|SalesforceError batchResult = getCsvInsertBatchResults(csvInsertOperator, batchIdUsingCsv, 5);
+        string|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchIdUsingCsv, noOfRetries);
 
         if (batchResult is string) {
             test:assertTrue(checkCsvBatchResult(batchResult), "Insert result was not successful.");
         } else {
             test:assertFail(msg = batchResult.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = csvInsertOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = csvInsertOperator.message);
     }
-}
-
-function getCsvInsertBatchResults(@tainted CsvInsertOperator csvInsertOperator, string batchId, int numberOfTries) 
-    returns @tainted string|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        string|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchId);
-
-        if (batchResult is string) {
-            return batchResult;
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return csvInsertOperator->getBatchResults(batchId);
 }

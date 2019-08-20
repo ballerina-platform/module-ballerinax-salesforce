@@ -84,14 +84,6 @@ function testXmlInsertOperator() {
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = xmlInsertOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = xmlInsertOperator->getBatchInfo(batchIdUsingXml);
         if (batchInfo is Batch) {
@@ -126,32 +118,22 @@ function testXmlInsertOperator() {
         }
 
         // Get the results of the batch
-        xml|SalesforceError batchResult = getXmlInsertBatchResults(xmlInsertOperator, batchIdUsingXml, 5);
+        xml|SalesforceError batchResult = xmlInsertOperator->getBatchResults(batchIdUsingXml, noOfRetries);
 
         if (batchResult is xml) {
             test:assertTrue(validateXmlBatchResult(batchResult), msg = "Invalid batch result.");                
         } else {
             test:assertFail(msg = batchResult.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = xmlInsertOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = xmlInsertOperator.message);
     }
-}
-
-function getXmlInsertBatchResults(@tainted XmlInsertOperator xmlInsertOperator, string batchId, int numberOfTries) 
-    returns @tainted xml|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        xml|SalesforceError batchResult = xmlInsertOperator->getBatchResults(batchId);
-        if (batchResult is xml) {
-            string|error result = 
-                batchResult[getElementNameWithNamespace("result")][getElementNameWithNamespace("Id")].getTextValue();
-            if (result is string) {
-                return batchResult;
-            }
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return xmlInsertOperator->getBatchResults(batchId);
 }

@@ -53,14 +53,6 @@ function testXmlQueryOperator() {
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = xmlQueryOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = xmlQueryOperator->getBatchInfo(batchId);
         if (batchInfo is Batch) {
@@ -78,7 +70,7 @@ function testXmlQueryOperator() {
         }
 
         // Get the result list.
-        ResultList|SalesforceError resultList = getXmlQueryResultList(xmlQueryOperator, batchId, 5);
+        ResultList|SalesforceError resultList = xmlQueryOperator->getResultList(batchId, noOfRetries);
 
         if (resultList is ResultList) {
             test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed, resultList=" 
@@ -96,24 +88,15 @@ function testXmlQueryOperator() {
         } else {
             test:assertFail(msg = resultList.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = xmlQueryOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = xmlQueryOperator.message);
     }
-}
-
-function getXmlQueryResultList(@tainted XmlQueryOperator xmlQueryOperator, string batchId, int numberOfTries) 
-    returns @tainted ResultList|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        ResultList|SalesforceError queryResultList = xmlQueryOperator->getResultList(batchId);
-        if (queryResultList is ResultList) {
-            string[]|error results = queryResultList.result;
-            if (results is string[] && results.length() > 0) {
-                return queryResultList;
-            }
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return xmlQueryOperator->getResultList(batchId);
 }
