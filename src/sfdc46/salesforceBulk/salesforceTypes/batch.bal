@@ -20,6 +20,7 @@ public type Batch record {
     string id;
     string jobId;
     string state;
+    string stateMessage?;
     string createdDate;
     string systemModstamp;
     int numberRecordsProcessed;
@@ -56,6 +57,9 @@ function createBatchRecordFromXml(xml batchDetails) returns Batch | SalesforceEr
         getIntValue(batchDetails[getElementNameWithNamespace("apexProcessingTime")].getTextValue())
     };
     if (batch is Batch) {
+        if (batchDetails.stateMessage.getTextValue().length() > 0) {
+            batch.stateMessage = batchDetails.stateMessage.getTextValue();
+        }
         return batch;
     } else {
         SalesforceError sfError = {
@@ -80,6 +84,10 @@ function createBatchRecordFromJson(json batchDetails) returns Batch | Salesforce
         apexProcessingTime: getIntValue(batchDetails.apexProcessingTime.toString())
     };
     if (batch is Batch) {
+        json | error stateMsg = batchDetails.stateMessage;
+        if (stateMsg is json) {
+            batch.stateMessage = stateMsg.toString();
+        }
         return batch;
     } else {
         SalesforceError sfError = {

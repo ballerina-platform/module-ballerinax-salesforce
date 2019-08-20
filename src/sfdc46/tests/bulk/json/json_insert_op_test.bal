@@ -51,7 +51,7 @@ function testJsonInsertOperator() {
         string batchIdUsingJsonFile = EMPTY_STRING;
 
         // Upload the json contacts.
-        Batch|SalesforceError batchUsingJson = jsonInsertOperator->upload(contacts);
+        Batch|SalesforceError batchUsingJson = jsonInsertOperator->insert(contacts);
         if (batchUsingJson is Batch) {
             test:assertTrue(batchUsingJson.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchIdUsingJson = batchUsingJson.id;
@@ -60,7 +60,7 @@ function testJsonInsertOperator() {
         }
 
         // Upload json contacts as a file.
-        Batch|SalesforceError batchUsingJsonFile = jsonInsertOperator->uploadFile(jsonContactsFilePath);
+        Batch|SalesforceError batchUsingJsonFile = jsonInsertOperator->insertFile(jsonContactsFilePath);
         if (batchUsingJsonFile is Batch) {
             test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
             batchIdUsingJsonFile = batchUsingJsonFile.id;
@@ -82,14 +82,6 @@ function testJsonInsertOperator() {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message);
-        }
-
-        // Abort job.
-        Job|SalesforceError abortedJob = jsonInsertOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
         }
 
         // Get batch information.
@@ -122,7 +114,7 @@ function testJsonInsertOperator() {
         }
 
         // Get the results of the batch
-        json|SalesforceError batchResult = getInsertBatchResults(jsonInsertOperator, batchIdUsingJson, 5);
+        json|SalesforceError batchResult = jsonInsertOperator->getBatchResults(batchIdUsingJson, noOfRetries);
 
         if (batchResult is json) {
             json[]|error batchResultArr = <json[]> batchResult;
@@ -134,24 +126,15 @@ function testJsonInsertOperator() {
         } else {
             test:assertFail(msg = batchResult.message);
         }
+
+        // Abort job.
+    Job|SalesforceError abortedJob = jsonInsertOperator->abortJob();
+    if (abortedJob is Job) {
+        test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+    } else {
+        test:assertFail(msg = abortedJob.message);
+    }
     } else {
         test:assertFail(msg = jsonInsertOperator.message);
     }
-}
-
-function getInsertBatchResults(JsonInsertOperator jsonInsertOperator, string batchId, int numberOfTries) 
-    returns @tainted json|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        json|SalesforceError batchResult = jsonInsertOperator->getBatchResults(batchId);
-        if (batchResult is json) {
-            json[] batchResArr = <json[]> batchResult;
-            if (batchResArr.length() > 0) {
-                return batchResult;
-            }
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return jsonInsertOperator->getBatchResults(batchId);
 }

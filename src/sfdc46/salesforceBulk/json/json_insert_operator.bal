@@ -32,7 +32,7 @@ public type JsonInsertOperator client object {
     #
     # + payload - insertion data in JSON format
     # + return - Batch record if successful else SalesforceError occured
-    public remote function upload(json payload) returns @tainted Batch | SalesforceError {
+    public remote function insert(json payload) returns @tainted Batch | SalesforceError {
         json | SalesforceError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id, 
             <@untainted> BATCH], payload);
 
@@ -48,7 +48,7 @@ public type JsonInsertOperator client object {
     #
     # + filePath - insertion JSON file path
     # + return - Batch record if successful else SalesforceError occured
-    public remote function uploadFile(string filePath) returns @tainted Batch | SalesforceError {
+    public remote function insertFile(string filePath) returns @tainted Batch | SalesforceError {
         if (filepath:extension(filePath) == "json") {
             io:ReadableByteChannel|io:GenericError|io:ConnectionTimedOutError rbc = io:openReadableFile(filePath);
 
@@ -171,9 +171,31 @@ public type JsonInsertOperator client object {
     # Get the results of the batch.
     #
     # + batchId - batch ID
-    # + return - Batch result in JSON if successful else SalesforceError occured
-    public remote function getBatchResults(string batchId) returns @tainted json | SalesforceError {
-        return self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, batchId, 
-        <@untainted> RESULT]);
+    # + numberOfTries - number of times checking the batch state
+    # + waitTime - time between two tries in ms
+    # + return - Batch result as CSV if successful else SalesforceError occured
+    public remote function getBatchResults(string batchId, int numberOfTries = 1, int waitTime = 3000) 
+        returns @tainted json | SalesforceError {
+        int counter = 0;
+        while (counter < numberOfTries) {
+            Batch|SalesforceError batch = self->getBatchInfo(batchId);
+            
+            if (batch is Batch) {
+                if (batch.state == COMPLETED) {
+                    return self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, 
+                        batchId, <@untainted> RESULT]);
+                } else if (batch.state == FAILED) {
+                    return getFailedBatchError(batch);
+                } else {
+                    printWaitingMessage(batch);
+                }
+            } else {
+                return batch;
+            }
+
+            runtime:sleep(waitTime); // Sleep 3s.
+            counter = counter + 1;
+        }
+        return getResultTimeoutError(batchId, numberOfTries, waitTime);
     }
 };

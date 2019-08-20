@@ -168,19 +168,19 @@ sfdc46:SalesforceBulkClient sfBulkClient = salesforceClient->createSalesforceBul
 sfdc46:CsvInsertOperator|sfdc:46SalesforceError csvInsertOperator = sfBulkClient->createCsvInsertOperator("Contact");
 ```
 
-`upload` remote function creates a insert batch using string CSV content. `uploadFile` remote function creates a insert
-batch using a CSV file. File path of the CSv file should be passed as the parameter to the `uploadFile` function.
+`insert` remote function creates a insert batch using string CSV content. `insertFile` remote function creates a insert
+batch using a CSV file. File path of the CSv file should be passed as the parameter to the `insertFile` function.
 
 ```ballerina
 // Upload the csv contacts.
 string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c
 Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301
 Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
-sfdc46:Batch|sfdc46:SalesforceError batchUsingCsv = csvInsertOperator->upload(contacts);
+sfdc46:Batch|sfdc46:SalesforceError batchUsingCsv = csvInsertOperator->insert(contacts);
 
 // Upload csv contacts as a file.
 string csvContactsFilePath = "src/sfdc46/tests/resources/contacts.csv";
-sfdc46:Batch|sfdc46:SalesforceError batchUsingJsonFile = csvInsertOperator->uploadFile(csvContactsFilePath);
+sfdc46:Batch|sfdc46:SalesforceError batchUsingJsonFile = csvInsertOperator->insertFile(csvContactsFilePath);
 ```
 
 `closeJob` and `abortJob` remote functions close and abort CSV insert job respectively. When a job is closed, no more 

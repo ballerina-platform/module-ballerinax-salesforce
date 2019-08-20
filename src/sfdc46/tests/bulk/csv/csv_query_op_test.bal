@@ -29,7 +29,7 @@ function testCsvQueryOperator() {
         string batchId = EMPTY_STRING;
 
         // Create csv query batch.
-        Batch|SalesforceError batch = csvQueryOperator->addQuery(queryStr);
+        Batch|SalesforceError batch = csvQueryOperator->query(queryStr);
         if (batch is Batch) {
             test:assertTrue(batch.id.length() > 0, msg = "Creating query batch failed.");
             batchId = batch.id;
@@ -53,14 +53,6 @@ function testCsvQueryOperator() {
             test:assertFail(msg = closedJob.message);
         }
 
-        // Abort job.
-        Job|SalesforceError abortedJob = csvQueryOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
-        }
-
         // Get batch information.
         Batch|SalesforceError batchInfo = csvQueryOperator->getBatchInfo(batchId);
         if (batchInfo is Batch) {
@@ -78,7 +70,7 @@ function testCsvQueryOperator() {
         }
 
         // Get the result list.
-        ResultList|SalesforceError resultList = getCsvQueryResultList(csvQueryOperator, batchId, 5);
+        ResultList|SalesforceError resultList = csvQueryOperator->getResultList(batchId, noOfRetries);
 
         if (resultList is ResultList) {
             test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed.");
@@ -93,21 +85,15 @@ function testCsvQueryOperator() {
         } else {
             test:assertFail(msg = resultList.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = csvQueryOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = csvQueryOperator.message);
     }
-}
-
-function getCsvQueryResultList(@tainted CsvQueryOperator csvQueryOperator, string batchId, int numberOfTries) 
-    returns @tainted ResultList|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        ResultList|SalesforceError queryResultList = csvQueryOperator->getResultList(batchId);
-        if (queryResultList is ResultList) {
-            return queryResultList;
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return csvQueryOperator->getResultList(batchId);
 }

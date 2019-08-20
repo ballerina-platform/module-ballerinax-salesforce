@@ -32,7 +32,7 @@ public type CsvQueryOperator client object {
     #
     # + queryString - SOQL query want to perform
     # + return - Batch record if successful else SalesforceError occured
-    public remote function addQuery(string queryString) returns @tainted Batch | SalesforceError {
+    public remote function query(string queryString) returns @tainted Batch | SalesforceError {
         xml | SalesforceError xmlResponse = self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], queryString);
         if (xmlResponse is xml) {
             Batch | SalesforceError batch = getBatch(xmlResponse);
@@ -113,15 +113,39 @@ public type CsvQueryOperator client object {
     # Get result IDs as a list.
     #
     # + batchId - batch ID
+    # + numberOfTries - number of times checking the batch state
+    # + waitTime - time between two tries in ms
     # + return - ResultList record if successful else SalesforceError occured
-    public remote function getResultList(string batchId) returns @tainted ResultList | SalesforceError {
-        xml | SalesforceError response = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
-        if (response is xml) {
-            ResultList | SalesforceError resultList = getResultList(response);
-            return resultList;
-        } else {
-            return response;
+    public remote function getResultList(string batchId, int numberOfTries = 1, int waitTime = 3000) 
+        returns @tainted ResultList | SalesforceError {
+        int counter = 0;
+        while (counter < numberOfTries) {
+            Batch|SalesforceError batch = self->getBatchInfo(batchId);
+            
+            if (batch is Batch) {
+
+                if (batch.state == COMPLETED) {
+                    xml | SalesforceError response = 
+                        self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
+                    if (response is xml) {
+                        ResultList | SalesforceError resultList = getResultList(response);
+                        return resultList;
+                    } else {
+                        return response;
+                    }
+                } else if (batch.state == FAILED) {
+                    return getFailedBatchError(batch);
+                } else {
+                    printWaitingMessage(batch);
+                }
+            } else {
+                return batch;
+            }
+
+            runtime:sleep(waitTime); // Sleep 3s.
+            counter = counter + 1;
         }
+        return getResultTimeoutError(batchId, numberOfTries, waitTime);
     }
 
     # Get query results.
