@@ -23,7 +23,7 @@ import ballerina/time;
 import ballerina/system;
 import ballerina/runtime;
 
-Create Salesforce client configuration by reading from config file.
+// Create Salesforce client configuration by reading from config file.
 SalesforceConfiguration sfConfig = {
     baseUrl: config:getAsString("EP_URL"),
     clientConfig: {
@@ -50,6 +50,8 @@ Client salesforceClient = new(sfConfig);
 
 // Create salesforce bulk client.
 SalesforceBulkClient sfBulkClient = salesforceClient->createSalesforceBulkClient();
+// No of retries to get bulk results.
+int noOfRetries = 5;
 
 @test:Config {}
 function testGetAvailableApiVersions() {

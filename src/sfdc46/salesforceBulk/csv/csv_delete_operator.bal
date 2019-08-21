@@ -30,7 +30,7 @@ public type CsvDeleteOperator client object {
     #
     # + csvContent - delete data with IDs in CSV format
     # + return - Batch record if successful else SalesforceError occured
-    public remote function upload(string csvContent) returns @tainted Batch | SalesforceError {
+    public remote function delete(string csvContent) returns @tainted Batch | SalesforceError {
         xml | SalesforceError xmlResponse = self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], csvContent);
         if (xmlResponse is xml) {
             Batch | SalesforceError batch = getBatch(xmlResponse);
@@ -119,8 +119,30 @@ public type CsvDeleteOperator client object {
     # Get the results of the batch.
     #
     # + batchId - batch ID
-    # + return - Batch result in CSV if successful else SalesforceError occured
-    public remote function getBatchResults(string batchId) returns @tainted string | SalesforceError {
-        return self.httpBaseClient->getCsvRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
+    # + numberOfTries - number of times checking the batch state
+    # + waitTime - time between two tries in ms
+    # + return - Batch result as CSV if successful else SalesforceError occured
+    public remote function getBatchResults(string batchId, int numberOfTries = 1, int waitTime = 3000) 
+        returns @tainted string | SalesforceError {
+        int counter = 0;
+        while (counter < numberOfTries) {
+            Batch|SalesforceError batch = self->getBatchInfo(batchId);
+            
+            if (batch is Batch) {
+                if (batch.state == COMPLETED) {
+                    return self.httpBaseClient->getCsvRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
+                } else if (batch.state == FAILED) {
+                    return getFailedBatchError(batch);
+                } else {
+                    printWaitingMessage(batch);
+                }
+            } else {
+                return batch;
+            }
+
+            runtime:sleep(waitTime); // Sleep 3s.
+            counter = counter + 1;
+        }
+        return getResultTimeoutError(batchId, numberOfTries, waitTime);
     }
 };

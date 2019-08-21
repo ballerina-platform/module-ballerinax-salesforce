@@ -34,7 +34,7 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
         string batchIdUsingCsvFile = EMPTY_STRING;
 
         // Upload the csv contacts.
-        Batch|SalesforceError batchUsingCsv = csvInsertOperator->upload(contacts);
+        Batch|SalesforceError batchUsingCsv = csvInsertOperator->insert(contacts);
         if (batchUsingCsv is Batch) {
             test:assertTrue(batchUsingCsv.id.length() > 0, msg = "Could not upload the contacts using csv.");
             batchIdUsingCsv = batchUsingCsv.id;
@@ -43,7 +43,7 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
         }
 
         // Upload csv contacts as a file.
-        Batch|SalesforceError batchUsingJsonFile = csvInsertOperator->uploadFile(csvContactsFilePath);
+        Batch|SalesforceError batchUsingJsonFile = csvInsertOperator->insertFile(csvContactsFilePath);
         if (batchUsingJsonFile is Batch) {
             test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using csv file.");
             batchIdUsingCsvFile = batchUsingJsonFile.id;
@@ -65,14 +65,6 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message);
-        }
-
-        // Abort job.
-        Job|SalesforceError abortedJob = csvInsertOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
         }
 
         // Get batch information.
@@ -100,29 +92,22 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
         }
 
         // Get the results of the batch
-        string|SalesforceError batchResult = getCsvInsertBatchResults(csvInsertOperator, batchIdUsingCsv, 5);
+        string|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchIdUsingCsv, noOfRetries);
 
         if (batchResult is string) {
             test:assertTrue(checkCsvBatchResult(batchResult), "Insert result was not successful.");
         } else {
             test:assertFail(msg = batchResult.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = csvInsertOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = csvInsertOperator.message);
     }
-}
-
-function getCsvInsertBatchResults(@tainted CsvInsertOperator csvInsertOperator, string batchId, int numberOfTries) 
-    returns @tainted string|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        string|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchId);
-
-        if (batchResult is string) {
-            return batchResult;
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return csvInsertOperator->getBatchResults(batchId);
 }

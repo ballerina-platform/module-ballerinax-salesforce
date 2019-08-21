@@ -30,7 +30,7 @@ public type XmlInsertOperator client object {
     #
     # + payload - insertion data in XML format
     # + return - Batch record if successful else SalesforceError occured
-    public remote function upload(xml payload) returns @tainted Batch | SalesforceError {
+    public remote function insert(xml payload) returns @tainted Batch | SalesforceError {
         xml | SalesforceError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id, BATCH], payload);
 
         if (xmlResponse is xml) {
@@ -45,7 +45,7 @@ public type XmlInsertOperator client object {
     #
     # + filePath - insertion XML file path
     # + return - Batch record if successful else SalesforceError occured
-    public remote function uploadFile(string filePath) returns @tainted Batch | SalesforceError {
+    public remote function insertFile(string filePath) returns @tainted Batch | SalesforceError {
         if (filepath:extension(filePath) == "xml") {
             io:ReadableByteChannel|io:GenericError|io:ConnectionTimedOutError rbc = io:openReadableFile(filePath);
 
@@ -167,9 +167,30 @@ public type XmlInsertOperator client object {
     # Get the results of the batch.
     #
     # + batchId - batch ID
-    # + return - Batch result in XML if successful else SalesforceError occured
-    public remote function getBatchResults(string batchId) returns @tainted xml | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
-        return xmlResponse;
+    # + numberOfTries - number of times checking the batch state
+    # + waitTime - time between two tries in ms
+    # + return - Batch result as CSV if successful else SalesforceError occured
+    public remote function getBatchResults(string batchId, int numberOfTries = 1, int waitTime = 3000) 
+        returns @tainted xml | SalesforceError {
+        int counter = 0;
+        while (counter < numberOfTries) {
+            Batch|SalesforceError batch = self->getBatchInfo(batchId);
+            
+            if (batch is Batch) {
+                if (batch.state == COMPLETED) {
+                    return self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
+                } else if (batch.state == FAILED) {
+                    return getFailedBatchError(batch);
+                } else {
+                    printWaitingMessage(batch);
+                }
+            } else {
+                return batch;
+            }
+
+            runtime:sleep(waitTime); // Sleep 3s.
+            counter = counter + 1;
+        }
+        return getResultTimeoutError(batchId, numberOfTries, waitTime);
     }
 };

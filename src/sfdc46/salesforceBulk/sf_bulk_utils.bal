@@ -301,6 +301,9 @@ function createResponseHeaderMap(http:Response resp) returns @tainted map<anydat
     return headerMap;
 }
 
+# Close ReadableCharacterChannel.
+#
+# + ch - ReadableCharacterChannel
 function closeRc(io:ReadableCharacterChannel ch) {
     var cr = ch.close();
     if (cr is error) {
@@ -308,9 +311,40 @@ function closeRc(io:ReadableCharacterChannel ch) {
     }
 }
 
+# Close ReadableByteChannel.
+#
+# + ch - ReadableByteChannel
 function closeRb(io:ReadableByteChannel ch) {
     var cr = ch.close();
     if (cr is error) {
         log:printError("Error occured while closing the channel: ", err = cr);
     }
+}
+
+# Get SalesforceError for failed batch.
+#
+# + batch - Failed Batch
+# + return - Returns SalesforceError for failed batch.
+function getFailedBatchError(Batch batch) returns SalesforceError {
+    return getSalesforceError("Batch has failed, batch=" + batch.toString(), 
+        http:STATUS_INTERNAL_SERVER_ERROR.toString());
+}
+
+# Get SalesforceError for getting results timed out.
+#
+# + batchId - ID of the batch which getting results timed out
+# + numberOfTries - No of times tried
+# + waitTime - Wait time between 2 tries
+# + return - SalesforceError for getting results timed out
+function getResultTimeoutError(string batchId, int numberOfTries, int waitTime) returns SalesforceError {
+    int totalTime = numberOfTries * waitTime;
+    return getSalesforceError("Getting result timed out after " + totalTime.toString() + " (ms), batchId=" + batchId, 
+        http:STATUS_REQUEST_TIMEOUT.toString());
+}
+
+# Log waiting message while getting batch results.
+#
+# + batch - Batch which trying to get results.
+function printWaitingMessage(Batch batch) {
+    log:printInfo("Waiting to complete the batch, batch=" + batch.toString());
 }

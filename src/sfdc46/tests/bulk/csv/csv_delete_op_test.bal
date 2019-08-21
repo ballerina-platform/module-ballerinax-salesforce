@@ -29,7 +29,7 @@ function testCsvDeleteOperator() {
         string batchId = EMPTY_STRING;
 
         // Create csv delete batch.
-        Batch|SalesforceError batch = csvDeleteOperator->upload(<@untainted> deleteContacts);
+        Batch|SalesforceError batch = csvDeleteOperator->delete(<@untainted> deleteContacts);
         if (batch is Batch) {
             test:assertTrue(batch.id.length() > 0, msg = "Creating query batch failed.");
             batchId = batch.id;
@@ -51,14 +51,6 @@ function testCsvDeleteOperator() {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message);
-        }
-
-        // Abort job.
-        Job|SalesforceError abortedJob = csvDeleteOperator->abortJob();
-        if (abortedJob is Job) {
-            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
-        } else {
-            test:assertFail(msg = abortedJob.message);
         }
 
         // Get batch information.
@@ -86,28 +78,22 @@ function testCsvDeleteOperator() {
         }
 
         // Get batch results.
-        string|SalesforceError batchResults = getCsvDeleteBatchResults(csvDeleteOperator, batchId, 5);
+        string|SalesforceError batchResults = csvDeleteOperator->getBatchResults(batchId, noOfRetries);
         if (batchResults is string) {
             test:assertTrue(batchResults.length() > 0, msg = "Getting batch results failed.");
             test:assertTrue(checkCsvBatchResult(batchResults), "Delete result was not successful.");
         } else {
             test:assertFail(msg = batchResults.message);
         }
+
+        // Abort job.
+        Job|SalesforceError abortedJob = csvDeleteOperator->abortJob();
+        if (abortedJob is Job) {
+            test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
+        } else {
+            test:assertFail(msg = abortedJob.message);
+        }
     } else {
         test:assertFail(msg = csvDeleteOperator.message);
     }
-}
-
-function getCsvDeleteBatchResults(@tainted CsvDeleteOperator csvDeleteOperator, string batchId, int numberOfTries) 
-    returns @tainted string|SalesforceError {
-    int counter = 0;
-    while (counter < numberOfTries) {
-        string|SalesforceError batchResult = csvDeleteOperator->getBatchResults(batchId);
-        if (batchResult is string) {
-            return batchResult;
-        } 
-        runtime:sleep(3000); // Sleep 3s.
-        counter = counter + 1;
-    }
-    return csvDeleteOperator->getBatchResults(batchId);
 }
