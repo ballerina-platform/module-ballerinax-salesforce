@@ -127,20 +127,27 @@ public type JsonUpsertOperator client object {
     # + waitTime - time between two tries in ms
     # + return - Batch result as CSV if successful else SalesforceError occured
     public remote function getBatchResults(string batchId, int numberOfTries = 1, int waitTime = 3000) 
-        returns @tainted json | SalesforceError {
+        returns @tainted Result[]|SalesforceError {
         int counter = 0;
         while (counter < numberOfTries) {
             Batch|SalesforceError batch = self->getBatchInfo(batchId);
             
             if (batch is Batch) {
+                
                 if (batch.state == COMPLETED) {
-                    return self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, 
-                        batchId, <@untainted> RESULT]);
+                    json|SalesforceError result = 
+                        self.httpBaseClient->getJsonRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
+                    if (result is json) {
+                        return getBatchResults(result);
+                    } else {
+                        return result;
+                    }
                 } else if (batch.state == FAILED) {
                     return getFailedBatchError(batch);
                 } else {
                     printWaitingMessage(batch);
                 }
+
             } else {
                 return batch;
             }

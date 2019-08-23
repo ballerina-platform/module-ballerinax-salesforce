@@ -14,77 +14,10 @@
 // specific language governing permissions and limitations
 // under the License.
 
-function checkRequestResponse(json[] arr) returns boolean {
-    foreach json|error ele in arr {
-        json|error res = ele.success;
-        if (res is json) {
-            if (res.toString() == "false") {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
-    return true;
-}
-
-function checkCsvBatchResult(string result) returns boolean {
-    handle arr = split(java:fromString(result), java:fromString("\n"));
-    int arrLength = java:getArrayLength(arr);
-
-    int counter = 1;
-    while (counter < arrLength) {
-        string? line = java:toString(java:getArrayElement(arr, counter));
-
-        if (line is string) {
-            handle lineArr = split(java:fromString(line), java:fromString(","));
-            string? successStr = java:toString(java:getArrayElement(lineArr, 1));
-
-            if (successStr is string) {
-                // Remove quotes of the success string.
-                string? remSuccessStr = java:toString(
-                    replace(java:fromString(successStr), java:fromString("\""), java:fromString(""))
-                );
-
-                if (remSuccessStr is string) {
-                    if (!getBooleanValue(remSuccessStr)) {
-                        // Record is un-successful.
-                        log:printError("Failed result, line=" + line + " result=" + result, err = ());
-                        return false;
-                    } 
-                } else {
-                    log:printError("remSuccessStr is empty, remSuccessStr=" + remSuccessStr.toString() + " successStr=" 
-                    + successStr.toString() + " line=" + line.toString() + " result=" + result.toString(), err = ());
-                    return false;
-                }
-            } else {
-                log:printError("successStr is empty, successStr=" + successStr.toString() + " line=" + line.toString() 
-                    + " result=" + result.toString(), err = ());
-                return false;
-            }
-            
-        } else {
-            log:printError("Line is empty, line=" + line.toString() + " result=" + result.toString(), err = ());
-            return false;
-        }
-        counter = counter + 1;
-    }
-    return true;
-}
-
-function validateXmlBatchResult(xml batchRes) returns boolean {
-    foreach var result in batchRes.*.elements() {
-        if (result is xml) {
-            if (!getBooleanValue(result[getElementNameWithNamespace("success")].getTextValue())) {
-                // Record is un-successful.
-                log:printError("Failed result, success=" 
-                    + result[getElementNameWithNamespace("success")].getTextValue().toString() + " result=" 
-                    + result.toString(), err = ());
-                return false;
-            }           
-        } else {
-            log:printError("result is not xml, result=" + result.toString() + " batchRes=" + batchRes.toString(),
-                err = ());
+function checkBatchResults(Result[] results) returns boolean {
+    foreach Result res in results {
+        if (!res.success) {
+            log:printError("Failed result, res=" + res.toString(), err = ());
             return false;
         }
     }

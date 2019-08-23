@@ -102,16 +102,11 @@ function testJsonUpsertOperator() {
         }
 
         // Get the results of the batch
-        json|SalesforceError batchResult = jsonUpsertOperator->getBatchResults(batchIdUsingJson, noOfRetries);
+        Result[]|SalesforceError batchResult = jsonUpsertOperator->getBatchResults(batchIdUsingJson, noOfRetries);
 
-        if (batchResult is json) {
-            json[]|error batchResultArr = <json[]> batchResult;
-            if (batchResultArr is json[]) {
-                test:assertTrue(batchResultArr.length() == 2, msg = "Retrieving batch result failed.");
-                test:assertTrue(checkRequestResponse(batchResultArr), msg = "Upsert result was not successful.");
-            } else {
-                test:assertFail(msg = batchResultArr.toString());
-            }
+        if (batchResult is Result[]) {
+            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
+            test:assertTrue(checkBatchResults(batchResult), msg = "Upsert result was not successful.");
         } else {
             test:assertFail(msg = batchResult.message);
         }

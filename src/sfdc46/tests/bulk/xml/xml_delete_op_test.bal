@@ -88,10 +88,10 @@ function testXmlDeleteOperator() {
         }
 
         // Get batch results.
-        xml|SalesforceError batchResults = xmlDeleteOperator->getBatchResults(batchId, noOfRetries);
+        Result[]|SalesforceError batchResults = xmlDeleteOperator->getBatchResults(batchId, noOfRetries);
 
-        if (batchResults is xml) {
-            test:assertTrue(validateXmlBatchResult(batchResults), msg = "Invalid batch result.");  
+        if (batchResults is Result[]) {
+            test:assertTrue(checkBatchResults(batchResults), msg = "Invalid batch result.");  
         } else {
             test:assertFail(msg = batchResults.message);
         }

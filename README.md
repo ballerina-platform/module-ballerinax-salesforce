@@ -222,7 +222,7 @@ string|sfdc46:SalesforceError batchRequest = csvInsertOperator->getBatchRequest(
 // Get batch result as csv.
 int noOfRetries = 5; // Number of times trying to get the results.
 int waitTime = 3000; // Time between two tries in mili-seconds.
-string|sfdc46:SalesforceError batchResult = 
+sfdc46:Result[]|sfdc46:SalesforceError batchResult = 
     csvInsertOperator->getBatchResults(batchId, noOfRetries, waitTime);
 ```
 
