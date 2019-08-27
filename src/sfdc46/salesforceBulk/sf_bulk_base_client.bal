@@ -16,6 +16,9 @@
 // under the License.
 //
 
+import ballerina/http;
+import ballerina/oauth2;
+
 # Base client for get and post operations.
 public type SalesforceBaseClient client object {
     http:Client httpClient;

@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerina/auth;
-import ballerina/log;
-import ballerina/internal;
 import ballerina/http;
 
 # Representation of the Bearer Auth header handler for both inbound and outbound HTTP traffic.

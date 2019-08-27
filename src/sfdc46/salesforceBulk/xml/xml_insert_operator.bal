@@ -16,6 +16,12 @@
 // under the License.
 //
 
+import ballerina/filepath;
+import ballerina/io;
+import ballerina/log;
+import ballerina/http;
+import ballerina/runtime;
+
 # XML insert operator client.
 public type XmlInsertOperator client object {
     Job job;

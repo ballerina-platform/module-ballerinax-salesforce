@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # XML upsert operator client.
 public type XmlUpsertOperator client object {
     Job job;

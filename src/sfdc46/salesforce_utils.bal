@@ -17,7 +17,6 @@
 //
 
 import ballerina/log;
-import ballerina/mime;
 import ballerina/http;
 
 # Returns the prepared URL.

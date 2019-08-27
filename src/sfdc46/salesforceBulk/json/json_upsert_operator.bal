@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # JSON upsert operator client.
 public type JsonUpsertOperator client object {
     Job job;

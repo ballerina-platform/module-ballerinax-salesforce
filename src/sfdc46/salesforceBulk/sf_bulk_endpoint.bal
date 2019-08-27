@@ -16,10 +16,6 @@
 // under the License.
 //
 
-import ballerina/http;
-import ballerina/io;
-import ballerina/mime;
-
 # Salesforce bulk API client.
 public type SalesforceBulkClient client object {
     SalesforceBaseClient httpBaseClient;

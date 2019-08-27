@@ -17,6 +17,10 @@
 //
 
 import ballerina/filepath;
+import ballerina/io;
+import ballerina/log;
+import ballerina/http;
+import ballerina/runtime;
 
 # JSON insert operator client.
 public type JsonInsertOperator client object {

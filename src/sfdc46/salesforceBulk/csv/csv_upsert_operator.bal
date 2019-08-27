@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # CSV upsert operator client.
 public type CsvUpsertOperator client object {
     Job job;

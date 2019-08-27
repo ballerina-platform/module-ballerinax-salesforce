@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # XML update operator client.
 public type XmlUpdateOperator client object {
     Job job;

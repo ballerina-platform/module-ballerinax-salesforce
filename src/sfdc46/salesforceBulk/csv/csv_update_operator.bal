@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # CSV update operator client.
 public type CsvUpdateOperator client object {
     Job job;
