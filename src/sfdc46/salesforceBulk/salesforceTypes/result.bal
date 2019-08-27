@@ -16,6 +16,10 @@
 // under the License.
 //
 
+import ballerina/log;
+import ballerina/http;
+import ballerinax/java;
+
 public type Result record {
     string id?;
     boolean success;

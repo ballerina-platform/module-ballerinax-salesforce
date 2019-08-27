@@ -14,6 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/log;
+import ballerina/test;
+
 function checkBatchResults(Result[] results) returns boolean {
     foreach Result res in results {
         if (!res.success) {

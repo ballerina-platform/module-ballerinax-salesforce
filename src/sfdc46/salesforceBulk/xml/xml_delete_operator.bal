@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # XML delete operator client.
 public type XmlDeleteOperator client object {
     Job job;

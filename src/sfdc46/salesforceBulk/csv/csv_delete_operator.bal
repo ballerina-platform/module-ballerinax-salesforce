@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # CSV delete operator client.
 public type CsvDeleteOperator client object {
     Job job;

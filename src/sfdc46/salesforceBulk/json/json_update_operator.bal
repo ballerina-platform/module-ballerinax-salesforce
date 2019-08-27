@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # JSON update operator client.
 public type JsonUpdateOperator client object {
     Job job;

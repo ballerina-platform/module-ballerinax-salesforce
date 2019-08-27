@@ -16,7 +16,7 @@
 // under the License.
 //
 
-import ballerina/http;
+import ballerina/runtime;
 
 # CSV query operator client.
 public type CsvQueryOperator client object {

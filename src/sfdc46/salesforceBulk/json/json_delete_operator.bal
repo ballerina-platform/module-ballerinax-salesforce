@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # JSON delete operator client.
 public type JsonDeleteOperator client object {
     Job job;

@@ -17,7 +17,6 @@
 //
 
 import ballerina/log;
-import ballerina/mime;
 import ballerina/http;
 import ballerina/io;
 import ballerina/'lang\.int as ints;

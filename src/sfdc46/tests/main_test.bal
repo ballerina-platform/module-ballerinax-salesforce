@@ -14,14 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/config;
 import ballerina/io;
 import ballerina/test;
 import ballerina/log;
-import ballerina/http;
 import ballerina/time;
 import ballerina/system;
-import ballerina/runtime;
+import ballerina/config;
 
 // Create Salesforce client configuration by reading from config file.
 SalesforceConfiguration sfConfig = {

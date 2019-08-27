@@ -16,6 +16,8 @@
 // under the License.
 //
 
+import ballerina/runtime;
+
 # JSON query operator client.
 public type JsonQueryOperator client object {
     Job job;
