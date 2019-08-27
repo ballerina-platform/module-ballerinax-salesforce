@@ -123,19 +123,27 @@ public type XmlUpdateOperator client object {
     # + waitTime - time between two tries in ms
     # + return - Batch result as CSV if successful else SalesforceError occured
     public remote function getBatchResults(string batchId, int numberOfTries = 1, int waitTime = 3000) 
-        returns @tainted xml | SalesforceError {
+        returns @tainted Result[]|SalesforceError {
         int counter = 0;
         while (counter < numberOfTries) {
             Batch|SalesforceError batch = self->getBatchInfo(batchId);
             
             if (batch is Batch) {
+                
                 if (batch.state == COMPLETED) {
-                    return self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
+                    xml|SalesforceError result = 
+                        self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
+                    if (result is xml) {
+                        return getBatchResults(result);
+                    } else {
+                        return result;
+                    }
                 } else if (batch.state == FAILED) {
                     return getFailedBatchError(batch);
                 } else {
                     printWaitingMessage(batch);
                 }
+
             } else {
                 return batch;
             }

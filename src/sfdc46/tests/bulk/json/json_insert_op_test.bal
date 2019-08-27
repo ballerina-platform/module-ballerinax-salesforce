@@ -114,15 +114,11 @@ function testJsonInsertOperator() {
         }
 
         // Get the results of the batch
-        json|SalesforceError batchResult = jsonInsertOperator->getBatchResults(batchIdUsingJson, noOfRetries);
+        Result[]|SalesforceError batchResult = jsonInsertOperator->getBatchResults(batchIdUsingJson, noOfRetries);
 
-        if (batchResult is json) {
-            json[]|error batchResultArr = <json[]> batchResult;
-            if (batchResultArr is json[]) {
-                test:assertTrue(batchResultArr.length() == 2, msg = "Retrieving batch result failed.");                
-            } else {
-                test:assertFail(msg = batchResultArr.toString());
-            }
+        if (batchResult is Result[]) {
+            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
+            test:assertTrue(checkBatchResults(batchResult), msg = "Insert result was not successful.");                
         } else {
             test:assertFail(msg = batchResult.message);
         }

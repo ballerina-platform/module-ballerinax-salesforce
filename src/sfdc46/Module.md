@@ -216,7 +216,7 @@ function get results of a batch that has completed processing.
 // Retrieve the csv batch request.
 string|SalesforceError batchRequest = csvInsertOperator->getBatchRequest(batchId;
 // Get batch result as csv.
-string|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchId);
+Result[]|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchId);
 ```
 
 Likewise Salesforce bulk client provides following operations:
