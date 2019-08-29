@@ -16,8 +16,6 @@
 // under the License.
 //
 
-import ballerina/runtime;
-
 # CSV upsert operator client.
 public type CsvUpsertOperator client object {
     Job job;
@@ -123,36 +121,9 @@ public type CsvUpsertOperator client object {
     # + batchId - batch ID
     # + numberOfTries - number of times checking the batch state
     # + waitTime - time between two tries in ms
-    # + return - Batch result as CSV if successful else SalesforceError occured
-    public remote function getBatchResults(string batchId, int numberOfTries = 1, int waitTime = 3000) 
+    # + return - Results array if successful else SalesforceError occured
+    public remote function getResult(string batchId, int numberOfTries = 1, int waitTime = 3000) 
         returns @tainted Result[]|SalesforceError {
-        int counter = 0;
-        while (counter < numberOfTries) {
-            Batch|SalesforceError batch = self->getBatchInfo(batchId);
-            
-            if (batch is Batch) {
-
-                if (batch.state == COMPLETED) {
-                    string|SalesforceError result = 
-                        self.httpBaseClient->getCsvRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
-                    if (result is string) {
-                        return getBatchResults(result);
-                    } else {
-                        return result;
-                    }
-                } else if (batch.state == FAILED) {
-                    return getFailedBatchError(batch);
-                } else {
-                    printWaitingMessage(batch);
-                }
-                
-            } else {
-                return batch;
-            }
-
-            runtime:sleep(waitTime); // Sleep 3s.
-            counter = counter + 1;
-        }
-        return getResultTimeoutError(batchId, numberOfTries, waitTime);
+        return checkBatchStateAndGetResults(getBatchPointer, getResultsPointer, self, batchId, numberOfTries, waitTime);
     }
 };

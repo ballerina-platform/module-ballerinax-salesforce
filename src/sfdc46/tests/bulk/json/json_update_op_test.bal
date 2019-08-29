@@ -110,7 +110,7 @@ function testJsonUpdateOperator() {
         }
 
         // Get the results of the batch
-        Result[]|SalesforceError batchResult = jsonUpdateOperator->getBatchResults(batchIdUsingJson, noOfRetries);
+        Result[]|SalesforceError batchResult = jsonUpdateOperator->getResult(batchIdUsingJson, noOfRetries);
 
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");

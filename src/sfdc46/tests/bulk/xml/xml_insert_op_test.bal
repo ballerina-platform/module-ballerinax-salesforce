@@ -121,7 +121,7 @@ function testXmlInsertOperator() {
         }
 
         // Get the results of the batch
-        Result[]|SalesforceError batchResult = xmlInsertOperator->getBatchResults(batchIdUsingXml, noOfRetries);
+        Result[]|SalesforceError batchResult = xmlInsertOperator->getResult(batchIdUsingXml, noOfRetries);
 
         if (batchResult is Result[]) {
             test:assertTrue(checkBatchResults(batchResult), msg = "Invalid batch result.");                

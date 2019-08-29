@@ -95,7 +95,7 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
         }
 
         // Get the results of the batch
-        Result[]|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchIdUsingCsv, noOfRetries);
+        Result[]|SalesforceError batchResult = csvInsertOperator->getResult(batchIdUsingCsv, noOfRetries);
 
         if (batchResult is Result[]) {
             test:assertTrue(checkBatchResults(batchResult), "Insert result was not successful.");

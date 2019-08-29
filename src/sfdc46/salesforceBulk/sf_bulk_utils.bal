@@ -19,6 +19,7 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/io;
+import ballerina/runtime;
 import ballerina/'lang\.int as ints;
 import ballerina/'lang\.float as floats;
 
@@ -346,4 +347,146 @@ function getResultTimeoutError(string batchId, int numberOfTries, int waitTime) 
 # + batch - Batch which trying to get results.
 function printWaitingMessage(Batch batch) {
     log:printInfo("Waiting to complete the batch, batch=" + batch.toString());
+}
+
+# Check batch state and get results for the given no of tries and waiting time.
+# 
+# + getBatchPointer - pointer function to get batch info
+# + getResultsPointer - pointer function to get batch results
+# + op - bulk operator object
+# + batchId - batch ID
+# + numberOfTries - number of times checking the batch state
+# + waitTime - time between two tries in ms
+# + return - Results array if successful else SalesforceError occured
+function checkBatchStateAndGetResults(function(BulkOperator, string) returns (Batch|SalesforceError) getBatchPointer,
+    function(BulkOperator, string) returns (Result[]|SalesforceError) getResultsPointer,
+    @tainted BulkOperator op, string batchId, int numberOfTries, int waitTime) 
+    returns @tainted Result[]|SalesforceError {
+    
+    int counter = 0;
+    while (counter < numberOfTries) {
+        Batch|SalesforceError batch = getBatchPointer(op, batchId);
+        
+        if (batch is Batch) {
+
+            if (batch.state == COMPLETED) {
+                return getResultsPointer(op, batchId);
+            } else if (batch.state == FAILED) {
+                return getFailedBatchError(batch);
+            } else {
+                printWaitingMessage(batch);
+            }
+
+        } else {
+            return batch;
+        }
+        runtime:sleep(waitTime);
+        counter = counter + 1;
+    }
+    return getResultTimeoutError(batchId, numberOfTries, waitTime);
+}
+
+# Check batch state and get resultList for the given no of tries and waiting time.
+# 
+# + getBatchPointer - pointer function to get batch info
+# + getResultListPointer - pointer function to get resultList
+# + op - bulk operator object
+# + batchId - batch ID
+# + numberOfTries - number of times checking the batch state
+# + waitTime - time between two tries in ms
+# + return - ResultList record if successful else SalesforceError occured
+function checkBatchStateAndGetResultList(function(BulkOperator, string) returns (Batch|SalesforceError) getBatchPointer,
+    function(BulkOperator, string) returns (ResultList|SalesforceError) getResultListPointer,
+    @tainted BulkOperator op, string batchId, int numberOfTries, int waitTime) 
+    returns @tainted ResultList|SalesforceError {
+    
+    int counter = 0;
+    while (counter < numberOfTries) {
+        Batch|SalesforceError batch = getBatchPointer(op, batchId);
+        
+        if (batch is Batch) {
+
+            if (batch.state == COMPLETED) {
+                return getResultListPointer(op, batchId);
+            } else if (batch.state == FAILED) {
+                return getFailedBatchError(batch);
+            } else {
+                printWaitingMessage(batch);
+            }
+
+        } else {
+            return batch;
+        }
+        runtime:sleep(waitTime);
+        counter = counter + 1;
+    }
+    return getResultTimeoutError(batchId, numberOfTries, waitTime);
+}
+
+# Get batch info
+# 
+# + op - bulk operator client object
+# + batchId - batchId
+# + return - Batch record if successful else SalesforceError occured
+function getBatchPointer(@tainted BulkOperator op, string batchId) returns @tainted Batch|SalesforceError {
+    return op->getBatchInfo(batchId);
+}
+
+# Get batch results
+# 
+# + op - bulk operator client object
+# + batchId - batchId
+# + return - Array of Result records if successful else SalesforceError occured
+function getResultsPointer(@tainted BulkOperator op, string batchId) returns @tainted Result[]|SalesforceError {
+    SalesforceBaseClient httpBaseClient = op.httpBaseClient;
+    string[] paths = [JOB, op.job.id, BATCH, batchId, RESULT];
+
+    if (op is CsvInsertOperator|CsvUpsertOperator|CsvUpdateOperator|CsvDeleteOperator) {
+        string|SalesforceError result = httpBaseClient->getCsvRecord(paths);
+        if (result is string) {
+            return getBatchResults(result);
+        } else {
+            return result;
+        }
+    } else if (op is JsonInsertOperator|JsonUpsertOperator|JsonUpdateOperator|JsonDeleteOperator) {
+        json|SalesforceError result = httpBaseClient->getJsonRecord(paths);
+        if (result is json) {
+            return getBatchResults(result);
+        } else {
+            return result;
+        }
+    } else {
+        xml|SalesforceError result = httpBaseClient->getXmlRecord(paths);
+        if (result is xml) {
+            return getBatchResults(result);
+        } else {
+            return result;
+        }
+    }
+}
+
+# Get resultList
+# 
+# + op - bulk operator client object
+# + batchId - batchId
+# + return - ResultList record if successful else SalesforceError occured
+function getResultListPointer(@tainted BulkOperator op, string batchId) returns @tainted ResultList|SalesforceError {
+    SalesforceBaseClient httpBaseClient = op.httpBaseClient;
+    string[] paths = [JOB, op.job.id, BATCH, batchId, RESULT];
+
+    if (op is CsvQueryOperator|XmlQueryOperator) {
+        xml|SalesforceError response = httpBaseClient->getXmlRecord(paths);
+        if (response is xml) {
+            return getResultList(response);
+        } else {
+            return response;
+        }
+    } else {
+        json|SalesforceError response = httpBaseClient->getJsonRecord(paths);
+        if (response is json) {
+            return getResultList(response);
+        } else {
+            return response;
+        }
+    }
 }

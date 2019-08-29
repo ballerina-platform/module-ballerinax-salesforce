@@ -49,7 +49,7 @@ Client salesforceClient = new(sfConfig);
 // Create salesforce bulk client.
 SalesforceBulkClient sfBulkClient = salesforceClient->createSalesforceBulkClient();
 // No of retries to get bulk results.
-int noOfRetries = 5;
+int noOfRetries = 25;
 
 @test:Config {}
 function testGetAvailableApiVersions() {
@@ -130,7 +130,7 @@ function testCreateRecord() {
 function testGetRecord() {
     json|SalesforceConnectorError response;
     log:printInfo("salesforceClient -> getRecord()");
-    string path = "/services/data/v37.0/sobjects/Account/" + testRecordId;
+    string path = "/services/data/v46.0/sobjects/Account/" + testRecordId;
     response = salesforceClient->getRecord(path);
 
     if (response is json) {

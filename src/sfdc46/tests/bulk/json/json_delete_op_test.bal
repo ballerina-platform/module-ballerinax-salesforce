@@ -82,7 +82,7 @@ function testJsonDeleteOperator() {
         }
 
         // Get batch results.
-        Result[]|SalesforceError batchResults = jsonDeleteOperator->getBatchResults(batchId, noOfRetries);
+        Result[]|SalesforceError batchResults = jsonDeleteOperator->getResult(batchId, noOfRetries);
 
         if (batchResults is Result[]) {
             test:assertTrue(batchResults.length() > 0, msg = "Getting batch results failed.");

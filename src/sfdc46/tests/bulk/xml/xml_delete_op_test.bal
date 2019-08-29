@@ -91,7 +91,7 @@ function testXmlDeleteOperator() {
         }
 
         // Get batch results.
-        Result[]|SalesforceError batchResults = xmlDeleteOperator->getBatchResults(batchId, noOfRetries);
+        Result[]|SalesforceError batchResults = xmlDeleteOperator->getResult(batchId, noOfRetries);
 
         if (batchResults is Result[]) {
             test:assertTrue(checkBatchResults(batchResults), msg = "Invalid batch result.");  

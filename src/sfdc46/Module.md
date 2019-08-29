@@ -103,7 +103,7 @@ The `createAccount` remote function creates an Account SObject. Pass a JSON obje
 the SObject Account.
 
 ```ballerina
-json account = {Name:"ABC Inc", BillingCity:"New York"};
+json account = { Name: "ABC Inc", BillingCity: "New York" };
 var createReponse = salesforceClient->createAccount(account);
 ```
 
@@ -165,7 +165,8 @@ creates Insert operator for CSV content type.
 sfdc46:SalesforceBulkClient sfBulkClient = salesforceClient->createSalesforceBulkClient();
 
 // Create CSV insert operator for object type `Contact`.
-sfdc46:CsvInsertOperator|sfdc:46SalesforceError csvInsertOperator = sfBulkClient->createCsvInsertOperator("Contact");
+sfdc46:CsvInsertOperator|sfdc46:SalesforceError csvInsertOperator = 
+    sfBulkClient->createCsvInsertOperator("Contact");
 ```
 
 `insert` remote function creates a insert batch using string CSV content. `insertFile` remote function creates a insert
@@ -179,8 +180,9 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
 sfdc46:Batch|sfdc46:SalesforceError batchUsingCsv = csvInsertOperator->insert(contacts);
 
 // Upload csv contacts as a file.
-string csvContactsFilePath = "src/sfdc46/tests/resources/contacts.csv";
-sfdc46:Batch|sfdc46:SalesforceError batchUsingJsonFile = csvInsertOperator->insertFile(csvContactsFilePath);
+string csvContactsFilePath = "path/to/the/file/contacts.csv";
+sfdc46:Batch|sfdc46:SalesforceError batchUsingJsonFile = 
+    csvInsertOperator->insertFile(csvContactsFilePath);
 ```
 
 `closeJob` and `abortJob` remote functions close and abort CSV insert job respectively. When a job is closed, no more 
@@ -189,10 +191,10 @@ committed, they aren’t rolled back.
 
 ```ballerina
 // Close job.
-Job|SalesforceError closedJob = csvInsertOperator->closeJob();
+sfdc46:Job|sfdc46:SalesforceError closedJob = csvInsertOperator->closeJob();
 
 // Abort job.
-Job|SalesforceError abortedJob = csvInsertOperator->abortJob();
+sfdc46:Job|sfdc46:SalesforceError abortedJob = csvInsertOperator->abortJob();
 ```
 
 `getJobInfo` remote function get all details for an existing job. `getBatchInfo` remote function get information about 
@@ -200,23 +202,25 @@ an existing batch. `getAllBatches` remote function get information about all bat
 
 ```ballerina
 // Get job information.
-Job|SalesforceError job = csvInsertOperator->getJobInfo();
+sfdc46:Job|sfdc46:SalesforceError job = csvInsertOperator->getJobInfo();
 
 // Get batch information.
-Batch|SalesforceError batchInfo = csvInsertOperator->getBatchInfo(batchId);
+sfdc46:Batch|sfdc46:SalesforceError batchInfo = csvInsertOperator->getBatchInfo(batchId);
 
 // Get informations of all batches of this csv insert job.
-BatchInfo|SalesforceError allBatchInfo = csvInsertOperator->getAllBatches();
+sfdc46:BatchInfo|sfdc46:SalesforceError allBatchInfo = csvInsertOperator->getAllBatches();
 ```
 
-`getBatchRequest` remote function gets the batch request uploaded to the csv insert job. `getBatchResults` remote 
+`getBatchRequest` remote function gets the batch request uploaded to the csv insert job. `getResult` remote 
 function get results of a batch that has completed processing.
 
 ```ballerina
 // Retrieve the csv batch request.
-string|SalesforceError batchRequest = csvInsertOperator->getBatchRequest(batchId;
+string|sfdc46:SalesforceError batchRequest = csvInsertOperator->getBatchRequest(batchId);
 // Get batch result as csv.
-Result[]|SalesforceError batchResult = csvInsertOperator->getBatchResults(batchId);
+int noOfRetries = 5; // Number of times trying to get the results.
+int waitTime = 3000; // Time between two tries in mili-seconds.
+sfdc46:Result[]|sfdc46:SalesforceError batchResult = csvInsertOperator->getResult(batchId, noOfRetries, waitTime);
 ```
 
 Likewise Salesforce bulk client provides following operations:

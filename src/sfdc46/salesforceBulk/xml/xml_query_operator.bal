@@ -16,12 +16,9 @@
 // under the License.
 //
 
-import ballerina/runtime;
-
 # XML query operator client.
 public type XmlQueryOperator client object {
-    Job job;
-    SalesforceBaseClient httpBaseClient;
+    *BulkOperator;
 
     public function __init(Job job, SalesforceConfiguration salesforceConfig) {
         self.job = job;
@@ -118,34 +115,7 @@ public type XmlQueryOperator client object {
     # + return - ResultList record if successful else SalesforceError occured
     public remote function getResultList(string batchId, int numberOfTries = 1, int waitTime = 3000) 
         returns @tainted ResultList | SalesforceError {
-        int counter = 0;
-        while (counter < numberOfTries) {
-            Batch|SalesforceError batch = self->getBatchInfo(batchId);
-            
-            if (batch is Batch) {
-
-                if (batch.state == COMPLETED) {
-                    xml | SalesforceError response = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, 
-                        batchId, RESULT]);
-                    if (response is xml) {
-                        ResultList | SalesforceError resultList = getResultList(response);
-                        return resultList;
-                    } else {
-                        return response;
-                    }
-                } else if (batch.state == FAILED) {
-                    return getFailedBatchError(batch);
-                } else {
-                    printWaitingMessage(batch);
-                }
-            } else {
-                return batch;
-            }
-
-            runtime:sleep(waitTime); // Sleep 3s.
-            counter = counter + 1;
-        }
-        return getResultTimeoutError(batchId, numberOfTries, waitTime);
+        return checkBatchStateAndGetResultList(getBatchPointer, getResultListPointer, self, batchId, numberOfTries, waitTime);        
     }
 
     # Get query results.

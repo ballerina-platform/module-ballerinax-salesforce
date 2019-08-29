@@ -86,7 +86,7 @@ function testCsvUpdateOperator() {
         }
 
         // Get the results of the batch
-        Result[]|SalesforceError batchResult = csvUpdateOperator->getBatchResults(batchId, noOfRetries);
+        Result[]|SalesforceError batchResult = csvUpdateOperator->getResult(batchId, noOfRetries);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Getting batch results failed.");
             test:assertTrue(checkBatchResults(batchResult), "Insert result was not successful.");

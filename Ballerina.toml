@@ -1,6 +1,6 @@
 [project]
-org-name= "pramodya"
+org-name= "wso2"
 version= "0.1.0"
-authors = ["Pramodya"]
+authors = ["WSO2"]
 keywords = ["ballerina", "salesforce", "sfdc", "client", "connector"]
 repository = "https://github.com/wso2-ballerina/module-salesforce"

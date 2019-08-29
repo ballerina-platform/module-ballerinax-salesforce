@@ -81,7 +81,7 @@ function testCsvDeleteOperator() {
         }
 
         // Get batch results.
-        Result[]|SalesforceError batchResults = csvDeleteOperator->getBatchResults(batchId, noOfRetries);
+        Result[]|SalesforceError batchResults = csvDeleteOperator->getResult(batchId, noOfRetries);
         if (batchResults is Result[]) {
             test:assertTrue(batchResults.length() > 0, msg = "Getting batch results failed.");
             test:assertTrue(checkBatchResults(batchResults), "Delete result was not successful.");
