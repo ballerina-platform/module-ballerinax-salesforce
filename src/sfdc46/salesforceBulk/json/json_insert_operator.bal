@@ -20,7 +20,6 @@ import ballerina/filepath;
 import ballerina/io;
 import ballerina/log;
 import ballerina/http;
-import ballerina/runtime;
 
 # JSON insert operator client.
 public type JsonInsertOperator client object {
@@ -178,35 +177,8 @@ public type JsonInsertOperator client object {
     # + numberOfTries - number of times checking the batch state
     # + waitTime - time between two tries in ms
     # + return - Batch result as CSV if successful else SalesforceError occured
-    public remote function getBatchResults(string batchId, int numberOfTries = 1, int waitTime = 3000) 
+    public remote function getResult(string batchId, int numberOfTries = 1, int waitTime = 3000) 
         returns @tainted Result[]|SalesforceError {
-        int counter = 0;
-        while (counter < numberOfTries) {
-            Batch|SalesforceError batch = self->getBatchInfo(batchId);
-            
-            if (batch is Batch) {
-                
-                if (batch.state == COMPLETED) {
-                    json|SalesforceError result = 
-                        self.httpBaseClient->getJsonRecord([JOB, self.job.id, BATCH, batchId, RESULT]);
-                    if (result is json) {
-                        return getBatchResults(result);
-                    } else {
-                        return result;
-                    }
-                } else if (batch.state == FAILED) {
-                    return getFailedBatchError(batch);
-                } else {
-                    printWaitingMessage(batch);
-                }
-
-            } else {
-                return batch;
-            }
-
-            runtime:sleep(waitTime); // Sleep 3s.
-            counter = counter + 1;
-        }
-        return getResultTimeoutError(batchId, numberOfTries, waitTime);
+        return checkBatchStateAndGetResults(getBatchPointer, getResultsPointer, self, batchId, numberOfTries, waitTime);
     }
 };

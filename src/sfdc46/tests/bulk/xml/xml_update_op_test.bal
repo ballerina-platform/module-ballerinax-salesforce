@@ -114,7 +114,7 @@ function testXmlUpdateOperator() {
         }
 
         // Get the results of the batch
-        Result[]|SalesforceError batchResult = xmlUpdateOperator->getBatchResults(batchIdUsingXml, noOfRetries);
+        Result[]|SalesforceError batchResult = xmlUpdateOperator->getResult(batchIdUsingXml, noOfRetries);
 
         if (batchResult is Result[]) {
             test:assertTrue(checkBatchResults(batchResult), msg = "Invalid batch result.");                
