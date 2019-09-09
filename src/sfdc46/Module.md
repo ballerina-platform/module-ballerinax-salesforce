@@ -113,7 +113,7 @@ the SObject Account.
 
 ```ballerina
 json account = { Name: "ABC Inc", BillingCity: "New York" };
-var createReponse = salesforceClient->createAccount(account);
+string|sfdc46:ConnectorError createReponse = salesforceClient->createAccount(account);
 ```
 
 The response from `createAccount` is either the string ID of the created account (if the account was created 
@@ -123,7 +123,7 @@ successfully) or `ConnectorError` (if the account creation was unsuccessful).
 if (createReponse is string) {
     io:println("Account id: " + createReponse);
 } else {
-    io:println(createReponse.message);
+    io:println(createReponse.detail()?.message.toString());
 }
 ```
 
@@ -133,7 +133,7 @@ remaining results.
 
 ```ballerina
 string sampleQuery = "SELECT name FROM Account";
-var response = salesforceClient->getQueryResult(sampleQuery);
+json|sfdc46:ConnectorError response = salesforceClient->getQueryResult(sampleQuery);
 ```
 
 The response from `getQueryResult` is either a JSON object with total size, execution status, resulting records, and 
@@ -147,7 +147,7 @@ if (response is json) {
     io:println("Records: ", response["records"]);
     io:println("Next response url: ", response["nextRecordsUrl"]);
 } else {
-    io:println("Error: ", response.message);
+    io:println("Error: ", response.detail()?.message.toString());
 }
 ```
 The `createLead` remote function creates a Lead SObject. It returns the lead ID if successful or 
@@ -155,11 +155,12 @@ The `createLead` remote function creates a Lead SObject. It returns the lead ID 
 
 ```ballerina
 json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
-var createResponse = salesforceClient->createLead(lead);
+string|sfdc46:ConnectorError createResponse = salesforceClient->createLead(lead);
+
 if (createResponse is string) {
     io:println("Lead id: " + createResponse);
 } else {
-    io:println("Error: ", createResponse.message);
+    io:println("Error: ", createResponse.detail()?.message.toString());
 }
 ```
 
