@@ -31,7 +31,7 @@ function getDeleteContacts() returns @tainted json {
     json[] deleteContacts = [];
 
     // Create JSON query operator.
-    JsonQueryOperator|SalesforceError jsonQueryOperator = sfBulkClient->createJsonQueryOperator("Contact");
+    JsonQueryOperator|ConnectorError jsonQueryOperator = sfBulkClient->createJsonQueryOperator("Contact");
     // Query string
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 03'";
 
@@ -39,25 +39,25 @@ function getDeleteContacts() returns @tainted json {
         string batchId = EMPTY_STRING;
 
         // Create json query batch.
-        Batch|SalesforceError batch = jsonQueryOperator->query(queryStr);
-        if (batch is Batch) {
+        BatchInfo|ConnectorError batch = jsonQueryOperator->query(queryStr);
+        if (batch is BatchInfo) {
             batchId = batch.id;
 
             // Close job.
-            Job|SalesforceError closedJob = jsonQueryOperator->closeJob();
-            if (closedJob is Job) {
+            JobInfo|ConnectorError closedJob = jsonQueryOperator->closeJob();
+            if (closedJob is JobInfo) {
                 if (closedJob.state == "Closed") {
 
                     // Get the result list.
-                    ResultList|SalesforceError resultList = jsonQueryOperator->getResultList(batchId, noOfRetries);
+                    string[]|ConnectorError resultList = jsonQueryOperator->getResultList(batchId, noOfRetries);
 
-                    if (resultList is ResultList) {
-                        test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed.");
+                    if (resultList is string[]) {
+                        test:assertTrue(resultList.length() > 0, msg = "Getting query result list failed.");
 
-                        foreach string resultId in resultList.result {
+                        foreach string resultId in resultList {
 
                             // Get query result.
-                            json|SalesforceError queryResult = jsonQueryOperator->getResult(batchId, resultId);
+                            json|ConnectorError queryResult = jsonQueryOperator->getResult(batchId, resultId);
 
                             if (queryResult is json) {
                                 json[] queryResArr = <json[]> queryResult;
@@ -75,23 +75,23 @@ function getDeleteContacts() returns @tainted json {
                                     }
                                 }
                             } else {
-                                test:assertFail(msg = queryResult.message);                            
+                                test:assertFail(msg = queryResult.detail()?.message.toString());                            
                             }
                         }
                     } else {
-                        test:assertFail(msg = resultList.message);
+                        test:assertFail(msg = resultList.detail()?.message.toString());
                     }
                 } else {
                     test:assertFail(msg = "Failed to close the job.");
                 }
             } else {
-                test:assertFail(msg = closedJob.message);
+                test:assertFail(msg = closedJob.detail()?.message.toString());
             }    
         } else {
-            test:assertFail(msg = batch.message);
+            test:assertFail(msg = batch.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = jsonQueryOperator.message);
+        test:assertFail(msg = jsonQueryOperator.detail()?.message.toString());
     }
     return <json>deleteContacts;
 }
@@ -100,7 +100,7 @@ function getDeleteContactsAsText() returns @tainted string {
     string deleteContacts = "Id";
 
     // Create JSON query operator.
-    JsonQueryOperator|SalesforceError jsonQueryOperator = sfBulkClient->createJsonQueryOperator("Contact");
+    JsonQueryOperator|ConnectorError jsonQueryOperator = sfBulkClient->createJsonQueryOperator("Contact");
     // Query string
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 04'";
 
@@ -108,24 +108,24 @@ function getDeleteContactsAsText() returns @tainted string {
         string batchId = EMPTY_STRING;
 
         // Create json query batch.
-        Batch|SalesforceError batch = jsonQueryOperator->query(queryStr);
-        if (batch is Batch) {
+        BatchInfo|ConnectorError batch = jsonQueryOperator->query(queryStr);
+        if (batch is BatchInfo) {
             batchId = batch.id;
 
             // Close job.
-            Job|SalesforceError closedJob = jsonQueryOperator->closeJob();
-            if (closedJob is Job) {
+            JobInfo|ConnectorError closedJob = jsonQueryOperator->closeJob();
+            if (closedJob is JobInfo) {
                 if (closedJob.state == "Closed") {
 
                     // Get the result list.
-                    ResultList|SalesforceError resultList = jsonQueryOperator->getResultList(batchId, noOfRetries);
+                    string[]|ConnectorError resultList = jsonQueryOperator->getResultList(batchId, noOfRetries);
 
-                    if (resultList is ResultList) {
-                        test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed.");
+                    if (resultList is string[]) {
+                        test:assertTrue(resultList.length() > 0, msg = "Getting query result list failed.");
 
-                        foreach string resultId in resultList.result {
+                        foreach string resultId in resultList {
                             // Get query result.
-                            json|SalesforceError queryResult = jsonQueryOperator->getResult(batchId, resultId);
+                            json|ConnectorError queryResult = jsonQueryOperator->getResult(batchId, resultId);
 
                             if (queryResult is json) {
                                 json[] queryResArr = <json[]> queryResult;
@@ -140,24 +140,24 @@ function getDeleteContactsAsText() returns @tainted string {
                                     }
                                 }
                             } else {
-                                test:assertFail(msg = queryResult.message);                            
+                                test:assertFail(msg = queryResult.detail()?.message.toString());                            
                             }
                         }
 
                     } else {
-                        test:assertFail(msg = resultList.message);
+                        test:assertFail(msg = resultList.detail()?.message.toString());
                     }
                 } else {
                     test:assertFail(msg = "Failed to close the job.");
                 }
             } else {
-                test:assertFail(msg = closedJob.message);
+                test:assertFail(msg = closedJob.detail()?.message.toString());
             }    
         } else {
-            test:assertFail(msg = batch.message);
+            test:assertFail(msg = batch.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = jsonQueryOperator.message);
+        test:assertFail(msg = jsonQueryOperator.detail()?.message.toString());
     }
     return deleteContacts;
 }
@@ -166,7 +166,7 @@ function getDeleteContactsAsXml() returns @tainted xml {
     xml deleteContacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
 
     // Create JSON query operator.
-    XmlQueryOperator|SalesforceError xmlQueryOperator = sfBulkClient->createXmlQueryOperator("Contact");
+    XmlQueryOperator|ConnectorError xmlQueryOperator = sfBulkClient->createXmlQueryOperator("Contact");
     // Query string
     string queryStr = "SELECT Name, Id FROM Contact WHERE Title='Professor Grade 05'";
 
@@ -174,26 +174,26 @@ function getDeleteContactsAsXml() returns @tainted xml {
         string batchId = EMPTY_STRING;
 
         // Create json query batch.
-        Batch|SalesforceError batch = xmlQueryOperator->query(queryStr);
-        if (batch is Batch) {
+        BatchInfo|ConnectorError batch = xmlQueryOperator->query(queryStr);
+        if (batch is BatchInfo) {
             batchId = batch.id;
 
             // Close job.
-            Job|SalesforceError closedJob = xmlQueryOperator->closeJob();
-            if (closedJob is Job) {
+            JobInfo|ConnectorError closedJob = xmlQueryOperator->closeJob();
+            if (closedJob is JobInfo) {
                 if (closedJob.state == "Closed") {
 
                     // Get the result list.
-                    ResultList|SalesforceError resultList = xmlQueryOperator->getResultList(batchId, noOfRetries);
+                    string[]|ConnectorError resultList = xmlQueryOperator->getResultList(batchId, noOfRetries);
 
-                    if (resultList is ResultList) {
-                        test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed, "
+                    if (resultList is string[]) {
+                        test:assertTrue(resultList.length() > 0, msg = "Getting query result list failed, "
                             + "resultList=" + resultList.toString());
 
-                        foreach string resultId in resultList.result {
+                        foreach string resultId in resultList {
 
                             // Get query result.
-                            xml|SalesforceError queryResult = xmlQueryOperator->getResult(batchId, resultId);
+                            xml|ConnectorError queryResult = xmlQueryOperator->getResult(batchId, resultId);
 
                             if (queryResult is xml) {
 
@@ -216,23 +216,23 @@ function getDeleteContactsAsXml() returns @tainted xml {
                                 }
 
                             } else {
-                                test:assertFail(msg = queryResult.message);                            
+                                test:assertFail(msg = queryResult.detail()?.message.toString());                            
                             }
                         }
                     } else {
-                        test:assertFail(msg = resultList.message);
+                        test:assertFail(msg = resultList.detail()?.message.toString());
                     }
                 } else {
                     test:assertFail(msg = "Failed to close the job.");
                 }
             } else {
-                test:assertFail(msg = closedJob.message);
+                test:assertFail(msg = closedJob.detail()?.message.toString());
             }    
         } else {
-            test:assertFail(msg = batch.message);
+            test:assertFail(msg = batch.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = xmlQueryOperator.message);
+        test:assertFail(msg = xmlQueryOperator.detail()?.message.toString());
     }
     return deleteContacts;
 }
@@ -241,7 +241,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string contactId = "";
     string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
         + "' AND Title='" + title + "'";
-    json|SalesforceConnectorError jsonRes = salesforceClient->getQueryResult(sampleQuery);
+    json|ConnectorError jsonRes = salesforceClient->getQueryResult(sampleQuery);
 
     if (jsonRes is json) {
         json|error records = jsonRes.records;

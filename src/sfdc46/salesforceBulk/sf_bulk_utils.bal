@@ -23,122 +23,148 @@ import ballerina/runtime;
 import ballerina/'lang\.int as ints;
 import ballerina/'lang\.float as floats;
 
-# Check and set errors of HTTP response with XML payload.
+# Check HTTP response and return XML payload if succesful, else set errors and return ConnectorError.
 # + httpResponse - HTTP response or error occurred
-# + return - XML response if successful else SalesforceError occured
-function checkAndSetErrorsXml(http:Response | error httpResponse) returns @tainted xml | SalesforceError {
+# + return - XML response if successful else ConnectorError occured
+function checkXmlPayloadAndSetErrors(http:Response|error httpResponse) returns @tainted xml|ConnectorError {
     if (httpResponse is http:Response) {
-        // If success.
-        if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
-            var xmlResponse = httpResponse.getXmlPayload();
+
+        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
+            || httpResponse.statusCode == http:STATUS_NO_CONTENT) {
+            xml|error xmlResponse = httpResponse.getXmlPayload();
+
             if (xmlResponse is xml) {
                 return xmlResponse;
             } else {
-                return logAndGetSalesforceError(xmlResponse, "HTTP response to XML conversion error.");
+                log:printError(XML_ACCESSING_ERROR_MSG, err = xmlResponse);
+                HttpResponseHandlingError httpResHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+                    message = XML_ACCESSING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
+                    cause = xmlResponse);
+                return httpResHandlingError;
             }
-        // If failure.
+
         } else {
-            var xmlResponse = httpResponse.getXmlPayload();
-            if (xmlResponse is xml) {
-                SalesforceError sfError = {
-                    message: xmlResponse.exceptionMessage.getTextValue(),
-                    errorCode: httpResponse.statusCode.toString()
-                };
-                return sfError;
-            } else {
-                return logAndGetSalesforceError(xmlResponse,
-                "Could not retirieve the error, HTTP response to XML conversion error.");
-            }
+            return handleXmlErrorResponse(httpResponse);
         }
+
     } else {
-        return logAndGetSalesforceError(httpResponse, "HTTP error.");
+        return handleHttpError(httpResponse);
     }
 }
 
-# Check and set errors of HTTP response with CSV payload.
+# Check HTTP response and return Text payload if succesful, else set errors and return ConnectorError.
 # + httpResponse - HTTP response or error occurred
-# + return - Text response if successful else SalesforceError occured
-function checkAndSetErrorsCsv(http:Response | error httpResponse) returns @tainted string | SalesforceError {
+# + return - Text response if successful else ConnectorError occured
+function checkTextPayloadAndSetErrors(http:Response|error httpResponse) returns @tainted string|ConnectorError {
     if (httpResponse is http:Response) {
-        // If success.
-        if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
-            string | error textResponse = httpResponse.getTextPayload();
+
+        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
+            || httpResponse.statusCode == http:STATUS_NO_CONTENT) {
+            string|error textResponse = httpResponse.getTextPayload();
+
             if (textResponse is string) {
                 return textResponse;
             } else {
-                return logAndGetSalesforceError(textResponse, "HTTP response to XML conversion error.");
+                log:printError(TEXT_ACCESSING_ERROR_MSG, err = textResponse);
+                HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+                    message = TEXT_ACCESSING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
+                    cause = textResponse);
+                return httpResponseHandlingError;
             }
-        // If failure.
+
         } else {
-            var xmlResponse = httpResponse.getXmlPayload();
-            if (xmlResponse is xml) {
-                SalesforceError sfError = {
-                    message: xmlResponse[getElementNameWithNamespace("exceptionMessage")].getTextValue(),
-                    errorCode: httpResponse.statusCode.toString()
-                };
-                return sfError;
-            } else {
-                return logAndGetSalesforceError(xmlResponse,
-                "Could not retrieve the error, HTTP response to XML conversion error.");
-            }
+            return handleXmlErrorResponse(httpResponse);
         }
     } else {
-        return logAndGetSalesforceError(httpResponse, "HTTP error.");
+        return handleHttpError(httpResponse);
     }
 }
 
-# Check and set errors of HTTP response with JSON payload.
+# Check HTTP response and return JSON payload if succesful, else set errors and return ConnectorError.
 # + httpResponse - HTTP response or error occurred
-# + return - JSON response if successful else SalesforceError occured
-function checkAndSetErrorsJson(http:Response | error httpResponse) returns @tainted json | SalesforceError {
+# + return - JSON response if successful else ConnectorError occured
+function checkJsonPayloadAndSetErrors(http:Response|error httpResponse) returns @tainted json|ConnectorError {
     if (httpResponse is http:Response) {
-        // If success.
-        if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
-            json | error response = httpResponse.getJsonPayload();
+
+        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
+            || httpResponse.statusCode == http:STATUS_NO_CONTENT) {
+            json|error response = httpResponse.getJsonPayload();
+
             if (response is json) {
                 return response;
             } else {
-                return logAndGetSalesforceError(response, "HTTP response to XML conversion error.");
+                log:printError(JSON_ACCESSING_ERROR_MSG, err = response);
+                HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+                    message = JSON_ACCESSING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
+                    cause = response);
+                return httpResponseHandlingError;
             }
-        // If failure.
+
         } else {
-            json | error response = httpResponse.getJsonPayload();
+            json|error response = httpResponse.getJsonPayload();
             if (response is json) {
-                SalesforceError sfError = {
-                    message: response.exceptionMessage.toString(),
-                    errorCode: httpResponse.statusCode.toString()
-                };
-                return sfError;
+                HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+                    message = response.exceptionMessage.toString(), errorCode = response.exceptionCode.toString());
+                return httpResponseHandlingError;
             } else {
-                return logAndGetSalesforceError(response,
-                "Could not retirieve the error, HTTP response to XML conversion error.");
+                log:printError(ERR_EXTRACTING_ERROR_MSG, err = response);
+                HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+                    message = ERR_EXTRACTING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR, cause = response);
+                return httpResponseHandlingError;
             }
         }
     } else {
-        return logAndGetSalesforceError(httpResponse, "HTTP error.");
+        return handleHttpError(httpResponse);
     }
 }
 
-# Log and get salesforce error.
-# + responseErr - error occurred
-# + baseErrorMsg - base error message
-# + return - SalesforceError
-function logAndGetSalesforceError(error responseErr, string baseErrorMsg) returns SalesforceError {
-    log:printError(baseErrorMsg + " Error: " + responseErr.detail()["message"].toString());
-    return getSalesforceError(baseErrorMsg, "500");
+# Handle HTTP error response and return HttpResponseHandlingError error.
+# + httpResponse - error response
+# + return - HttpResponseHandlingError error
+function handleXmlErrorResponse(http:Response httpResponse) returns @tainted HttpResponseHandlingError {
+    xml|error xmlResponse = httpResponse.getXmlPayload();
+
+    if (xmlResponse is xml) {
+        HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+            message = xmlResponse.exceptionMessage.getTextValue(), 
+            errorCode = xmlResponse.exceptionCode.getTextValue());
+        return httpResponseHandlingError;
+    } else {
+        log:printError(ERR_EXTRACTING_ERROR_MSG, err = xmlResponse);
+        HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+            message = ERR_EXTRACTING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR, cause = xmlResponse);
+        return httpResponseHandlingError;
+    }
 }
 
-# Get salesforce error.
-# + errMsg - error message
-# + errCode - error code
-# + return - SalesforceError
-function getSalesforceError(string errMsg, string errCode) returns SalesforceError {
-    SalesforceError sfError = {
-        message: errMsg,
-        errorCode: errCode
-    };
-    return sfError;
+# Handle HTTP error and return HttpError.
+# + return - HttpError error
+function handleHttpError( error httpResponse) returns HttpError {
+    log:printError(HTTP_ERROR_MSG, err = httpResponse);
+    HttpError httpError = error(HTTP_ERROR, message = HTTP_ERROR_MSG, errorCode = HTTP_ERROR, cause = httpResponse);
+    return httpError;
 }
+
+// # Log and get salesforce error.
+// # + responseErr - error occurred
+// # + baseErrorMsg - base error message
+// # + return - ConnectorError
+// function logAndGetConnectorError(error responseErr, string baseErrorMsg) returns ConnectorError {
+//     log:printError(baseErrorMsg + " Error: " + responseErr.detail()["message"].toString());
+//     return getConnectorError(baseErrorMsg, "500");
+// }
+
+// # Get salesforce error.
+// # + errMsg - error message
+// # + errCode - error code
+// # + return - ConnectorError
+// function getConnectorError(string errMsg, string errCode) returns ConnectorError {
+//     ConnectorError sfError = {
+//         message: errMsg,
+//         errorCode: errCode
+//     };
+//     return sfError;
+// }
 
 # Concatinate namespace with elemant name to access the element from XML.
 # + elementName - element name 
@@ -321,31 +347,33 @@ function closeRb(io:ReadableByteChannel ch) {
     }
 }
 
-# Get SalesforceError for failed batch.
+# Get ConnectorError for failed batch.
 #
 # + batch - Failed Batch
-# + return - Returns SalesforceError for failed batch.
-function getFailedBatchError(Batch batch) returns SalesforceError {
-    return getSalesforceError("Batch has failed, batch=" + batch.toString(), 
-        http:STATUS_INTERNAL_SERVER_ERROR.toString());
+# + return - Returns ConnectorError for failed batch.
+function getFailedBatchError(BatchInfo batch) returns ConnectorError {
+    ServerError serverError = error(SERVER_ERROR, message = "Failed batch=" + batch.toString(), 
+        errorCode = SERVER_ERROR);
+    return serverError;
 }
 
-# Get SalesforceError for getting results timed out.
+# Get ConnectorError for getting results timed out.
 #
 # + batchId - ID of the batch which getting results timed out
 # + numberOfTries - No of times tried
 # + waitTime - Wait time between 2 tries
-# + return - SalesforceError for getting results timed out
-function getResultTimeoutError(string batchId, int numberOfTries, int waitTime) returns SalesforceError {
+# + return - ConnectorError for getting results timed out
+function getResultTimeoutError(string batchId, int numberOfTries, int waitTime) returns ConnectorError {
     int totalTime = numberOfTries * waitTime;
-    return getSalesforceError("Getting result timed out after " + totalTime.toString() + " (ms), batchId=" + batchId, 
-        http:STATUS_REQUEST_TIMEOUT.toString());
+    ServerError serverError = error(SERVER_ERROR, message = "Getting result timed out after " + totalTime.toString() 
+        + " (ms), batchId=" + batchId, errorCode = SERVER_ERROR);
+    return serverError;
 }
 
 # Log waiting message while getting batch results.
 #
 # + batch - Batch which trying to get results.
-function printWaitingMessage(Batch batch) {
+function printWaitingMessage(BatchInfo batch) {
     log:printInfo("Waiting to complete the batch, batch=" + batch.toString());
 }
 
@@ -357,17 +385,17 @@ function printWaitingMessage(Batch batch) {
 # + batchId - batch ID
 # + numberOfTries - number of times checking the batch state
 # + waitTime - time between two tries in ms
-# + return - Results array if successful else SalesforceError occured
-function checkBatchStateAndGetResults(function(BulkOperator, string) returns (Batch|SalesforceError) getBatchPointer,
-    function(BulkOperator, string) returns (Result[]|SalesforceError) getResultsPointer,
+# + return - Results array if successful else ConnectorError occured
+function checkBatchStateAndGetResults(function(BulkOperator, string) returns (BatchInfo|ConnectorError) getBatchPointer,
+    function(BulkOperator, string) returns (Result[]|ConnectorError) getResultsPointer,
     @tainted BulkOperator op, string batchId, int numberOfTries, int waitTime) 
-    returns @tainted Result[]|SalesforceError {
+    returns @tainted Result[]|ConnectorError {
     
     int counter = 0;
     while (counter < numberOfTries) {
-        Batch|SalesforceError batch = getBatchPointer(op, batchId);
+        BatchInfo|ConnectorError batch = getBatchPointer(op, batchId);
         
-        if (batch is Batch) {
+        if (batch is BatchInfo) {
 
             if (batch.state == COMPLETED) {
                 return getResultsPointer(op, batchId);
@@ -394,17 +422,18 @@ function checkBatchStateAndGetResults(function(BulkOperator, string) returns (Ba
 # + batchId - batch ID
 # + numberOfTries - number of times checking the batch state
 # + waitTime - time between two tries in ms
-# + return - ResultList record if successful else SalesforceError occured
-function checkBatchStateAndGetResultList(function(BulkOperator, string) returns (Batch|SalesforceError) getBatchPointer,
-    function(BulkOperator, string) returns (ResultList|SalesforceError) getResultListPointer,
+# + return - string array if successful else ConnectorError occured
+function checkBatchStateAndGetResultList(
+    function(BulkOperator, string) returns (BatchInfo|ConnectorError) getBatchPointer,
+    function(BulkOperator, string) returns (string[]|ConnectorError) getResultListPointer,
     @tainted BulkOperator op, string batchId, int numberOfTries, int waitTime) 
-    returns @tainted ResultList|SalesforceError {
+    returns @tainted string[]|ConnectorError {
     
     int counter = 0;
     while (counter < numberOfTries) {
-        Batch|SalesforceError batch = getBatchPointer(op, batchId);
+        BatchInfo|ConnectorError batch = getBatchPointer(op, batchId);
         
-        if (batch is Batch) {
+        if (batch is BatchInfo) {
 
             if (batch.state == COMPLETED) {
                 return getResultListPointer(op, batchId);
@@ -427,8 +456,8 @@ function checkBatchStateAndGetResultList(function(BulkOperator, string) returns 
 # 
 # + op - bulk operator client object
 # + batchId - batchId
-# + return - Batch record if successful else SalesforceError occured
-function getBatchPointer(@tainted BulkOperator op, string batchId) returns @tainted Batch|SalesforceError {
+# + return - Batch record if successful else ConnectorError occured
+function getBatchPointer(@tainted BulkOperator op, string batchId) returns @tainted BatchInfo|ConnectorError {
     return op->getBatchInfo(batchId);
 }
 
@@ -436,27 +465,27 @@ function getBatchPointer(@tainted BulkOperator op, string batchId) returns @tain
 # 
 # + op - bulk operator client object
 # + batchId - batchId
-# + return - Array of Result records if successful else SalesforceError occured
-function getResultsPointer(@tainted BulkOperator op, string batchId) returns @tainted Result[]|SalesforceError {
+# + return - Array of Result records if successful else ConnectorError occured
+function getResultsPointer(@tainted BulkOperator op, string batchId) returns @tainted Result[]|ConnectorError {
     SalesforceBaseClient httpBaseClient = op.httpBaseClient;
     string[] paths = [JOB, op.job.id, BATCH, batchId, RESULT];
 
     if (op is CsvInsertOperator|CsvUpsertOperator|CsvUpdateOperator|CsvDeleteOperator) {
-        string|SalesforceError result = httpBaseClient->getCsvRecord(paths);
+        string|ConnectorError result = httpBaseClient->getCsvRecord(paths);
         if (result is string) {
             return getBatchResults(result);
         } else {
             return result;
         }
     } else if (op is JsonInsertOperator|JsonUpsertOperator|JsonUpdateOperator|JsonDeleteOperator) {
-        json|SalesforceError result = httpBaseClient->getJsonRecord(paths);
+        json|ConnectorError result = httpBaseClient->getJsonRecord(paths);
         if (result is json) {
             return getBatchResults(result);
         } else {
             return result;
         }
     } else {
-        xml|SalesforceError result = httpBaseClient->getXmlRecord(paths);
+        xml|ConnectorError result = httpBaseClient->getXmlRecord(paths);
         if (result is xml) {
             return getBatchResults(result);
         } else {
@@ -469,20 +498,20 @@ function getResultsPointer(@tainted BulkOperator op, string batchId) returns @ta
 # 
 # + op - bulk operator client object
 # + batchId - batchId
-# + return - ResultList record if successful else SalesforceError occured
-function getResultListPointer(@tainted BulkOperator op, string batchId) returns @tainted ResultList|SalesforceError {
+# + return - string array if successful else ConnectorError occured
+function getResultListPointer(@tainted BulkOperator op, string batchId) returns @tainted string[]|ConnectorError {
     SalesforceBaseClient httpBaseClient = op.httpBaseClient;
     string[] paths = [JOB, op.job.id, BATCH, batchId, RESULT];
 
     if (op is CsvQueryOperator|XmlQueryOperator) {
-        xml|SalesforceError response = httpBaseClient->getXmlRecord(paths);
+        xml|ConnectorError response = httpBaseClient->getXmlRecord(paths);
         if (response is xml) {
             return getResultList(response);
         } else {
             return response;
         }
     } else {
-        json|SalesforceError response = httpBaseClient->getJsonRecord(paths);
+        json|ConnectorError response = httpBaseClient->getJsonRecord(paths);
         if (response is json) {
             return getResultList(response);
         } else {

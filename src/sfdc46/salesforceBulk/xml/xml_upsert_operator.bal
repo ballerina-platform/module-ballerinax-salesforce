@@ -18,10 +18,10 @@
 
 # XML upsert operator client.
 public type XmlUpsertOperator client object {
-    Job job;
+    JobInfo job;
     SalesforceBaseClient httpBaseClient;
 
-    public function __init(Job job, SalesforceConfiguration salesforceConfig) {
+    public function __init(JobInfo job, SalesforceConfiguration salesforceConfig) {
         self.job = job;
         self.httpBaseClient = new(salesforceConfig);
     }
@@ -29,11 +29,11 @@ public type XmlUpsertOperator client object {
     # Create XML upsert batch.
     #
     # + payload - update data in XML format
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function upsert(xml payload) returns @tainted Batch | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id, BATCH], payload);
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function upsert(xml payload) returns @tainted BatchInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id, BATCH], payload);
         if (xmlResponse is xml) {
-            Batch | SalesforceError batch = getBatch(xmlResponse);
+            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
             return batch;
         } else {
             return xmlResponse;
@@ -42,11 +42,11 @@ public type XmlUpsertOperator client object {
 
     # Get XML upsert operator job information.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function getJobInfo() returns @tainted Job | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
         if (xmlResponse is xml) {
-            Job | SalesforceError job = getJob(xmlResponse);
+            JobInfo|ConnectorError job = getJob(xmlResponse);
             return job;
         } else {
             return xmlResponse;
@@ -55,12 +55,12 @@ public type XmlUpsertOperator client object {
 
     # Close XML upsert operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function closeJob() returns @tainted Job | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id], 
-        XML_STATE_CLOSED_PAYLOAD);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function closeJob() returns @tainted JobInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
+            XML_STATE_CLOSED_PAYLOAD);
         if (xmlResponse is xml) {
-            Job | SalesforceError job = getJob(xmlResponse);
+            JobInfo|ConnectorError job = getJob(xmlResponse);
             return job;
         } else {
             return xmlResponse;
@@ -69,12 +69,12 @@ public type XmlUpsertOperator client object {
 
     # Abort XML upsert operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function abortJob() returns @tainted Job | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id], 
-        XML_STATE_ABORTED_PAYLOAD);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function abortJob() returns @tainted JobInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
+            XML_STATE_ABORTED_PAYLOAD);
         if (xmlResponse is xml) {
-            Job | SalesforceError job = getJob(xmlResponse);
+            JobInfo|ConnectorError job = getJob(xmlResponse);
             return job;
         } else {
             return xmlResponse;
@@ -84,11 +84,11 @@ public type XmlUpsertOperator client object {
     # Get XML upsert batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function getBatchInfo(string batchId) returns @tainted Batch | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
         if (xmlResponse is xml) {
-            Batch | SalesforceError batch = getBatch(xmlResponse);
+            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
             return batch;
         } else {
             return xmlResponse;
@@ -97,11 +97,11 @@ public type XmlUpsertOperator client object {
 
     # Get information of all batches of XML upsert operator job.
     #
-    # + return - BatchInfo record if successful else SalesforceError occured
-    public remote function getAllBatches() returns @tainted BatchInfo | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
+    # + return - BatchInfo record if successful else ConnectorError occured
+    public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
         if (xmlResponse is xml) {
-            BatchInfo | SalesforceError batchInfo = getBatchInfo(xmlResponse);
+            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(xmlResponse);
             return batchInfo;
         } else {
             return xmlResponse;
@@ -111,10 +111,10 @@ public type XmlUpsertOperator client object {
     # Retrieve the XML batch request.
     #
     # + batchId - batch ID
-    # + return - JSON Batch request if successful else SalesforceError occured
-    public remote function getBatchRequest(string batchId) returns @tainted xml | SalesforceError {
-        xml | SalesforceError xmlResponse = 
-        self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, REQUEST]);
+    # + return - JSON Batch request if successful else ConnectorError occured
+    public remote function getBatchRequest(string batchId) returns @tainted xml|ConnectorError {
+        xml|ConnectorError xmlResponse =
+            self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId, REQUEST]);
         return xmlResponse;
     }
 
@@ -123,9 +123,9 @@ public type XmlUpsertOperator client object {
     # + batchId - batch ID
     # + numberOfTries - number of times checking the batch state
     # + waitTime - time between two tries in ms
-    # + return - Batch result as CSV if successful else SalesforceError occured
+    # + return - Batch result as CSV if successful else ConnectorError occured
     public remote function getResult(string batchId, int numberOfTries = 1, int waitTime = 3000) 
-        returns @tainted Result[]|SalesforceError {
+        returns @tainted Result[]|ConnectorError {
         return checkBatchStateAndGetResults(getBatchPointer, getResultsPointer, self, batchId, numberOfTries, waitTime);
     }
 };

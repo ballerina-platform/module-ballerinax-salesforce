@@ -20,7 +20,7 @@
 public type JsonQueryOperator client object {
     *BulkOperator;
 
-    public function __init(Job job, SalesforceConfiguration salesforceConfig) {
+    public function __init(JobInfo job, SalesforceConfiguration salesforceConfig) {
         self.job = job;
         self.httpBaseClient = new(salesforceConfig);
     }
@@ -28,12 +28,12 @@ public type JsonQueryOperator client object {
     # Create JSON query batch.
     #
     # + queryString - SOQL query want to perform
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function query(string queryString) returns @tainted Batch | SalesforceError {
-        json | SalesforceError jsonPayload = self.httpBaseClient->createJsonQuery([<@untainted> JOB, self.job.id, 
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function query(string queryString) returns @tainted BatchInfo|ConnectorError {
+        json|ConnectorError jsonPayload = self.httpBaseClient->createJsonQuery([<@untainted> JOB, self.job.id,
         <@untainted> BATCH], queryString);
         if (jsonPayload is json) {
-            Batch | SalesforceError batch = getBatch(jsonPayload);
+            BatchInfo|ConnectorError batch = getBatch(jsonPayload);
             return batch;
         } else {
             return jsonPayload;
@@ -42,11 +42,11 @@ public type JsonQueryOperator client object {
 
     # Get JSON query operator job information.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function getJobInfo() returns @tainted Job | SalesforceError {
-        json | SalesforceError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
+        json|ConnectorError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
         if (payload is json) {
-            Job | SalesforceError job = getJob(payload);
+            JobInfo|ConnectorError job = getJob(payload);
             return job;
         } else {
             return payload;
@@ -55,12 +55,12 @@ public type JsonQueryOperator client object {
 
     # Close JSON query operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function closeJob() returns @tainted Job | SalesforceError {
-        json | SalesforceError payload = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id], 
+    # + return - Job record if successful else ConnectorError occured
+    public remote function closeJob() returns @tainted JobInfo|ConnectorError {
+        json|ConnectorError payload = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
         JSON_STATE_CLOSED_PAYLOAD);
         if (payload is json) {
-            Job | SalesforceError job = getJob(payload);
+            JobInfo|ConnectorError job = getJob(payload);
             return job;
         } else {
             return payload;
@@ -69,12 +69,12 @@ public type JsonQueryOperator client object {
 
     # Abort JSON query operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function abortJob() returns @tainted Job | SalesforceError {
-        json | SalesforceError payload = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id], 
-        JSON_STATE_ABORTED_PAYLOAD);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function abortJob() returns @tainted JobInfo|ConnectorError {
+        json|ConnectorError payload = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+            JSON_STATE_ABORTED_PAYLOAD);
         if (payload is json) {
-            Job | SalesforceError job = getJob(payload);
+            JobInfo|ConnectorError job = getJob(payload);
             return job;
         } else {
             return payload;
@@ -84,12 +84,12 @@ public type JsonQueryOperator client object {
     # Get JSON query batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function getBatchInfo(string batchId) returns @tainted Batch | SalesforceError {
-        json | SalesforceError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, 
-        <@untainted> BATCH, batchId]);
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
+        json|ConnectorError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
+            <@untainted> BATCH, batchId]);
         if (payload is json) {
-            Batch | SalesforceError batch = getBatch(payload);
+            BatchInfo|ConnectorError batch = getBatch(payload);
             return batch;
         } else {
             return payload;
@@ -98,12 +98,12 @@ public type JsonQueryOperator client object {
 
     # Get information of all batches of JSON query operator job.
     #
-    # + return - BatchInfo record if successful else SalesforceError occured
-    public remote function getAllBatches() returns @tainted BatchInfo | SalesforceError {
-        json | SalesforceError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, 
-        <@untainted> BATCH]);
+    # + return - BatchInfo record if successful else ConnectorError occured
+    public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
+        json|ConnectorError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
+            <@untainted> BATCH]);
         if (payload is json) {
-            BatchInfo | SalesforceError batchInfo = getBatchInfo(payload);
+            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(payload);
             return batchInfo;
         } else {
             return payload;
@@ -115,10 +115,11 @@ public type JsonQueryOperator client object {
     # + batchId - batch ID
     # + numberOfTries - number of times checking the batch state
     # + waitTime - time between two tries in ms
-    # + return - ResultList record if successful else SalesforceError occured
+    # + return - ResultList record if successful else ConnectorError occured
     public remote function getResultList(string batchId, int numberOfTries = 1, int waitTime = 3000) 
-        returns @tainted ResultList | SalesforceError {
-        return checkBatchStateAndGetResultList(getBatchPointer, getResultListPointer, self, batchId, numberOfTries, waitTime);        
+        returns @tainted string[]|ConnectorError {
+        return checkBatchStateAndGetResultList(getBatchPointer, getResultListPointer, self, batchId, numberOfTries, 
+            waitTime);        
     }
 
 
@@ -126,9 +127,9 @@ public type JsonQueryOperator client object {
     #
     # + batchId - batch ID
     # + resultId - result ID
-    # + return - Query result in JSON format if successful else SalesforceError occured
-    public remote function getResult(string batchId, string resultId) returns @tainted json | SalesforceError {
+    # + return - Query result in JSON format if successful else ConnectorError occured
+    public remote function getResult(string batchId, string resultId) returns @tainted json|ConnectorError {
         return self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, batchId, 
-        <@untainted> RESULT, resultId]);
+            <@untainted> RESULT, resultId]);
     }
 };

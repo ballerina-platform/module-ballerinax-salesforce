@@ -28,43 +28,55 @@ public type SalesforceBaseClient client object {
         oauth2:OutboundOAuth2Provider oauth2Provider = new(sfConfig.clientConfig);
         // Create salesforce bulk auth handler using created provider.
         SalesforceBulkAuthHandler sfBulkAuthHandler = new(oauth2Provider);
+
+        http:ClientSecureSocket? socketConfig = sfConfig?.secureSocketConfig;
+        
         // Create http client.
-        self.httpClient = new(sfConfig.baseUrl + prepareUrl([SERVICES, ASYNC, BULK_API_VERSION]), { 
-            auth: { 
-                authHandler: sfBulkAuthHandler 
-            } 
-        });
+        if (socketConfig is http:ClientSecureSocket) {
+            self.httpClient = new(sfConfig.baseUrl + prepareUrl([SERVICES, ASYNC, BULK_API_VERSION]), { 
+                auth: { 
+                    authHandler: sfBulkAuthHandler 
+                },
+                secureSocket: socketConfig
+            });
+        } else {
+            self.httpClient = new(sfConfig.baseUrl + prepareUrl([SERVICES, ASYNC, BULK_API_VERSION]), { 
+                auth: { 
+                    authHandler: sfBulkAuthHandler 
+                }
+            });
+        }
     }
 
-    remote function getXmlRecord(string[] paths) returns @tainted xml | SalesforceError {
+    remote function getXmlRecord(string[] paths) returns @tainted xml|ConnectorError {
         http:Request req = new;
         req.setHeader(CONTENT_TYPE, APP_XML);
         string path = prepareUrl(paths);
 
-        http:Response | error response = self.httpClient->get(path, req);
-        return checkAndSetErrorsXml(response);
+        http:Response|error response = self.httpClient->get(path, req);
+        return checkXmlPayloadAndSetErrors(response);
     }
 
-    remote function getJsonRecord(string[] paths) returns @tainted json | SalesforceError {
+    remote function getJsonRecord(string[] paths) returns @tainted json|ConnectorError {
         http:Request req = new;
         req.setHeader(CONTENT_TYPE, APP_JSON);
         string path = prepareUrl(paths);
 
-        http:Response | error response = self.httpClient->get(path, req);
-        return checkAndSetErrorsJson(response);
+        http:Response|error response = self.httpClient->get(path, req);
+        return checkJsonPayloadAndSetErrors(response);
     }
 
-    remote function getCsvRecord(string[] paths) returns @tainted string | SalesforceError{
+    remote function getCsvRecord(string[] paths) returns @tainted string|ConnectorError{
         http:Request req = new;
         req.setHeader(CONTENT_TYPE, APP_XML);
         string path = prepareUrl(paths);
 
-        http:Response | error response = self.httpClient->get(path, req);
-        return checkAndSetErrorsCsv(response);
+        http:Response|error response = self.httpClient->get(path, req);
+        return checkTextPayloadAndSetErrors(response);
     }
 
     remote function createXmlRecord(string[] paths, xml payload, boolean enablePkChunking = false) 
-    returns @tainted xml | SalesforceError {
+        returns @tainted xml|ConnectorError {
         http:Request req = new;
         req.setXmlPayload(payload);
 
@@ -74,11 +86,11 @@ public type SalesforceBaseClient client object {
 
         string path = prepareUrl(paths);
         var response = self.httpClient->post(path, req);
-        return checkAndSetErrorsXml(response);
+        return checkXmlPayloadAndSetErrors(response);
     }
 
     remote function createJsonRecord(string[] paths, json payload, boolean enablePkChunking = false) 
-    returns @tainted json | SalesforceError {
+        returns @tainted json|ConnectorError {
         http:Request req = new;
         req.setJsonPayload(payload);
 
@@ -88,11 +100,11 @@ public type SalesforceBaseClient client object {
 
         string path = prepareUrl(paths);
         var response = self.httpClient->post(path, req);
-        return checkAndSetErrorsJson(response);
+        return checkJsonPayloadAndSetErrors(response);
     }
 
     remote function createCsvRecord(string[] paths, string payload, boolean enablePkChunking = false) 
-    returns @tainted xml | SalesforceError {
+        returns @tainted xml|ConnectorError {
         http:Request req = new;
         req.setPayload(payload);
         req.setHeader(CONTENT_TYPE, TEXT_CSV);
@@ -103,11 +115,11 @@ public type SalesforceBaseClient client object {
 
         string path = prepareUrl(paths);
         var response = self.httpClient->post(path, req);
-        return checkAndSetErrorsXml(response);
+        return checkXmlPayloadAndSetErrors(response);
     }
 
     remote function createJsonQuery(string[] paths, string payload, boolean enablePkChunking = false) 
-    returns @tainted json | SalesforceError {
+        returns @tainted json|ConnectorError {
         http:Request req = new;
         req.setBinaryPayload(payload.toBytes(), contentType = APP_JSON);
 
@@ -117,11 +129,11 @@ public type SalesforceBaseClient client object {
 
         string path = prepareUrl(paths);
         var response = self.httpClient->post(path, req);
-        return checkAndSetErrorsJson(response);
+        return checkJsonPayloadAndSetErrors(response);
     }
 
     remote function createXmlQuery(string[] paths, string payload, boolean enablePkChunking = false) 
-    returns @tainted xml | SalesforceError{
+        returns @tainted xml|ConnectorError{
         http:Request req = new;
         req.setPayload(payload);
         req.setHeader(CONTENT_TYPE, APP_XML);
@@ -132,6 +144,6 @@ public type SalesforceBaseClient client object {
 
         string path = prepareUrl(paths);
         var response = self.httpClient->post(path, req);
-        return checkAndSetErrorsXml(response);
+        return checkXmlPayloadAndSetErrors(response);
     }
 };

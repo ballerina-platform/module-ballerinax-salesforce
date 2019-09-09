@@ -29,14 +29,14 @@ public type SalesforceBulkClient client object {
     # Create CSV insert operator client.
     # 
     # + objectName - Object operation applies 
-    # + return - CSV insert operator client if successful else SalesforceError occured
+    # + return - CSV insert operator client if successful else ConnectorError occured
     public remote function createCsvInsertOperator(string objectName)
-    returns @tainted CsvInsertOperator | SalesforceError {
-        xml | SalesforceError response =
+        returns @tainted CsvInsertOperator|ConnectorError {
+        xml|ConnectorError response =
         self.httpBaseClient->createXmlRecord([JOB], getXmlJobDetails(INSERT, objectName, CSV));
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 CsvInsertOperator csvInsertOperator = new(job, self.salesforceConfiguration);
                 return csvInsertOperator;
             } else {
@@ -51,15 +51,15 @@ public type SalesforceBulkClient client object {
     #
     # + objectName - Object operation applies 
     # + externalIdFieldName - Field using as external Id 
-    # + return - CSV upsert operator client if successful else SalesforceError occured
+    # + return - CSV upsert operator client if successful else ConnectorError occured
     public remote function createCsvUpsertOperator(string objectName, string externalIdFieldName)
-    returns @tainted CsvUpsertOperator | SalesforceError {
-        xml | SalesforceError response = self.httpBaseClient->createXmlRecord([JOB], 
+    returns @tainted CsvUpsertOperator|ConnectorError {
+        xml|ConnectorError response = self.httpBaseClient->createXmlRecord([JOB],
         getXmlJobDetails(UPSERT, objectName, CSV, extIdFieldName = externalIdFieldName));
 
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 CsvUpsertOperator csvUpsertOperator = new(job, self.salesforceConfiguration);
                 return csvUpsertOperator;
             } else {
@@ -73,15 +73,15 @@ public type SalesforceBulkClient client object {
     # Create CSV update operator client.
     #
     # + objectName - Object operation applies
-    # + return - CSV update operator client if successful else SalesforceError occured
+    # + return - CSV update operator client if successful else ConnectorError occured
     public remote function createCsvUpdateOperator(string objectName)
-    returns @tainted CsvUpdateOperator | SalesforceError {
-        xml | SalesforceError response = 
+    returns @tainted CsvUpdateOperator|ConnectorError {
+        xml|ConnectorError response =
         self.httpBaseClient->createXmlRecord([JOB], getXmlJobDetails(UPDATE, objectName, CSV));
 
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 CsvUpdateOperator csvUpdateOperator = new(job, self.salesforceConfiguration);
                 return csvUpdateOperator;
             } else {
@@ -96,14 +96,14 @@ public type SalesforceBulkClient client object {
     #
     # + enablePkChunking - PK chunking is enabled or not
     # + objectName - Object operation applies
-    # + return - CSV query operator client if successful else SalesforceError occured
+    # + return - CSV query operator client if successful else ConnectorError occured
     public remote function createCsvQueryOperator(string objectName, 
-    boolean enablePkChunking = false) returns @tainted CsvQueryOperator | SalesforceError {
-        xml | SalesforceError response = self.httpBaseClient->createXmlRecord([JOB], 
+    boolean enablePkChunking = false) returns @tainted CsvQueryOperator|ConnectorError {
+        xml|ConnectorError response = self.httpBaseClient->createXmlRecord([JOB],
         <@untainted> getXmlJobDetails(QUERY, objectName, CSV), enablePkChunking = enablePkChunking);
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 CsvQueryOperator csvQueryOperator = new(job, self.salesforceConfiguration);
                 return csvQueryOperator;
             } else {
@@ -117,15 +117,15 @@ public type SalesforceBulkClient client object {
     # Create CSV delete operator client.
     #
     # + objectName - Object operation applies
-    # + return - CSV delete operator client if successful else SalesforceError occured
+    # + return - CSV delete operator client if successful else ConnectorError occured
     public remote function createCsvDeleteOperator(string objectName)
-    returns @tainted CsvDeleteOperator | SalesforceError {
-        xml | SalesforceError response = 
+    returns @tainted CsvDeleteOperator|ConnectorError {
+        xml|ConnectorError response =
         self.httpBaseClient->createXmlRecord([JOB], getXmlJobDetails(DELETE, objectName, CSV));
 
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 CsvDeleteOperator csvDeleteOperator = new(job, self.salesforceConfiguration);
                 return csvDeleteOperator;
             } else {
@@ -139,14 +139,14 @@ public type SalesforceBulkClient client object {
     # Create XML insert operator client.
     #
     # + objectName - Object operation applies 
-    # + return - XML insert operator client if successful else SalesforceError occured
+    # + return - XML insert operator client if successful else ConnectorError occured
     public remote function createXmlInsertOperator(string objectName)
-    returns @tainted XmlInsertOperator | SalesforceError {
-        xml | SalesforceError response = 
+    returns @tainted XmlInsertOperator|ConnectorError {
+        xml|ConnectorError response =
         self.httpBaseClient->createXmlRecord([JOB], getXmlJobDetails(INSERT, objectName, XML));
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 XmlInsertOperator xmlInsertOperator = new(job, self.salesforceConfiguration);
                 return xmlInsertOperator;
             } else {
@@ -161,14 +161,14 @@ public type SalesforceBulkClient client object {
     #
     # + objectName - Object operation applies 
     # + externalIdFieldName - Field using as external Id
-    # + return - XML upsert operator client if successful else SalesforceError occured
+    # + return - XML upsert operator client if successful else ConnectorError occured
     public remote function createXmlUpsertOperator(string objectName, string externalIdFieldName)
-    returns @tainted XmlUpsertOperator | SalesforceError {
-        xml | SalesforceError response = self.httpBaseClient->createXmlRecord([JOB], 
+    returns @tainted XmlUpsertOperator|ConnectorError {
+        xml|ConnectorError response = self.httpBaseClient->createXmlRecord([JOB],
         getXmlJobDetails(UPSERT, objectName, XML, extIdFieldName = externalIdFieldName));
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 XmlUpsertOperator xmlUpsertOperator = new(job, self.salesforceConfiguration);
                 return xmlUpsertOperator;
             } else {
@@ -182,14 +182,14 @@ public type SalesforceBulkClient client object {
     # Create XML update operator client.
     #
     # + objectName - Object operation applies 
-    # + return - XML update operator client if successful else SalesforceError occured
+    # + return - XML update operator client if successful else ConnectorError occured
     public remote function createXmlUpdateOperator(string objectName)
-    returns @tainted XmlUpdateOperator | SalesforceError {
-        xml | SalesforceError response = 
+    returns @tainted XmlUpdateOperator|ConnectorError {
+        xml|ConnectorError response =
         self.httpBaseClient->createXmlRecord([JOB], getXmlJobDetails(UPDATE, objectName, XML));
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 XmlUpdateOperator xmlUpdateOperator = new(job, self.salesforceConfiguration);
                 return xmlUpdateOperator;
             } else {
@@ -204,14 +204,14 @@ public type SalesforceBulkClient client object {
     #
     # + enablePkChunking - PK chunking is enabled or not
     # + objectName - Object operation applies 
-    # + return - XML query operator client if successful else SalesforceError occured
+    # + return - XML query operator client if successful else ConnectorError occured
     public remote function createXmlQueryOperator(string objectName, 
-            boolean enablePkChunking = false) returns @tainted XmlQueryOperator | SalesforceError {
-        xml | SalesforceError response = self.httpBaseClient->createXmlRecord([JOB], 
+            boolean enablePkChunking = false) returns @tainted XmlQueryOperator|ConnectorError {
+        xml|ConnectorError response = self.httpBaseClient->createXmlRecord([JOB],
         <@untainted> getXmlJobDetails(QUERY, objectName, XML), enablePkChunking = enablePkChunking);
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 XmlQueryOperator xmlQueryOperator = new(job, self.salesforceConfiguration);
                 return xmlQueryOperator;
             } else {
@@ -225,14 +225,14 @@ public type SalesforceBulkClient client object {
     # Create XML delete operator client.
     #
     # + objectName - Object operation applies 
-    # + return - XML delete operator client if successful else SalesforceError occured
+    # + return - XML delete operator client if successful else ConnectorError occured
     public remote function createXmlDeleteOperator(string objectName)
-    returns @tainted XmlDeleteOperator | SalesforceError {
-        xml | SalesforceError response = 
+    returns @tainted XmlDeleteOperator|ConnectorError {
+        xml|ConnectorError response =
         self.httpBaseClient->createXmlRecord([JOB], getXmlJobDetails(DELETE, objectName, XML));
         if (response is xml) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 XmlDeleteOperator xmlDeleteOperator = new(job, self.salesforceConfiguration);
                 return xmlDeleteOperator;
             } else {
@@ -246,14 +246,14 @@ public type SalesforceBulkClient client object {
     # Create JSON insert operator client.
     #
     # + objectName - Object operation applies 
-    # + return - JSON insert operator client if successful else SalesforceError occured
+    # + return - JSON insert operator client if successful else ConnectorError occured
     public remote function createJsonInsertOperator(string objectName)
-    returns @tainted JsonInsertOperator | SalesforceError {
-        json | SalesforceError response = 
+    returns @tainted JsonInsertOperator|ConnectorError {
+        json|ConnectorError response =
         self.httpBaseClient->createJsonRecord([JOB], getJsonJobDetails(INSERT, objectName));
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 JsonInsertOperator jsonInsertOperator = new(job, self.salesforceConfiguration);
                 return jsonInsertOperator;
             } else {
@@ -268,14 +268,14 @@ public type SalesforceBulkClient client object {
     #
     # + objectName - Object operation applies 
     # + externalIdFieldName - externalIdFieldName Parameter Description 
-    # + return - JSON upsert operator client if successful else SalesforceError occured
+    # + return - JSON upsert operator client if successful else ConnectorError occured
     public remote function createJsonUpsertOperator(string objectName, string externalIdFieldName)
-    returns @tainted JsonUpsertOperator | SalesforceError {
-        json | SalesforceError response = self.httpBaseClient->createJsonRecord([JOB], 
+    returns @tainted JsonUpsertOperator|ConnectorError {
+        json|ConnectorError response = self.httpBaseClient->createJsonRecord([JOB],
         getJsonJobDetails(UPSERT, objectName, extIdFieldName = externalIdFieldName));
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 JsonUpsertOperator jsonUpsertOperator = new(job, self.salesforceConfiguration);
                 return jsonUpsertOperator;
             } else {
@@ -289,14 +289,14 @@ public type SalesforceBulkClient client object {
     # Create XML update operator client.
     #
     # + objectName - Object operation applies 
-    # + return - JSON update operator client if successful else SalesforceError occured
+    # + return - JSON update operator client if successful else ConnectorError occured
     public remote function createJsonUpdateOperator(string objectName)
-    returns @tainted JsonUpdateOperator | SalesforceError {
-        json | SalesforceError response = 
+    returns @tainted JsonUpdateOperator|ConnectorError {
+        json|ConnectorError response =
         self.httpBaseClient->createJsonRecord([JOB], getJsonJobDetails(UPDATE, objectName));
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 JsonUpdateOperator jsonUpdateOperator = new(job, self.salesforceConfiguration);
                 return jsonUpdateOperator;
             } else {
@@ -311,15 +311,15 @@ public type SalesforceBulkClient client object {
     #
     # + enablePkChunking - enablePkChunking Parameter Description 
     # + objectName - Object operation applies 
-    # + return - JSON query operator client if successful else SalesforceError occured
+    # + return - JSON query operator client if successful else ConnectorError occured
     public remote function createJsonQueryOperator(string objectName, 
-    boolean enablePkChunking = false) returns @tainted JsonQueryOperator | SalesforceError {
-        json | SalesforceError response = 
+    boolean enablePkChunking = false) returns @tainted JsonQueryOperator|ConnectorError {
+        json|ConnectorError response =
         self.httpBaseClient->createJsonRecord([JOB], <@untainted> getJsonJobDetails(QUERY, objectName), 
         enablePkChunking = enablePkChunking);
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 JsonQueryOperator jsonQueryOperator = new(job, self.salesforceConfiguration);
                 return jsonQueryOperator;
             } else {
@@ -333,14 +333,14 @@ public type SalesforceBulkClient client object {
     # Create XML delete operator client.
     #
     # + objectName - Object operation applies 
-    # + return - JSON delete operator client if successful else SalesforceError occured
+    # + return - JSON delete operator client if successful else ConnectorError occured
     public remote function createJsonDeleteOperator(string objectName)
-    returns @tainted JsonDeleteOperator | SalesforceError {
-        json | SalesforceError response = 
+    returns @tainted JsonDeleteOperator|ConnectorError {
+        json|ConnectorError response =
         self.httpBaseClient->createJsonRecord([JOB], getJsonJobDetails(DELETE, objectName));
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
-            if (job is Job) {
+            JobInfo|ConnectorError job = getJob(response);
+            if (job is JobInfo) {
                 JsonDeleteOperator jsonDeleteOperator = new(job, self.salesforceConfiguration);
                 return jsonDeleteOperator;
             } else {

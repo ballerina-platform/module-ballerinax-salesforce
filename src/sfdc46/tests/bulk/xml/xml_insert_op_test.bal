@@ -47,64 +47,64 @@ function testXmlInsertOperator() {
     string jsonContactsFilePath = "src/sfdc46/tests/resources/contacts.xml";
 
     // Create JSON insert operator.
-    XmlInsertOperator|SalesforceError xmlInsertOperator = sfBulkClient->createXmlInsertOperator("Contact");
+    XmlInsertOperator|ConnectorError xmlInsertOperator = sfBulkClient->createXmlInsertOperator("Contact");
 
     if (xmlInsertOperator is XmlInsertOperator) {
         string batchIdUsingXml = EMPTY_STRING;
         string batchIdUsingXmlFile = EMPTY_STRING;
 
         // Upload the json contacts.
-        Batch|SalesforceError batchUsingXml = xmlInsertOperator->insert(contacts);
-        if (batchUsingXml is Batch) {
+        BatchInfo|ConnectorError batchUsingXml = xmlInsertOperator->insert(contacts);
+        if (batchUsingXml is BatchInfo) {
             test:assertTrue(batchUsingXml.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchIdUsingXml = batchUsingXml.id;
         } else {
-            test:assertFail(msg = batchUsingXml.message);
+            test:assertFail(msg = batchUsingXml.detail()?.message.toString());
         }
 
         // Upload json contacts as a file.
-        Batch|SalesforceError batchUsingXmlFile = xmlInsertOperator->insertFile(jsonContactsFilePath);
-        if (batchUsingXmlFile is Batch) {
+        BatchInfo|ConnectorError batchUsingXmlFile = xmlInsertOperator->insertFile(jsonContactsFilePath);
+        if (batchUsingXmlFile is BatchInfo) {
             test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
             batchIdUsingXmlFile = batchUsingXmlFile.id;
         } else {
-            test:assertFail(msg = batchUsingXmlFile.message);
+            test:assertFail(msg = batchUsingXmlFile.detail()?.message.toString());
         }
 
         // Get job information.
-        Job|SalesforceError job = xmlInsertOperator->getJobInfo();
-        if (job is Job) {
+        JobInfo|ConnectorError job = xmlInsertOperator->getJobInfo();
+        if (job is JobInfo) {
             test:assertTrue(job.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = job.message);
+            test:assertFail(msg = job.detail()?.message.toString());
         }
 
         // Close job.
-        Job|SalesforceError closedJob = xmlInsertOperator->closeJob();
-        if (closedJob is Job) {
+        JobInfo|ConnectorError closedJob = xmlInsertOperator->closeJob();
+        if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.message);
+            test:assertFail(msg = closedJob.detail()?.message.toString());
         }
 
         // Get batch information.
-        Batch|SalesforceError batchInfo = xmlInsertOperator->getBatchInfo(batchIdUsingXml);
-        if (batchInfo is Batch) {
+        BatchInfo|ConnectorError batchInfo = xmlInsertOperator->getBatchInfo(batchIdUsingXml);
+        if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchIdUsingXml, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.message);
+            test:assertFail(msg = batchInfo.detail()?.message.toString());
         }
 
         // Get informations of all batches of this job.
-        BatchInfo|SalesforceError allBatchInfo = xmlInsertOperator->getAllBatches();
-        if (allBatchInfo is BatchInfo) {
-            test:assertTrue(allBatchInfo.batchInfoList.length() == 2, msg = "Getting all batches info failed.");
+        BatchInfo[]|ConnectorError allBatchInfo = xmlInsertOperator->getAllBatches();
+        if (allBatchInfo is BatchInfo[]) {
+            test:assertTrue(allBatchInfo.length() == 2, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = allBatchInfo.message);
+            test:assertFail(msg = allBatchInfo.detail()?.message.toString());
         }
 
         // Retrieve the json batch request.
-        xml|SalesforceError batchRequest = xmlInsertOperator->getBatchRequest(batchIdUsingXml);
+        xml|ConnectorError batchRequest = xmlInsertOperator->getBatchRequest(batchIdUsingXml);
         if (batchRequest is xml) {
             foreach var xmlBatch in batchRequest.*.elements() {
                 if (xmlBatch is xml) {
@@ -117,26 +117,26 @@ function testXmlInsertOperator() {
                 }
             }
         } else {
-            test:assertFail(msg = batchRequest.message);
+            test:assertFail(msg = batchRequest.detail()?.message.toString());
         }
 
         // Get the results of the batch
-        Result[]|SalesforceError batchResult = xmlInsertOperator->getResult(batchIdUsingXml, noOfRetries);
+        Result[]|ConnectorError batchResult = xmlInsertOperator->getResult(batchIdUsingXml, noOfRetries);
 
         if (batchResult is Result[]) {
             test:assertTrue(checkBatchResults(batchResult), msg = "Invalid batch result.");                
         } else {
-            test:assertFail(msg = batchResult.message);
+            test:assertFail(msg = batchResult.detail()?.message.toString());
         }
 
         // Abort job.
-        Job|SalesforceError abortedJob = xmlInsertOperator->abortJob();
-        if (abortedJob is Job) {
+        JobInfo|ConnectorError abortedJob = xmlInsertOperator->abortJob();
+        if (abortedJob is JobInfo) {
             test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
         } else {
-            test:assertFail(msg = abortedJob.message);
+            test:assertFail(msg = abortedJob.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = xmlInsertOperator.message);
+        test:assertFail(msg = xmlInsertOperator.detail()?.message.toString());
     }
 }

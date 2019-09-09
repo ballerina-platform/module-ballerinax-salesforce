@@ -50,54 +50,54 @@ function testJsonUpdateOperator() {
     ];
 
     // Create JSON update operator.
-    JsonUpdateOperator|SalesforceError jsonUpdateOperator = sfBulkClient->createJsonUpdateOperator("Contact");
+    JsonUpdateOperator|ConnectorError jsonUpdateOperator = sfBulkClient->createJsonUpdateOperator("Contact");
 
     if (jsonUpdateOperator is JsonUpdateOperator) {
         string batchIdUsingJson = EMPTY_STRING;
 
         // Upload the json contacts.
-        Batch|SalesforceError batchUsingJson = jsonUpdateOperator->update(<@untainted> contacts);
-        if (batchUsingJson is Batch) {
+        BatchInfo|ConnectorError batchUsingJson = jsonUpdateOperator->update(<@untainted> contacts);
+        if (batchUsingJson is BatchInfo) {
             test:assertTrue(batchUsingJson.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchIdUsingJson = batchUsingJson.id;
         } else {
-            test:assertFail(msg = batchUsingJson.message);
+            test:assertFail(msg = batchUsingJson.detail()?.message.toString());
         }
 
         // Get job information.
-        Job|SalesforceError job = jsonUpdateOperator->getJobInfo();
-        if (job is Job) {
+        JobInfo|ConnectorError job = jsonUpdateOperator->getJobInfo();
+        if (job is JobInfo) {
             test:assertTrue(job.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = job.message);
+            test:assertFail(msg = job.detail()?.message.toString());
         }
 
         // Close job.
-        Job|SalesforceError closedJob = jsonUpdateOperator->closeJob();
-        if (closedJob is Job) {
+        JobInfo|ConnectorError closedJob = jsonUpdateOperator->closeJob();
+        if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.message);
+            test:assertFail(msg = closedJob.detail()?.message.toString());
         }
 
         // Get batch information.
-        Batch|SalesforceError batchInfo = jsonUpdateOperator->getBatchInfo(batchIdUsingJson);
-        if (batchInfo is Batch) {
+        BatchInfo|ConnectorError batchInfo = jsonUpdateOperator->getBatchInfo(batchIdUsingJson);
+        if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchIdUsingJson, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.message);
+            test:assertFail(msg = batchInfo.detail()?.message.toString());
         }
 
         // Get informations of all batches of this job.
-        BatchInfo|SalesforceError allBatchInfo = jsonUpdateOperator->getAllBatches();
-        if (allBatchInfo is BatchInfo) {
-            test:assertTrue(allBatchInfo.batchInfoList.length() > 0, msg = "Getting all batches info failed.");
+        BatchInfo[]|ConnectorError allBatchInfo = jsonUpdateOperator->getAllBatches();
+        if (allBatchInfo is BatchInfo[]) {
+            test:assertTrue(allBatchInfo.length() > 0, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = allBatchInfo.message);
+            test:assertFail(msg = allBatchInfo.detail()?.message.toString());
         }
 
         // Retrieve the json batch request.
-        json|SalesforceError batchRequest = jsonUpdateOperator->getBatchRequest(batchIdUsingJson);
+        json|ConnectorError batchRequest = jsonUpdateOperator->getBatchRequest(batchIdUsingJson);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]> batchRequest;
             if (batchRequestArr is json[]) {
@@ -106,27 +106,27 @@ function testJsonUpdateOperator() {
                 test:assertFail(msg = batchRequestArr.toString());
             }
         } else {
-            test:assertFail(msg = batchRequest.message);
+            test:assertFail(msg = batchRequest.detail()?.message.toString());
         }
 
         // Get the results of the batch
-        Result[]|SalesforceError batchResult = jsonUpdateOperator->getResult(batchIdUsingJson, noOfRetries);
+        Result[]|ConnectorError batchResult = jsonUpdateOperator->getResult(batchIdUsingJson, noOfRetries);
 
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Update result was not successful.");
         } else {
-            test:assertFail(msg = batchResult.message);
+            test:assertFail(msg = batchResult.detail()?.message.toString());
         }
 
         // Abort job.
-        Job|SalesforceError abortedJob = jsonUpdateOperator->abortJob();
-        if (abortedJob is Job) {
+        JobInfo|ConnectorError abortedJob = jsonUpdateOperator->abortJob();
+        if (abortedJob is JobInfo) {
             test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
         } else {
-            test:assertFail(msg = abortedJob.message);
+            test:assertFail(msg = abortedJob.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = jsonUpdateOperator.message);
+        test:assertFail(msg = jsonUpdateOperator.detail()?.message.toString());
     }
 }

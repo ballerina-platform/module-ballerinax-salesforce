@@ -24,7 +24,7 @@ function testXmlQueryOperator() {
     log:printInfo("salesforceBulkClient -> XmlQueryOperator");
     
     // Create JSON insert operator.
-    XmlQueryOperator|SalesforceError xmlQueryOperator = sfBulkClient->createXmlQueryOperator("Contact");
+    XmlQueryOperator|ConnectorError xmlQueryOperator = sfBulkClient->createXmlQueryOperator("Contact");
     // Query string
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 05'";
 
@@ -32,74 +32,74 @@ function testXmlQueryOperator() {
         string batchId = EMPTY_STRING;
 
         // Create json query batch.
-        Batch|SalesforceError batch = xmlQueryOperator->query(queryStr);
-        if (batch is Batch) {
+        BatchInfo|ConnectorError batch = xmlQueryOperator->query(queryStr);
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Creating query batch failed.");
             batchId = batch.id;
         } else {
-            test:assertFail(msg = batch.message);
+            test:assertFail(msg = batch.detail()?.message.toString());
         }
 
         // Get job information.
-        Job|SalesforceError jobInfo = xmlQueryOperator->getJobInfo();
-        if (jobInfo is Job) {
+        JobInfo|ConnectorError jobInfo = xmlQueryOperator->getJobInfo();
+        if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.message);
+            test:assertFail(msg = jobInfo.detail()?.message.toString());
         }
 
         // Close job.
-        Job|SalesforceError closedJob = xmlQueryOperator->closeJob();
-        if (closedJob is Job) {
+        JobInfo|ConnectorError closedJob = xmlQueryOperator->closeJob();
+        if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.message);
+            test:assertFail(msg = closedJob.detail()?.message.toString());
         }
 
         // Get batch information.
-        Batch|SalesforceError batchInfo = xmlQueryOperator->getBatchInfo(batchId);
-        if (batchInfo is Batch) {
+        BatchInfo|ConnectorError batchInfo = xmlQueryOperator->getBatchInfo(batchId);
+        if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.message);
+            test:assertFail(msg = batchInfo.detail()?.message.toString());
         }
 
         // Get informations of all batches of this job.
-        BatchInfo|SalesforceError allBatchInfo = xmlQueryOperator->getAllBatches();
-        if (allBatchInfo is BatchInfo) {
-            test:assertTrue(allBatchInfo.batchInfoList.length() == 1, msg = "Getting all batches info failed.");
+        BatchInfo[]|ConnectorError allBatchInfo = xmlQueryOperator->getAllBatches();
+        if (allBatchInfo is BatchInfo[]) {
+            test:assertTrue(allBatchInfo.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = allBatchInfo.message);
+            test:assertFail(msg = allBatchInfo.detail()?.message.toString());
         }
 
         // Get the result list.
-        ResultList|SalesforceError resultList = xmlQueryOperator->getResultList(batchId, noOfRetries);
+        string[]|ConnectorError resultList = xmlQueryOperator->getResultList(batchId, noOfRetries);
 
-        if (resultList is ResultList) {
-            test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed, resultList=" 
+        if (resultList is string[]) {
+            test:assertTrue(resultList.length() > 0, msg = "Getting query result list failed, resultList=" 
                 + resultList.toString());
 
             // Get results.
-            xml|SalesforceError result = xmlQueryOperator->getResult(batchId, resultList.result[0]);
+            xml|ConnectorError result = xmlQueryOperator->getResult(batchId, resultList[0]);
 
             if (result is xml) {
                 xml records = result[getElementNameWithNamespace("records")];
                 test:assertTrue(records.*.elements().length() > 0, msg = "Getting query result failed.");
             } else {
-                test:assertFail(msg = result.message);
+                test:assertFail(msg = result.detail()?.message.toString());
             }
         } else {
-            test:assertFail(msg = resultList.message);
+            test:assertFail(msg = resultList.detail()?.message.toString());
         }
 
         // Abort job.
-        Job|SalesforceError abortedJob = xmlQueryOperator->abortJob();
-        if (abortedJob is Job) {
+        JobInfo|ConnectorError abortedJob = xmlQueryOperator->abortJob();
+        if (abortedJob is JobInfo) {
             test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
         } else {
-            test:assertFail(msg = abortedJob.message);
+            test:assertFail(msg = abortedJob.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = xmlQueryOperator.message);
+        test:assertFail(msg = xmlQueryOperator.detail()?.message.toString());
     }
 }
