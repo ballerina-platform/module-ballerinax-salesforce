@@ -95,7 +95,7 @@ sfdc46:Client salesforceClient = new(sfConfig);
 
 After the create a `ballerina.conf` file and enter your credentials as mentioned below. These configs will be used in
 the above Salesforce configuration.
-```ballerina
+```
 EP_URL = ""
 ACCESS_TOKEN = ""
 CLIENT_ID = ""
@@ -117,7 +117,7 @@ var createReponse = salesforceClient->createAccount(account);
 ```
 
 The response from `createAccount` is either the string ID of the created account (if the account was created 
-successfully) or `SalesforceConnectorError` (if the account creation was unsuccessful).
+successfully) or `ConnectorError` (if the account creation was unsuccessful).
 
 ```ballerina
 if (createReponse is string) {
@@ -137,7 +137,7 @@ var response = salesforceClient->getQueryResult(sampleQuery);
 ```
 
 The response from `getQueryResult` is either a JSON object with total size, execution status, resulting records, and 
-URL to get next record set (if query execution was successful) or `SalesforceConnectorError` (if the query execution 
+URL to get next record set (if query execution was successful) or `ConnectorError` (if the query execution 
 was unsuccessful).
 
 ```ballerina
@@ -151,7 +151,7 @@ if (response is json) {
 }
 ```
 The `createLead` remote function creates a Lead SObject. It returns the lead ID if successful or 
-`SalesforceConnectorError` if unsuccessful.
+`ConnectorError` if unsuccessful.
 
 ```ballerina
 json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
@@ -166,8 +166,8 @@ if (createResponse is string) {
 **Salesforce Bulk Operations**
 
 The `createSalesforceBulkClient` remote function creates the salesforce bulk client which facilitates bulk operations.
-Bulk client can create appropriate operator Corresponding to the data type. The `createCsvInsertOperator` remote function
-creates Insert operator for CSV content type.
+Bulk client can create appropriate operator Corresponding to the data type. The `createCsvInsertOperator` remote 
+function creates Insert operator for CSV content type.
 
 ```ballerina
 // Create salesforce bulk client.
