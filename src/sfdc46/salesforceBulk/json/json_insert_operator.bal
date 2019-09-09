@@ -33,7 +33,7 @@ public type JsonInsertOperator client object {
     # Create JSON insert batch.
     #
     # + payload - insertion data in JSON format
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function insert(json payload) returns @tainted BatchInfo|ConnectorError {
         json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id,
             <@untainted> BATCH], payload);
@@ -49,7 +49,7 @@ public type JsonInsertOperator client object {
     # Create JSON insert batch using a JSON file.
     #
     # + filePath - insertion JSON file path
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function insertFile(string filePath) returns @tainted BatchInfo|ConnectorError {
         if (filepath:extension(filePath) == "json") {
             io:ReadableByteChannel|io:Error rbc = io:openReadableFile(filePath);
@@ -98,7 +98,7 @@ public type JsonInsertOperator client object {
 
     # Get JSON insert operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
         json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
         if (response is json) {
@@ -111,7 +111,7 @@ public type JsonInsertOperator client object {
 
     # Close JSON insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
         json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
             JSON_STATE_CLOSED_PAYLOAD);
@@ -125,7 +125,7 @@ public type JsonInsertOperator client object {
 
     # Abort JSON insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
         json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
             JSON_STATE_ABORTED_PAYLOAD);
@@ -140,7 +140,7 @@ public type JsonInsertOperator client object {
     # Get JSON insert batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
         json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
             <@untainted> BATCH, batchId]);
