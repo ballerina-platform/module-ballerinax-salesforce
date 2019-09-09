@@ -24,7 +24,7 @@ function testXmlDeleteOperator() {
     log:printInfo("salesforceBulkClient -> XmlDeleteOperator");
     
     // Create JSON delete operator.
-    XmlDeleteOperator|SalesforceError xmlDeleteOperator = sfBulkClient->createXmlDeleteOperator("Contact");
+    XmlDeleteOperator|ConnectorError xmlDeleteOperator = sfBulkClient->createXmlDeleteOperator("Contact");
     // Get contacts to be deleted.
     xml deleteContacts = getDeleteContactsAsXml();
 
@@ -32,49 +32,49 @@ function testXmlDeleteOperator() {
         string batchId = EMPTY_STRING;
 
         // Create json delete batch.
-        Batch|SalesforceError batch = xmlDeleteOperator->delete(<@untainted> deleteContacts);
-        if (batch is Batch) {
+        BatchInfo|ConnectorError batch = xmlDeleteOperator->delete(<@untainted> deleteContacts);
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Creating query batch failed.");
             batchId = batch.id;
         } else {
-            test:assertFail(msg = batch.message);
+            test:assertFail(msg = batch.detail()?.message.toString());
         }
 
         // Get job information.
-        Job|SalesforceError jobInfo = xmlDeleteOperator->getJobInfo();
-        if (jobInfo is Job) {
+        JobInfo|ConnectorError jobInfo = xmlDeleteOperator->getJobInfo();
+        if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.message);
+            test:assertFail(msg = jobInfo.detail()?.message.toString());
         }
 
         // Close job.
-        Job|SalesforceError closedJob = xmlDeleteOperator->closeJob();
-        if (closedJob is Job) {
+        JobInfo|ConnectorError closedJob = xmlDeleteOperator->closeJob();
+        if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.message);
+            test:assertFail(msg = closedJob.detail()?.message.toString());
         }
 
         // Get batch information.
-        Batch|SalesforceError batchInfo = xmlDeleteOperator->getBatchInfo(batchId);
-        if (batchInfo is Batch) {
+        BatchInfo|ConnectorError batchInfo = xmlDeleteOperator->getBatchInfo(batchId);
+        if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.message);
+            test:assertFail(msg = batchInfo.detail()?.message.toString());
         }
 
         // Get informations of all batches of this job.
-        BatchInfo|SalesforceError allBatchInfo = xmlDeleteOperator->getAllBatches();
+        BatchInfo[]|ConnectorError allBatchInfo = xmlDeleteOperator->getAllBatches();
 
-        if (allBatchInfo is BatchInfo) {
-            test:assertTrue(allBatchInfo.batchInfoList.length() == 1, msg = "Getting all batches info failed.");
+        if (allBatchInfo is BatchInfo[]) {
+            test:assertTrue(allBatchInfo.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = allBatchInfo.message);
+            test:assertFail(msg = allBatchInfo.detail()?.message.toString());
         }
 
         // Get the batch request.
-        xml|SalesforceError batchRequest = xmlDeleteOperator->getBatchRequest(batchId);
+        xml|ConnectorError batchRequest = xmlDeleteOperator->getBatchRequest(batchId);
         if (batchRequest is xml) {
             foreach var xmlBatch in batchRequest.*.elements() {
 
@@ -87,26 +87,26 @@ function testXmlDeleteOperator() {
                 }
             }
         } else {
-            test:assertFail(msg = batchRequest.message);
+            test:assertFail(msg = batchRequest.detail()?.message.toString());
         }
 
         // Get batch results.
-        Result[]|SalesforceError batchResults = xmlDeleteOperator->getResult(batchId, noOfRetries);
+        Result[]|ConnectorError batchResults = xmlDeleteOperator->getResult(batchId, noOfRetries);
 
         if (batchResults is Result[]) {
             test:assertTrue(checkBatchResults(batchResults), msg = "Invalid batch result.");  
         } else {
-            test:assertFail(msg = batchResults.message);
+            test:assertFail(msg = batchResults.detail()?.message.toString());
         }
 
         // Abort job.
-        Job|SalesforceError abortedJob = xmlDeleteOperator->abortJob();
-        if (abortedJob is Job) {
+        JobInfo|ConnectorError abortedJob = xmlDeleteOperator->abortJob();
+        if (abortedJob is JobInfo) {
             test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
         } else {
-            test:assertFail(msg = abortedJob.message);
+            test:assertFail(msg = abortedJob.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = xmlDeleteOperator.message);
+        test:assertFail(msg = xmlDeleteOperator.detail()?.message.toString());
     }
 }

@@ -20,14 +20,13 @@ import ballerina/encoding;
 import ballerina/filepath;
 import ballerina/io;
 import ballerina/log;
-import ballerina/http;
 
 # CSV insert operator client.
 public type CsvInsertOperator client object {
-    Job job;
+    JobInfo job;
     SalesforceBaseClient httpBaseClient;
 
-    public function __init(Job job, SalesforceConfiguration salesforceConfig) {
+    public function __init(JobInfo job, SalesforceConfiguration salesforceConfig) {
         self.job = job;
         self.httpBaseClient = new(salesforceConfig);
     }
@@ -35,11 +34,11 @@ public type CsvInsertOperator client object {
     # Create CSV insert batch.
     #
     # + csvContent - insertion data in CSV format
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function insert(string csvContent) returns @tainted Batch | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], csvContent);
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function insert(string csvContent) returns @tainted BatchInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], csvContent);
         if (xmlResponse is xml) {
-            Batch | SalesforceError batch = getBatch(xmlResponse);
+            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
             return batch;
         } else {
             return xmlResponse;
@@ -49,57 +48,62 @@ public type CsvInsertOperator client object {
     # Create CSV insert batch using a CSV file.
     #
     # + filePath - insertion CSV file path
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function insertFile(string filePath) returns @tainted Batch | SalesforceError {
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function insertFile(string filePath) returns @tainted BatchInfo|ConnectorError {
         if (filepath:extension(filePath) == "csv") {
-            io:ReadableByteChannel|io:GenericError|io:ConnectionTimedOutError rbc = io:openReadableFile(filePath);
+            io:ReadableByteChannel|io:Error rbc = io:openReadableFile(filePath);
 
-            if (rbc is io:GenericError|io:ConnectionTimedOutError) {
-                log:printError("Error occurred while reading the csv file, file: " + filePath, err = rbc);
-                return getSalesforceError("Error occurred while reading the csv file, file: " + filePath, 
-                    http:STATUS_BAD_REQUEST.toString());
+            if (rbc is io:Error) {
+                string errMsg = "Error occurred while reading the csv file, file: " + filePath;
+                log:printError(errMsg, err = rbc);
+                IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rbc);
+                return ioError;
             } else {
                 // Read content.
-                int readCount = 1;
                 byte[] readContent;
                 string textContent = "";
-                while (readCount > 0) {
-                    [byte[], int]|io:GenericError|io:ConnectionTimedOutError result = rbc.read(1000);
-                    if (result is io:GenericError|io:ConnectionTimedOutError) {
-                        log:printError("Error occurred while reading the csv file, file: " + filePath, err = result);
-                        return getSalesforceError("Error occurred while reading the csv file, file: " + filePath, 
-                            http:STATUS_BAD_REQUEST.toString());
+                while (true) {
+                    byte[]|io:Error result = rbc.read(1000);
+                    if (result is io:EofError) {
+                        break;
+                    } else if (result is io:Error) {
+                        string errMsg = "Error occurred while reading the csv file, file: " + filePath;
+                        log:printError(errMsg, err = result);
+                        IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = result);
+                        return ioError;
                     } else {
-                        [readContent, readCount] = result;  
-                        textContent = textContent + encoding:byteArrayToString(readContent, "UTF-8");                      
+                        readContent = result;  
+                        textContent = textContent + encoding:encodeBase64Url(readContent);                      
                     }
                 }
                 // close channel.
                 closeRb(rbc);
 
-                xml | SalesforceError response = 
+                xml|ConnectorError response =
                 self.httpBaseClient->createCsvRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH], textContent);
 
                 if (response is xml) {
-                    Batch | SalesforceError batch = getBatch(response);
+                    BatchInfo|ConnectorError batch = getBatch(response);
                     return batch;
                 } else {
                     return response;
                 }
             }
         } else {
-            log:printError("Invalid file type, file: " + filePath);
-            return getSalesforceError("Invalid file type, file: " + filePath, http:STATUS_BAD_REQUEST.toString());
+            string errMsg = "Invalid file type, file: " + filePath;
+            log:printError(errMsg, err = ());
+            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR);
+            return ioError;
         }
     }
 
     # Get CSV insert operator job information.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function getJobInfo() returns @tainted Job | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
         if (xmlResponse is xml) {
-            Job | SalesforceError job = getJob(xmlResponse);
+            JobInfo|ConnectorError job = getJob(xmlResponse);
             return job;
         } else {
             return xmlResponse;
@@ -108,12 +112,12 @@ public type CsvInsertOperator client object {
 
     # Close CSV insert operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function closeJob() returns @tainted Job | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id], 
+    # + return - Job record if successful else ConnectorError occured
+    public remote function closeJob() returns @tainted JobInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
         XML_STATE_CLOSED_PAYLOAD);
         if (xmlResponse is xml) {
-            Job | SalesforceError job = getJob(xmlResponse);
+            JobInfo|ConnectorError job = getJob(xmlResponse);
             return job;
         } else {
             return xmlResponse;
@@ -122,12 +126,12 @@ public type CsvInsertOperator client object {
 
     # Abort CSV insert operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function abortJob() returns @tainted Job | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id], 
+    # + return - Job record if successful else ConnectorError occured
+    public remote function abortJob() returns @tainted JobInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
         XML_STATE_ABORTED_PAYLOAD);
         if (xmlResponse is xml) {
-            Job | SalesforceError job = getJob(xmlResponse);
+            JobInfo|ConnectorError job = getJob(xmlResponse);
             return job;
         } else {
             return xmlResponse;
@@ -137,11 +141,11 @@ public type CsvInsertOperator client object {
     # Get CSV insert batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function getBatchInfo(string batchId) returns @tainted Batch | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
         if (xmlResponse is xml) {
-            Batch | SalesforceError batch = getBatch(xmlResponse);
+            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
             return batch;
         } else {
             return xmlResponse;
@@ -150,11 +154,11 @@ public type CsvInsertOperator client object {
 
     # Get information of all batches of CSV insert operator job.
     #
-    # + return - BatchInfo record if successful else SalesforceError occured
-    public remote function getAllBatches() returns @tainted BatchInfo | SalesforceError {
-        xml | SalesforceError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
+    # + return - BatchInfo record if successful else ConnectorError occured
+    public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
+        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
         if (xmlResponse is xml) {
-            BatchInfo | SalesforceError batchInfo = getBatchInfo(xmlResponse);
+            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(xmlResponse);
             return batchInfo;
         } else {
             return xmlResponse;
@@ -164,8 +168,8 @@ public type CsvInsertOperator client object {
     # Retrieve the CSV batch request.
     #
     # + batchId - batch ID
-    # + return - CSV Batch request if successful else SalesforceError occured
-    public remote function getBatchRequest(string batchId) returns @tainted string | SalesforceError {
+    # + return - CSV Batch request if successful else ConnectorError occured
+    public remote function getBatchRequest(string batchId) returns @tainted string|ConnectorError {
         return self.httpBaseClient->getCsvRecord([JOB, self.job.id, BATCH, batchId, REQUEST]);
     }
 
@@ -174,9 +178,9 @@ public type CsvInsertOperator client object {
     # + batchId - batch ID
     # + numberOfTries - number of times checking the batch state
     # + waitTime - time between two tries in ms
-    # + return - Results array if successful else SalesforceError occured
+    # + return - Results array if successful else ConnectorError occured
     public remote function getResult(string batchId, int numberOfTries = 1, int waitTime = 3000) 
-        returns @tainted Result[]|SalesforceError {
+        returns @tainted Result[]|ConnectorError {
         return checkBatchStateAndGetResults(getBatchPointer, getResultsPointer, self, batchId, numberOfTries, waitTime);
     }
 };

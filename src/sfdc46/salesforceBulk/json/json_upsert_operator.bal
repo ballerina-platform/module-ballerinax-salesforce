@@ -18,10 +18,10 @@
 
 # JSON upsert operator client.
 public type JsonUpsertOperator client object {
-    Job job;
+    JobInfo job;
     SalesforceBaseClient httpBaseClient;
 
-    public function __init(Job job, SalesforceConfiguration salesforceConfig) {
+    public function __init(JobInfo job, SalesforceConfiguration salesforceConfig) {
         self.job = job;
         self.httpBaseClient = new(salesforceConfig);
     }
@@ -29,12 +29,12 @@ public type JsonUpsertOperator client object {
     # Create JSON upsert batch.
     #
     # + payload - upsert data in JSON format
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function upsert(json payload) returns @tainted Batch | SalesforceError {
-        json | SalesforceError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id, 
-        <@untainted> BATCH], payload);
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function upsert(json payload) returns @tainted BatchInfo|ConnectorError {
+        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id,
+            <@untainted> BATCH], payload);
         if (response is json) {
-            Batch | SalesforceError batch = getBatch(response);
+            BatchInfo|ConnectorError batch = getBatch(response);
             return batch;
         } else {
             return response;
@@ -43,11 +43,11 @@ public type JsonUpsertOperator client object {
 
     # Get JSON upsert operator job information.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function getJobInfo() returns @tainted Job | SalesforceError {
-        json | SalesforceError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
+        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
+            JobInfo|ConnectorError job = getJob(response);
             return job;
         } else {
             return response;
@@ -56,12 +56,12 @@ public type JsonUpsertOperator client object {
 
     # Close JSON upsert operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function closeJob() returns @tainted Job | SalesforceError {
-        json | SalesforceError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id], 
-        JSON_STATE_CLOSED_PAYLOAD);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function closeJob() returns @tainted JobInfo|ConnectorError {
+        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+            JSON_STATE_CLOSED_PAYLOAD);
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
+            JobInfo|ConnectorError job = getJob(response);
             return job;
         } else {
             return response;
@@ -70,12 +70,12 @@ public type JsonUpsertOperator client object {
 
     # Abort JSON upsert operator job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function abortJob() returns @tainted Job | SalesforceError {
-        json | SalesforceError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id], 
-        JSON_STATE_ABORTED_PAYLOAD);
+    # + return - Job record if successful else ConnectorError occured
+    public remote function abortJob() returns @tainted JobInfo|ConnectorError {
+        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+            JSON_STATE_ABORTED_PAYLOAD);
         if (response is json) {
-            Job | SalesforceError job = getJob(response);
+            JobInfo|ConnectorError job = getJob(response);
             return job;
         } else {
             return response;
@@ -85,12 +85,12 @@ public type JsonUpsertOperator client object {
     # Get JSON upsert batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function getBatchInfo(string batchId) returns @tainted Batch | SalesforceError {
-        json | SalesforceError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, 
-        <@untainted> BATCH, batchId]);
+    # + return - Batch record if successful else ConnectorError occured
+    public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
+        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
+            <@untainted> BATCH, batchId]);
         if (response is json) {
-            Batch | SalesforceError batch = getBatch(response);
+            BatchInfo|ConnectorError batch = getBatch(response);
             return batch;
         } else {
             return response;
@@ -99,12 +99,12 @@ public type JsonUpsertOperator client object {
 
     # Get information of all batches of JSON upsert operator job.
     #
-    # + return - BatchInfo record if successful else SalesforceError occured
-    public remote function getAllBatches() returns @tainted BatchInfo | SalesforceError {
-        json | SalesforceError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, 
-        <@untainted> BATCH]);
+    # + return - BatchInfo record if successful else ConnectorError occured
+    public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
+        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
+            <@untainted> BATCH]);
         if (response is json) {
-            BatchInfo | SalesforceError batchInfo = getBatchInfo(response);
+            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(response);
             return batchInfo;
         } else {
             return response;
@@ -114,10 +114,10 @@ public type JsonUpsertOperator client object {
     # Retrieve the JSON batch request.
     #
     # + batchId - batch ID
-    # + return - JSON Batch request if successful else SalesforceError occured
-    public remote function getBatchRequest(string batchId) returns @tainted json | SalesforceError {
+    # + return - JSON Batch request if successful else ConnectorError occured
+    public remote function getBatchRequest(string batchId) returns @tainted json|ConnectorError {
         return self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, batchId, 
-        <@untainted> REQUEST]);
+            <@untainted> REQUEST]);
     }
 
     # Get the results of the batch.
@@ -125,9 +125,9 @@ public type JsonUpsertOperator client object {
     # + batchId - batch ID
     # + numberOfTries - number of times checking the batch state
     # + waitTime - time between two tries in ms
-    # + return - Batch result as CSV if successful else SalesforceError occured
+    # + return - Batch result as CSV if successful else ConnectorError occured
     public remote function getResult(string batchId, int numberOfTries = 1, int waitTime = 3000) 
-        returns @tainted Result[]|SalesforceError {
+        returns @tainted Result[]|ConnectorError {
         return checkBatchStateAndGetResults(getBatchPointer, getResultsPointer, self, batchId, numberOfTries, waitTime);
     }
 };

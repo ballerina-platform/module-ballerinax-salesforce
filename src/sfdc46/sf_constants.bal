@@ -128,7 +128,7 @@ final string AMPERSAND = "&";
 final string FORWARD_SLASH = "/";
 
 // Error Codes
-final string SALESFORCE_ERROR_CODE = "(wso2/sfdc37)SalesforceConnectorError";
+const SALESFORCE_ERROR_CODE = "{wso2/salesforce}";
 
 // ================ Salesforce bulk client constants =======================================
 

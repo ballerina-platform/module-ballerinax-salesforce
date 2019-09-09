@@ -18,6 +18,7 @@
 
 import ballerina/log;
 import ballerina/http;
+import ballerina/encoding;
 
 # Returns the prepared URL.
 # + paths - An array of paths prefixes
@@ -51,7 +52,7 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
     foreach var name in queryParamNames {
         string value = queryParamValues[i];
 
-        var encoded = http:encode(value, ENCODING_CHARSET);
+        var encoded = encoding:encodeUriComponent(value, ENCODING_CHARSET);
 
         if (encoded is string) {
             if (first) {
@@ -69,65 +70,70 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
 
     return url;
 }
-# Returns the JSON result or SalesforceConnectorError.
-# + httpResponse - HTTP respone or HttpConnectorError
-# + expectPayload - true if json payload expected in response, if not false
-# + return - JSON result if successful, else SalesforceConnectorError occured
-function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload)
-returns @tainted json|SalesforceConnectorError {
-    json result = {};
 
+# Check HTTP response and return JSON payload if succesful, else set errors and return ConnectorError.
+# + httpResponse - HTTP respone or HttpConnectorError
+# + expectPayload - Payload is expected or not
+# + return - JSON result if successful, else ConnectorError occured
+function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
+    returns @tainted json|ConnectorError {
     if (httpResponse is http:Response) {
-        //if success
-        if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201 || httpResponse.statusCode == 204) {
+        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
+            || httpResponse.statusCode == http:STATUS_NO_CONTENT) {
+
             if (expectPayload) {
-                var jsonResponse = httpResponse.getJsonPayload();
+                json|error jsonResponse = httpResponse.getJsonPayload();
+
                 if (jsonResponse is json) {
                     return jsonResponse;
                 } else {
-                    log:printError("Error occurred when extracting JSON payload. Error: "
-                    + <string> jsonResponse.detail()["message"]);
-                    SalesforceConnectorError connectorError = { message: "", salesforceErrors: [] };
-                    connectorError.message = "Error occured while extracting Json payload!";
-                    return connectorError;
+                    log:printError(JSON_ACCESSING_ERROR_MSG, err = jsonResponse);
+                    HttpResponseHandlingError httpResponseHandlingFailed = error(HTTP_RESPONSE_HANDLING_ERROR,
+                        message = JSON_ACCESSING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
+                        cause = jsonResponse);
+                    return httpResponseHandlingFailed;
                 }
-            }
-        } else {
-            SalesforceConnectorError connectorError = { message: "", salesforceErrors: [] };
-            var jsonResponse = httpResponse.getJsonPayload();
-            if (jsonResponse is json) {
-                json[]|error errors = <json[]>jsonResponse;
 
-                if (errors is error) {
-                    log:printError("Error occurred when extracting JSON payload. Error: "
-                    + <string> errors.detail()["message"]);
-                    connectorError = { message: "", salesforceErrors: [] };
-                    connectorError.message = "Error occured while extracting Json payload!";
-                    return connectorError;
-                } else {
-                    int i = 0;
-                    foreach var err in errors {
-                        SalesforceError sfError = { message: err.message.toString(), errorCode:err.errorCode
-                        .toString() };
-                        connectorError.message = err.message.toString();
-                        connectorError.salesforceErrors[i] = sfError;
-                        i = i + 1;
-                    }
-                    return connectorError;
-                }
             } else {
-                log:printError("Error occurred when extracting errors from payload. Error: "
-                + <string> jsonResponse.detail()["message"]);
-                connectorError = { message: "", salesforceErrors: [] };
-                connectorError.message = "Error occured while extracting errors from payload!";
-                return connectorError;
+                json result = {};
+                return result;
             }
+
+        } else {
+            json|error jsonResponse = httpResponse.getJsonPayload();
+
+            if (jsonResponse is json) {
+                json[] errArr = <json[]> jsonResponse;
+
+                string errCodes = "";
+                string errMssgs = "";
+                int counter = 1;
+
+                foreach json err in errArr {
+                    errCodes = errCodes + err.errorCode.toString();
+                    errMssgs = errMssgs + err.message.toString();
+                    if (counter != errArr.length()) {
+                        errCodes = errCodes + ", ";
+                        errMssgs = errMssgs + ", ";
+                    }
+                    counter = counter + 1;
+                }
+
+                HttpResponseHandlingError httpResponseHandlingFailed = error(HTTP_RESPONSE_HANDLING_ERROR,
+                    message = errMssgs, errorCode = errCodes);
+                return httpResponseHandlingFailed;
+            } else {
+                log:printError(ERR_EXTRACTING_ERROR_MSG, err = jsonResponse);
+                HttpResponseHandlingError httpResponseHandlingFailed = error(HTTP_RESPONSE_HANDLING_ERROR,
+                    message = ERR_EXTRACTING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
+                    cause = jsonResponse);
+                return httpResponseHandlingFailed;
+            }
+
         }
     } else {
-        SalesforceConnectorError connectorError = {
-                message: "Http error -> message: " + <string> httpResponse.detail()["message"], salesforceErrors: []
-        };
-        return connectorError;
+        log:printError(HTTP_ERROR_MSG, err = httpResponse);
+        HttpError httpError = error(HTTP_ERROR, message = HTTP_ERROR_MSG, errorCode = HTTP_ERROR, cause = httpResponse);
+        return httpError;
     }
-    return result;
 }

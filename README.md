@@ -68,7 +68,7 @@ Note:- When you are setting up the connected app, select the following scopes un
 
 **Create Salesforce client**
 
-You can define the Salesforce configuration and create Salesforce client as mentioned below. 
+You can define the Salesforce configuration and create Salesforce client as mentioned below. secureSocketConfig is optional.
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 sfdc46:SalesforceConfiguration sfConfig = {
@@ -80,6 +80,12 @@ sfdc46:SalesforceConfiguration sfConfig = {
             clientSecret: config:getAsString("CLIENT_SECRET"),
             refreshToken: config:getAsString("REFRESH_TOKEN"),
             refreshUrl: config:getAsString("REFRESH_URL")
+        }
+    },
+    secureSocketConfig: {
+        trustStore: {
+            path: config:getAsString("TRUSTSTORE_PATH"),
+            password: config:getAsString("TRUSTSTORE_PASSWORD")
         }
     }
 };
@@ -97,6 +103,8 @@ CLIENT_ID = ""
 CLIENT_SECRET = ""
 REFRESH_TOKEN = ""
 REFRESH_URL = ""
+TRUSTSTORE_PATH = ""
+TRUSTSTORE_PASSWORD = ""
 ```
 
 **Salesforce CRUD Operations**
@@ -225,7 +233,7 @@ int waitTime = 3000; // Time between two tries in mili-seconds.
 sfdc46:Result[]|sfdc46:SalesforceError batchResult = csvInsertOperator->getResult(batchId, noOfRetries, waitTime);
 ```
 
-Likewise Salesforce bulk client provides following operations:
+Likewise Salesforce bulk client provides following operators:
 
 - CSV 
   - insert operator

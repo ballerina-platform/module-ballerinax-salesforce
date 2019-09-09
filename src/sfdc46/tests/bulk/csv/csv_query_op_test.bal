@@ -24,7 +24,7 @@ function testCsvQueryOperator() {
     log:printInfo("salesforceBulkClient -> CsvQueryOperator");
     
     // Create csv query operator.
-    CsvQueryOperator|SalesforceError csvQueryOperator = sfBulkClient->createCsvQueryOperator("Contact");
+    CsvQueryOperator|ConnectorError csvQueryOperator = sfBulkClient->createCsvQueryOperator("Contact");
     // Query string
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 04'";
 
@@ -32,71 +32,71 @@ function testCsvQueryOperator() {
         string batchId = EMPTY_STRING;
 
         // Create csv query batch.
-        Batch|SalesforceError batch = csvQueryOperator->query(queryStr);
-        if (batch is Batch) {
+        BatchInfo|ConnectorError batch = csvQueryOperator->query(queryStr);
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Creating query batch failed.");
             batchId = batch.id;
         } else {
-            test:assertFail(msg = batch.message);
+            test:assertFail(msg = batch.detail()?.message.toString());
         }
 
         // Get job information.
-        Job|SalesforceError jobInfo = csvQueryOperator->getJobInfo();
-        if (jobInfo is Job) {
-            test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
+        JobInfo|ConnectorError job = csvQueryOperator->getJobInfo();
+        if (job is JobInfo) {
+            test:assertTrue(job.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.message);
+            test:assertFail(msg = job.detail()?.message.toString());
         }
 
         // Close job.
-        Job|SalesforceError closedJob = csvQueryOperator->closeJob();
-        if (closedJob is Job) {
+        JobInfo|ConnectorError closedJob = csvQueryOperator->closeJob();
+        if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.message);
+            test:assertFail(msg = closedJob.detail()?.message.toString());
         }
 
         // Get batch information.
-        Batch|SalesforceError batchInfo = csvQueryOperator->getBatchInfo(batchId);
-        if (batchInfo is Batch) {
+        BatchInfo|ConnectorError batchInfo = csvQueryOperator->getBatchInfo(batchId);
+        if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.message);
+            test:assertFail(msg = batchInfo.detail()?.message.toString());
         }
 
         // Get informations of all batches of this job.
-        BatchInfo|SalesforceError allBatchInfo = csvQueryOperator->getAllBatches();
-        if (allBatchInfo is BatchInfo) {
-            test:assertTrue(allBatchInfo.batchInfoList.length() == 1, msg = "Getting all batches info failed.");
+        BatchInfo[]|ConnectorError allBatchInfo = csvQueryOperator->getAllBatches();
+        if (allBatchInfo is BatchInfo[]) {
+            test:assertTrue(allBatchInfo.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = allBatchInfo.message);
+            test:assertFail(msg = allBatchInfo.detail()?.message.toString());
         }
 
         // Get the result list.
-        ResultList|SalesforceError resultList = csvQueryOperator->getResultList(batchId, noOfRetries);
+        string[]|ConnectorError resultList = csvQueryOperator->getResultList(batchId, noOfRetries);
 
-        if (resultList is ResultList) {
-            test:assertTrue(resultList.result.length() > 0, msg = "Getting query result list failed.");
+        if (resultList is string[]) {
+            test:assertTrue(resultList.length() > 0, msg = "Getting query result list failed.");
 
             // Get results.
-            string|SalesforceError result = csvQueryOperator->getResult(batchId, resultList.result[0]);
+            string|ConnectorError result = csvQueryOperator->getResult(batchId, resultList[0]);
             if (result is string) {
                 test:assertTrue(result.length() > 0, msg = "Getting query result failed.");
             } else {
-                test:assertFail(msg = result.message);
+                test:assertFail(msg = result.detail()?.message.toString());
             }
         } else {
-            test:assertFail(msg = resultList.message);
+            test:assertFail(msg = resultList.detail()?.message.toString());
         }
 
         // Abort job.
-        Job|SalesforceError abortedJob = csvQueryOperator->abortJob();
-        if (abortedJob is Job) {
+        JobInfo|ConnectorError abortedJob = csvQueryOperator->abortJob();
+        if (abortedJob is JobInfo) {
             test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
         } else {
-            test:assertFail(msg = abortedJob.message);
+            test:assertFail(msg = abortedJob.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = csvQueryOperator.message);
+        test:assertFail(msg = csvQueryOperator.detail()?.message.toString());
     }
 }

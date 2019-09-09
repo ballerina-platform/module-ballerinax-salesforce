@@ -24,7 +24,7 @@ function testCsvDeleteOperator() {
     log:printInfo("salesforceBulkClient -> CsvDeleteOperator");
     
     // Create csv delete operator.
-    CsvDeleteOperator|SalesforceError csvDeleteOperator = sfBulkClient->createCsvDeleteOperator("Contact");
+    CsvDeleteOperator|ConnectorError csvDeleteOperator = sfBulkClient->createCsvDeleteOperator("Contact");
     // Get contacts to be deleted.
     string deleteContacts = getDeleteContactsAsText();
 
@@ -32,71 +32,71 @@ function testCsvDeleteOperator() {
         string batchId = EMPTY_STRING;
 
         // Create csv delete batch.
-        Batch|SalesforceError batch = csvDeleteOperator->delete(<@untainted> deleteContacts);
-        if (batch is Batch) {
+        BatchInfo|ConnectorError batch = csvDeleteOperator->delete(<@untainted> deleteContacts);
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Creating query batch failed.");
             batchId = batch.id;
         } else {
-            test:assertFail(msg = batch.message);
+            test:assertFail(msg = batch.detail()?.message.toString());
         }
 
         // Get job information.
-        Job|SalesforceError jobInfo = csvDeleteOperator->getJobInfo();
-        if (jobInfo is Job) {
+        JobInfo|ConnectorError jobInfo = csvDeleteOperator->getJobInfo();
+        if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.message);
+            test:assertFail(msg = jobInfo.detail()?.message.toString());
         }
 
         // Close job.
-        Job|SalesforceError closedJob = csvDeleteOperator->closeJob();
-        if (closedJob is Job) {
+        JobInfo|ConnectorError closedJob = csvDeleteOperator->closeJob();
+        if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.message);
+            test:assertFail(msg = closedJob.detail()?.message.toString());
         }
 
         // Get batch information.
-        Batch|SalesforceError batchInfo = csvDeleteOperator->getBatchInfo(batchId);
-        if (batchInfo is Batch) {
+        BatchInfo|ConnectorError batchInfo = csvDeleteOperator->getBatchInfo(batchId);
+        if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.message);
+            test:assertFail(msg = batchInfo.detail()?.message.toString());
         }
 
         // Get informations of all batches of this job.
-        BatchInfo|SalesforceError allBatchInfo = csvDeleteOperator->getAllBatches();
-        if (allBatchInfo is BatchInfo) {
-            test:assertTrue(allBatchInfo.batchInfoList.length() == 1, msg = "Getting all batches info failed.");
+        BatchInfo[]|ConnectorError allBatchInfo = csvDeleteOperator->getAllBatches();
+        if (allBatchInfo is BatchInfo[]) {
+            test:assertTrue(allBatchInfo.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = allBatchInfo.message);
+            test:assertFail(msg = allBatchInfo.detail()?.message.toString());
         }
 
         // Get the batch request.
-        string|SalesforceError batchRequest = csvDeleteOperator->getBatchRequest(batchId);
+        string|ConnectorError batchRequest = csvDeleteOperator->getBatchRequest(batchId);
         if (batchRequest is string) {
             test:assertTrue(batchRequest.length() > 0, msg = "Getting batch request failed.");
         } else {
-            test:assertFail(msg = batchRequest.message);
+            test:assertFail(msg = batchRequest.detail()?.message.toString());
         }
 
         // Get batch results.
-        Result[]|SalesforceError batchResults = csvDeleteOperator->getResult(batchId, noOfRetries);
+        Result[]|ConnectorError batchResults = csvDeleteOperator->getResult(batchId, noOfRetries);
         if (batchResults is Result[]) {
             test:assertTrue(batchResults.length() > 0, msg = "Getting batch results failed.");
             test:assertTrue(checkBatchResults(batchResults), "Delete result was not successful.");
         } else {
-            test:assertFail(msg = batchResults.message);
+            test:assertFail(msg = batchResults.detail()?.message.toString());
         }
 
         // Abort job.
-        Job|SalesforceError abortedJob = csvDeleteOperator->abortJob();
-        if (abortedJob is Job) {
+        JobInfo|ConnectorError abortedJob = csvDeleteOperator->abortJob();
+        if (abortedJob is JobInfo) {
             test:assertTrue(abortedJob.state == "Aborted", msg = "Aborting job failed.");
         } else {
-            test:assertFail(msg = abortedJob.message);
+            test:assertFail(msg = abortedJob.detail()?.message.toString());
         }
     } else {
-        test:assertFail(msg = csvDeleteOperator.message);
+        test:assertFail(msg = csvDeleteOperator.detail()?.message.toString());
     }
 }

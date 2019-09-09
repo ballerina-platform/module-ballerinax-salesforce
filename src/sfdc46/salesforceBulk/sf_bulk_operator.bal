@@ -18,32 +18,32 @@
 
 # Bulk operator abstract client.
 public type BulkOperator abstract client object {
-    Job job;
+    JobInfo job;
     SalesforceBaseClient httpBaseClient;
 
     # Get job information.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function getJobInfo() returns @tainted Job | SalesforceError;
+    # + return - JobInfo record if successful else ConnectorError occured
+    public remote function getJobInfo() returns @tainted JobInfo|ConnectorError;
 
     # Close job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function closeJob() returns @tainted Job | SalesforceError;
+    # + return - JobInfo record if successful else ConnectorError occured
+    public remote function closeJob() returns @tainted JobInfo|ConnectorError;
 
     # Abort job.
     #
-    # + return - Job record if successful else SalesforceError occured
-    public remote function abortJob() returns @tainted Job | SalesforceError;
+    # + return - JobInfo record if successful else ConnectorError occured
+    public remote function abortJob() returns @tainted JobInfo|ConnectorError;
 
     # Get batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else SalesforceError occured
-    public remote function getBatchInfo(string batchId) returns @tainted Batch|SalesforceError;
+    # + return - BatchInfo record if successful else ConnectorError occured
+    public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError;
 
     # Get information of all batches of the job.
     #
-    # + return - BatchInfo record if successful else SalesforceError occured
-    public remote function getAllBatches() returns @tainted BatchInfo | SalesforceError;
+    # + return - BatchInfo[] if successful else ConnectorError occured
+    public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError;
 };
