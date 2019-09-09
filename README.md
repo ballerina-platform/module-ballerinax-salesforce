@@ -32,7 +32,7 @@ and XML data types.
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 1.0            |
+| Ballerina Language  | 1.0.0          |
 | Salesforce REST API | v46.0          |
 
 ## Sample
