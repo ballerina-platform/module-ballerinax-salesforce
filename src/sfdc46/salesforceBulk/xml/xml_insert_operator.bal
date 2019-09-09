@@ -33,7 +33,7 @@ public type XmlInsertOperator client object {
     # Create XML insert batch.
     #
     # + payload - insertion data in XML format
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function insert(xml payload) returns @tainted BatchInfo|ConnectorError {
         xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id, BATCH], payload);
 
@@ -48,7 +48,7 @@ public type XmlInsertOperator client object {
     # Create XML insert batch using a XML file.
     #
     # + filePath - insertion XML file path
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function insertFile(string filePath) returns @tainted BatchInfo|ConnectorError {
         if (filepath:extension(filePath) == "xml") {
             io:ReadableByteChannel|io:Error rbc = io:openReadableFile(filePath);
@@ -97,7 +97,7 @@ public type XmlInsertOperator client object {
 
     # Get XML insert operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted  JobInfo|ConnectorError {
         xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
         if (xmlResponse is xml) {
@@ -110,7 +110,7 @@ public type XmlInsertOperator client object {
 
     # Close XML insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
         xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
         XML_STATE_CLOSED_PAYLOAD);
@@ -124,7 +124,7 @@ public type XmlInsertOperator client object {
 
     # Abort XML insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
         xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
         XML_STATE_ABORTED_PAYLOAD);
@@ -139,7 +139,7 @@ public type XmlInsertOperator client object {
     # Get XML insert batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted  BatchInfo|ConnectorError {
         xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
         if (xmlResponse is xml) {

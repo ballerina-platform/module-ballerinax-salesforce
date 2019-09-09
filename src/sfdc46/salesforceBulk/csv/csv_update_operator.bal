@@ -29,7 +29,7 @@ public type CsvUpdateOperator client object {
     # Create CSV update batch.
     #
     # + csvContent - update data in CSV format
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function update(string csvContent) returns @tainted BatchInfo|ConnectorError {
         xml | ConnectorError xmlResponse = self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], csvContent);
         if (xmlResponse is xml) {
@@ -42,7 +42,7 @@ public type CsvUpdateOperator client object {
 
     # Get CSV update operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
         xml | ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
         if (xmlResponse is xml) {
@@ -55,7 +55,7 @@ public type CsvUpdateOperator client object {
 
     # Close CSV update operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
         xml | ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
         XML_STATE_CLOSED_PAYLOAD);
@@ -69,7 +69,7 @@ public type CsvUpdateOperator client object {
 
     # Abort CSV update operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
         xml | ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
         XML_STATE_ABORTED_PAYLOAD);
@@ -84,7 +84,7 @@ public type CsvUpdateOperator client object {
     # Get CSV update batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
         xml | ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
         if (xmlResponse is xml) {

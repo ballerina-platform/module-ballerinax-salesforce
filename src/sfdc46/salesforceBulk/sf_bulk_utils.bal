@@ -456,7 +456,7 @@ function checkBatchStateAndGetResultList(
 # 
 # + op - bulk operator client object
 # + batchId - batchId
-# + return - Batch record if successful else ConnectorError occured
+# + return - BatchInfo record if successful else ConnectorError occured
 function getBatchPointer(@tainted BulkOperator op, string batchId) returns @tainted BatchInfo|ConnectorError {
     return op->getBatchInfo(batchId);
 }

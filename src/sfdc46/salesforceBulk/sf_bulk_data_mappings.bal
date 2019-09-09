@@ -62,7 +62,7 @@ function createJobRecordFromXml(xml jobDetails) returns JobInfo|ConnectorError {
         // }
         return job;
     } else {
-        string errMsg = "Error occurred while creating Job record using xml payload.";
+        string errMsg = "Error occurred while creating JobInfo record using xml payload.";
         log:printError(errMsg, err = job);
         TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
             errorCode = TYPE_CONVERSION_ERROR, cause = job);
@@ -76,7 +76,7 @@ function createJobRecordFromJson(json jobDetails) returns JobInfo|ConnectorError
     if (job is JobInfo) {
         return job;
     } else {
-        string errMsg = "Error occurred while creating Job record using json payload.";
+        string errMsg = "Error occurred while creating JobInfo record using json payload.";
         log:printError(errMsg, err = job);
         TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
             errorCode = TYPE_CONVERSION_ERROR, cause = job);
@@ -116,7 +116,7 @@ function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|ConnectorE
         // }
         return batch;
     } else {
-        string errMsg = "Error occurred while creating Batch record using xml payload.";
+        string errMsg = "Error occurred while creating BatchInfo record using xml payload.";
         log:printError(errMsg, err = batch);
         TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
             errorCode = TYPE_CONVERSION_ERROR, cause = batch);
@@ -130,7 +130,7 @@ function createBatchRecordFromJson(json batchDetails) returns BatchInfo|Connecto
     if (batch is BatchInfo) {
         return batch;
     } else {
-        string errMsg = "Error occurred while creating Batch record using json payload.";
+        string errMsg = "Error occurred while creating BatchInfo record using json payload.";
         log:printError(errMsg, err = batch);
         TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
             errorCode = TYPE_CONVERSION_ERROR, cause = batch);

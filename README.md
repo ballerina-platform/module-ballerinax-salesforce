@@ -95,17 +95,17 @@ sfdc46:SalesforceConfiguration sfConfig = {
 sfdc46:Client salesforceClient = new(sfConfig);
 ```
 
-After the create a `ballerina.conf` file and enter your credentials as mentioned below. These configs will be used in
-the above Salesforce configuration.
+Then create a `ballerina.conf` file and enter your credentials as mentioned below. Replace values inside quotes 
+(eg: <EP_URL>) with appropriate values. These configs will be used in the above Salesforce configuration.
 ```
-EP_URL = ""
-ACCESS_TOKEN = ""
-CLIENT_ID = ""
-CLIENT_SECRET = ""
-REFRESH_TOKEN = ""
-REFRESH_URL = ""
-TRUSTSTORE_PATH = ""
-TRUSTSTORE_PASSWORD = ""
+EP_URL="<EP_URL>"
+ACCESS_TOKEN="<ACCESS_TOKEN>"
+CLIENT_ID="<CLIENT_ID>"
+CLIENT_SECRET="<CLIENT_SECRET>"
+REFRESH_TOKEN="<REFRESH_TOKEN>"
+REFRESH_URL="<REFRESH_URL>"
+TRUSTSTORE_PATH="<TRUSTSTORE_PATH>"
+TRUSTSTORE_PASSWORD="<TRUSTSTORE_PASSWORD>"
 ```
 
 **Salesforce CRUD Operations**
@@ -147,7 +147,6 @@ if (response is json) {
     io:println("TotalSize:  ", response["totalSize"]);
     io:println("Done:  ", response["done"]);
     io:println("Records: ", response["records"]);
-    io:println("Next response url: ", response["nextRecordsUrl"]);
 } else {
     io:println("Error: ", response.detail()?.message.toString());
 }
@@ -177,7 +176,7 @@ function creates Insert operator for CSV content type.
 sfdc46:SalesforceBulkClient sfBulkClient = salesforceClient->createSalesforceBulkClient();
 
 // Create CSV insert operator for object type `Contact`.
-sfdc46:CsvInsertOperator|sfdc46:SalesforceError csvInsertOperator = 
+sfdc46:CsvInsertOperator|sfdc46:ConnectorError csvInsertOperator = 
     sfBulkClient->createCsvInsertOperator("Contact");
 ```
 
@@ -189,11 +188,11 @@ batch using a CSV file. File path of the CSv file should be passed as the parame
 string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c
 Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301
 Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
-sfdc46:Batch|sfdc46:SalesforceError batchUsingCsv = csvInsertOperator->insert(contacts);
+sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingCsv = csvInsertOperator->insert(contacts);
 
 // Upload csv contacts as a file.
 string csvContactsFilePath = "path/to/the/file/contacts.csv";
-sfdc46:BatchInfo|sfdc46:SalesforceError batchUsingJsonFile = 
+sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingJsonFile = 
     csvInsertOperator->insertFile(csvContactsFilePath);
 ```
 
@@ -203,10 +202,10 @@ committed, they aren’t rolled back.
 
 ```ballerina
 // Close job.
-sfdc46:JobInfo|sfdc46:SalesforceError closedJob = csvInsertOperator->closeJob();
+sfdc46:JobInfo|sfdc46:ConnectorError closedJob = csvInsertOperator->closeJob();
 
 // Abort job.
-sfdc46:JobInfo|sfdc46:SalesforceError abortedJob = csvInsertOperator->abortJob();
+sfdc46:JobInfo|sfdc46:ConnectorError abortedJob = csvInsertOperator->abortJob();
 ```
 
 `getJobInfo` remote function get all details for an existing job. `getBatchInfo` remote function get information about 
@@ -214,13 +213,13 @@ an existing batch. `getAllBatches` remote function get information about all bat
 
 ```ballerina
 // Get job information.
-sfdc46:JobInfo|sfdc46:SalesforceError job = csvInsertOperator->getJobInfo();
+sfdc46:JobInfo|sfdc46:ConnectorError job = csvInsertOperator->getJobInfo();
 
 // Get batch information.
-sfdc46:BatchInfo|sfdc46:SalesforceError batchInfo = csvInsertOperator->getBatchInfo(batchId);
+sfdc46:BatchInfo|sfdc46:ConnectorError batchInfo = csvInsertOperator->getBatchInfo(batchId);
 
 // Get information of all batches of this csv insert job.
-sfdc46:BatchInfo[]|sfdc46:SalesforceError allBatchInfo = csvInsertOperator->getAllBatches();
+sfdc46:BatchInfo[]|sfdc46:ConnectorError allBatchInfo = csvInsertOperator->getAllBatches();
 ```
 
 `getBatchRequest` remote function gets the batch request uploaded to the csv insert job. `getResult` remote 
@@ -228,11 +227,11 @@ function get results of a batch that has completed processing.
 
 ```ballerina
 // Retrieve the csv batch request.
-string|sfdc46:SalesforceError batchRequest = csvInsertOperator->getBatchRequest(batchId);
+string|sfdc46:ConnectorError batchRequest = csvInsertOperator->getBatchRequest(batchId);
 // Get batch result as csv.
 int noOfRetries = 5; // Number of times trying to get the results.
 int waitTime = 3000; // Time between two tries in milli-seconds.
-sfdc46:Result[]|sfdc46:SalesforceError batchResult = csvInsertOperator->getResult(batchId, noOfRetries, waitTime);
+sfdc46:Result[]|sfdc46:ConnectorError batchResult = csvInsertOperator->getResult(batchId, noOfRetries, waitTime);
 ```
 
 Likewise Salesforce bulk client provides following operators:

@@ -29,7 +29,7 @@ public type JsonDeleteOperator client object {
     # Create JSON delete batch.
     #
     # + payload - delete data with IDs in JSON format
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function delete(json payload) returns @tainted BatchInfo|ConnectorError {
         json | ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id,
         <@untainted> BATCH], payload);
@@ -43,7 +43,7 @@ public type JsonDeleteOperator client object {
 
     # Get JSON delete operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
         json | ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
         if (response is json) {
@@ -56,7 +56,7 @@ public type JsonDeleteOperator client object {
 
     # Close JSON delete operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
         json | ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
         JSON_STATE_CLOSED_PAYLOAD);
@@ -70,7 +70,7 @@ public type JsonDeleteOperator client object {
 
     # Abort JSON delete operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
         json | ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
         JSON_STATE_ABORTED_PAYLOAD);
@@ -85,7 +85,7 @@ public type JsonDeleteOperator client object {
     # Get JSON delete batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
         json | ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
         <@untainted> BATCH, batchId]);
