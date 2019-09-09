@@ -68,7 +68,8 @@ Note:- When you are setting up the connected app, select the following scopes un
 
 **Create Salesforce client**
 
-You can define the Salesforce configuration and create Salesforce client as mentioned below. secureSocketConfig is optional.
+You can define the Salesforce configuration and create Salesforce client as mentioned below. 
+secureSocketConfig is optional.
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 sfdc46:SalesforceConfiguration sfConfig = {
@@ -114,7 +115,7 @@ the SObject Account.
 
 ```ballerina
 json account = { Name: "ABC Inc", BillingCity: "New York" };
-var createReponse = salesforceClient->createAccount(account);
+string|sfdc46:ConnectorError createReponse = salesforceClient->createAccount(account);
 ```
 
 The response from `createAccount` is either the string ID of the created account (if the account was created 
@@ -124,7 +125,7 @@ successfully) or `ConnectorError` (if the account creation was unsuccessful).
 if (createReponse is string) {
     io:println("Account id: " + createReponse);
 } else {
-    io:println(createReponse.message);
+    io:println(createReponse.detail()?.message.toString());
 }
 ```
 
@@ -134,7 +135,7 @@ remaining results.
 
 ```ballerina
 string sampleQuery = "SELECT name FROM Account";
-var response = salesforceClient->getQueryResult(sampleQuery);
+json|sfdc46:ConnectorError response = salesforceClient->getQueryResult(sampleQuery);
 ```
 
 The response from `getQueryResult` is either a JSON object with total size, execution status, resulting records, and 
@@ -148,7 +149,7 @@ if (response is json) {
     io:println("Records: ", response["records"]);
     io:println("Next response url: ", response["nextRecordsUrl"]);
 } else {
-    io:println("Error: ", response.message);
+    io:println("Error: ", response.detail()?.message.toString());
 }
 ```
 The `createLead` remote function creates a Lead SObject. It returns the lead ID if successful or 
@@ -156,19 +157,20 @@ The `createLead` remote function creates a Lead SObject. It returns the lead ID 
 
 ```ballerina
 json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
-var createResponse = salesforceClient->createLead(lead);
+string|sfdc46:ConnectorError createResponse = salesforceClient->createLead(lead);
+
 if (createResponse is string) {
     io:println("Lead id: " + createResponse);
 } else {
-    io:println("Error: ", createResponse.message);
+    io:println("Error: ", createResponse.detail()?.message.toString());
 }
 ```
 
 **Salesforce Bulk Operations**
 
 The `createSalesforceBulkClient` remote function creates the salesforce bulk client which facilitates bulk operations.
-Bulk client can create appropiate operator Corresponding to the data type. The `createCsvInsertOperator` remote function
-creates Insert operator for CSV content type.
+Bulk client can create appropriate operator Corresponding to the data type. The `createCsvInsertOperator` remote 
+function creates Insert operator for CSV content type.
 
 ```ballerina
 // Create salesforce bulk client.
@@ -191,7 +193,7 @@ sfdc46:Batch|sfdc46:SalesforceError batchUsingCsv = csvInsertOperator->insert(co
 
 // Upload csv contacts as a file.
 string csvContactsFilePath = "path/to/the/file/contacts.csv";
-sfdc46:Batch|sfdc46:SalesforceError batchUsingJsonFile = 
+sfdc46:BatchInfo|sfdc46:SalesforceError batchUsingJsonFile = 
     csvInsertOperator->insertFile(csvContactsFilePath);
 ```
 
@@ -201,10 +203,10 @@ committed, they aren’t rolled back.
 
 ```ballerina
 // Close job.
-sfdc46:Job|sfdc46:SalesforceError closedJob = csvInsertOperator->closeJob();
+sfdc46:JobInfo|sfdc46:SalesforceError closedJob = csvInsertOperator->closeJob();
 
 // Abort job.
-sfdc46:Job|sfdc46:SalesforceError abortedJob = csvInsertOperator->abortJob();
+sfdc46:JobInfo|sfdc46:SalesforceError abortedJob = csvInsertOperator->abortJob();
 ```
 
 `getJobInfo` remote function get all details for an existing job. `getBatchInfo` remote function get information about 
@@ -212,13 +214,13 @@ an existing batch. `getAllBatches` remote function get information about all bat
 
 ```ballerina
 // Get job information.
-sfdc46:Job|sfdc46:SalesforceError job = csvInsertOperator->getJobInfo();
+sfdc46:JobInfo|sfdc46:SalesforceError job = csvInsertOperator->getJobInfo();
 
 // Get batch information.
-sfdc46:Batch|sfdc46:SalesforceError batchInfo = csvInsertOperator->getBatchInfo(batchId);
+sfdc46:BatchInfo|sfdc46:SalesforceError batchInfo = csvInsertOperator->getBatchInfo(batchId);
 
-// Get informations of all batches of this csv insert job.
-sfdc46:BatchInfo|sfdc46:SalesforceError allBatchInfo = csvInsertOperator->getAllBatches();
+// Get information of all batches of this csv insert job.
+sfdc46:BatchInfo[]|sfdc46:SalesforceError allBatchInfo = csvInsertOperator->getAllBatches();
 ```
 
 `getBatchRequest` remote function gets the batch request uploaded to the csv insert job. `getResult` remote 
@@ -229,7 +231,7 @@ function get results of a batch that has completed processing.
 string|sfdc46:SalesforceError batchRequest = csvInsertOperator->getBatchRequest(batchId);
 // Get batch result as csv.
 int noOfRetries = 5; // Number of times trying to get the results.
-int waitTime = 3000; // Time between two tries in mili-seconds.
+int waitTime = 3000; // Time between two tries in milli-seconds.
 sfdc46:Result[]|sfdc46:SalesforceError batchResult = csvInsertOperator->getResult(batchId, noOfRetries, waitTime);
 ```
 
