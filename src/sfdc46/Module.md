@@ -1,7 +1,5 @@
 Connects to Salesforce from Ballerina. 
 
-# Module Overview
-
 The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
 describe SObjects and organizational data through the Salesforce REST API. Also it supports insert, upsert, update, 
 query and delete operations for CSV, JSON and XML data types which provides in Salesforce bulk API. 
@@ -30,7 +28,7 @@ and XML data types.
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 1.0            |
+| Ballerina Language  | 1.0.0          |
 | Salesforce REST API | v46.0          |
 
 ## Sample
