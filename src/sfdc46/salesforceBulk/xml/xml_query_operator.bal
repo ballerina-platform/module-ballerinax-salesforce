@@ -30,54 +30,32 @@ public type XmlQueryOperator client object {
     # + queryString - SOQL query want to perform
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function query(string queryString) returns @tainted BatchInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlQuery([JOB, self.job.id, BATCH], queryString);
-        if (xmlResponse is xml) {
-            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
-            return batch;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->createXmlQuery([JOB, self.job.id, BATCH], queryString);
+        return getBatch(xmlResponse);
     }
 
     # Get XML query operator job information.
     #
     # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
+        return getJob(xmlResponse);
     }
 
     # Close XML query operator job.
     #
     # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
-            XML_STATE_CLOSED_PAYLOAD);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->createXmlRecord([JOB, self.job.id], XML_STATE_CLOSED_PAYLOAD);
+        return getJob(xmlResponse);
     }
 
     # Abort XML query operator job.
     #
     # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
-            XML_STATE_ABORTED_PAYLOAD);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->createXmlRecord([JOB, self.job.id], XML_STATE_ABORTED_PAYLOAD);
+        return getJob(xmlResponse);
     }
 
     # Get XML query batch information.
@@ -85,26 +63,16 @@ public type XmlQueryOperator client object {
     # + batchId - batch ID 
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
-        if (xmlResponse is xml) {
-            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
-            return batch;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
+        return getBatch(xmlResponse);
     }
 
     # Get information of all batches of XML query operator job.
     #
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
-        if (xmlResponse is xml) {
-            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(xmlResponse);
-            return batchInfo;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
+        return getBatchInfoList(xmlResponse);
     }
 
     # Get result IDs as a list.

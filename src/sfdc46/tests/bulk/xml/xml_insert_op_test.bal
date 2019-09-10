@@ -120,13 +120,22 @@ function testXmlInsertOperator() {
             test:assertFail(msg = batchRequest.detail()?.message.toString());
         }
 
-        // Get the results of the batch
+        // Get the results of the batch.
         Result[]|ConnectorError batchResult = xmlInsertOperator->getResult(batchIdUsingXml, noOfRetries);
 
         if (batchResult is Result[]) {
             test:assertTrue(checkBatchResults(batchResult), msg = "Invalid batch result.");                
         } else {
             test:assertFail(msg = batchResult.detail()?.message.toString());
+        }
+        // Get the results of the xml file insert batch.
+        Result[]|ConnectorError xmlFileInsertBatchResult = xmlInsertOperator->getResult(batchIdUsingXml, noOfRetries);
+
+        if (xmlFileInsertBatchResult is Result[]) {
+            test:assertTrue(checkBatchResults(xmlFileInsertBatchResult), 
+                msg = "Xml insert batch result was unsuccesful.");                
+        } else {
+            test:assertFail(msg = xmlFileInsertBatchResult.detail()?.message.toString());
         }
 
         // Abort job.
