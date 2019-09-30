@@ -31,12 +31,6 @@ SalesforceConfiguration sfConfig = {
             refreshToken: config:getAsString("REFRESH_TOKEN"),
             refreshUrl: config:getAsString("REFRESH_URL")
         }
-    },
-    secureSocketConfig: {
-        trustStore: {
-            path: config:getAsString("TRUSTSTORE_PATH"),
-            password: config:getAsString("TRUSTSTORE_PASSWORD")
-        }
     }
 };
 

@@ -507,8 +507,8 @@ public type Client client object {
 };
 
 # Salesforce client configuration.
-# + clientConfig - HTTP configuration
-# + baseUrl - The Salesforce API URL
+# + baseUrl - The Salesforce endpoint URL
+# + clientConfig - OAuth2 direct token configuration
 # + secureSocketConfig - HTTPS secure socket configuration
 public type SalesforceConfiguration record {
     string baseUrl;

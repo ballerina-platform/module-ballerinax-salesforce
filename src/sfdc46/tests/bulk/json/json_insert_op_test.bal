@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 
@@ -61,12 +62,19 @@ function testJsonInsertOperator() {
         }
 
         // Upload json contacts as a file.
-        BatchInfo|ConnectorError batchUsingJsonFile = jsonInsertOperator->insertFile(jsonContactsFilePath);
-        if (batchUsingJsonFile is BatchInfo) {
-            test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
-            batchIdUsingJsonFile = batchUsingJsonFile.id;
+        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
+        if (rbc is io:ReadableByteChannel) {
+            BatchInfo|ConnectorError batchUsingJsonFile = jsonInsertOperator->insert(rbc);
+            if (batchUsingJsonFile is BatchInfo) {
+                test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
+                batchIdUsingJsonFile = batchUsingJsonFile.id;
+            } else {
+                test:assertFail(msg = batchUsingJsonFile.detail()?.message.toString());
+            }
+            // close channel.
+            closeRb(rbc);
         } else {
-            test:assertFail(msg = batchUsingJsonFile.detail()?.message.toString());
+            test:assertFail(msg = rbc.detail()?.message.toString());
         }
 
         // Get job information.

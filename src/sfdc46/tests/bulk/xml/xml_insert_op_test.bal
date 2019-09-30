@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 
@@ -44,7 +45,7 @@ function testXmlInsertOperator() {
         </sObject>
     </sObjects>`;
 
-    string jsonContactsFilePath = "src/sfdc46/tests/resources/contacts.xml";
+    string xmlContactsFilePath = "src/sfdc46/tests/resources/contacts.xml";
 
     // Create JSON insert operator.
     XmlInsertOperator|ConnectorError xmlInsertOperator = sfBulkClient->createXmlInsertOperator("Contact");
@@ -63,12 +64,20 @@ function testXmlInsertOperator() {
         }
 
         // Upload json contacts as a file.
-        BatchInfo|ConnectorError batchUsingXmlFile = xmlInsertOperator->insertFile(jsonContactsFilePath);
-        if (batchUsingXmlFile is BatchInfo) {
-            test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
-            batchIdUsingXmlFile = batchUsingXmlFile.id;
+        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(xmlContactsFilePath);
+        if (rbc is io:ReadableByteChannel) {
+            BatchInfo|ConnectorError batchUsingXmlFile = xmlInsertOperator->insert(rbc);
+            if (batchUsingXmlFile is BatchInfo) {
+                test:assertTrue(batchUsingXmlFile.id.length() > 0, 
+                    msg = "Could not upload the contacts using json file.");
+                batchIdUsingXmlFile = batchUsingXmlFile.id;
+            } else {
+                test:assertFail(msg = batchUsingXmlFile.detail()?.message.toString());
+            }
+            // close channel.
+            closeRb(rbc);
         } else {
-            test:assertFail(msg = batchUsingXmlFile.detail()?.message.toString());
+            test:assertFail(msg = rbc.detail()?.message.toString());
         }
 
         // Get job information.
