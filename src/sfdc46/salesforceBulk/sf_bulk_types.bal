@@ -102,9 +102,9 @@ public type BatchInfo record {|
 # + success - The result is a success or not
 # + created - New record created or not
 # + errors - Errors occurred
-public type Result record {
+public type Result record {|
     string id?;
     boolean success;
     boolean created;
     string errors?;
-};
+|};

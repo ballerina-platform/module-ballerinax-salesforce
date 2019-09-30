@@ -55,5 +55,4 @@ field in the salesforce.
    ```bash
    ballerina test sfdc46 --b7a.config.file=src/sfdc46/tests/resources/ballerina.conf
    ```
-
    

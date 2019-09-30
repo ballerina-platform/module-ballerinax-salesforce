@@ -31,55 +31,35 @@ public type JsonUpdateOperator client object {
     # + payload - update data in JSON format
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function update(json payload) returns @tainted BatchInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id,
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id,
             <@untainted> BATCH], payload);
-        if (response is json) {
-            BatchInfo|ConnectorError batch = getBatch(response);
-            return batch;
-        } else {
-            return response;
-        }
+        return getBatch(response);
     }
 
     # Get JSON update operator job information.
     #
     # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
+        return getJob(response);
     }
 
     # Close JSON update operator job.
     #
     # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
             JSON_STATE_CLOSED_PAYLOAD);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        return getJob(response);
     }
 
     # Abort JSON update operator job.
     #
     # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
             JSON_STATE_ABORTED_PAYLOAD);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        return getJob(response);
     }
 
     # Get JSON update batch information.
@@ -87,28 +67,17 @@ public type JsonUpdateOperator client object {
     # + batchId - batch ID 
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH, batchId]);
-        if (response is json) {
-            BatchInfo|ConnectorError batch = getBatch(response);
-            return batch;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, 
+            batchId]);
+        return getBatch(response);
     }
 
     # Get information of all batches of JSON update operator job.
     #
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH]);
-        if (response is json) {
-            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(response);
-            return batchInfo;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH]);
+        return getBatchInfoList(response);
     }
 
     # Retrieve the JSON batch request.

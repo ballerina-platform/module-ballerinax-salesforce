@@ -62,80 +62,89 @@ public type Client client object {
     }
 
     # Lists summary details about each REST API version available.
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getAvailableApiVersions() returns @tainted json|ConnectorError {
+    # + return - List of `Version` if successful else ConnectorError occured
+    public remote function getAvailableApiVersions() returns @tainted Version[]|ConnectorError {
         string path = prepareUrl([BASE_PATH]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toVersions(res);
     }
 
     # Lists the resources available for the specified API version.
     # + apiVersion - API version (v37)
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getResourcesByApiVersion(string apiVersion) returns @tainted json|ConnectorError {
+    # + return - `Resources` as map of strings if successful else ConnectorError occured
+    public remote function getResourcesByApiVersion(string apiVersion) returns @tainted map<string>|ConnectorError {
         string path = prepareUrl([BASE_PATH, apiVersion]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toMapOfStrings(res);            
     }
 
     # Lists limits information for your organization.
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getOrganizationLimits() returns @tainted json|ConnectorError {
+    # + return - `OrganizationLimits` as map of `Limit` if successful else ConnectorError occured
+    public remote function getOrganizationLimits() returns @tainted map<Limit>|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, LIMITS]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toMapOfLimits(res);
     }
 
     //Query
 
     # Executes the specified SOQL query.
     # + receivedQuery - Sent SOQL query
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getQueryResult(string receivedQuery) returns @tainted json|ConnectorError {
+    # + return - `SoqlResult` record if successful else ConnectorError occured
+    public remote function getQueryResult(string receivedQuery) returns @tainted SoqlResult|ConnectorError {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSoqlResult(res);
     }
 
     # If the query results are too large, retrieve the next batch of results using nextRecordUrl.
     # + nextRecordsUrl - URL to get next query results
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getNextQueryResult(string nextRecordsUrl) returns @tainted json|ConnectorError {
-        return self->getRecord(nextRecordsUrl);
+    # + return - `SoqlResult` record if successful else ConnectorError occured
+    public remote function getNextQueryResult(string nextRecordsUrl) returns @tainted SoqlResult|ConnectorError {
+        json res = check self->getRecord(nextRecordsUrl);
+        return toSoqlResult(res);
     }
 
-    # Returns records that have been deleted because of a merge or delete, archived Task
-    # and Event records.
+    # Executes the specified SOQL query. Unlike the Query resource, QueryAll will return records that have been deleted 
+    # because of a merge or delete. QueryAll will also return information about archived Task and Event records. 
     # + queryString - Sent SOQL query
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getAllQueries(string queryString) returns @tainted json|ConnectorError {
+    # + return - `SoqlResult` record if successful else ConnectorError occured
+    public remote function getQueryAllResult(string queryString) returns @tainted SoqlResult|ConnectorError {
         string path = prepareQueryUrl([API_BASE_PATH, QUERYALL], [Q], [queryString]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSoqlResult(res);
     }
 
     # Get feedback on how Salesforce will execute the query, report, or list view based on performance.
     # + queryReportOrListview - Sent query
-    # + return - `json` result if successful else ConnectorError occured
+    # + return - `SoqlResult` record if successful else ConnectorError occured
     public remote function explainQueryOrReportOrListview(string queryReportOrListview)
-        returns @tainted json|ConnectorError {
+        returns @tainted ExecutionFeedback|ConnectorError {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [EXPLAIN], [queryReportOrListview]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toExecutionFeedback(res);        
     }
 
     //Search
 
     # Executes the specified SOSL search.
     # + searchString - Sent SOSL search query
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function searchSOSLString(string searchString) returns @tainted json|ConnectorError {
+    # + return - `SoslResult` record if successful else ConnectorError occured
+    public remote function searchSOSLString(string searchString) returns @tainted SoslResult|ConnectorError {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSoslResult(res);
     }
 
     //Account
 
     # Accesses Account SObject records based on the Account object ID.
     # + accountId - Account ID
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getAccountById(string accountId) returns @tainted json|ConnectorError {
+    # + return - `SObject` record if successful else ConnectorError occured
+    public remote function getAccountById(string accountId) returns @tainted SObject|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, ACCOUNT, accountId]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObject(res);
     }
 
     # Creates new Account object record.
@@ -165,10 +174,11 @@ public type Client client object {
 
     # Accesses Lead SObject records based on the Lead object ID.
     # + leadId - Lead ID
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getLeadById(string leadId) returns @tainted json|ConnectorError {
+    # + return - `SObject` record if successful else ConnectorError occured
+    public remote function getLeadById(string leadId) returns @tainted SObject|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, LEAD, leadId]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObject(res);
     }
     # Creates new Lead object record.
     # + leadRecord - Lead JSON record to be inserted
@@ -196,10 +206,11 @@ public type Client client object {
 
     # Accesses Contacts SObject records based on the Contact object ID.
     # + contactId - Contact ID
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getContactById(string contactId) returns @tainted json|ConnectorError {
+    # + return - `SObject` record if successful else ConnectorError occured
+    public remote function getContactById(string contactId) returns @tainted SObject|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, CONTACT, contactId]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObject(res);
     }
 
     # Creates new Contact object record.
@@ -228,10 +239,11 @@ public type Client client object {
 
     # Accesses Opportunities SObject records based on the Opportunity object ID.
     # + opportunityId - Opportunity ID
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getOpportunityById(string opportunityId) returns @tainted json|ConnectorError {
+    # + return - `SObject` record if successful else ConnectorError occured
+    public remote function getOpportunityById(string opportunityId) returns @tainted SObject|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, OPPORTUNITY, opportunityId]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObject(res);
     }
 
     # Creates new Opportunity object record.
@@ -261,10 +273,11 @@ public type Client client object {
 
     # Accesses Products SObject records based on the Product object ID.
     # + productId - Product ID
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getProductById(string productId) returns @tainted json|ConnectorError {
+    # + return - `SObject` record if successful else ConnectorError occured
+    public remote function getProductById(string productId) returns @tainted SObject|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, PRODUCT, productId]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObject(res);
     }
 
     # Creates new Product object record.
@@ -295,22 +308,24 @@ public type Client client object {
     # + sObjectName - SObject name value
     # + id - SObject id
     # + fields - Relevant fields
-    # + return - `json` result if successful else ConnectorError occured
+    # + return - `SObject` record if successful else ConnectorError occured
     public remote function getFieldValuesFromSObjectRecord(string sObjectName, string id, string fields)
-        returns @tainted json|ConnectorError {
+        returns @tainted SObject|ConnectorError {
         string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-        return self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
+        json res = check self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
+        return toSObject(res);
     }
 
     # Retrieve field values from an external object record using Salesforce ID or External ID.
     # + externalObjectName - External SObject name value
     # + id - External SObject id
     # + fields - Relevant fields
-    # + return - `json` result if successful else ConnectorError occured
+    # + return - `SObject` record if successful else ConnectorError occured
     public remote function getFieldValuesFromExternalObjectRecord(string externalObjectName, string id, string fields)
-        returns @tainted json|ConnectorError {
+        returns @tainted SObject|ConnectorError {
         string prefixPath = prepareUrl([API_BASE_PATH, SOBJECTS, externalObjectName, id]);
-        return self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
+        json res = check self->getRecord(prefixPath + QUESTION_MARK + FIELDS + EQUAL_SIGN + fields);
+        return toSObject(res);
     }
 
     # Allows to create multiple records.
@@ -318,24 +333,26 @@ public type Client client object {
     # + records - JSON records
     # + return - `json` result if successful else ConnectorError occured
     public remote function createMultipleRecords(string sObjectName, json records) 
-        returns @tainted json|ConnectorError {
+        returns @tainted SObjectTreeResponse|ConnectorError {
         http:Request req = new;
         string path = string `${API_BASE_PATH}/${MULTIPLE_RECORDS}/${sObjectName}`;
         req.setJsonPayload(records);
 
         http:Response|error response = self.salesforceClient->post(path, req);
-        return checkAndSetErrors(response);
+        json res = check checkAndSetErrors(response);
+        return toSObjectTreeResponse(res);
     }
 
     # Accesses records based on the value of a specified external ID field.
     # + sObjectName - SObject name value
     # + fieldName - Relevant field name
     # + fieldValue - Relevant field value
-    # + return - `json` result if successful else ConnectorError occured
+    # + return - `SObject` record if successful else ConnectorError occured
     public remote function getRecordByExternalId(string sObjectName, string fieldName, string fieldValue)
-        returns @tainted json|ConnectorError {
+        returns @tainted SObject|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, fieldName, fieldValue]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObject(res);
     }
 
     # Creates new records or updates existing records (upserts records) based on the value of a specified
@@ -344,27 +361,30 @@ public type Client client object {
     # + fieldId - Field id
     # + fieldValue - Relevant field value
     # + recordPayload - JSON record
-    # + return - `json` result if successful else ConnectorError occured
+    # + return - `SObjectResult` record if successful else ConnectorError occured
     public remote function upsertSObjectByExternalId(string sObjectName, string fieldId, string fieldValue,
-    json recordPayload) returns @tainted json|ConnectorError {
-
+        json recordPayload) returns @tainted SObjectResult|ConnectorError {
         http:Request req = new;
         string path = string `${API_BASE_PATH}/${SOBJECTS}/${sObjectName}/${fieldId}/${fieldValue}`;
         req.setJsonPayload(recordPayload);
 
         http:Response|error response = self.salesforceClient->patch(path, req);
-        return checkAndSetErrors(response, false);
+        json res = check checkAndSetErrors(response, true);
+        return toSObjectResult(res);
     }
 
-    # Retrieves the list of individual records that have been deleted within the given timespan for the specified object
+    # Retrieves the list of individual records that have been deleted within the given timespan for the specified 
+    # object.
     # + sObjectName - SObject name value
     # + startTime - Start time relevant to records
     # + endTime - End time relevant to records
-    # + return - `json` result if successful else ConnectorError occured
+    # + return - `DeletedRecordsResponse` record if successful else ConnectorError occured
     public remote function getDeletedRecords(string sObjectName, string startTime, string endTime)
-        returns @tainted json|ConnectorError {
-        string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED], [START, END], [startTime, endTime]);
-        return self->getRecord(path);
+        returns @tainted DeletedRecordsInfo|ConnectorError {
+        string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED], [START, END], 
+            [startTime, endTime]);
+        json res = check self->getRecord(path);
+        return toDeletedRecordsInfo(res);
     }
 
     # Retrieves the list of individual records that have been updated (added or changed) within the given timespan for
@@ -372,44 +392,49 @@ public type Client client object {
     # + sObjectName - SObject name value
     # + startTime - Start time relevant to records
     # + endTime - End time relevant to records
-    # + return - `json` result if successful else ConnectorError occured
+    # + return - `UpdatedRecordsInfo` record if successful else ConnectorError occured
     public remote function getUpdatedRecords(string sObjectName, string startTime, string endTime)
-        returns @tainted json|ConnectorError {
+        returns @tainted UpdatedRecordsInfo|ConnectorError {
         string path = prepareQueryUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED], [START, END], [startTime, endTime]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toUpdatedRecordsInfo(res);
     }
 
     //Describe SObjects
 
     # Lists the available objects and their metadata for your organization and available to the logged-in user.
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function describeAvailableObjects() returns @tainted json|ConnectorError {
+    # + return - `OrgMetadata` record if successful else ConnectorError occured
+    public remote function describeAvailableObjects() returns @tainted OrgMetadata|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toOrgMetadata(res);
     }
 
     # Describes the individual metadata for the specified object.
     # + sobjectName - sobject name
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function getSObjectBasicInfo(string sobjectName) returns @tainted json|ConnectorError {
+    # + return - `SObjectBasicInfo` record if successful else ConnectorError occured
+    public remote function getSObjectBasicInfo(string sobjectName) returns @tainted SObjectBasicInfo|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObjectBasicInfo(res);
     }
 
     # Completely describes the individual metadata at all levels for the specified object. Can be used to retrieve
     # the fields, URLs, and child relationships.
     # + sObjectName - SObject name value
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function describeSObject(string sObjectName) returns @tainted json|ConnectorError {
+    # + return - `SObjectMetaData` record if successful else ConnectorError occured
+    public remote function describeSObject(string sObjectName) returns @tainted SObjectMetaData|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObjectMetaData(res);
     }
 
     # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
-    # + return - `json` result if successful else ConnectorError occured
-    public remote function sObjectPlatformAction() returns @tainted json|ConnectorError {
+    # + return - `SObjectBasicInfo` record if successful else ConnectorError occured
+    public remote function sObjectPlatformAction() returns @tainted SObjectBasicInfo|ConnectorError {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
-        return self->getRecord(path);
+        json res = check self->getRecord(path);
+        return toSObjectBasicInfo(res);
     }
 
     //Basic CRUD

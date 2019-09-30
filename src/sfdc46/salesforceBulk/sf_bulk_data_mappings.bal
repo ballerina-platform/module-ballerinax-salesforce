@@ -54,12 +54,12 @@ function createJobRecordFromXml(xml jobDetails) returns JobInfo|ConnectorError {
     };
 
     if (job is JobInfo) {
-        // if (jobDetails.externalIdFieldName.getTextValue().length() > 0) {
-        //     job.externalIdFieldName = jobDetails.externalIdFieldName.getTextValue();
-        // }
-        // if (jobDetails.assignmentRuleId.getTextValue().length() > 0) {
-        //     job.assignmentRuleId = jobDetails.assignmentRuleId.getTextValue();
-        // }
+        if (jobDetails.externalIdFieldName.getTextValue().length() > 0) {
+            job["externalIdFieldName"] = jobDetails.externalIdFieldName.getTextValue();
+        }
+        if (jobDetails.assignmentRuleId.getTextValue().length() > 0) {
+            job["assignmentRuleId"] = jobDetails.assignmentRuleId.getTextValue();
+        }
         return job;
     } else {
         string errMsg = "Error occurred while creating JobInfo record using xml payload.";
@@ -99,21 +99,20 @@ function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|ConnectorE
         state: batchDetails[getElementNameWithNamespace("state")].getTextValue(),
         createdDate: batchDetails[getElementNameWithNamespace("createdDate")].getTextValue(),
         systemModstamp: batchDetails[getElementNameWithNamespace("systemModstamp")].getTextValue(),
-        numberRecordsProcessed:
-            getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsProcessed")].getTextValue()),
-        numberRecordsFailed:
-            getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsFailed")].getTextValue()),
-        totalProcessingTime:
-            getIntValue(batchDetails[getElementNameWithNamespace("totalProcessingTime")].getTextValue()),
-        apiActiveProcessingTime:
-            getIntValue(batchDetails[getElementNameWithNamespace("apiActiveProcessingTime")].getTextValue()),
-        apexProcessingTime:
-            getIntValue(batchDetails[getElementNameWithNamespace("apexProcessingTime")].getTextValue())
+        numberRecordsProcessed: getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsProcessed")]
+            .getTextValue()),
+        numberRecordsFailed: getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsFailed")]
+            .getTextValue()),
+        totalProcessingTime: getIntValue(batchDetails[getElementNameWithNamespace("totalProcessingTime")]
+            .getTextValue()),
+        apiActiveProcessingTime: getIntValue(batchDetails[getElementNameWithNamespace("apiActiveProcessingTime")]
+            .getTextValue()),
+        apexProcessingTime: getIntValue(batchDetails[getElementNameWithNamespace("apexProcessingTime")].getTextValue())
     };
     if (batch is BatchInfo) {
-        // if (batchDetails.stateMessage.getTextValue().length() > 0) {
-        //     batch.stateMessage = batchDetails.stateMessage.getTextValue();
-        // }
+        if (batchDetails.stateMessage.getTextValue().length() > 0) {
+            batch["stateMessage"] = batchDetails.stateMessage.getTextValue();
+        }
         return batch;
     } else {
         string errMsg = "Error occurred while creating BatchInfo record using xml payload.";

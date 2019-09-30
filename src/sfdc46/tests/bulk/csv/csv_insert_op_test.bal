@@ -96,11 +96,19 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
 
         // Get the results of the batch
         Result[]|ConnectorError batchResult = csvInsertOperator->getResult(batchIdUsingCsv, noOfRetries);
-
         if (batchResult is Result[]) {
             test:assertTrue(checkBatchResults(batchResult), "Insert result was not successful.");
         } else {
             test:assertFail(msg = batchResult.detail()?.message.toString());
+        }
+        // Get the resultd of csv file insert batch.
+        Result[]|ConnectorError csvFileInsertBatchResult = 
+            csvInsertOperator->getResult(batchIdUsingCsvFile, noOfRetries);
+        if (csvFileInsertBatchResult is Result[]) {
+            test:assertTrue(checkBatchResults(csvFileInsertBatchResult), 
+                "Csv file content insert result was not successful.");
+        } else {
+            test:assertFail(msg = csvFileInsertBatchResult.detail()?.message.toString());
         }
 
         // Abort job.

@@ -131,18 +131,18 @@ remaining results.
 
 ```ballerina
 string sampleQuery = "SELECT name FROM Account";
-json|sfdc46:ConnectorError response = salesforceClient->getQueryResult(sampleQuery);
+sfdc46:SoqlResult|sfdc46:ConnectorError response = salesforceClient->getQueryResult(sampleQuery);
 ```
 
-The response from `getQueryResult` is either a JSON object with total size, execution status, resulting records, and 
-URL to get next record set (if query execution was successful) or `ConnectorError` (if the query execution 
+The response from `getQueryResult` is either a SoqlResult record with total size, execution status, resulting records, 
+and URL to get next record set (if query execution was successful) or `ConnectorError` (if the query execution 
 was unsuccessful).
 
 ```ballerina
-if (response is json) {
-    io:println("TotalSize:  ", response["totalSize"]);
-    io:println("Done:  ", response["done"]);
-    io:println("Records: ", response["records"]);
+if (response is sfdc46:SoqlResult) {
+    io:println("TotalSize:  ", response.totalSize.toString());
+    io:println("Done:  ", response.done.toString());
+    io:println("Records: ", response.records.toString());
 } else {
     io:println("Error: ", response.detail()?.message.toString());
 }

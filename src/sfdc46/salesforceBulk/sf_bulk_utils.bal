@@ -374,7 +374,7 @@ function getResultTimeoutError(string batchId, int numberOfTries, int waitTime) 
 #
 # + batch - Batch which trying to get results.
 function printWaitingMessage(BatchInfo batch) {
-    log:printInfo("Waiting to complete the batch, batch=" + batch.toString());
+    log:printDebug("Waiting to complete the batch, batch=" + batch.toString());
 }
 
 # Check batch state and get results for the given no of tries and waiting time.
