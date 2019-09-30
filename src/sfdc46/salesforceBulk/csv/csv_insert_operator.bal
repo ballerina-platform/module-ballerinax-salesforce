@@ -16,10 +16,7 @@
 // under the License.
 //
 
-import ballerina/filepath;
 import ballerina/io;
-import ballerina/log;
-import ballerina/lang.'string as strings;
 
 # CSV insert operator client.
 public type CsvInsertOperator client object {
@@ -35,64 +32,15 @@ public type CsvInsertOperator client object {
     #
     # + csvContent - insertion data in CSV format
     # + return - BatchInfo record if successful else ConnectorError occured
-    public remote function insert(string csvContent) returns @tainted BatchInfo|ConnectorError {
-        xml xmlResponse = check self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], csvContent);
-        return getBatch(xmlResponse);
-    }
-
-    # Create CSV insert batch using a CSV file.
-    #
-    # + filePath - insertion CSV file path
-    # + return - BatchInfo record if successful else ConnectorError occured
-    public remote function insertFile(string filePath) returns @tainted BatchInfo|ConnectorError {
-        if (filepath:extension(filePath) == "csv") {
-            io:ReadableByteChannel|io:Error rbc = io:openReadableFile(filePath);
-
-            if (rbc is io:Error) {
-                string errMsg = "Error occurred while reading the csv file, file: " + filePath;
-                log:printError(errMsg, err = rbc);
-                IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rbc);
-                return ioError;
-            } else {
-                // Read content.
-                byte[] readContent;
-                string textContent = "";
-                while (true) {
-                    byte[]|io:Error result = rbc.read(1000);
-                    if (result is io:EofError) {
-                        break;
-                    } else if (result is io:Error) {
-                        string errMsg = "Error occurred while reading the csv file, file: " + filePath;
-                        log:printError(errMsg, err = result);
-                        IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = result);
-                        return ioError;
-                    } else {
-                        readContent = result;
-                        string|error readContentStr = strings:fromBytes(readContent);
-                        if (readContentStr is string) {
-                            textContent = textContent + readContentStr; 
-                        } else {
-                            string errMsg = "Error occurred while converting readContent byte array to string.";
-                            log:printError(errMsg, err = readContentStr);
-                            TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg, 
-                                errorCode = TYPE_CONVERSION_ERROR, cause = readContentStr);
-                            return typeError;
-                        }                 
-                    }
-                }
-                // close channel.
-                closeRb(rbc);
-
-                xml response = check self.httpBaseClient->createCsvRecord([<@untainted> JOB, self.job.id, 
-                    <@untainted> BATCH], <@untainted> textContent);
-                return getBatch(response);
-            }
+    public remote function insert(string|io:ReadableByteChannel csvContent) returns @tainted BatchInfo|ConnectorError {
+        string textContent;
+        if (csvContent is io:ReadableByteChannel) {
+            textContent = <@untainted> check convertToString(csvContent);
         } else {
-            string errMsg = "Invalid file type, file: " + filePath;
-            log:printError(errMsg, err = ());
-            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR);
-            return ioError;
+            textContent = <@untainted> csvContent;
         }
+        xml xmlResponse = check self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], textContent);
+        return getBatch(xmlResponse);
     }
 
     # Get CSV insert operator job information.

@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 
@@ -46,13 +47,22 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
         }
 
         // Upload csv contacts as a file.
-        BatchInfo|ConnectorError batchUsingJsonFile = csvInsertOperator->insertFile(csvContactsFilePath);
-        if (batchUsingJsonFile is BatchInfo) {
-            test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using csv file.");
-            batchIdUsingCsvFile = batchUsingJsonFile.id;
+        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(csvContactsFilePath);
+        if (rbc is io:ReadableByteChannel) {
+            BatchInfo|ConnectorError batchUsingCsvFile = csvInsertOperator->insert(rbc);
+            if (batchUsingCsvFile is BatchInfo) {
+                test:assertTrue(batchUsingCsvFile.id.length() > 0, 
+                    msg = "Could not upload the contacts using csv file.");
+                batchIdUsingCsvFile = batchUsingCsvFile.id;
+            } else {
+                test:assertFail(msg = batchUsingCsvFile.detail()?.message.toString());
+            }
+            // close channel.
+            closeRb(rbc);
         } else {
-            test:assertFail(msg = batchUsingJsonFile.detail()?.message.toString());
+            test:assertFail(msg = rbc.detail()?.message.toString());
         }
+        
 
         // Get job information.
         JobInfo|ConnectorError job = csvInsertOperator->getJobInfo();
@@ -101,7 +111,7 @@ Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,pet
         } else {
             test:assertFail(msg = batchResult.detail()?.message.toString());
         }
-        // Get the resultd of csv file insert batch.
+        // Get the results of csv file insert batch.
         Result[]|ConnectorError csvFileInsertBatchResult = 
             csvInsertOperator->getResult(batchIdUsingCsvFile, noOfRetries);
         if (csvFileInsertBatchResult is Result[]) {

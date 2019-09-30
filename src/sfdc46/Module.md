@@ -51,21 +51,41 @@ token.
     * Client Secret
     * Refresh Token
     * Refresh Token URL
+    
+3.  When you are setting up the connected app, select the following scopes under Selected OAuth Scopes:
 
-Note:- When you are setting up the connected app, select the following scopes under Selected OAuth Scopes:
+    * Access and manage your data (api)
+    * Perform requests on your behalf at any time (refresh_token, offline_access)
+    * Provide access to your data via the Web (web)
 
-* Access and manage your data (api)
-* Perform requests on your behalf at any time (refresh_token, offline_access)
-* Provide access to your data via the Web (web)
-
-3. Provide the client ID and client secret to obtain the refresh token and access token. For more information on 
+4. Provide the client ID and client secret to obtain the refresh token and access token. For more information on 
    obtaining OAuth2 credentials, go to 
    [Salesforce documentation](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
 **Create Salesforce client**
 
 You can define the Salesforce configuration and create Salesforce client as mentioned below. 
-secureSocketConfig is optional.
+```ballerina
+// Create Salesforce client configuration by reading from config file.
+sfdc46:SalesforceConfiguration sfConfig = {
+    baseUrl: config:getAsString("EP_URL"),
+    clientConfig: {
+        accessToken: config:getAsString("ACCESS_TOKEN"),
+        refreshConfig: {
+            clientId: config:getAsString("CLIENT_ID"),
+            clientSecret: config:getAsString("CLIENT_SECRET"),
+            refreshToken: config:getAsString("REFRESH_TOKEN"),
+            refreshUrl: config:getAsString("REFRESH_URL")
+        }
+    }
+};
+
+// Create the Salesforce client.
+sfdc46:Client salesforceClient = new(sfConfig);
+```
+
+If you want to add your own key store to define the `secureSocketConfig`, change the Salesforce configuration as
+mentioned below.
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 sfdc46:SalesforceConfiguration sfConfig = {
@@ -86,13 +106,11 @@ sfdc46:SalesforceConfiguration sfConfig = {
         }
     }
 };
-
-// Create the Salesforce client.
-sfdc46:Client salesforceClient = new(sfConfig);
 ```
 
 Then create a `ballerina.conf` file and enter your credentials as mentioned below. Replace values inside quotes 
 (eg: <EP_URL>) with appropriate values. These configs will be used in the above Salesforce configuration.
+         
 ```
 EP_URL="<EP_URL>"
 ACCESS_TOKEN="<ACCESS_TOKEN>"
@@ -100,9 +118,16 @@ CLIENT_ID="<CLIENT_ID>"
 CLIENT_SECRET="<CLIENT_SECRET>"
 REFRESH_TOKEN="<REFRESH_TOKEN>"
 REFRESH_URL="<REFRESH_URL>"
+```
+
+> **Note**: If you are using your own keystore to define **secureSocketConfig**, add below configurations to your 
+**ballerina.conf** file.
+
+```
 TRUSTSTORE_PATH="<TRUSTSTORE_PATH>"
 TRUSTSTORE_PASSWORD="<TRUSTSTORE_PASSWORD>"
 ```
+
 
 **Salesforce CRUD Operations**
 
@@ -172,24 +197,31 @@ function creates Insert operator for CSV content type.
 sfdc46:SalesforceBulkClient sfBulkClient = salesforceClient->createSalesforceBulkClient();
 
 // Create CSV insert operator for object type `Contact`.
-sfdc46:CsvInsertOperator|sfdc46:ConnectorError csvInsertOperator = 
-    sfBulkClient->createCsvInsertOperator("Contact");
+sfdc46:CsvInsertOperator|sfdc46:ConnectorError csvInsertOperator = sfBulkClient->createCsvInsertOperator("Contact");
 ```
 
-`insert` remote function creates a insert batch using string CSV content. `insertFile` remote function creates a insert
-batch using a CSV file. File path of the CSv file should be passed as the parameter to the `insertFile` function.
+`insert` remote function creates a insert batch using CSV content. CSV content can be passed as a `string` or 
+`io:ReadableByteChannel` as given below.
 
 ```ballerina
-// Upload the csv contacts.
+// Upload the CSV contacts as a string.
 string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c
 Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301
 Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
 sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingCsv = csvInsertOperator->insert(contacts);
 
-// Upload csv contacts as a file.
-string csvContactsFilePath = "path/to/the/file/contacts.csv";
-sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingJsonFile = 
-    csvInsertOperator->insertFile(csvContactsFilePath);
+// Upload CSV contacts as a file.
+io:ReadableByteChannel|io:Error rbc = io:openReadableFile("path/to/the/file/contacts.csv");
+if (rbc is io:ReadableByteChannel) {
+    sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingCsvFile = csvInsertOperator->insert(rbc);
+    // close channel.
+    var cr = ch.close();
+    if (cr is error) {
+        io:println("Error occured while closing the channel: " + cr.toString());
+    }
+} else {
+    io:println("Error occurred while reading file: " + rbc.toString());
+}
 ```
 
 `closeJob` and `abortJob` remote functions close and abort CSV insert job respectively. When a job is closed, no more 

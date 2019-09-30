@@ -39,7 +39,7 @@ field in the salesforce.
 
 **Running Tests**
 
-1. Create a `ballerina.conf` inside `src/sfdc46/tests/resources` and replace values inside quotes (eg: <EP_URL>) with 
+1. Create a `ballerina.conf` inside project root directory and replace values inside quotes (eg: <EP_URL>) with 
    appropriate values.
    ```
    EP_URL="<EP_URL>"
@@ -48,11 +48,9 @@ field in the salesforce.
    CLIENT_SECRET="<CLIENT_SECRET>"
    REFRESH_TOKEN="<REFRESH_TOKEN>"
    REFRESH_URL="<REFRESH_URL>"
-   TRUSTSTORE_PATH="<TRUSTSTORE_PATH>"
-   TRUSTSTORE_PASSWORD="<TRUSTSTORE_PASSWORD>"
    ```
 2. Run the following command inside repo root folder.
    ```bash
-   ballerina test sfdc46 --b7a.config.file=src/sfdc46/tests/resources/ballerina.conf
+   $ ballerina test sfdc46
    ```
    

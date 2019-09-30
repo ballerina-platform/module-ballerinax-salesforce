@@ -16,9 +16,7 @@
 // under the License.
 //
 
-import ballerina/filepath;
 import ballerina/io;
-import ballerina/log;
 
 # JSON insert operator client.
 public type JsonInsertOperator client object {
@@ -32,56 +30,18 @@ public type JsonInsertOperator client object {
 
     # Create JSON insert batch.
     #
-    # + payload - insertion data in JSON format
+    # + jsonContent - insertion data in JSON format
     # + return - BatchInfo record if successful else ConnectorError occured
-    public remote function insert(json payload) returns @tainted BatchInfo|ConnectorError {
-        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH], 
-            payload);
-        return getBatch(response);
-    }
-
-    # Create JSON insert batch using a JSON file.
-    #
-    # + filePath - insertion JSON file path
-    # + return - BatchInfo record if successful else ConnectorError occured
-    public remote function insertFile(string filePath) returns @tainted BatchInfo|ConnectorError {
-        if (filepath:extension(filePath) == "json") {
-            io:ReadableByteChannel|io:Error rbc = io:openReadableFile(filePath);
-
-            if (rbc is io:Error) {
-                string errMsg = "Error occurred while reading the json file, file: " + filePath;
-                log:printError(errMsg, err = rbc);
-                IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rbc);
-                return ioError;
-            } else {
-                io:ReadableCharacterChannel|io:Error rch = new(rbc, "UTF8");
-
-                if (rch is io:Error) {
-                    string errMsg = "Error occurred while reading the json file, file: " + filePath;
-                    log:printError(errMsg, err = rch);
-                    IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rch);
-                    return ioError;
-                } else {
-                    json|error fileContent = rch.readJson();
-
-                    if (fileContent is json) {
-                        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id, 
-                            <@untainted> BATCH], <@untainted> fileContent);
-                        return getBatch(response);
-                    } else {
-                        string errMsg = "Error occurred while reading the json file, file: " + filePath;
-                        log:printError(errMsg, err = fileContent);
-                        IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = fileContent);
-                        return ioError;
-                    }
-                }
-            }
+    public remote function insert(json|io:ReadableByteChannel jsonContent) returns @tainted BatchInfo|ConnectorError {
+        json payload;
+        if (jsonContent is io:ReadableByteChannel) {
+            payload = check convertToJson(jsonContent);
         } else {
-            string errMsg = "Invalid file type, file: " + filePath;
-            log:printError(errMsg, err = ());
-            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR);
-            return ioError;
+            payload = jsonContent;
         }
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH], 
+            <@untainted> payload);
+        return getBatch(response);
     }
 
     # Get JSON insert operator job information.

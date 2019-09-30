@@ -1,6 +1,6 @@
 [project]
 org-name= "wso2"
-version= "0.10.0"
+version= "0.10.1"
 license= ["Apache-2.0"]
 authors = ["WSO2"]
 keywords = ["ballerina", "salesforce", "sfdc", "sfdc46", "client", "connector"]
