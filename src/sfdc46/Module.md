@@ -28,7 +28,7 @@ and XML data types.
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 1.0.0          |
+| Ballerina Language  | 1.0.1          |
 | Salesforce REST API | v46.0          |
 
 ## Sample
@@ -68,14 +68,14 @@ You can define the Salesforce configuration and create Salesforce client as ment
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 sfdc46:SalesforceConfiguration sfConfig = {
-    baseUrl: config:getAsString("EP_URL"),
+    baseUrl: "<EP_URL>",
     clientConfig: {
-        accessToken: config:getAsString("ACCESS_TOKEN"),
+        accessToken: "<ACCESS_TOKEN>",
         refreshConfig: {
-            clientId: config:getAsString("CLIENT_ID"),
-            clientSecret: config:getAsString("CLIENT_SECRET"),
-            refreshToken: config:getAsString("REFRESH_TOKEN"),
-            refreshUrl: config:getAsString("REFRESH_URL")
+            clientId: "<CLIENT_ID>",
+            clientSecret: "<CLIENT_SECRET>",
+            refreshToken: "<REFRESH_TOKEN>",
+            refreshUrl: "<REFRESH_URL>"
         }
     }
 };
@@ -89,45 +89,24 @@ mentioned below.
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 sfdc46:SalesforceConfiguration sfConfig = {
-    baseUrl: config:getAsString("EP_URL"),
+    baseUrl: "<EP_URL>",
     clientConfig: {
-        accessToken: config:getAsString("ACCESS_TOKEN"),
+        accessToken: "<ACCESS_TOKEN>",
         refreshConfig: {
-            clientId: config:getAsString("CLIENT_ID"),
-            clientSecret: config:getAsString("CLIENT_SECRET"),
-            refreshToken: config:getAsString("REFRESH_TOKEN"),
-            refreshUrl: config:getAsString("REFRESH_URL")
+            clientId: "<CLIENT_ID>",
+            clientSecret: "<CLIENT_SECRET>",
+            refreshToken: "<REFRESH_TOKEN>",
+            refreshUrl: "<REFRESH_URL>"
         }
     },
     secureSocketConfig: {
         trustStore: {
-            path: config:getAsString("TRUSTSTORE_PATH"),
-            password: config:getAsString("TRUSTSTORE_PASSWORD")
+            path: "<TRUSTSTORE_PATH>",
+            password: "<TRUSTSTORE_PASSWORD>"
         }
     }
 };
 ```
-
-Then create a `ballerina.conf` file and enter your credentials as mentioned below. Replace values inside quotes 
-(eg: <EP_URL>) with appropriate values. These configs will be used in the above Salesforce configuration.
-         
-```
-EP_URL="<EP_URL>"
-ACCESS_TOKEN="<ACCESS_TOKEN>"
-CLIENT_ID="<CLIENT_ID>"
-CLIENT_SECRET="<CLIENT_SECRET>"
-REFRESH_TOKEN="<REFRESH_TOKEN>"
-REFRESH_URL="<REFRESH_URL>"
-```
-
-> **Note**: If you are using your own keystore to define **secureSocketConfig**, add below configurations to your 
-**ballerina.conf** file.
-
-```
-TRUSTSTORE_PATH="<TRUSTSTORE_PATH>"
-TRUSTSTORE_PASSWORD="<TRUSTSTORE_PASSWORD>"
-```
-
 
 **Salesforce CRUD Operations**
 
@@ -215,7 +194,7 @@ io:ReadableByteChannel|io:Error rbc = io:openReadableFile("path/to/the/file/cont
 if (rbc is io:ReadableByteChannel) {
     sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingCsvFile = csvInsertOperator->insert(rbc);
     // close channel.
-    var cr = ch.close();
+    var cr = rbc.close();
     if (cr is error) {
         io:println("Error occured while closing the channel: " + cr.toString());
     }
@@ -243,6 +222,8 @@ an existing batch. `getAllBatches` remote function get information about all bat
 // Get job information.
 sfdc46:JobInfo|sfdc46:ConnectorError job = csvInsertOperator->getJobInfo();
 
+// Get batch ID using sfdc46:BatchInfo record.
+string batchId = batchUsingCsv.id;
 // Get batch information.
 sfdc46:BatchInfo|sfdc46:ConnectorError batchInfo = csvInsertOperator->getBatchInfo(batchId);
 
