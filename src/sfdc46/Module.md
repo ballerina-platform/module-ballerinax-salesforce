@@ -1,9 +1,19 @@
 Connects to Salesforce from Ballerina. 
 
+## Module Overview
+
 The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
 describe SObjects and organizational data through the Salesforce REST API. Also it supports insert, upsert, update, 
 query and delete operations for CSV, JSON and XML data types which provides in Salesforce bulk API. 
 It handles OAuth 2.0 authentication.
+
+## Compatibility
+|                     |    Version     |
+|:-------------------:|:--------------:|
+| Ballerina Language  | 1.0.1          |
+| Salesforce REST API | v46.0          |
+
+## Supported Operations
 
 **SObject Operations**
 
@@ -25,17 +35,8 @@ limitations for organizations.
 The `wso2/sfdc46` module contains insert, upsert, update, query and delete asynchronous bulk operations for CSV, JSON
 and XML data types.
 
-## Compatibility
-|                     |    Version     |
-|:-------------------:|:--------------:|
-| Ballerina Language  | 1.0.1          |
-| Salesforce REST API | v46.0          |
+## Configuration
 
-## Sample
-First, import the `wso2/sfdc46` module into the Ballerina project.
-```ballerina
-import wso2/sfdc46;
-```
 Instantiate the connector by giving authentication details in the HTTP client config, which has built-in support for 
 BasicAuth and OAuth 2.0. Salesforce uses OAuth 2.0 to authenticate and authorize requests. The Salesforce connector can 
 be instantiated in the HTTP client config using the access token or using the client ID, client secret, and refresh 
@@ -62,204 +63,70 @@ token.
    obtaining OAuth2 credentials, go to 
    [Salesforce documentation](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
-**Create Salesforce client**
 
-You can define the Salesforce configuration and create Salesforce client as mentioned below. 
+## Sample
+
+ 
 ```ballerina
+import ballerina/config;
+import ballerina/http;
+import ballerina/log;
+import wso2/sfdc46;
+
 // Create Salesforce client configuration by reading from config file.
 sfdc46:SalesforceConfiguration sfConfig = {
-    baseUrl: "<EP_URL>",
+    baseUrl: config:getAsString("EP_URL"),
     clientConfig: {
-        accessToken: "<ACCESS_TOKEN>",
+        accessToken: config:getAsString("ACCESS_TOKEN"),
         refreshConfig: {
-            clientId: "<CLIENT_ID>",
-            clientSecret: "<CLIENT_SECRET>",
-            refreshToken: "<REFRESH_TOKEN>",
-            refreshUrl: "<REFRESH_URL>"
+            clientId: config:getAsString("CLIENT_ID"),
+            clientSecret: config:getAsString("CLIENT_SECRET"),
+            refreshToken: config:getAsString("REFRESH_TOKEN"),
+            refreshUrl: config:getAsString("REFRESH_URL")
         }
     }
 };
 
-// Create the Salesforce client.
-sfdc46:Client salesforceClient = new(sfConfig);
-```
+// Create salesforce client.
+sfdc46:Client sfClient = new (sfConfig);
 
-If you want to add your own key store to define the `secureSocketConfig`, change the Salesforce configuration as
-mentioned below.
-```ballerina
-// Create Salesforce client configuration by reading from config file.
-sfdc46:SalesforceConfiguration sfConfig = {
-    baseUrl: "<EP_URL>",
-    clientConfig: {
-        accessToken: "<ACCESS_TOKEN>",
-        refreshConfig: {
-            clientId: "<CLIENT_ID>",
-            clientSecret: "<CLIENT_SECRET>",
-            refreshToken: "<REFRESH_TOKEN>",
-            refreshUrl: "<REFRESH_URL>"
-        }
-    },
-    secureSocketConfig: {
-        trustStore: {
-            path: "<TRUSTSTORE_PATH>",
-            password: "<TRUSTSTORE_PASSWORD>"
-        }
+@http:ServiceConfig {
+    basePath: "/salesforce"
+}
+service salesforceService on new http:Listener(9090) {
+
+    @http:ResourceConfig {
+        methods: ["POST"],
+        path: "/account"
     }
-};
-```
+    // Function to create a Account record.
+    resource function createAccount(http:Caller caller, http:Request request) returns error? {
+        // Define new response.
+        http:Response backendResponse = new ();
+        json payload = check request.getJsonPayload();
+        // Get `Account` record.
+        json account = {
+            Name: payload.Name.toString(),
+            BillingCity: payload.BillingCity.toString(),
+            Website: payload.Website.toString()
+        };
 
-**Salesforce CRUD Operations**
+        // Invoke createAccount remote function from salesforce client.
+        string response = check sfClient->createAccount(<@untainted>account);
 
-The `createAccount` remote function creates an Account SObject. Pass a JSON object with the relevant fields needed for 
-the SObject Account.
-
-```ballerina
-json account = { Name: "ABC Inc", BillingCity: "New York" };
-string|sfdc46:ConnectorError createReponse = salesforceClient->createAccount(account);
-```
-
-The response from `createAccount` is either the string ID of the created account (if the account was created 
-successfully) or `ConnectorError` (if the account creation was unsuccessful).
-
-```ballerina
-if (createReponse is string) {
-    io:println("Account id: " + createReponse);
-} else {
-    io:println(createReponse.detail()?.message.toString());
-}
-```
-
-The `getQueryResult` remote function executes a SOQL query that returns all the results in a single response or if it 
-exceeds the maximum record limit, it returns part of the results and an identifier that can be used to retrieve the 
-remaining results.
-
-```ballerina
-string sampleQuery = "SELECT name FROM Account";
-sfdc46:SoqlResult|sfdc46:ConnectorError response = salesforceClient->getQueryResult(sampleQuery);
-```
-
-The response from `getQueryResult` is either a SoqlResult record with total size, execution status, resulting records, 
-and URL to get next record set (if query execution was successful) or `ConnectorError` (if the query execution 
-was unsuccessful).
-
-```ballerina
-if (response is sfdc46:SoqlResult) {
-    io:println("TotalSize:  ", response.totalSize.toString());
-    io:println("Done:  ", response.done.toString());
-    io:println("Records: ", response.records.toString());
-} else {
-    io:println("Error: ", response.detail()?.message.toString());
-}
-```
-The `createLead` remote function creates a Lead SObject. It returns the lead ID if successful or 
-`ConnectorError` if unsuccessful.
-
-```ballerina
-json lead = {LastName:"Carmen", Company:"WSO2", City:"New York"};
-string|sfdc46:ConnectorError createResponse = salesforceClient->createLead(lead);
-
-if (createResponse is string) {
-    io:println("Lead id: " + createResponse);
-} else {
-    io:println("Error: ", createResponse.detail()?.message.toString());
-}
-```
-
-**Salesforce Bulk Operations**
-
-The `createSalesforceBulkClient` remote function creates the salesforce bulk client which facilitates bulk operations.
-Bulk client can create appropriate operator Corresponding to the data type. The `createCsvInsertOperator` remote 
-function creates Insert operator for CSV content type.
-
-```ballerina
-// Create salesforce bulk client.
-sfdc46:SalesforceBulkClient sfBulkClient = salesforceClient->createSalesforceBulkClient();
-
-// Create CSV insert operator for object type `Contact`.
-sfdc46:CsvInsertOperator|sfdc46:ConnectorError csvInsertOperator = sfBulkClient->createCsvInsertOperator("Contact");
-```
-
-`insert` remote function creates a insert batch using CSV content. CSV content can be passed as a `string` or 
-`io:ReadableByteChannel` as given below.
-
-```ballerina
-// Upload the CSV contacts as a string.
-string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c
-Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301
-Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
-sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingCsv = csvInsertOperator->insert(contacts);
-
-// Upload CSV contacts as a file.
-io:ReadableByteChannel|io:Error rbc = io:openReadableFile("path/to/the/file/contacts.csv");
-if (rbc is io:ReadableByteChannel) {
-    sfdc46:BatchInfo|sfdc46:ConnectorError batchUsingCsvFile = csvInsertOperator->insert(rbc);
-    // close channel.
-    var cr = rbc.close();
-    if (cr is error) {
-        io:println("Error occured while closing the channel: " + cr.toString());
+        json resPayload = { accountId: response };
+        respondAndHandleError(caller, http:STATUS_OK, <@untainted> resPayload);
     }
-} else {
-    io:println("Error occurred while reading file: " + rbc.toString());
+}
+
+// Send the response back to the client and handle responding errors.
+function respondAndHandleError(http:Caller caller, int resCode, json | xml | string payload) {
+    http:Response res = new;
+    res.statusCode = resCode;
+    res.setPayload(payload);
+    var respond = caller->respond(res);
+    if (respond is error) {
+        log:printError("Error occurred while responding", err = respond);
+    }
 }
 ```
-
-`closeJob` and `abortJob` remote functions close and abort CSV insert job respectively. When a job is closed, no more 
-batches can be added. When a job is aborted, no more records are processed. If changes to data have already been 
-committed, they aren’t rolled back.
-
-```ballerina
-// Close job.
-sfdc46:JobInfo|sfdc46:ConnectorError closedJob = csvInsertOperator->closeJob();
-
-// Abort job.
-sfdc46:JobInfo|sfdc46:ConnectorError abortedJob = csvInsertOperator->abortJob();
-```
-
-`getJobInfo` remote function get all details for an existing job. `getBatchInfo` remote function get information about 
-an existing batch. `getAllBatches` remote function get information about all batches in a job.
-
-```ballerina
-// Get job information.
-sfdc46:JobInfo|sfdc46:ConnectorError job = csvInsertOperator->getJobInfo();
-
-// Get batch ID using sfdc46:BatchInfo record.
-string batchId = batchUsingCsv.id;
-// Get batch information.
-sfdc46:BatchInfo|sfdc46:ConnectorError batchInfo = csvInsertOperator->getBatchInfo(batchId);
-
-// Get information of all batches of this csv insert job.
-sfdc46:BatchInfo[]|sfdc46:ConnectorError allBatchInfo = csvInsertOperator->getAllBatches();
-```
-
-`getBatchRequest` remote function gets the batch request uploaded to the csv insert job. `getResult` remote 
-function get results of a batch that has completed processing.
-
-```ballerina
-// Retrieve the csv batch request.
-string|sfdc46:ConnectorError batchRequest = csvInsertOperator->getBatchRequest(batchId);
-// Get batch result as csv.
-int noOfRetries = 5; // Number of times trying to get the results.
-int waitTime = 3000; // Time between two tries in milli-seconds.
-sfdc46:Result[]|sfdc46:ConnectorError batchResult = csvInsertOperator->getResult(batchId, noOfRetries, waitTime);
-```
-
-Likewise Salesforce bulk client provides following operators:
-
-- CSV 
-  - insert operator
-  - upsert operator
-  - update operator
-  - query operator
-  - delete operator
-- JSON 
-  - insert operator
-  - upsert operator
-  - update operator
-  - query operator
-  - delete operator
-- XML
-  - insert operator
-  - upsert operator
-  - update operator
-  - query operator
-  - delete operator
