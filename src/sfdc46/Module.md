@@ -10,7 +10,7 @@ It handles OAuth 2.0 authentication.
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 1.0.1          |
+| Ballerina Language  | 1.0.2          |
 | Salesforce REST API | v46.0          |
 
 ## Supported Operations
