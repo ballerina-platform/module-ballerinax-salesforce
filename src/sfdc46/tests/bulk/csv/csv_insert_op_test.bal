@@ -24,9 +24,9 @@ import ballerina/test;
 function testCsvInsertOperator() {
     log:printInfo("salesforceBulkClient -> CsvInsertOperator");
 
-    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c
-Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301
-Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
+    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c" +
+"Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301" +
+"Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
 
     string csvContactsFilePath = "src/sfdc46/tests/resources/contacts.csv";
 
