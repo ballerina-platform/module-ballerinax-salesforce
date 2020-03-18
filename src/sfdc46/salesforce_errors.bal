@@ -27,24 +27,24 @@ type ErrorDetail record {
 
 // Ballerina Salesforce Client Error Types
 const HTTP_RESPONSE_HANDLING_ERROR = "[wso2/sfdc46]HttpResponseHandlingError";
-type HttpResponseHandlingError error<HTTP_RESPONSE_HANDLING_ERROR, ErrorDetail>;
+public type HttpResponseHandlingError error<HTTP_RESPONSE_HANDLING_ERROR, ErrorDetail>;
 
 const TYPE_CONVERSION_ERROR = "[wso2/sfdc46]TypeConversionError";
-type TypeConversionError error<TYPE_CONVERSION_ERROR, ErrorDetail>;
+public type TypeConversionError error<TYPE_CONVERSION_ERROR, ErrorDetail>;
 
 const HTTP_ERROR = "[wso2/sfdc46]HTTPError";
-type HttpError error<HTTP_ERROR, ErrorDetail>;
+public type HttpError error<HTTP_ERROR, ErrorDetail>;
 
 const SERVER_ERROR = "[wso2/sfdc46]ServerError";
-type ServerError error<SERVER_ERROR, ErrorDetail>;
+public type ServerError error<SERVER_ERROR, ErrorDetail>;
 
 const IO_ERROR = "[wso2/sfdc46]IOError";
-type IOError error<IO_ERROR, ErrorDetail>;
+public type IOError error<IO_ERROR, ErrorDetail>;
 
 // Ballerina Salesforce Union Errors
-type ConnectorError ServerError|ClientError;
+public type ConnectorError ServerError|ClientError;
 
-type ClientError HttpResponseHandlingError|HttpError|TypeConversionError|IOError;
+public type ClientError HttpResponseHandlingError|HttpError|TypeConversionError|IOError;
 
 // Error messages
 const string JSON_ACCESSING_ERROR_MSG = "Error occurred while accessing the JSON payload of the response.";

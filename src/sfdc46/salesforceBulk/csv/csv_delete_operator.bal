@@ -28,7 +28,7 @@ public type CsvDeleteOperator client object {
     # Create CSV delete batch.
     #
     # + csvContent - delete data with IDs in CSV format
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function delete(string csvContent) returns @tainted BatchInfo|ConnectorError {
         xml xmlResponse = check self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], csvContent);
         return getBatch(xmlResponse);
@@ -36,70 +36,43 @@ public type CsvDeleteOperator client object {
 
     # Get CSV delete operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
+        return getJob(xmlResponse);
     }
 
     # Close CSV delete operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id], 
-            XML_STATE_CLOSED_PAYLOAD);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->createXmlRecord([JOB, self.job.id], XML_STATE_CLOSED_PAYLOAD);
+        return getJob(xmlResponse);
     }
 
     # Abort CSV delete operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id], 
-            XML_STATE_ABORTED_PAYLOAD);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->createXmlRecord([JOB, self.job.id], XML_STATE_ABORTED_PAYLOAD);
+        return getJob(xmlResponse);
     }
 
     # Get CSV delete batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
-        if (xmlResponse is xml) {
-            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
-            return batch;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
+        return getBatch(xmlResponse);
     }
 
     # Get information of all batches of CSV delete operator job.
     #
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
-        if (xmlResponse is xml) {
-            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(xmlResponse);
-            return batchInfo;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
+        return getBatchInfoList(xmlResponse);
     }
 
     # Retrieve the CSV batch request.

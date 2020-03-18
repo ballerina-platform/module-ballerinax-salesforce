@@ -22,6 +22,7 @@ import ballerina/io;
 import ballerina/runtime;
 import ballerina/'lang\.int as ints;
 import ballerina/'lang\.float as floats;
+import ballerina/lang.'string as strings;
 
 # Check HTTP response and return XML payload if succesful, else set errors and return ConnectorError.
 # + httpResponse - HTTP response or error occurred
@@ -374,7 +375,7 @@ function getResultTimeoutError(string batchId, int numberOfTries, int waitTime) 
 #
 # + batch - Batch which trying to get results.
 function printWaitingMessage(BatchInfo batch) {
-    log:printInfo("Waiting to complete the batch, batch=" + batch.toString());
+    log:printDebug("Waiting to complete the batch, batch=" + batch.toString());
 }
 
 # Check batch state and get results for the given no of tries and waiting time.
@@ -456,7 +457,7 @@ function checkBatchStateAndGetResultList(
 # 
 # + op - bulk operator client object
 # + batchId - batchId
-# + return - Batch record if successful else ConnectorError occured
+# + return - BatchInfo record if successful else ConnectorError occured
 function getBatchPointer(@tainted BulkOperator op, string batchId) returns @tainted BatchInfo|ConnectorError {
     return op->getBatchInfo(batchId);
 }
@@ -516,6 +517,91 @@ function getResultListPointer(@tainted BulkOperator op, string batchId) returns 
             return getResultList(response);
         } else {
             return response;
+        }
+    }
+}
+
+# Convert ReadableByteChannel to string.
+# 
+# + rbc - ReadableByteChannel
+# + return - converted string
+function convertToString(io:ReadableByteChannel rbc) returns @tainted string|ConnectorError {
+    byte[] readContent;
+    string textContent = "";
+    while (true) {
+        byte[]|io:Error result = rbc.read(1000);
+        if (result is io:EofError) {
+            break;
+        } else if (result is io:Error) {
+            string errMsg = "Error occurred while reading from Readable Byte Channel.";
+            log:printError(errMsg, err = result);
+            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = result);
+            return ioError;
+        } else {
+            readContent = result;
+            string|error readContentStr = strings:fromBytes(readContent);
+            if (readContentStr is string) {
+                textContent = textContent + readContentStr; 
+            } else {
+                string errMsg = "Error occurred while converting readContent byte array to string.";
+                log:printError(errMsg, err = readContentStr);
+                TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg, 
+                    errorCode = TYPE_CONVERSION_ERROR, cause = readContentStr);
+                return typeError;
+            }                 
+        }
+    }
+    return textContent;
+}
+
+# Convert ReadableByteChannel to json.
+# 
+# + rbc - ReadableByteChannel
+# + return - converted json
+function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|ConnectorError {
+    io:ReadableCharacterChannel|io:Error rch = new(rbc, ENCODING_CHARSET);
+
+    if (rch is io:Error) {
+        string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
+        log:printError(errMsg, err = rch);
+        IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rch);
+        return ioError;
+    } else {
+        json|error jsonContent = rch.readJson();
+
+        if (jsonContent is json) {
+            return jsonContent;
+        } else {
+            string errMsg = "Error occurred while reading ReadableCharacterChannel as json.";
+            log:printError(errMsg, err = jsonContent);
+            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = jsonContent);
+            return ioError;
+        }
+    }
+}
+
+# Convert ReadableByteChannel to xml.
+# 
+# + rbc - ReadableByteChannel
+# + return - converted xml
+function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|ConnectorError {
+    io:ReadableCharacterChannel|io:Error rch = new(rbc, ENCODING_CHARSET);
+
+    if (rch is io:Error) {
+        string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
+        log:printError(errMsg, err = rch);
+        IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rch);
+        return ioError;
+    } else {
+        xml|error xmlContent = rch.readXml();
+
+        if (xmlContent is xml) {
+            return xmlContent;
+        } else {
+            string errMsg = "Error occurred while reading ReadableCharacterChannel as xml.";
+            log:printError(errMsg, err = xmlContent);
+            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = xmlContent);
+            return ioError;
         }
     }
 }

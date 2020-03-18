@@ -14,12 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    // dependsOn: ["testDeleteOpportunity"]
-}
+@test:Config {}
 function testJsonInsertOperator() {
     log:printInfo("salesforceBulkClient -> JsonInsertOperator");
 
@@ -63,12 +62,19 @@ function testJsonInsertOperator() {
         }
 
         // Upload json contacts as a file.
-        BatchInfo|ConnectorError batchUsingJsonFile = jsonInsertOperator->insertFile(jsonContactsFilePath);
-        if (batchUsingJsonFile is BatchInfo) {
-            test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
-            batchIdUsingJsonFile = batchUsingJsonFile.id;
+        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
+        if (rbc is io:ReadableByteChannel) {
+            BatchInfo|ConnectorError batchUsingJsonFile = jsonInsertOperator->insert(rbc);
+            if (batchUsingJsonFile is BatchInfo) {
+                test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
+                batchIdUsingJsonFile = batchUsingJsonFile.id;
+            } else {
+                test:assertFail(msg = batchUsingJsonFile.detail()?.message.toString());
+            }
+            // close channel.
+            closeRb(rbc);
         } else {
-            test:assertFail(msg = batchUsingJsonFile.detail()?.message.toString());
+            test:assertFail(msg = rbc.detail()?.message.toString());
         }
 
         // Get job information.
@@ -116,14 +122,24 @@ function testJsonInsertOperator() {
             test:assertFail(msg = batchRequest.detail()?.message.toString());
         }
 
-        // Get the results of the batch
+        // Get the results of the batch.
         Result[]|ConnectorError batchResult = jsonInsertOperator->getResult(batchIdUsingJson, noOfRetries);
-
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Insert result was not successful.");                
         } else {
             test:assertFail(msg = batchResult.detail()?.message.toString());
+        }
+        // Get the results of the json file insert batch.
+        Result[]|ConnectorError jsonFileInsertbatchResult = 
+            jsonInsertOperator->getResult(batchIdUsingJsonFile, noOfRetries);
+        if (jsonFileInsertbatchResult is Result[]) {
+            test:assertTrue(jsonFileInsertbatchResult.length() > 0, 
+                msg = "Retrieving json file insert batch result failed.");
+            test:assertTrue(checkBatchResults(jsonFileInsertbatchResult),
+                msg = "Json file batch insert result was not successful.");                
+        } else {
+            test:assertFail(msg = jsonFileInsertbatchResult.detail()?.message.toString());
         }
 
         // Abort job.
