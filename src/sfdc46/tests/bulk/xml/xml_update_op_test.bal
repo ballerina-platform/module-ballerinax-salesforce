@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/test;
+import ballerina/lang.'xml as xmllib;
 
 @test:Config {
     dependsOn: ["testXmlUpsertOperator"]
@@ -99,9 +100,10 @@ function testXmlUpdateOperator() {
         // Retrieve the json batch request.
         xml|ConnectorError batchRequest = xmlUpdateOperator->getBatchRequest(batchIdUsingXml);
         if (batchRequest is xml) {
-            foreach var xmlBatch in batchRequest.*.elements() {
+            xmllib:Element element = <xmllib:Element> batchRequest;
+            foreach var xmlBatch in element.getChildren().elements() {
                 if (xmlBatch is xml) {
-                    test:assertTrue(xmlBatch[getElementNameWithNamespace("description")].getTextValue() == 
+                    test:assertTrue(xmlBatch[getElementNameWithNamespace("description")].toString() == 
                         "Created_from_Ballerina_Sf_Bulk_API", 
                         msg = "Retrieving batch request failed.");                
                 } else {

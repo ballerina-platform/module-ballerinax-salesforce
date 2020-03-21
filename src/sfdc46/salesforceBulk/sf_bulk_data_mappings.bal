@@ -17,8 +17,9 @@
 //
 
 import ballerina/log;
-import ballerinax/java;
-import ballerinax/java.arrays as jarrays;
+import ballerina/java;
+import ballerina/java.arrays as jarrays;
+import ballerina/lang.'xml as xmllib;
 
 function getJob(xml|json jobDetails) returns JobInfo|ConnectorError {
     if (jobDetails is xml) {
@@ -30,27 +31,27 @@ function getJob(xml|json jobDetails) returns JobInfo|ConnectorError {
 
 function createJobRecordFromXml(xml jobDetails) returns JobInfo|ConnectorError {
     JobInfo|error job = trap {
-        id: jobDetails.id.getTextValue(),
-        operation: jobDetails.operation.getTextValue(),
-        'object: jobDetails.'object.getTextValue(),
-        createdById: jobDetails.createdById.getTextValue(),
-        createdDate: jobDetails.createdDate.getTextValue(),
-        systemModstamp: jobDetails.systemModstamp.getTextValue(),
-        state: jobDetails.state.getTextValue(),
-        concurrencyMode: jobDetails.concurrencyMode.getTextValue(),
-        contentType: jobDetails.contentType.getTextValue(),
-        numberBatchesQueued: getIntValue(jobDetails.numberBatchesQueued.getTextValue()),
-        numberBatchesInProgress: getIntValue(jobDetails.numberBatchesQueued.getTextValue()),
-        numberBatchesCompleted: getIntValue(jobDetails.numberBatchesCompleted.getTextValue()),
-        numberBatchesFailed: getIntValue(jobDetails.numberBatchesFailed.getTextValue()),
-        numberBatchesTotal: getIntValue(jobDetails.numberBatchesTotal.getTextValue()),
-        numberRecordsProcessed: getIntValue(jobDetails.numberRecordsProcessed.getTextValue()),
-        numberRetries: getIntValue(jobDetails.numberRetries.getTextValue()),
-        apiVersion: getFloatValue(jobDetails.apiVersion.getTextValue()),
-        numberRecordsFailed: getIntValue(jobDetails.numberRecordsFailed.getTextValue()),
-        totalProcessingTime: getIntValue(jobDetails.totalProcessingTime.getTextValue()),
-        apiActiveProcessingTime: getIntValue(jobDetails.apiActiveProcessingTime.getTextValue()),
-        apexProcessingTime: getIntValue(jobDetails.apexProcessingTime.getTextValue())
+        id: jobDetails.id.toString(),
+        operation: jobDetails.operation.toString(),
+        'object: jobDetails.'object.toString(),
+        createdById: jobDetails.createdById.toString(),
+        createdDate: jobDetails.createdDate.toString(),
+        systemModstamp: jobDetails.systemModstamp.toString(),
+        state: jobDetails.state.toString(),
+        concurrencyMode: jobDetails.concurrencyMode.toString(),
+        contentType: jobDetails.contentType.toString(),
+        numberBatchesQueued: getIntValue(jobDetails.numberBatchesQueued.toString()),
+        numberBatchesInProgress: getIntValue(jobDetails.numberBatchesQueued.toString()),
+        numberBatchesCompleted: getIntValue(jobDetails.numberBatchesCompleted.toString()),
+        numberBatchesFailed: getIntValue(jobDetails.numberBatchesFailed.toString()),
+        numberBatchesTotal: getIntValue(jobDetails.numberBatchesTotal.toString()),
+        numberRecordsProcessed: getIntValue(jobDetails.numberRecordsProcessed.toString()),
+        numberRetries: getIntValue(jobDetails.numberRetries.toString()),
+        apiVersion: getFloatValue(jobDetails.apiVersion.toString()),
+        numberRecordsFailed: getIntValue(jobDetails.numberRecordsFailed.toString()),
+        totalProcessingTime: getIntValue(jobDetails.totalProcessingTime.toString()),
+        apiActiveProcessingTime: getIntValue(jobDetails.apiActiveProcessingTime.toString()),
+        apexProcessingTime: getIntValue(jobDetails.apexProcessingTime.toString())
     };
 
     if (job is JobInfo) {
@@ -94,21 +95,21 @@ function getBatch(xml|json batchDetails) returns BatchInfo|ConnectorError {
 
 function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|ConnectorError {
     BatchInfo|error batch = trap {
-        id: batchDetails[getElementNameWithNamespace("id")].getTextValue(),
-        jobId: batchDetails[getElementNameWithNamespace("jobId")].getTextValue(),
-        state: batchDetails[getElementNameWithNamespace("state")].getTextValue(),
-        createdDate: batchDetails[getElementNameWithNamespace("createdDate")].getTextValue(),
-        systemModstamp: batchDetails[getElementNameWithNamespace("systemModstamp")].getTextValue(),
+        id: batchDetails[getElementNameWithNamespace("id")].toString(),
+        jobId: batchDetails[getElementNameWithNamespace("jobId")].toString(),
+        state: batchDetails[getElementNameWithNamespace("state")].toString(),
+        createdDate: batchDetails[getElementNameWithNamespace("createdDate")].toString(),
+        systemModstamp: batchDetails[getElementNameWithNamespace("systemModstamp")].toString(),
         numberRecordsProcessed:
-            getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsProcessed")].getTextValue()),
+            getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsProcessed")].toString()),
         numberRecordsFailed:
-            getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsFailed")].getTextValue()),
+            getIntValue(batchDetails[getElementNameWithNamespace("numberRecordsFailed")].toString()),
         totalProcessingTime:
-            getIntValue(batchDetails[getElementNameWithNamespace("totalProcessingTime")].getTextValue()),
+            getIntValue(batchDetails[getElementNameWithNamespace("totalProcessingTime")].toString()),
         apiActiveProcessingTime:
-            getIntValue(batchDetails[getElementNameWithNamespace("apiActiveProcessingTime")].getTextValue()),
+            getIntValue(batchDetails[getElementNameWithNamespace("apiActiveProcessingTime")].toString()),
         apexProcessingTime:
-            getIntValue(batchDetails[getElementNameWithNamespace("apexProcessingTime")].getTextValue())
+            getIntValue(batchDetails[getElementNameWithNamespace("apexProcessingTime")].toString())
     };
     if (batch is BatchInfo) {
         // if (batchDetails.stateMessage.getTextValue().length() > 0) {
@@ -148,9 +149,10 @@ function getBatchInfoList(xml|json batchInfoDetails) returns BatchInfo[]|Connect
 
 function createBatchInfoListFromXml(xml batchInfoDetails) returns BatchInfo[]|ConnectorError {
     BatchInfo[] batchInfoList = [];
-    foreach var batchDetails in batchInfoDetails.*.elements() {
-        if (batchDetails is xml) {
-            BatchInfo|ConnectorError batch = getBatch(batchDetails);
+    xmllib:Element element = <xmllib:Element> batchInfoDetails;
+    foreach var xmlBatch in element.getChildren().elements() {
+        if (xmlBatch is xml) {
+            BatchInfo|ConnectorError batch = getBatch(xmlBatch);
             if (batch is BatchInfo) {
                 batchInfoList[batchInfoList.length()] = batch;
             } else {
@@ -197,25 +199,26 @@ function getBatchResults(xml|json|string batchResult) returns Result[]|Connector
 function createBatchResultRecordFromXml(xml payload) returns Result[]|ConnectorError {
     Result[] batchResArr = [];
 
-    foreach var result in payload.*.elements() {
+    xmllib:Element element = <xmllib:Element> payload;
+    foreach var result in element.getChildren().elements() {
         if (result is xml) {
             Result|error batchRes = trap {
-                success: getBooleanValue(result[getElementNameWithNamespace("success")].getTextValue()),
-                created: getBooleanValue(result[getElementNameWithNamespace("created")].getTextValue())
+                success: getBooleanValue(result[getElementNameWithNamespace("success")].toString()),
+                created: getBooleanValue(result[getElementNameWithNamespace("created")].toString())
             };
 
             if (batchRes is Result) {
                 // Check whether ID exists
-                if (result.id.getTextValue().length() > 0) {
-                    batchRes.id = result.id.getTextValue();
+                if (result.id.toString().length() > 0) {
+                    batchRes.id = result.id.toString();
                 }
                 // Check whether errors exists
-                xml|error errors = result.errors;
-                if (errors is xml) {
+                string|error errors = result.errors;
+                if (errors is string) {
 
                     if (errors.toString().length() > 0) {
                         log:printInfo("Failed batch result, err=" + errors.toString());
-                        batchRes.errors = "[" + errors.statusCode.getTextValue() + "] " + errors.message.getTextValue();
+                        batchRes.errors = errors.toString();
                     }
                 }
                 // Add to batch results array.
@@ -373,9 +376,10 @@ function getResultList(xml|json resultListDetails) returns string[]|ConnectorErr
 
 function createResultListRecordFromXml(xml payload) returns string[]|ConnectorError {
     string[] results = [];
-    foreach var result in payload.*.elements() {
+    xmllib:Element element = <xmllib:Element> payload;
+    foreach var result in element.getChildren().elements() {
         if (result is xml) {
-            string|error resultId = result.getTextValue();
+            string|error resultId = result.toString();
             if (resultId is string) {
                 results[results.length()] = resultId;
             } else {

@@ -126,8 +126,8 @@ function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Htt
 
     if (xmlResponse is xml) {
         HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
-            message = xmlResponse.exceptionMessage.getTextValue(), 
-            errorCode = xmlResponse.exceptionCode.getTextValue());
+            message = xmlResponse.exceptionMessage.toString(), 
+            errorCode = xmlResponse.exceptionCode.toString());
         return httpResponseHandlingError;
     } else {
         log:printError(ERR_EXTRACTING_ERROR_MSG, err = xmlResponse);
@@ -306,7 +306,7 @@ function createResponseHeaderMap(http:Response resp) returns @tainted map<anydat
         } else if (contentType == APP_XML) {
             xml | error payload = resp.getXmlPayload();
             if (payload is xml){
-                if (payload.exceptionCode.getTextValue() == INVALID_SESSION_ID) {
+                if (payload.exceptionCode.toString() == INVALID_SESSION_ID) {
                     headerMap[http:STATUS_CODE] = http:STATUS_UNAUTHORIZED;
                 }
             } else {

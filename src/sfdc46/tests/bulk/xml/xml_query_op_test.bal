@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/test;
+import ballerina/lang.'xml as xmllib;
 
 @test:Config {
     dependsOn: ["testXmlInsertOperator"]
@@ -84,7 +85,8 @@ function testXmlQueryOperator() {
 
             if (result is xml) {
                 xml records = result[getElementNameWithNamespace("records")];
-                test:assertTrue(records.*.elements().length() > 0, msg = "Getting query result failed.");
+                xmllib:Element element = <xmllib:Element> records;
+                test:assertTrue(element.getChildren().elements().length() > 0, msg = "Getting query result failed.");
             } else {
                 test:assertFail(msg = result.detail()?.message.toString());
             }

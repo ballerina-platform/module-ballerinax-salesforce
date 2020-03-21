@@ -23,9 +23,9 @@ import ballerina/test;
 function testCsvUpsertOperator() {
     log:printInfo("salesforceBulkClient -> CsvUpsertOperator");
 
-    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c
-Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john.michael@gmail.com,301
-Created_from_Ballerina_Sf_Bulk_API,Pedro,Guterez,Professor Grade 04,0445567100,pedro.gut@gmail.com,303";
+    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c" + 
+"Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john.michael@gmail.com,301" +
+"Created_from_Ballerina_Sf_Bulk_API,Pedro,Guterez,Professor Grade 04,0445567100,pedro.gut@gmail.com,303";
 
     // Create JSON upsert operator.
     CsvUpsertOperator|ConnectorError csvUpsertOperator =

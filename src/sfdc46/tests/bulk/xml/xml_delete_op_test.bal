@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/test;
+import ballerina/lang.'xml as xmllib;
 
 @test:Config {
     dependsOn: ["testXmlUpdateOperator"]
@@ -76,10 +77,10 @@ function testXmlDeleteOperator() {
         // Get the batch request.
         xml|ConnectorError batchRequest = xmlDeleteOperator->getBatchRequest(batchId);
         if (batchRequest is xml) {
-            foreach var xmlBatch in batchRequest.*.elements() {
-
+            xmllib:Element element = <xmllib:Element> batchRequest;
+            foreach var xmlBatch in element.getChildren().elements() {
                 if (xmlBatch is xml) {
-                    test:assertTrue(xmlBatch[getElementNameWithNamespace("Id")].getTextValue().length() > 0, 
+                    test:assertTrue(xmlBatch[getElementNameWithNamespace("Id")].toString().length() > 0, 
                         msg = "Retrieving batch request failed.");                
                 } else {
                     test:assertFail(msg = "Accessing xml batches from batch request failed, err=" 

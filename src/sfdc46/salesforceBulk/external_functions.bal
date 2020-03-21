@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/java;
+import ballerina/java;
 
 function trim(string receiver) returns string {
     return java:toString(trimExternal(java:fromString(receiver))).toString();
