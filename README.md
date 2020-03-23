@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/wso2-ballerina/module-salesforce.svg?branch=master)](https://travis-ci.org/wso2-ballerina/module-salesforce)
+[![Build Status](https://travis-ci.org/ballerina-platform/module-salesforce.svg?branch=master)](https://travis-ci.org/ballerina-platform/module-salesforce)
 
 # Module Salesforce
 
