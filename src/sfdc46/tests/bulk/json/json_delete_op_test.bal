@@ -18,7 +18,7 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    dependsOn: ["testJsonUpdateOperator"]
+    dependsOn: ["testJsonUpdateOperator", "testGetUpdatedRecords"]
 }
 function testJsonDeleteOperator() {
     log:printInfo("salesforceBulkClient -> JsonDeleteOperator");

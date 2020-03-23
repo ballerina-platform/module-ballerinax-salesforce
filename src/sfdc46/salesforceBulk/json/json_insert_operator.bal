@@ -16,9 +16,7 @@
 // under the License.
 //
 
-import ballerina/filepath;
 import ballerina/io;
-import ballerina/log;
 
 # JSON insert operator client.
 public type JsonInsertOperator client object {
@@ -32,138 +30,62 @@ public type JsonInsertOperator client object {
 
     # Create JSON insert batch.
     #
-    # + payload - insertion data in JSON format
-    # + return - Batch record if successful else ConnectorError occured
-    public remote function insert(json payload) returns @tainted BatchInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH], payload);
-
-        if (response is json) {
-            BatchInfo|ConnectorError batch = getBatch(response);
-            return batch;
+    # + jsonContent - insertion data in JSON format
+    # + return - BatchInfo record if successful else ConnectorError occured
+    public remote function insert(json|io:ReadableByteChannel jsonContent) returns @tainted BatchInfo|ConnectorError {
+        json payload;
+        if (jsonContent is io:ReadableByteChannel) {
+            payload = check convertToJson(jsonContent);
         } else {
-            return response;
+            payload = jsonContent;
         }
-    }
-
-    # Create JSON insert batch using a JSON file.
-    #
-    # + filePath - insertion JSON file path
-    # + return - Batch record if successful else ConnectorError occured
-    public remote function insertFile(string filePath) returns @tainted BatchInfo|ConnectorError {
-        if (filepath:extension(filePath) == "json") {
-            io:ReadableByteChannel|io:Error rbc = io:openReadableFile(filePath);
-
-            if (rbc is io:Error) {
-                string errMsg = "Error occurred while reading the json file, file: " + filePath;
-                log:printError(errMsg, err = rbc);
-                IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rbc);
-                return ioError;
-            } else {
-                io:ReadableCharacterChannel|io:Error rch = new(rbc, "UTF8");
-
-                if (rch is io:Error) {
-                    string errMsg = "Error occurred while reading the json file, file: " + filePath;
-                    log:printError(errMsg, err = rch);
-                    IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rch);
-                    return ioError;
-                } else {
-                    json|error fileContent = rch.readJson();
-
-                    if (fileContent is json) {
-                        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB,
-                            self.job.id, <@untainted> BATCH], <@untainted> fileContent);
-
-                        if (response is json) {
-                            BatchInfo|ConnectorError batch = getBatch(response);
-                            return batch;
-                        } else {
-                            return response;
-                        }
-                    } else {
-                        string errMsg = "Error occurred while reading the json file, file: " + filePath;
-                        log:printError(errMsg, err = fileContent);
-                        IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = fileContent);
-                        return ioError;
-                    }
-                }
-            }
-        } else {
-            string errMsg = "Invalid file type, file: " + filePath;
-            log:printError(errMsg, err = ());
-            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR);
-            return ioError;
-        }
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH], 
+            <@untainted> payload);
+        return getBatch(response);
     }
 
     # Get JSON insert operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
+        return getJob(response);
     }
 
     # Close JSON insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
             JSON_STATE_CLOSED_PAYLOAD);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        return getJob(response);
     }
 
     # Abort JSON insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
             JSON_STATE_ABORTED_PAYLOAD);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        return getJob(response);
     }
 
     # Get JSON insert batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH, batchId]);
-        if (response is json) {
-            BatchInfo|ConnectorError batch = getBatch(response);
-            return batch;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, 
+            batchId]);
+        return getBatch(response);
     }
 
     # Get information of all batches of JSON insert operator job.
     #
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH]);
-        if (response is json) {
-            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(response);
-            return batchInfo;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH]);
+        return getBatchInfoList(response);
     }
 
     # Retrieve the JSON batch request.

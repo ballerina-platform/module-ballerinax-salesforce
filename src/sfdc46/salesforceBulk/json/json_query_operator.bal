@@ -28,86 +28,55 @@ public type JsonQueryOperator client object {
     # Create JSON query batch.
     #
     # + queryString - SOQL query want to perform
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function query(string queryString) returns @tainted BatchInfo|ConnectorError {
-        json|ConnectorError jsonPayload = self.httpBaseClient->createJsonQuery([<@untainted> JOB, self.job.id,
-        <@untainted> BATCH], queryString);
-        if (jsonPayload is json) {
-            BatchInfo|ConnectorError batch = getBatch(jsonPayload);
-            return batch;
-        } else {
-            return jsonPayload;
-        }
+        json jsonPayload = check self.httpBaseClient->createJsonQuery([<@untainted> JOB, self.job.id, 
+            <@untainted> BATCH], queryString);
+        return getBatch(jsonPayload);
     }
 
     # Get JSON query operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
-        if (payload is json) {
-            JobInfo|ConnectorError job = getJob(payload);
-            return job;
-        } else {
-            return payload;
-        }
+        json payload = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
+        return getJob(payload);
     }
 
     # Close JSON query operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError payload = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
-        JSON_STATE_CLOSED_PAYLOAD);
-        if (payload is json) {
-            JobInfo|ConnectorError job = getJob(payload);
-            return job;
-        } else {
-            return payload;
-        }
+        json payload = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+            JSON_STATE_CLOSED_PAYLOAD);
+        return getJob(payload);
     }
 
     # Abort JSON query operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
-        json|ConnectorError payload = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+        json payload = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
             JSON_STATE_ABORTED_PAYLOAD);
-        if (payload is json) {
-            JobInfo|ConnectorError job = getJob(payload);
-            return job;
-        } else {
-            return payload;
-        }
+        return getJob(payload);
     }
 
     # Get JSON query batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
-        json|ConnectorError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH, batchId]);
-        if (payload is json) {
-            BatchInfo|ConnectorError batch = getBatch(payload);
-            return batch;
-        } else {
-            return payload;
-        }
+        json payload = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, 
+            batchId]);
+        return getBatch(payload);
     }
 
     # Get information of all batches of JSON query operator job.
     #
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
-        json|ConnectorError payload = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH]);
-        if (payload is json) {
-            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(payload);
-            return batchInfo;
-        } else {
-            return payload;
-        }
+        json payload = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH]);
+        return getBatchInfoList(payload);
     }
 
     # Get result IDs as a list.

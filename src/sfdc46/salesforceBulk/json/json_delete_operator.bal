@@ -29,86 +29,55 @@ public type JsonDeleteOperator client object {
     # Create JSON delete batch.
     #
     # + payload - delete data with IDs in JSON format
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function delete(json payload) returns @tainted BatchInfo|ConnectorError {
-        json | ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id,
-        <@untainted> BATCH], payload);
-        if (response is json) {
-            BatchInfo|ConnectorError batch = getBatch(response);
-            return batch;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH], 
+            payload);
+        return getBatch(response);
     }
 
     # Get JSON delete operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
-        json | ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id]);
+        return getJob(response);
     }
 
     # Close JSON delete operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
-        json | ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
-        JSON_STATE_CLOSED_PAYLOAD);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+            JSON_STATE_CLOSED_PAYLOAD);
+        return getJob(response);
     }
 
     # Abort JSON delete operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
-        json | ConnectorError response = self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
-        JSON_STATE_ABORTED_PAYLOAD);
-        if (response is json) {
-            JobInfo|ConnectorError job = getJob(response);
-            return job;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->createJsonRecord([<@untainted> JOB, self.job.id],
+            JSON_STATE_ABORTED_PAYLOAD);
+        return getJob(response);
     }
 
     # Get JSON delete batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
-        json | ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-        <@untainted> BATCH, batchId]);
-        if (response is json) {
-            BatchInfo|ConnectorError batch = getBatch(response);
-            return batch;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH, 
+            batchId]);
+        return getBatch(response);
     }
 
     # Get information of all batches of JSON delete operator job.
     #
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
-        json|ConnectorError response = self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id,
-            <@untainted> BATCH]);
-        if (response is json) {
-            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(response);
-            return batchInfo;
-        } else {
-            return response;
-        }
+        json response = check self.httpBaseClient->getJsonRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH]);
+        return getBatchInfoList(response);
     }
 
     # Retrieve the JSON batch request.

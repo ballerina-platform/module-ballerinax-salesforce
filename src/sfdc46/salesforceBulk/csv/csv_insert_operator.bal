@@ -16,10 +16,7 @@
 // under the License.
 //
 
-import ballerina/encoding;
-import ballerina/filepath;
 import ballerina/io;
-import ballerina/log;
 
 # CSV insert operator client.
 public type CsvInsertOperator client object {
@@ -34,135 +31,57 @@ public type CsvInsertOperator client object {
     # Create CSV insert batch.
     #
     # + csvContent - insertion data in CSV format
-    # + return - Batch record if successful else ConnectorError occured
-    public remote function insert(string csvContent) returns @tainted BatchInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], csvContent);
-        if (xmlResponse is xml) {
-            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
-            return batch;
+    # + return - BatchInfo record if successful else ConnectorError occured
+    public remote function insert(string|io:ReadableByteChannel csvContent) returns @tainted BatchInfo|ConnectorError {
+        string textContent;
+        if (csvContent is io:ReadableByteChannel) {
+            textContent = <@untainted> check convertToString(csvContent);
         } else {
-            return xmlResponse;
+            textContent = <@untainted> csvContent;
         }
-    }
-
-    # Create CSV insert batch using a CSV file.
-    #
-    # + filePath - insertion CSV file path
-    # + return - Batch record if successful else ConnectorError occured
-    public remote function insertFile(string filePath) returns @tainted BatchInfo|ConnectorError {
-        if (filepath:extension(filePath) == "csv") {
-            io:ReadableByteChannel|io:Error rbc = io:openReadableFile(filePath);
-
-            if (rbc is io:Error) {
-                string errMsg = "Error occurred while reading the csv file, file: " + filePath;
-                log:printError(errMsg, err = rbc);
-                IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = rbc);
-                return ioError;
-            } else {
-                // Read content.
-                byte[] readContent;
-                string textContent = "";
-                while (true) {
-                    byte[]|io:Error result = rbc.read(1000);
-                    if (result is io:EofError) {
-                        break;
-                    } else if (result is io:Error) {
-                        string errMsg = "Error occurred while reading the csv file, file: " + filePath;
-                        log:printError(errMsg, err = result);
-                        IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR, cause = result);
-                        return ioError;
-                    } else {
-                        readContent = result;  
-                        textContent = textContent + encoding:encodeBase64Url(readContent);                      
-                    }
-                }
-                // close channel.
-                closeRb(rbc);
-
-                xml|ConnectorError response =
-                self.httpBaseClient->createCsvRecord([<@untainted> JOB, self.job.id, <@untainted> BATCH], textContent);
-
-                if (response is xml) {
-                    BatchInfo|ConnectorError batch = getBatch(response);
-                    return batch;
-                } else {
-                    return response;
-                }
-            }
-        } else {
-            string errMsg = "Invalid file type, file: " + filePath;
-            log:printError(errMsg, err = ());
-            IOError ioError = error(IO_ERROR, message = errMsg, errorCode = IO_ERROR);
-            return ioError;
-        }
+        xml xmlResponse = check self.httpBaseClient->createCsvRecord([JOB, self.job.id, BATCH], textContent);
+        return getBatch(xmlResponse);
     }
 
     # Get CSV insert operator job information.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function getJobInfo() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id]);
+        return getJob(xmlResponse);
     }
 
     # Close CSV insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function closeJob() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
-        XML_STATE_CLOSED_PAYLOAD);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->createXmlRecord([JOB, self.job.id], XML_STATE_CLOSED_PAYLOAD);
+        return getJob(xmlResponse);
     }
 
     # Abort CSV insert operator job.
     #
-    # + return - Job record if successful else ConnectorError occured
+    # + return - JobInfo record if successful else ConnectorError occured
     public remote function abortJob() returns @tainted JobInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->createXmlRecord([JOB, self.job.id],
-        XML_STATE_ABORTED_PAYLOAD);
-        if (xmlResponse is xml) {
-            JobInfo|ConnectorError job = getJob(xmlResponse);
-            return job;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->createXmlRecord([JOB, self.job.id], XML_STATE_ABORTED_PAYLOAD);
+        return getJob(xmlResponse);
     }
 
     # Get CSV insert batch information.
     #
     # + batchId - batch ID 
-    # + return - Batch record if successful else ConnectorError occured
+    # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getBatchInfo(string batchId) returns @tainted BatchInfo|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
-        if (xmlResponse is xml) {
-            BatchInfo|ConnectorError batch = getBatch(xmlResponse);
-            return batch;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH, batchId]);
+        return getBatch(xmlResponse);
     }
 
     # Get information of all batches of CSV insert operator job.
     #
     # + return - BatchInfo record if successful else ConnectorError occured
     public remote function getAllBatches() returns @tainted BatchInfo[]|ConnectorError {
-        xml|ConnectorError xmlResponse = self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
-        if (xmlResponse is xml) {
-            BatchInfo[]|ConnectorError batchInfo = getBatchInfoList(xmlResponse);
-            return batchInfo;
-        } else {
-            return xmlResponse;
-        }
+        xml xmlResponse = check self.httpBaseClient->getXmlRecord([JOB, self.job.id, BATCH]);
+        return getBatchInfoList(xmlResponse);
     }
 
     # Retrieve the CSV batch request.

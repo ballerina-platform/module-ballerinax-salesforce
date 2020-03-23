@@ -244,19 +244,18 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string contactId = "";
     string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
         + "' AND Title='" + title + "'";
-    json|ConnectorError jsonRes = salesforceClient->getQueryResult(sampleQuery);
+    SoqlResult|ConnectorError res = salesforceClient->getQueryResult(sampleQuery);
 
-    if (jsonRes is json) {
-        json|error records = jsonRes.records;
-        if (records is json) {
-            json[] recordsArr = <json[]> records;
-            string id = recordsArr[0].Id.toString();
+    if (res is SoqlResult) {
+        SoqlRecord[]|error records = res.records;
+        if (records is SoqlRecord[]) {
+            string id = records[0]["Id"].toString();
             contactId = id;
         } else {
             test:assertFail(msg = "Getting contact ID by name failed. err=" + records.toString());            
         }
     } else {
-        test:assertFail(msg = "Getting contact ID by name failed. err=" + jsonRes.toString());
+        test:assertFail(msg = "Getting contact ID by name failed. err=" + res.toString());
     }
     return contactId;
 }
