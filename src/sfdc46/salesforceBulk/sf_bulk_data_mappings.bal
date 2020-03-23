@@ -55,11 +55,11 @@ function createJobRecordFromXml(xml jobDetails) returns JobInfo|ConnectorError {
     };
 
     if (job is JobInfo) {
-        if (jobDetails.externalIdFieldName.getTextValue().length() > 0) {
-            job["externalIdFieldName"] = jobDetails.externalIdFieldName.getTextValue();
+        if (jobDetails.externalIdFieldName.toString().length() > 0) {
+            job["externalIdFieldName"] = jobDetails.externalIdFieldName.toString();
         }
-        if (jobDetails.assignmentRuleId.getTextValue().length() > 0) {
-            job["assignmentRuleId"] = jobDetails.assignmentRuleId.getTextValue();
+        if (jobDetails.assignmentRuleId.toString().length() > 0) {
+            job["assignmentRuleId"] = jobDetails.assignmentRuleId.toString();
         }
         return job;
     } else {
@@ -112,8 +112,8 @@ function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|ConnectorE
             getIntValue(batchDetails[getElementNameWithNamespace("apexProcessingTime")].toString())
     };
     if (batch is BatchInfo) {
-        if (batchDetails.stateMessage.getTextValue().length() > 0) {
-            batch["stateMessage"] = batchDetails.stateMessage.getTextValue();
+        if (batchDetails.stateMessage.toString().length() > 0) {
+            batch["stateMessage"] = batchDetails.stateMessage.toString();
         }
         return batch;
     } else {
