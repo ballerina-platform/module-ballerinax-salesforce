@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/test;
+import ballerina/lang.'xml as xmllib;
 
 function checkBatchResults(Result[] results) returns boolean {
     foreach Result res in results {
@@ -163,7 +164,7 @@ function getDeleteContactsAsText() returns @tainted string {
 }
 
 function getDeleteContactsAsXml() returns @tainted xml {
-    xml deleteContacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
+    xmllib:Element deleteContacts = <xmllib:Element> xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
 
     // Create JSON query operator.
     XmlQueryOperator|ConnectorError xmlQueryOperator = sfBulkClient->createXmlQueryOperator("Contact");
@@ -196,17 +197,19 @@ function getDeleteContactsAsXml() returns @tainted xml {
                             xml|ConnectorError queryResult = xmlQueryOperator->getResult(batchId, resultId);
 
                             if (queryResult is xml) {
-
-                                foreach var queryRes in queryResult.*.elements() {
+                                xmllib:Element element = <xmllib:Element> queryResult;
+                                foreach var queryRes in element.getChildren().elements() {
                                     if (queryRes is xml) {
                                         // Get 0th ID since queryRes has 2 ID elements.
                                         string|error recordId = queryRes[getElementNameWithNamespace("Id")][0]
-                                            .getTextValue();
+                                            .toString();
 
                                         if (recordId is string){
                                             xml rec = xml `<sObject xmlns="http://www.force.com/2009/06/asyncapi/dataload"><Id>${recordId}</Id></sObject>`;
                                             // Set rec as a children for deleteContacts xml.
-                                            deleteContacts.appendChildren(rec);
+                                            xml listOfChildren = deleteContacts.getChildren();
+                                            listOfChildren = listOfChildren.concat(rec);
+                                            deleteContacts.setChildren(listOfChildren);
                                         } else {
                                             test:assertFail(msg = "Failed to get query result ID.");                            
                                         }

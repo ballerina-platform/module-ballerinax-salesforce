@@ -26,8 +26,8 @@ function testCsvUpdateOperator() {
     string johnsID = getContactIdByName("John", "Michael", "Professor Grade 04");
     string pedrosID = getContactIdByName("Pedro", "Guterez", "Professor Grade 04");
 
-    string contacts = "Id,description,FirstName,LastName,Title,Phone,Email,My_External_Id__c" +
-    johnsID + ",Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john.michael@gmail.com,301" +
+    string contacts = "Id,description,FirstName,LastName,Title,Phone,Email,My_External_Id__c" + 
+    johnsID + ",Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john.michael@gmail.com,301" + 
     pedrosID + ",Created_from_Ballerina_Sf_Bulk_API,Pedro,Guterez,Professor Grade 04,0445567100,pedro.gut@gmail.com,303";
 
     // Create JSON update operator.
