@@ -28,7 +28,7 @@ The `ballerinax/sfdc48` module support bulk data operations for CSV, JSON, and X
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 1.2.0          |
+| Ballerina Language  | 1.2.x          |
 | Salesforce API      | v48.0          |
 
 ## Sample

@@ -8,7 +8,7 @@ describe SObjects and organizational data through the Salesforce REST API. Also,
 ## Compatibility
 |                     |    Version     |
 |:-------------------:|:--------------:|
-| Ballerina Language  | 1.2.0          |
+| Ballerina Language  | 1.2.x          |
 | Salesforce API      | v48.0          |
 
 ## Supported Operations
