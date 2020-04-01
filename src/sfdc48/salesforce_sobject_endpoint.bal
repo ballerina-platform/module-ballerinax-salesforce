@@ -31,26 +31,26 @@ public type SObjectClient client object {
     public function __init(SalesforceConfiguration salesforceConfig) {
         self.salesforceConfiguration = salesforceConfig;
         // Create OAuth2 provider.
-        oauth2:OutboundOAuth2Provider oauth2Provider = new(salesforceConfig.clientConfig);
+        oauth2:OutboundOAuth2Provider oauth2Provider = new (salesforceConfig.clientConfig);
         // Create bearer auth handler using created provider.
-        http:BearerAuthHandler bearerHandler = new(oauth2Provider);
+        http:BearerAuthHandler bearerHandler = new (oauth2Provider);
 
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
-        
+
         // Create an HTTP client.
         if (socketConfig is http:ClientSecureSocket) {
-            self.salesforceClient = new(salesforceConfig.baseUrl, {
-                secureSocket: socketConfig,
-                auth: {
-                    authHandler: bearerHandler
-                }
-            });
+            self.salesforceClient = new (salesforceConfig.baseUrl, {
+                    secureSocket: socketConfig,
+                    auth: {
+                        authHandler: bearerHandler
+                    }
+                });
         } else {
-            self.salesforceClient = new(salesforceConfig.baseUrl, {
-                auth: {
-                    authHandler: bearerHandler
-                }
-            });
+            self.salesforceClient = new (salesforceConfig.baseUrl, {
+                    auth: {
+                        authHandler: bearerHandler
+                    }
+                });
         }
     }
 
@@ -126,7 +126,7 @@ public type SObjectClient client object {
     # + recordPayload - JSON record to be updated
     # + return - true if successful else false or ConnectorError occured
     public remote function updateRecord(string sObjectName, string id, json recordPayload)
-        returns @tainted boolean|ConnectorError {
+    returns @tainted boolean|ConnectorError {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
@@ -157,5 +157,47 @@ public type SObjectClient client object {
         } else {
             return result;
         }
+    }
+
+    # Get an object record by Id.
+    #
+    # + sobject - sobject name 
+    # + id - sobject id 
+    # + fields - fields to retrieve 
+    # + return - `json` result if successful else `ConnectorError` occured
+    public remote function getRecordById(string sobject, string id, string... fields) 
+    returns @tainted json|ConnectorError {
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
+        if (fields.length() > 0) {
+            path = path.concat(self.appendQueryParams(fields));
+        }
+        json response = check self->getRecord(path);
+        return response;
+    }
+
+    # Get an object record by external Id.
+    #
+    # + sobject - sobject name 
+    # + extIdField - external Id field name 
+    # + extId - external Id value 
+    # + fields - fields to retrieve 
+    # + return - `json` result if successful else `ConnectorError` occured
+    public remote function getRecordByExtId(string sobject, string extIdField, string extId, string... fields) 
+    returns @tainted json|ConnectorError {
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
+        if (fields.length() > 0) {
+            path = path.concat(self.appendQueryParams(fields));
+        }
+        json response = check self->getRecord(path);
+        return response;
+    }
+
+    private function appendQueryParams(string[] fields) returns string {
+        string appended = "?fields=";
+        foreach string item in fields {
+            appended = appended.concat(item.trim(), ",");
+        }
+        appended = appended.substring(0, appended.length() - 1);
+        return appended;
     }
 };
