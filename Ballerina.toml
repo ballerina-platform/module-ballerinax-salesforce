@@ -3,5 +3,5 @@ org-name= "ballerinax"
 version= "1.1.0"
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
-keywords = ["ballerina", "salesforce", "sfdc", "sfdc48", "client", "connector"]
+keywords = ["ballerina", "salesforce", "sfdc", "client", "connector"]
 repository = "https://github.com/ballerina-platform/module-salesforce"

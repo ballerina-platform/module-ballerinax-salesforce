@@ -9,7 +9,6 @@ jobs:
 
         steps:
             - uses: actions/checkout@v2
-            - run: cd sfdc48
             - name: Ballerina Build
               uses: ballerina-platform/ballerina-action/@master
               with:
