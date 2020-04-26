@@ -192,6 +192,172 @@ public type SObjectClient client object {
         return response;
     }
 
+     //Account
+
+    # Accesses Account SObject records based on the Account object ID.
+    # + accountId - Account ID
+    # + fields - Fields to retireve
+    # + return - JSON response if successful or else an sfdc:ConnectorError
+    public remote function getAccountById(string accountId, string... fields) returns @tainted json|ConnectorError {
+        json res = check self->getRecordById(ACCOUNT, accountId, ...fields);
+        return res;
+    }
+
+    # Creates new Account object record.
+    # + accountRecord - Account JSON record to be inserted
+    # + return - Account ID if successful or else an sfdc:ConnectorError
+    public remote function createAccount(json accountRecord) returns @tainted string|ConnectorError {
+        return self->createRecord(ACCOUNT, accountRecord);
+    }
+
+    # Deletes existing Account's records.
+    # + accountId - Account ID
+    # + return - `true` if successful `false` otherwise, or an sfdc:ConnectorError in case of an error
+    public remote function deleteAccount(string accountId) returns @tainted boolean|ConnectorError {
+        return self->deleteRecord(ACCOUNT, accountId);
+    }
+
+    # Updates existing Account object record.
+    # + accountId - Account ID
+    # + accountRecord - account record json payload
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function updateAccount(string accountId, json accountRecord)
+    returns @tainted boolean|ConnectorError {
+        return self->updateRecord(ACCOUNT, accountId, accountRecord);
+    }
+
+    //Lead
+
+    # Accesses Lead SObject records based on the Lead object ID.
+    # + leadId - Lead ID
+    # + fields - Fields to retireve
+    # + return - JSON response if successful or else an sfdc:ConnectorError
+    public remote function getLeadById(string leadId, string... fields) returns @tainted json|ConnectorError {
+        json res = check self->getRecordById(LEAD, leadId, ...fields);
+        return res;
+    }
+    # Creates new Lead object record.
+    # + leadRecord - Lead JSON record to be inserted
+    # + return - Lead ID if successful or else an sfdc:ConnectorError
+    public remote function createLead(json leadRecord) returns @tainted string|ConnectorError {
+        return self->createRecord(LEAD, leadRecord);
+    }
+
+    # Deletes existing Lead's records.
+    # + leadId - Lead ID
+    # + return - `true`  if successful, `false` otherwise or an sfdc:ConnectorError incase of an error
+    public remote function deleteLead(string leadId) returns @tainted boolean|ConnectorError {
+        return self->deleteRecord(LEAD, leadId);
+    }
+
+    # Updates existing Lead object record.
+    # + leadId - Lead ID
+    # + leadRecord - Lead JSON record
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function updateLead(string leadId, json leadRecord) returns @tainted boolean|ConnectorError {
+        return self->updateRecord(LEAD, leadId, leadRecord);
+    }
+
+    //Contact
+
+    # Accesses Contacts SObject records based on the Contact object ID.
+    # + contactId - Contact ID
+    # + fields - Fields to retireve
+    # + return - JSON result if successful or else an sfdc:ConnectorError
+    public remote function getContactById(string contactId, string... fields) returns @tainted json|ConnectorError {
+        json res = check self->getRecordById(CONTACT, contactId, ...fields);
+        return res;
+    }
+
+    # Creates new Contact object record.
+    # + contactRecord - JSON contact record
+    # + return - Contact ID if successful or else an sfdc:ConnectorError
+    public remote function createContact(json contactRecord) returns @tainted string|ConnectorError {
+        return self->createRecord(CONTACT, contactRecord);
+    }
+
+    # Deletes existing Contact's records.
+    # + contactId - Contact ID
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function deleteContact(string contactId) returns @tainted boolean|ConnectorError {
+        return self->deleteRecord(CONTACT, contactId);
+    }
+
+    # Updates existing Contact object record.
+    # + contactId - Contact ID
+    # + contactRecord - JSON contact record
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function updateContact(string contactId, json contactRecord) returns @tainted boolean|ConnectorError {
+        return self->updateRecord(CONTACT, contactId, contactRecord);
+    }
+
+    //Opportunity
+
+    # Accesses Opportunities SObject records based on the Opportunity object ID.
+    # + opportunityId - Opportunity ID
+    # + fields - Fields to retireve
+    # + return - JSON response if successful or else an sfdc:ConnectorError
+    public remote function getOpportunityById(string opportunityId, string... fields) returns @tainted json|ConnectorError {
+        json res = check self->getRecordById(OPPORTUNITY, opportunityId, ...fields);
+        return res;
+    }
+
+    # Creates new Opportunity object record.
+    # + opportunityRecord - JSON opportunity record
+    # + return - Opportunity ID if successful or else an sfdc:ConnectorError
+    public remote function createOpportunity(json opportunityRecord) returns @tainted string|ConnectorError {
+        return self->createRecord(OPPORTUNITY, opportunityRecord);
+    }
+
+    # Deletes existing Opportunity's records.
+    # + opportunityId - Opportunity ID
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function deleteOpportunity(string opportunityId) returns @tainted boolean|ConnectorError {
+        return self->deleteRecord(OPPORTUNITY, opportunityId);
+    }
+
+    # Updates existing Opportunity object record.
+    # + opportunityId - Opportunity ID
+    # + opportunityRecord - Opportunity json payload
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function updateOpportunity(string opportunityId, json opportunityRecord)
+    returns @tainted boolean|ConnectorError {
+        return self->updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
+    }
+
+    //Product
+
+    # Accesses Products SObject records based on the Product object ID.
+    # + productId - Product ID
+    # + fields - Fields to retireve
+    # + return - JSON result if successful or else an sfdc:ConnectorError
+    public remote function getProductById(string productId, string... fields) returns @tainted json|ConnectorError {
+        json res = check self->getRecordById(PRODUCT, productId, ...fields);
+        return res;
+    }
+
+    # Creates new Product object record.
+    # + productRecord - JSON product record
+    # + return - Product ID if successful or else an sfdc:ConnectorError
+    public remote function createProduct(json productRecord) returns @tainted string|ConnectorError {
+        return self->createRecord(PRODUCT, productRecord);
+    }
+
+    # Deletes existing product's records.
+    # + productId - Product ID
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function deleteProduct(string productId) returns @tainted boolean|ConnectorError {
+        return self->deleteRecord(PRODUCT, productId);
+    }
+
+    # Updates existing Product object record.
+    # + productId - Product ID
+    # + productRecord - JSON product record
+    # + return - `true` if successful, `false` otherwise or an sfdc:ConnectorError in case of an error
+    public remote function updateProduct(string productId, json productRecord) returns @tainted boolean|ConnectorError {
+        return self->updateRecord(PRODUCT, productId, productRecord);
+    }
+
     private function appendQueryParams(string[] fields) returns string {
         string appended = "?fields=";
         foreach string item in fields {
