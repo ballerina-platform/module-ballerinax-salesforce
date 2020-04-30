@@ -18,4 +18,4 @@ script:
   - sudo apt-get install -f
   - export JAVA_OPTS="-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
   - ballerina --version
-  - ballerina build -c --skip-tests sfdc48
+  - ballerina build -c --skip-tests sfdc

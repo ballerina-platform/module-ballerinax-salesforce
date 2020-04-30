@@ -11,7 +11,7 @@ function testCsvlJob() {
 "Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com\n" +
 "Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com";
 
-    string csvContactsFilePath = "src/sfdc48/tests/resources/contacts.csv";
+    string csvContactsFilePath = "src/sfdc/tests/resources/contacts.csv";
 
     //create job
     error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "CSV");

@@ -19,16 +19,16 @@ The base client of the Salesforce connector takes the Salesforce configurations 
 
 **SObject Operations**
 
-The `ballerinax/sfdc48` module contains operations related to standard and customized SObjects. It can get, create, update, and delete SObjects via SObject IDs.
+The `ballerinax/sfdc` module contains operations related to standard and customized SObjects. It can get, create, update, and delete SObjects via SObject IDs.
 
 **SOQL & SOSL Operations**
 
-The `ballerinax/sfdc48` module contains operations, which query using SOQL and search using SOSL. This allows complex 
+The `ballerinax/sfdc` module contains operations, which query using SOQL and search using SOSL. This allows complex 
 operations using SObjects relationships.
 
 **Bulk Operations**
 
-The `ballerinax/sfdc48` module supports bulk data operations for CSV, JSON, and XML data types.
+The `ballerinax/sfdc` module supports bulk data operations for CSV, JSON, and XML data types.
 
 ## Configuration
 
@@ -66,10 +66,10 @@ token.
 import ballerina/config;
 import ballerina/http;
 import ballerina/log;
-import ballerinax/sfdc48;
+import ballerinax/sfdc;
 
 // Create Salesforce client configuration by reading from config file.
-sfdc48:SalesforceConfiguration sfConfig = {
+sfdc:SalesforceConfiguration sfConfig = {
     baseUrl: config:getAsString("EP_URL"),
     clientConfig: {
         accessToken: config:getAsString("ACCESS_TOKEN"),
@@ -83,10 +83,10 @@ sfdc48:SalesforceConfiguration sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc48:BaseClient baseClient = new(sfConfig);
+sfdc:BaseClient baseClient = new(sfConfig);
 
 // Create an Sobject client.
-sfdc48:SObjectClient sobjectClient = baseClient->getSobjectClient();
+sfdc:SObjectClient sobjectClient = baseClient->getSobjectClient();
 
 @http:ServiceConfig {
     basePath: "/salesforce"
