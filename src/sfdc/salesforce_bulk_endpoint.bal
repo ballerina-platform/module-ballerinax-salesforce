@@ -83,7 +83,7 @@ public type BulkClient client object {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
         var response = self.httpClient->post(path, req);
         json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
-        if(jobResponse is json) {
+        if (jobResponse is json) {
             BulkJob bulkJob = new(jobResponse.id.toString(), contentType, operation, self.httpClient);
             return bulkJob;
         } else {
@@ -101,7 +101,7 @@ public type BulkClient client object {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
         var response = self.httpClient->get(path, req);
-        if(JSON == jobDataType) {
+        if (JSON == jobDataType) {
             json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json){            
                 JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
@@ -132,7 +132,7 @@ public type BulkClient client object {
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.httpClient->post(path, req);
         json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
-        if(jobResponse is json){
+        if (jobResponse is json){
             JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
             return jobInfo;
         } else {
@@ -151,7 +151,7 @@ public type BulkClient client object {
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.httpClient->post(path, req);
         json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
-        if(jobResponse is json){
+        if (jobResponse is json){
             JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
             return jobInfo;
         } else {
@@ -193,10 +193,10 @@ public type BulkJob client object {
                 if (content is io:ReadableByteChannel) {
                     if (QUERY == self.operation) {
                         string payload = check convertToString(content);
-                        req.setTextPayload(<@untained>  payload);
+                        req.setTextPayload(<@untainted>  payload);
                     } else {
                         json payload = check convertToJson(content);
-                        req.setJsonPayload(<@untained>  payload);
+                        req.setJsonPayload(<@untainted>  payload);
                     }
                 }
                 req.setHeader(CONTENT_TYPE, APP_JSON);
@@ -219,10 +219,10 @@ public type BulkJob client object {
                 if (content is io:ReadableByteChannel) {
                     if (QUERY == self.operation) {
                         string payload = check convertToString(content);
-                        req.setTextPayload(<@untained>  payload);
+                        req.setTextPayload(<@untainted>  payload);
                     } else {
                         xml payload = check convertToXml(content);
-                        req.setXmlPayload(<@untained>  payload);
+                        req.setXmlPayload(<@untainted>  payload);
                     }
                 } 
                 req.setHeader(CONTENT_TYPE, APP_XML);

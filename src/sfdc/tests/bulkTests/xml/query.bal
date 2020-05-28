@@ -1,10 +1,27 @@
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/log;
 import ballerina/test;
 
 @test:Config {
     dependsOn: ["updateXml", "insertXmlFromFile"]
 }
-function queryXml() {
+function queryXml()
+    {
     log:printInfo("bulkClient -> queryXml");
     string batchId = "";
 
@@ -13,10 +30,10 @@ function queryXml() {
     //create job
     error|BulkJob queryJob = bulkClient->creatJob("query", "Contact", "XML");
 
-    if(queryJob is BulkJob){
+        if (queryJob is BulkJob) {
         //add xml content
         error|BatchInfo batch = queryJob->addBatch(queryStr);
-        if(batch is BatchInfo){
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload batch.");
             batchId = batch.id;
         } else {
@@ -56,12 +73,12 @@ function queryXml() {
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
-        
+
         //get batch result
         var batchResult = queryJob->getBatchResult(batchId);
-        if (batchResult is xml) {
-            test:assertTrue((batchResult/<*>).length() == 5, msg = "Retrieving batch result failed.");
-            xmlQueryResult = <@untainted> batchResult;
+            if (batchResult is xml) {
+            test:assertTrue ((batchResult/<*>).length() == 5, msg ="Retrieving batch result failed.");
+            xmlQueryResult = <@untainted>batchResult;
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.detail()?.message.toString());
         } else {
@@ -75,7 +92,7 @@ function queryXml() {
         } else {
             test:assertFail(msg = closedJob.detail()?.message.toString());
         }
-        
+
     } else {
         test:assertFail(msg = queryJob.detail()?.message.toString());
     }

@@ -1,6 +1,22 @@
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+import ballerina/io;
 import ballerina/log;
 import ballerina/test;
-import ballerina/io;
 
 @test:Config {}
 function insertJson() {
@@ -31,10 +47,10 @@ function insertJson() {
     //create job
     error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "JSON");
 
-    if(insertJob is BulkJob){
+    if (insertJob is BulkJob) {
         //add json content
         error|BatchInfo batch = insertJob->addBatch(contacts);
-        if(batch is BatchInfo){
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchId = batch.id;
         } else {
@@ -68,9 +84,9 @@ function insertJson() {
         //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
         if (batchRequest is json) {
-            json[]|error batchRequestArr = <json[]> batchRequest;
+            json[]|error batchRequestArr = <json[]>batchRequest;
             if (batchRequestArr is json[]) {
-                test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");               
+                test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
             } else {
                 test:assertFail(msg = batchRequestArr.toString());
             }
@@ -113,11 +129,11 @@ function insertJsonFromFile() {
     //create job
     error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "JSON");
 
-    if(insertJob is BulkJob){
+    if (insertJob is BulkJob) {
         //add json content
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
-            error|BatchInfo batchUsingJsonFile = insertJob->addBatch(<@untained> rbc);
+            error|BatchInfo batchUsingJsonFile = insertJob->addBatch(<@untainted>rbc);
             if (batchUsingJsonFile is BatchInfo) {
                 test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
                 batchId = batchUsingJsonFile.id;
@@ -157,9 +173,9 @@ function insertJsonFromFile() {
         //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
         if (batchRequest is json) {
-            json[]|error batchRequestArr = <json[]> batchRequest;
+            json[]|error batchRequestArr = <json[]>batchRequest;
             if (batchRequestArr is json[]) {
-                test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");               
+                test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
             } else {
                 test:assertFail(msg = batchRequestArr.toString());
             }
@@ -191,5 +207,3 @@ function insertJsonFromFile() {
         test:assertFail(msg = insertJob.detail()?.message.toString());
     }
 }
-
-

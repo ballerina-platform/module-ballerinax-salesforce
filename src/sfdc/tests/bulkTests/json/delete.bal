@@ -1,3 +1,19 @@
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/log;
 import ballerina/test;
 
@@ -13,10 +29,10 @@ function deleteJson() {
     //create job
     error|BulkJob deleteJob = bulkClient->creatJob("delete", "Contact", "JSON");
 
-    if(deleteJob is BulkJob){
+    if (deleteJob is BulkJob) {
         //add json content
         error|BatchInfo batch = deleteJob->addBatch(contacts);
-        if(batch is BatchInfo){
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using json.");
             batchId = batch.id;
         } else {
@@ -50,9 +66,9 @@ function deleteJson() {
         //get batch request
         var batchRequest = deleteJob->getBatchRequest(batchId);
         if (batchRequest is json) {
-            json[]|error batchRequestArr = <json[]> batchRequest;
+            json[]|error batchRequestArr = <json[]>batchRequest;
             if (batchRequestArr is json[]) {
-                test:assertTrue(batchRequestArr.length() == 5, msg = "Retrieving batch request failed.");               
+                test:assertTrue(batchRequestArr.length() == 5, msg = "Retrieving batch request failed.");
             } else {
                 test:assertFail(msg = batchRequestArr.toString());
             }

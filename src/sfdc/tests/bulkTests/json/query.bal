@@ -1,3 +1,19 @@
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/log;
 import ballerina/test;
 
@@ -13,10 +29,10 @@ function queryJson() {
     //create job
     error|BulkJob queryJob = bulkClient->creatJob("query", "Contact", "JSON");
 
-    if(queryJob is BulkJob){
+    if (queryJob is BulkJob) {
         //add query string
         error|BatchInfo batch = queryJob->addBatch(queryStr);
-        if(batch is BatchInfo){
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
             batchId = batch.id;
         } else {
@@ -56,14 +72,14 @@ function queryJson() {
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
-        
+
         //get batch result
         var batchResult = queryJob->getBatchResult(batchId);
         if (batchResult is json) {
-            json[]|error batchResultArr = <json[]> batchResult;
+            json[]|error batchResultArr = <json[]>batchResult;
             if (batchResultArr is json[]) {
-                jsonQueryResult = <@untainted> batchResultArr;
-                test:assertTrue(batchResultArr.length() == 5, msg = "Retrieving batch result failed.");               
+                jsonQueryResult = <@untainted>batchResultArr;
+                test:assertTrue(batchResultArr.length() == 5, msg = "Retrieving batch result failed.");
             } else {
                 test:assertFail(msg = batchResultArr.toString());
             }

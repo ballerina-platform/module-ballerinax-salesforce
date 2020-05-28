@@ -368,13 +368,13 @@ function getJsonQueryResult(json resultlist, string path, http:Client httpClient
     json[] finalResults = [];
     http:Request req = new;
     //result list is always a json[]
-    if(resultlist is json[]) {
+    if (resultlist is json[]) {
         foreach var item in resultlist {
             string resultId = item.toString();
             var response = httpClient->get(path + "/"+ resultId, req);
             json result = check checkJsonPayloadAndSetErrors(response);
             //result is always a json[]
-            if(result is json[]) {
+            if (result is json[]) {
                 finalResults = mergeJson(finalResults, result);
             }
         }
@@ -418,7 +418,7 @@ function getCsvQueryResult(xml resultlist, string path, http:Client httpClient) 
 }
 
 function mergeJson(json[] list1, json[] list2) returns json[] {
-    foreach var item in list2{
+    foreach var item in list2 {
         list1[list1.length()] = item;
     }
     return list1;

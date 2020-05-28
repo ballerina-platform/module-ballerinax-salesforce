@@ -1,3 +1,19 @@
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/log;
 import ballerina/test;
 
@@ -13,10 +29,10 @@ function deleteCsv() {
     //create job
     error|BulkJob deleteJob = bulkClient->creatJob("delete", "Contact", "CSV");
 
-    if(deleteJob is BulkJob){
+    if (deleteJob is BulkJob) {
         //add csv content
-        error|BatchInfo batch = deleteJob->addBatch(<@untained>  contacts);
-        if(batch is BatchInfo){
+        error|BatchInfo batch = deleteJob->addBatch(<@untainted>contacts);
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using CSV.");
             batchId = batch.id;
         } else {
@@ -47,10 +63,10 @@ function deleteCsv() {
             test:assertFail(msg = batchInfoList.detail()?.message.toString());
         }
 
-         //get batch request
+        //get batch request
         var batchRequest = deleteJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 5, msg = "Retrieving batch request failed.");                
+            test:assertTrue(checkCsvResult(batchRequest) == 5, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.detail()?.message.toString());
         } else {
@@ -74,7 +90,7 @@ function deleteCsv() {
         } else {
             test:assertFail(msg = closedJob.detail()?.message.toString());
         }
-        
+
     } else {
         test:assertFail(msg = deleteJob.detail()?.message.toString());
     }

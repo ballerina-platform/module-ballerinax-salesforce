@@ -1,3 +1,19 @@
+// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
@@ -8,16 +24,16 @@ function insertCsv() {
     string batchId = "";
 
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-            "Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301\n" +
-            "Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
+        "Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301\n" +
+        "Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
 
     //create job
     error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "CSV");
 
-    if(insertJob is BulkJob){
+    if (insertJob is BulkJob) {
         //add csv content
         error|BatchInfo batch = insertJob->addBatch(contacts);
-        if(batch is BatchInfo){
+        if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
             batchId = batch.id;
         } else {
@@ -48,10 +64,10 @@ function insertCsv() {
             test:assertFail(msg = batchInfoList.detail()?.message.toString());
         }
 
-         //get batch request
+        //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");                
+            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.detail()?.message.toString());
         } else {
@@ -75,7 +91,7 @@ function insertCsv() {
         } else {
             test:assertFail(msg = closedJob.detail()?.message.toString());
         }
-        
+
     } else {
         test:assertFail(msg = insertJob.detail()?.message.toString());
     }
@@ -91,11 +107,11 @@ function insertCsvFromFile() {
     //create job
     error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "CSV");
 
-    if(insertJob is BulkJob){
+    if (insertJob is BulkJob) {
         //add csv content via file
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(csvContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
-            error|BatchInfo batchUsingXmlFile = insertJob->addBatch(<@untained> rbc);
+            error|BatchInfo batchUsingXmlFile = insertJob->addBatch(<@untainted>rbc);
             if (batchUsingXmlFile is BatchInfo) {
                 test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using CSV file.");
                 batchId = batchUsingXmlFile.id;
@@ -132,10 +148,10 @@ function insertCsvFromFile() {
             test:assertFail(msg = batchInfoList.detail()?.message.toString());
         }
 
-         //get batch request
+        //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");                
+            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.detail()?.message.toString());
         } else {
@@ -159,7 +175,7 @@ function insertCsvFromFile() {
         } else {
             test:assertFail(msg = closedJob.detail()?.message.toString());
         }
-        
+
     } else {
         test:assertFail(msg = insertJob.detail()?.message.toString());
     }
