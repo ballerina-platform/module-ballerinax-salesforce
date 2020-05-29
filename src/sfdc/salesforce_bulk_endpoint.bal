@@ -60,21 +60,31 @@ public type BulkClient client object {
     # + operation - type of operation like insert, delete, etc.
     # + sobj - kind of sobject 
     # + contentType - content type of the job 
+    # + extIdFieldName - field name of the external ID incase of an Upsert operation
     # + return - returns job object or error
-    public remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType) returns @tainted ConnectorError|BulkJob {
-        BulkJob bulkJob;
+    public remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|BulkJob {
         json jobPayload = {
             "operation" : operation,
             "object" : sobj,
             "contentType" : contentType
         };
+        if (UPSERT == operation) {
+            if (extIdFieldName.length() > 0) {
+                json extField = {
+                    "externalIdFieldName" : extIdFieldName
+                };
+                jobPayload = check jobPayload.mergeJson(extField);
+            } else {
+                return error("External ID Field Name Required for UPSERT Operation!");
+            }
+        }        
         http:Request req = new;
         req.setJsonPayload(jobPayload);
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
         var response = self.httpClient->post(path, req);
         json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
-        if(jobResponse is json) {
-            bulkJob = new(jobResponse.id.toString(), contentType, self.httpClient);
+        if (jobResponse is json) {
+            BulkJob bulkJob = new(jobResponse.id.toString(), contentType, operation, self.httpClient);
             return bulkJob;
         } else {
             return jobResponse;
@@ -91,7 +101,7 @@ public type BulkClient client object {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
         var response = self.httpClient->get(path, req);
-        if(JSON == jobDataType) {
+        if (JSON == jobDataType) {
             json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json){            
                 JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
@@ -122,7 +132,7 @@ public type BulkClient client object {
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.httpClient->post(path, req);
         json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
-        if(jobResponse is json){
+        if (jobResponse is json){
             JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
             return jobInfo;
         } else {
@@ -141,7 +151,7 @@ public type BulkClient client object {
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.httpClient->post(path, req);
         json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
-        if(jobResponse is json){
+        if (jobResponse is json){
             JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
             return jobInfo;
         } else {
@@ -155,11 +165,13 @@ public type BulkClient client object {
 public type BulkJob client object {
     string jobId;
     JOBTYPE jobDataType;
+    OPERATION operation;
     http:Client httpClient;
 
-    public function __init(string jobId, JOBTYPE jobDataType, http:Client httpClient) {
+    public function __init(string jobId, JOBTYPE jobDataType, OPERATION operation, http:Client httpClient) {
         self.jobId = jobId;
         self.jobDataType = jobDataType;
+        self.operation = operation;
         self.httpClient = httpClient;
     }
 
@@ -174,88 +186,77 @@ public type BulkJob client object {
             JSON => {
                 if (content is json) {
                     req.setJsonPayload(content);
-                    var response = self.httpClient->post(path, req);
-                    json|ConnectorError batchResponse = checkJsonPayloadAndSetErrors(response);
-                    if (batchResponse is json){
-                        BatchInfo binfo = check BatchInfo.constructFrom(batchResponse);
-                        return binfo;
+                }
+                if (content is string) {
+                    req.setTextPayload(content);
+                }                
+                if (content is io:ReadableByteChannel) {
+                    if (QUERY == self.operation) {
+                        string payload = check convertToString(content);
+                        req.setTextPayload(<@untainted>  payload);
                     } else {
-                        return batchResponse;
+                        json payload = check convertToJson(content);
+                        req.setJsonPayload(<@untainted>  payload);
                     }
                 }
-
-                if (content is io:ReadableByteChannel) {
-                    json payload = check convertToJson(content);
-                    req.setJsonPayload(<@untained>  payload);
-                    var response = self.httpClient->post(path, req);
-                    json|ConnectorError batchResponse = checkJsonPayloadAndSetErrors(response);
-                    if (batchResponse is json){
-                        BatchInfo binfo = check BatchInfo.constructFrom(batchResponse);
-                        return binfo;
-                    } else {
-                        return batchResponse;
-                    }
+                req.setHeader(CONTENT_TYPE, APP_JSON);
+                var response = self.httpClient->post(path, req);
+                json|ConnectorError batchResponse = checkJsonPayloadAndSetErrors(response);
+                if (batchResponse is json){
+                    BatchInfo binfo = check BatchInfo.constructFrom(batchResponse);
+                    return binfo;
+                } else {
+                    return batchResponse;
                 } 
             }
             XML => {
                 if (content is xml) {
                     req.setXmlPayload(content);
-                    var response = self.httpClient->post(path, req);
-                    xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
-                    if (batchResponse is xml){
-                        BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
-                        return binfo;
-                    } else {
-                        return batchResponse;
-                    }
                 }
-
+                if (content is string) {
+                    req.setTextPayload(content);
+                }
                 if (content is io:ReadableByteChannel) {
-                    xml payload = check convertToXml(content);
-                    req.setXmlPayload(<@untained>  payload);
-                    var response = self.httpClient->post(path, req);
-                    xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
-                    if (batchResponse is xml){
-                        BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
-                        return binfo;
+                    if (QUERY == self.operation) {
+                        string payload = check convertToString(content);
+                        req.setTextPayload(<@untainted>  payload);
                     } else {
-                        return batchResponse;
+                        xml payload = check convertToXml(content);
+                        req.setXmlPayload(<@untainted>  payload);
                     }
                 } 
+                req.setHeader(CONTENT_TYPE, APP_XML);
+                var response = self.httpClient->post(path, req);
+                xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
+                if (batchResponse is xml){
+                    BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
             }
             CSV => {
                 if (content is string) {
                     req.setTextPayload(content);
-                    req.setHeader(CONTENT_TYPE, TEXT_CSV);
-                    var response = self.httpClient->post(path, req);
-                    xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
-                    if (batchResponse is xml){
-                        BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
-                        return binfo;
-                    } else {
-                        return batchResponse;
-                    }
-                }
-
+                }                
                 if (content is io:ReadableByteChannel) {
                     string textcontent = check convertToString(content);
                     req.setTextPayload(<@untainted> textcontent);
-                    req.setHeader(CONTENT_TYPE, TEXT_CSV);
-                    var response = self.httpClient->post(path, req);
-                    xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
-                    if (batchResponse is xml){
-                        BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
-                        return binfo;
-                    } else {
-                        return batchResponse;
-                    }
+                }
+                req.setHeader(CONTENT_TYPE, TEXT_CSV);
+                var response = self.httpClient->post(path, req);
+                xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
+                if (batchResponse is xml){
+                    BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
+                    return binfo;
+                } else {
+                    return batchResponse;
                 }
             }
             _ => {
                 return error("Invalid Job Type!");
             }
         }
-        return error("Invalid Job Type!");
     }
 
     # Get information about a batch.
@@ -321,43 +322,56 @@ public type BulkJob client object {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH, batchId, REQUEST]);
         http:Request req = new;
         var response = self.httpClient->get(path, req);
-        
-        match self.jobDataType {
-            JSON => {
-                return checkJsonPayloadAndSetErrors(response);
+        if (QUERY == self.operation) {
+            return getQueryRequest(response, self.jobDataType);
+        } else {
+            match self.jobDataType {
+                JSON => {
+                    return checkJsonPayloadAndSetErrors(response);
+                }
+                XML => {
+                    return checkXmlPayloadAndSetErrors(response);
+                }
+                CSV => {
+                    return checkTextPayloadAndSetErrors(response);
+                }
+                _ => {
+                    return error("Invalid Job Type!");
+                }
             }
-            XML => {
-                return checkXmlPayloadAndSetErrors(response);
-            }
-            CSV => {
-                return checkTextPayloadAndSetErrors(response);
-            }
-            _ => {
-                return error("Invalid Job Type!");
-            }
-        }
-        
+        }       
     }
 
-    # Get la ist result of the records processed in a batch.
+    # Get result of the records processed in a batch.
     #
     # + batchId - batch ID
     # + return - result list
-    public remote function getBatchResult(string batchId) returns @tainted error|Result[]{
+    public remote function getBatchResult(string batchId) returns @tainted error|json|xml|string|Result[]{
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH, batchId, RESULT]);
         Result [] results = [];
         http:Request req = new;
         var response = self.httpClient->get(path, req);
+        
         match self.jobDataType {
             JSON => {
                 json resultResponse = check checkJsonPayloadAndSetErrors(response);
+                if (QUERY == self.operation) {
+                    return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient);
+                }
                 return createBatchResultRecordFromJson(resultResponse);
             }
             XML => {
                 xml resultResponse = check checkXmlPayloadAndSetErrors(response);
+                if (QUERY == self.operation) {
+                    return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient);
+                }
                 return createBatchResultRecordFromXml(resultResponse);
             }
             CSV => {
+                if (QUERY == self.operation) {
+                    xml resultResponse = check checkXmlPayloadAndSetErrors(response);
+                    return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient);
+                }
                 string resultResponse = check checkTextPayloadAndSetErrors(response);
                 return createBatchResultRecordFromCsv(resultResponse);
             }

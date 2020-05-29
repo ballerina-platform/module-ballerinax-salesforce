@@ -22,6 +22,7 @@ import ballerina/io;
 import ballerina/'lang\.int as ints;
 import ballerina/'lang\.float as floats;
 import ballerina/lang.'string as strings;
+import ballerina/lang.'xml as xmllib;
 
 # Check HTTP response and return XML payload if succesful, else set errors and return ConnectorError.
 # + httpResponse - HTTP response or error occurred
@@ -89,7 +90,6 @@ function checkJsonPayloadAndSetErrors(http:Response|error httpResponse) returns 
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
             || httpResponse.statusCode == http:STATUS_NO_CONTENT) {
             json|error response = httpResponse.getJsonPayload();
-
             if (response is json) {
                 return response;
             } else {
@@ -99,18 +99,36 @@ function checkJsonPayloadAndSetErrors(http:Response|error httpResponse) returns 
                     cause = response);
                 return httpResponseHandlingError;
             }
-
         } else {
-            json|error response = httpResponse.getJsonPayload();
-            if (response is json) {
-                HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
-                    message = response.exceptionMessage.toString(), errorCode = response.exceptionCode.toString());
-                return httpResponseHandlingError;
+            return handleJsonErrorResponse(httpResponse);
+        }
+    } else {
+        return handleHttpError(httpResponse);
+    }
+}
+
+# Check query request and return query string
+#
+# + httpResponse - HTTP response or error occurred
+# + return - Query string response if successful or else an sfdc:ConnectorError
+function getQueryRequest(http:Response|error httpResponse, JOBTYPE jobtype) returns @tainted string|ConnectorError {
+    if (httpResponse is http:Response) {
+        if (httpResponse.statusCode == http:STATUS_OK) {
+            string|error textResponse = httpResponse.getTextPayload();
+            if (textResponse is string) {
+                return textResponse;
             } else {
-                log:printError(ERR_EXTRACTING_ERROR_MSG, err = response);
+                log:printError(TEXT_ACCESSING_ERROR_MSG, err = textResponse);
                 HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
-                    message = ERR_EXTRACTING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR, cause = response);
+                    message = TEXT_ACCESSING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
+                    cause = textResponse);
                 return httpResponseHandlingError;
+            }
+        } else {
+            if (JSON == jobtype) {
+                return handleJsonErrorResponse(httpResponse);
+            } else {
+                return handleXmlErrorResponse(httpResponse);
             }
         }
     } else {
@@ -137,6 +155,23 @@ function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Htt
         return httpResponseHandlingError;
     }
 }
+
+# Handle HTTP error response and return HttpResponseHandlingError error.
+# + httpResponse - error response
+# + return - HttpResponseHandlingError error
+function handleJsonErrorResponse(http:Response httpResponse) returns @tainted HttpResponseHandlingError {
+    json|error response = httpResponse.getJsonPayload();
+    if (response is json) {
+        HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+            message = response.exceptionMessage.toString(), errorCode = response.exceptionCode.toString());
+        return httpResponseHandlingError;
+    } else {
+        log:printError(ERR_EXTRACTING_ERROR_MSG, err = response);
+        HttpResponseHandlingError httpResponseHandlingError = error(HTTP_RESPONSE_HANDLING_ERROR,
+            message = ERR_EXTRACTING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR, cause = response);
+        return httpResponseHandlingError;
+    }
+} 
 
 # Handle HTTP error and return HttpError.
 # + return - HttpError error
@@ -327,4 +362,81 @@ function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|Connector
             return ioError;
         }
     }
+}
+
+function getJsonQueryResult(json resultlist, string path, http:Client httpClient) returns @tainted json|ConnectorError {
+    json[] finalResults = [];
+    http:Request req = new;
+    //result list is always a json[]
+    if (resultlist is json[]) {
+        foreach var item in resultlist {
+            string resultId = item.toString();
+            var response = httpClient->get(path + "/"+ resultId, req);
+            json result = check checkJsonPayloadAndSetErrors(response);
+            //result is always a json[]
+            if (result is json[]) {
+                finalResults = mergeJson(finalResults, result);
+            }
+        }
+        return finalResults;
+    }
+    return resultlist;    
+}
+
+function getXmlQueryResult(xml resultlist, string path, http:Client httpClient) returns @tainted xml|ConnectorError {
+    xml finalResults = xml `<queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
+    http:Request req = new;
+    foreach var item in resultlist/<*> {
+        if (item is xml) {
+            string resultId = (item/*).toString();
+            var response = httpClient->get(path + "/"+ resultId, req);
+            xml result = check checkXmlPayloadAndSetErrors(response);
+            finalResults = mergeXml(finalResults, result);
+        }        
+    }    
+    return finalResults;
+}
+
+function getCsvQueryResult(xml resultlist, string path, http:Client httpClient) returns @tainted string|ConnectorError {
+    string finalResults = "";
+    http:Request req = new;
+    int i = 0;
+    foreach var item in resultlist/<*> {
+        if (item is xml) {
+            string resultId = (item/*).toString();
+            var response = httpClient->get(path + "/"+ resultId, req);
+            string result = check checkTextPayloadAndSetErrors(response);
+            if (i == 0) {
+                finalResults = result;
+            } else {
+                finalResults = mergeCsv(finalResults, result);
+            }
+        } 
+        i = i + 1;      
+    } 
+    return finalResults;  
+}
+
+function mergeJson(json[] list1, json[] list2) returns json[] {
+    foreach var item in list2 {
+        list1[list1.length()] = item;
+    }
+    return list1;
+}
+
+function mergeXml(xml list1, xml list2) returns xml {
+    xmllib:Element list1ele = <xmllib:Element>list1; 
+    xmllib:Element list2ele = <xmllib:Element>list2;
+    list1ele.setChildren(list1ele.getChildren().elements()+list2ele.getChildren().elements());
+    return list1ele;
+}
+
+function mergeCsv(string list1, string list2) returns string{
+    int? inof = list2.indexOf("\n");
+    string finalList = list1;
+    if (inof is int) {
+        string list2new = list2.substring(inof);            
+        finalList = finalList.concat(list2new);   
+    }
+    return finalList;
 }

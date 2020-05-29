@@ -110,7 +110,7 @@ public type Result record {|
 |};
 
 # Operation type of the bulk job.
-public type OPERATION INSERT|UPDATE|DELETE|UPSERT;
+public type OPERATION INSERT|UPDATE|DELETE|UPSERT|QUERY;
 
 # Data type of the bulk job.
 public type JOBTYPE JSON|XML|CSV;
