@@ -18,133 +18,119 @@
 
 import ballerina/log;
 
-function toVersions(json payload) returns Version[]|ConnectorError {
+function toVersions(json payload) returns Version[]|Error {
     Version[] versions = [];
     json[] versionsArr = <json[]> payload;
 
     foreach json ele in versionsArr {
-        Version|error ver = Version.constructFrom(ele);
+        Version|error ver = ele.cloneWithType(Version);
 
         if (ver is Version) {
             versions[versions.length()] = ver;
         } else {
             string errMsg = "Error occurred while constructing Version record.";
             log:printError(errMsg + " ele:" + ele.toJsonString(), err = ver);
-            TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-                errorCode = TYPE_CONVERSION_ERROR, cause = ver);
-            return typeError;
+            return Error(errMsg, ver);
         }
     }
     return versions;
 }
 
-function toMapOfStrings(json payload) returns map<string>|ConnectorError {
-    map<string>|error strMap = map<string>.constructFrom(payload);
+type StringMap map<string>;
+
+function toMapOfStrings(json payload) returns map<string>|Error {
+    map<string>|error strMap = payload.cloneWithType(StringMap);
 
     if (strMap is map<string>) {
         return strMap;
     } else {
         string errMsg = "Error occurred while constructing map<string>.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = strMap);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = strMap);
-        return typeError;
+        return Error(errMsg, strMap);
     }
 }
 
-function toMapOfLimits(json payload) returns map<Limit>|ConnectorError {
+type JsonMap map<json>;
+
+function toMapOfLimits(json payload) returns map<Limit>|Error {
     map<Limit> limits = {};
-    map<json>|error payloadMap = map<json>.constructFrom(payload);
+    map<json>|error payloadMap = payload.cloneWithType(JsonMap);
 
     if (payloadMap is error) {
         string errMsg = "Error occurred while constructing map<json> using json payload.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = payloadMap);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = payloadMap);
-        return typeError;
+        return Error(errMsg, payloadMap);
     } else {
         foreach var [key, value] in payloadMap.entries() {
-            Limit|error lim = Limit.constructFrom(value);
+            Limit|error lim = value.cloneWithType(Limit);
             if (lim is Limit) {
                 limits[key] = lim;
             } else {
                 string errMsg = "Error occurred while constructing Limit record.";
                 log:printError(errMsg + " value:" + value.toJsonString(), err = lim);
-                TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-                    errorCode = TYPE_CONVERSION_ERROR, cause = lim);
-                return typeError;
+                return Error(errMsg, lim);
             }
         }
     }
     return limits;
 }
 
-function toSoqlResult(json payload) returns SoqlResult|ConnectorError {
-    SoqlResult|error res = SoqlResult.constructFrom(payload);
+function toSoqlResult(json payload) returns SoqlResult|Error {
+    SoqlResult|error res = payload.cloneWithType(SoqlResult);
 
     if (res is SoqlResult) {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SoqlResult record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = res);
-        return typeError;
+        return Error(errMsg, res);
     }
 }
 
-function toSoslResult(json payload) returns SoslResult|ConnectorError {
-    SoslResult|error res = SoslResult.constructFrom(payload);
+function toSoslResult(json payload) returns SoslResult|Error {
+    SoslResult|error res = payload.cloneWithType(SoslResult);
 
     if (res is SoslResult) {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SoslResult record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = res);
-        return typeError;
+        return Error(errMsg, res);
     }
 }
 
-function toSObjectMetaData(json payload) returns SObjectMetaData|ConnectorError {
-    SObjectMetaData|error res = SObjectMetaData.constructFrom(payload);
+function toSObjectMetaData(json payload) returns SObjectMetaData|Error {
+    SObjectMetaData|error res = payload.cloneWithType(SObjectMetaData);
 
     if (res is SObjectMetaData) {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SObjectMetaData record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = res);
-        return typeError;
+        return Error(errMsg, res);
     }
 }
 
-function toOrgMetadata(json payload) returns OrgMetadata|ConnectorError {
-    OrgMetadata|error res = OrgMetadata.constructFrom(payload);
+function toOrgMetadata(json payload) returns OrgMetadata|Error {
+    OrgMetadata|error res = payload.cloneWithType(OrgMetadata);
 
     if (res is OrgMetadata) {
         return res;
     } else {
         string errMsg = "Error occurred while constructing OrgMetadata record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = res);
-        return typeError;
+        return Error(errMsg, res);
     }
 }
 
-function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|ConnectorError {
-    SObjectBasicInfo|error res = SObjectBasicInfo.constructFrom(payload);
+function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Error {
+    SObjectBasicInfo|error res = payload.cloneWithType(SObjectBasicInfo);
 
     if (res is SObjectBasicInfo) {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SObjectBasicInfo record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = res);
-        return typeError;
+        return Error(errMsg, res);
     }
 }

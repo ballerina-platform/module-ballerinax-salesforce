@@ -20,7 +20,7 @@ import ballerina/log;
 import ballerina/java;
 import ballerina/java.arrays as jarrays;
 
-function createJobRecordFromXml(xml jobDetails) returns JobInfo|ConnectorError {
+function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
 
     JobInfo|error job = trap {
@@ -58,13 +58,11 @@ function createJobRecordFromXml(xml jobDetails) returns JobInfo|ConnectorError {
     } else {
         string errMsg = "Error occurred while creating JobInfo record using xml payload.";
         log:printError(errMsg, err = job);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = job);
-        return typeError;
+        return Error(errMsg, job);
     }
 }
 
-function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|ConnectorError {
+function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
 
     BatchInfo|error batch = trap {
@@ -87,13 +85,11 @@ function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|ConnectorE
     } else {
         string errMsg = "Error occurred while creating BatchInfo record using xml payload.";
         log:printError(errMsg, err = batch);
-        TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-            errorCode = TYPE_CONVERSION_ERROR, cause = batch);
-        return typeError;
+        return Error(errMsg, batch);
     }
 }
 
-function createBatchResultRecordFromXml(xml payload) returns Result[]|ConnectorError {
+function createBatchResultRecordFromXml(xml payload) returns Result[]|Error {
     Result[] batchResArr = [];
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
     foreach var result in payload/<*> {
@@ -122,21 +118,17 @@ function createBatchResultRecordFromXml(xml payload) returns Result[]|ConnectorE
             } else {
                 string errMsg = "Error occurred while creating BatchResult record using xml payload.";
                 log:printError(errMsg, err = batchRes);
-                TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-                    errorCode = TYPE_CONVERSION_ERROR, cause = batchRes);
-                return typeError;
+                return Error(errMsg, batchRes);
             }
         } else {
             log:printError(XML_ACCESSING_ERROR_MSG + ", result=" + result.toString(), err = ());
-            TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = XML_ACCESSING_ERROR_MSG,
-                errorCode = TYPE_CONVERSION_ERROR);
-            return typeError;
+            return Error(XML_ACCESSING_ERROR_MSG);
         }
     }
     return batchResArr;
 }
 
-function createBatchResultRecordFromJson(json payload) returns Result[]|ConnectorError {
+function createBatchResultRecordFromJson(json payload) returns Result[]|Error {
     Result[] batchResArr = [];
     json[] payloadArr = <json[]> payload;
 
@@ -174,23 +166,19 @@ function createBatchResultRecordFromJson(json payload) returns Result[]|Connecto
             } else {
                 string errMsg = "Error occurred while accessing errors from batch result.";
                 log:printError(errMsg, err = errors);
-                TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-                    errorCode = TYPE_CONVERSION_ERROR, cause = errors);
-                return typeError;
+                return Error(errMsg, errors);
             }
             batchResArr[batchResArr.length()] = batchRes;
         } else {
             string errMsg = "Error occurred while creating BatchResult record using json payload.";
             log:printError(errMsg, err = batchRes);
-            TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-                errorCode = TYPE_CONVERSION_ERROR, cause = batchRes);
-            return typeError;
+            return Error(errMsg, batchRes);
         }
     }
     return batchResArr;
 }
 
-function createBatchResultRecordFromCsv(string payload) returns Result[]|ConnectorError {
+function createBatchResultRecordFromCsv(string payload) returns Result[]|Error {
     Result[] batchResArr = [];
 
     handle payloadArr = split(java:fromString(payload), java:fromString("\n"));
@@ -235,26 +223,18 @@ function createBatchResultRecordFromCsv(string payload) returns Result[]|Connect
                 } else {
                     string errMsg = "Error occurred while creating BatchResult record using csv payload.";
                     log:printError(errMsg, err = batchRes);
-                    TypeConversionError typeError = error(TYPE_CONVERSION_ERROR, message = errMsg,
-                        errorCode = TYPE_CONVERSION_ERROR, cause = batchRes);
-                    return typeError;
+                    return Error(errMsg, batchRes);
                 }
 
             } else {
                 log:printError("Error occurred while accessing success & created fields from batch result, success="
                     + successStr.toString() + " created=" + createdStr.toString(), err = ());
-                TypeConversionError typeError = error(TYPE_CONVERSION_ERROR,
-                    message = "Error occurred while creating BatchResult record using json payload.",
-                    errorCode = TYPE_CONVERSION_ERROR);
-            return typeError;
+            return Error("Error occurred while creating BatchResult record using json payload.");
             }
         } else {
             log:printError("Error occrred while retrieveing batch result line from batch results csv, line="
                 + line.toString(), err = ());
-            TypeConversionError typeError = error(TYPE_CONVERSION_ERROR,
-                message = "Error occurred while accessing batch results from csv payload.",
-                errorCode = TYPE_CONVERSION_ERROR);
-            return typeError;
+            return Error("Error occurred while accessing batch results from csv payload.");
         }
         counter = counter + 1;
     }

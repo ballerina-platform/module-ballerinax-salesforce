@@ -21,6 +21,7 @@ import ballerina/test;
     dependsOn: ["insertJson", "upsertJson"]
 }
 function updateJson() {
+    BulkClient bulkClient = baseClient->getBulkClient();
     log:printInfo("bulkClient -> updateJson");
     string batchId = "";
     string mornsId = getContactIdByName("Morne", "Morkel", "Professor Grade 03");
@@ -59,7 +60,7 @@ function updateJson() {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchId = batch.id;
         } else {
-            test:assertFail(msg = batch.detail()?.message.toString());
+            test:assertFail(msg = batch.message());
         }
 
         //get job info
@@ -67,7 +68,7 @@ function updateJson() {
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.detail()?.message.toString());
+            test:assertFail(msg = jobInfo.message());
         }
 
         //get batch info
@@ -75,7 +76,7 @@ function updateJson() {
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.detail()?.message.toString());
+            test:assertFail(msg = batchInfo.message());
         }
 
         //get all batches
@@ -83,7 +84,7 @@ function updateJson() {
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = batchInfoList.detail()?.message.toString());
+            test:assertFail(msg = batchInfoList.message());
         }
 
         //get batch request
@@ -96,7 +97,7 @@ function updateJson() {
                 test:assertFail(msg = batchRequestArr.toString());
             }
         } else if (batchRequest is error) {
-            test:assertFail(msg = batchRequest.detail()?.message.toString());
+            test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
@@ -107,7 +108,7 @@ function updateJson() {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Update was not successful.");
         } else if (batchResult is error) {
-            test:assertFail(msg = batchResult.detail()?.message.toString());
+            test:assertFail(msg = batchResult.message());
         } else {
             test:assertFail("Invalid Batch Result!");
         }
@@ -117,9 +118,9 @@ function updateJson() {
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.detail()?.message.toString());
+            test:assertFail(msg = closedJob.message());
         }
     } else {
-        test:assertFail(msg = updateJob.detail()?.message.toString());
+        test:assertFail(msg = updateJob.message());
     }
 }

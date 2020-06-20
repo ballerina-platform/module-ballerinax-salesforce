@@ -21,8 +21,6 @@ import ballerina/lang.'xml as xmllib;
 import ballerina/java;
 import ballerina/java.arrays as jarrays;
 
-BulkClient bulkClient = baseClient->getBulkClient();
-
 json[] jsonQueryResult = [];
 xml xmlQueryResult = xml `<test/>`;
 string csvQueryResult = "";
@@ -55,7 +53,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
         + "' AND Title='" + title + "'";
     QueryClient queryClient = baseClient->getQueryClient();
-    SoqlResult|ConnectorError res = queryClient->getQueryResult(sampleQuery);
+    SoqlResult|Error res = queryClient->getQueryResult(sampleQuery);
 
     if (res is SoqlResult) {
         SoqlRecord[]|error records = res.records;

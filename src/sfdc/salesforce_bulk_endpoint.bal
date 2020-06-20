@@ -29,7 +29,7 @@ public type BulkClient client object {
 
     # The Salesforce Bulk client initialization function.
     # + salesforceConfig - the Salesforce Connector configuration
-    public function __init(SalesforceConfiguration salesforceConfig) {
+    public function init(SalesforceConfiguration salesforceConfig) {
         self.salesforceConfiguration = salesforceConfig;
         // Create the OAuth2 provider.
         oauth2:OutboundOAuth2Provider oauth2Provider = new(salesforceConfig.clientConfig);
@@ -82,7 +82,7 @@ public type BulkClient client object {
         req.setJsonPayload(jobPayload);
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
         var response = self.httpClient->post(path, req);
-        json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
+        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
             BulkJob bulkJob = new(jobResponse.id.toString(), contentType, operation, self.httpClient);
             return bulkJob;
@@ -102,15 +102,15 @@ public type BulkClient client object {
         http:Request req = new;
         var response = self.httpClient->get(path, req);
         if (JSON == jobDataType) {
-            json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
+            json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json){            
-                JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
+                JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
                 return jobInfo;
             } else {
                 return jobResponse;
             }
         } else {
-            xml|ConnectorError jobResponse = checkXmlPayloadAndSetErrors(response);
+            xml|Error jobResponse = checkXmlPayloadAndSetErrors(response);
             if (jobResponse is xml){            
                 JobInfo jobInfo = check createJobRecordFromXml(jobResponse);
                 return jobInfo;
@@ -131,9 +131,9 @@ public type BulkClient client object {
         http:Request req = new;
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.httpClient->post(path, req);
-        json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
+        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json){
-            JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
+            JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
             return jobInfo;
         } else {
             return jobResponse;
@@ -150,9 +150,9 @@ public type BulkClient client object {
         http:Request req = new;
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.httpClient->post(path, req);
-        json|ConnectorError jobResponse = checkJsonPayloadAndSetErrors(response);
+        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json){
-            JobInfo jobInfo = check JobInfo.constructFrom(jobResponse);
+            JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
             return jobInfo;
         } else {
             return jobResponse;
@@ -168,7 +168,7 @@ public type BulkJob client object {
     OPERATION operation;
     http:Client httpClient;
 
-    public function __init(string jobId, JOBTYPE jobDataType, OPERATION operation, http:Client httpClient) {
+    public function init(string jobId, JOBTYPE jobDataType, OPERATION operation, http:Client httpClient) {
         self.jobId = jobId;
         self.jobDataType = jobDataType;
         self.operation = operation;
@@ -201,9 +201,9 @@ public type BulkJob client object {
                 }
                 req.setHeader(CONTENT_TYPE, APP_JSON);
                 var response = self.httpClient->post(path, req);
-                json|ConnectorError batchResponse = checkJsonPayloadAndSetErrors(response);
+                json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
                 if (batchResponse is json){
-                    BatchInfo binfo = check BatchInfo.constructFrom(batchResponse);
+                    BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
                     return binfo;
                 } else {
                     return batchResponse;
@@ -227,7 +227,7 @@ public type BulkJob client object {
                 } 
                 req.setHeader(CONTENT_TYPE, APP_XML);
                 var response = self.httpClient->post(path, req);
-                xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
+                xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
                 if (batchResponse is xml){
                     BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
                     return binfo;
@@ -245,7 +245,7 @@ public type BulkJob client object {
                 }
                 req.setHeader(CONTENT_TYPE, TEXT_CSV);
                 var response = self.httpClient->post(path, req);
-                xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
+                xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
                 if (batchResponse is xml){
                     BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
                     return binfo;
@@ -268,15 +268,15 @@ public type BulkJob client object {
         http:Request req = new;
         var response = self.httpClient->get(path, req);
         if (JSON == self.jobDataType) {
-            json|ConnectorError batchResponse = checkJsonPayloadAndSetErrors(response);
+            json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
             if (batchResponse is json){
-                BatchInfo binfo = check BatchInfo.constructFrom(batchResponse);
+                BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
                 return binfo;
             } else {
                 return batchResponse;
             }
         } else {
-            xml|ConnectorError batchResponse = checkXmlPayloadAndSetErrors(response);
+            xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
             if (batchResponse is xml){
                 BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
                 return binfo;
@@ -299,7 +299,7 @@ public type BulkJob client object {
             json batchResponse = check checkJsonPayloadAndSetErrors(response);
             json[] batchInfoArr = <json[]>batchResponse.batchInfo;
             foreach json batchInfo in batchInfoArr {
-                BatchInfo batch = check BatchInfo.constructFrom(batchInfo);
+                BatchInfo batch = check batchInfo.cloneWithType(BatchInfo);
                 batchInfoList[batchInfoList.length()] = batch;
             }
         } else {

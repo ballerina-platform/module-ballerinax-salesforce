@@ -17,13 +17,12 @@
 import ballerina/test;
 import ballerina/log;
 
-QueryClient queryClient = baseClient->getQueryClient();
-
 @test:Config {}
 function testGetQueryResult() {
+    QueryClient queryClient = baseClient->getQueryClient();
     log:printInfo("queryClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
-    SoqlResult|ConnectorError res = queryClient->getQueryResult(sampleQuery);
+    SoqlResult|Error res = queryClient->getQueryResult(sampleQuery);
 
     if (res is SoqlResult) {
         assertSoqlResult(res);
@@ -31,17 +30,17 @@ function testGetQueryResult() {
 
         while (nextRecordsUrl is string && trim(nextRecordsUrl) != EMPTY_STRING) {
             log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-            SoqlResult|ConnectorError resp = queryClient->getNextQueryResult(<@untainted> nextRecordsUrl);
+            SoqlResult|Error resp = queryClient->getNextQueryResult(<@untainted> nextRecordsUrl);
 
             if (resp is SoqlResult) {
                 assertSoqlResult(resp);
                 res = resp;
             } else {
-                test:assertFail(msg = resp.detail()?.message.toString());
+                test:assertFail(msg = resp.message());
             }
         }
     } else {
-        test:assertFail(msg = res.detail()?.message.toString());
+        test:assertFail(msg = res.message());
     }
 }
 
@@ -49,25 +48,26 @@ function testGetQueryResult() {
     dependsOn: ["testUpdateRecord"]
 }
 function testSearchSOSLString() {
+    QueryClient queryClient = baseClient->getQueryClient();
     log:printInfo("queryClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
-    SoslResult|ConnectorError res = queryClient->searchSOSLString(searchString);
+    SoslResult|Error res = queryClient->searchSOSLString(searchString);
 
     if (res is SoslResult) {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
         test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, 
             msg = "Matched search record is not an Account type!");
     } else {
-        test:assertFail(msg = res.detail()?.message.toString());
+        test:assertFail(msg = res.message());
     }
 }
 
-function assertSoqlResult(SoqlResult|ConnectorError res) {
+function assertSoqlResult(SoqlResult|Error res) {
     if (res is SoqlResult) {
         test:assertTrue(res.totalSize > 0, "Total number result records is 0");
         test:assertTrue(res.'done, "Query is not completed");
         test:assertTrue(res.records.length() == res.totalSize, "Query result records not equal to totalSize");
     } else {
-        test:assertFail(msg = res.detail()?.message.toString());
+        test:assertFail(msg = res.message());
     }
 }

@@ -21,6 +21,7 @@ import ballerina/test;
     dependsOn: ["insertCsv", "upsertCsv"]
 }
 function updateCsv() {
+    BulkClient bulkClient = baseClient->getBulkClient();
     log:printInfo("bulkClient -> updateCsv");
     string batchId = "";
 
@@ -41,7 +42,7 @@ function updateCsv() {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
             batchId = batch.id;
         } else {
-            test:assertFail(msg = batch.detail()?.message.toString());
+            test:assertFail(msg = batch.message());
         }
 
         //get job info
@@ -49,7 +50,7 @@ function updateCsv() {
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.detail()?.message.toString());
+            test:assertFail(msg = jobInfo.message());
         }
 
         //get batch info
@@ -57,7 +58,7 @@ function updateCsv() {
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.detail()?.message.toString());
+            test:assertFail(msg = batchInfo.message());
         }
 
         //get all batches
@@ -65,7 +66,7 @@ function updateCsv() {
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = batchInfoList.detail()?.message.toString());
+            test:assertFail(msg = batchInfoList.message());
         }
 
         //get batch request
@@ -73,7 +74,7 @@ function updateCsv() {
         if (batchRequest is string) {
             test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
-            test:assertFail(msg = batchRequest.detail()?.message.toString());
+            test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
@@ -83,7 +84,7 @@ function updateCsv() {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Update was not successful.");
         } else if (batchResult is error) {
-            test:assertFail(msg = batchResult.detail()?.message.toString());
+            test:assertFail(msg = batchResult.message());
         } else {
             test:assertFail("Invalid Batch Result!");
         }
@@ -93,10 +94,10 @@ function updateCsv() {
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.detail()?.message.toString());
+            test:assertFail(msg = closedJob.message());
         }
 
     } else {
-        test:assertFail(msg = updateJob.detail()?.message.toString());
+        test:assertFail(msg = updateJob.message());
     }
 }
