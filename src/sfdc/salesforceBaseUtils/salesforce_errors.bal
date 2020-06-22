@@ -26,19 +26,19 @@ type ErrorDetail record {
 };
 
 // Ballerina Salesforce Client Error Types
-const HTTP_RESPONSE_HANDLING_ERROR = "[ballerinax/sfdc]HttpResponseHandlingError";
+const HTTP_RESPONSE_HANDLING_ERROR = "{ballerinax/sfdc}HttpResponseHandlingError";
 public type HttpResponseHandlingError error<HTTP_RESPONSE_HANDLING_ERROR, ErrorDetail>;
 
-const TYPE_CONVERSION_ERROR = "[ballerinax/sfdc]TypeConversionError";
+const TYPE_CONVERSION_ERROR = "{ballerinax/sfdc}TypeConversionError";
 public type TypeConversionError error<TYPE_CONVERSION_ERROR, ErrorDetail>;
 
-const HTTP_ERROR = "[ballerinax/sfdc]HTTPError";
+const HTTP_ERROR = "{ballerinax/sfdc}HTTPError";
 public type HttpError error<HTTP_ERROR, ErrorDetail>;
 
-const SERVER_ERROR = "[ballerinax/sfdc]ServerError";
+const SERVER_ERROR = "{ballerinax/sfdc}ServerError";
 public type ServerError error<SERVER_ERROR, ErrorDetail>;
 
-const IO_ERROR = "[ballerinax/sfdc]IOError";
+const IO_ERROR = "{ballerinax/sfdc}IOError";
 public type IOError error<IO_ERROR, ErrorDetail>;
 
 // Ballerina Salesforce Union Errors
