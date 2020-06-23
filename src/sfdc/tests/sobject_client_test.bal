@@ -17,8 +17,6 @@
 import ballerina/test;
 import ballerina/log;
 
-SObjectClient sobjectClient = baseClient->getSobjectClient();
-
 json accountRecord = { 
     Name: "John Keells Holdings", 
     BillingCity: "Colombo 3" 
@@ -28,14 +26,15 @@ string testRecordId = "";
 
 @test:Config {}
 function testCreateRecord() {
+    SObjectClient sobjectClient = baseClient->getSobjectClient();
     log:printInfo("sobjectClient -> createRecord()");
-    string|ConnectorError stringResponse = sobjectClient->createRecord(ACCOUNT, accountRecord);
+    string|Error stringResponse = sobjectClient->createRecord(ACCOUNT, accountRecord);
 
     if (stringResponse is string) {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
         testRecordId = <@untainted> stringResponse;
     } else {
-        test:assertFail(msg = stringResponse.detail()?.message.toString());
+        test:assertFail(msg = stringResponse.message());
     }
 }
 
@@ -43,7 +42,8 @@ function testCreateRecord() {
     dependsOn: ["testCreateRecord"]
 }
 function testGetRecord() {
-    json|ConnectorError response;
+    SObjectClient sobjectClient = baseClient->getSobjectClient();
+    json|Error response;
     log:printInfo("sobjectClient -> getRecord()");
     string path = "/services/data/v48.0/sobjects/Account/" + testRecordId;
     response = sobjectClient->getRecord(path);
@@ -53,7 +53,7 @@ function testGetRecord() {
         test:assertEquals(response.Name, "John Keells Holdings", msg = "Name key mismatched in response");
         test:assertEquals(response.BillingCity, "Colombo 3", msg = "BillingCity key mismatched in response");
     } else {
-        test:assertFail(msg = response.detail()?.message.toString());
+        test:assertFail(msg = response.message());
     }
 }
 
@@ -61,14 +61,15 @@ function testGetRecord() {
     dependsOn: ["testCreateRecord", "testGetRecord"]
 }
 function testUpdateRecord() {
+    SObjectClient sobjectClient = baseClient->getSobjectClient();
     log:printInfo("sobjectClient -> updateRecord()");
     json account = { Name: "WSO2 Inc", BillingCity: "Jaffna", Phone: "+94110000000" };
-    boolean|ConnectorError response = sobjectClient->updateRecord(ACCOUNT, testRecordId, account);
+    boolean|Error response = sobjectClient->updateRecord(ACCOUNT, testRecordId, account);
 
     if (response is boolean) {
         test:assertTrue(response, msg = "Expects true on success");
     } else {
-        test:assertFail(msg = response.detail()?.message.toString());
+        test:assertFail(msg = response.message());
     }
 }
 
@@ -76,12 +77,13 @@ function testUpdateRecord() {
     dependsOn: ["testSearchSOSLString"]
 }
 function testDeleteRecord() {
+    SObjectClient sobjectClient = baseClient->getSobjectClient();
     log:printInfo("sobjectClient -> deleteRecord()");
-    boolean|ConnectorError response = sobjectClient->deleteRecord(ACCOUNT, testRecordId);
+    boolean|Error response = sobjectClient->deleteRecord(ACCOUNT, testRecordId);
 
     if (response is boolean) {
         test:assertTrue(response, msg = "Expects true on success");
     } else {
-        test:assertFail(msg = response.detail()?.message.toString());
+        test:assertFail(msg = response.message());
     }
 }

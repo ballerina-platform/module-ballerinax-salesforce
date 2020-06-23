@@ -21,6 +21,22 @@ Note:- When you are setting up the connected app, select the following scopes un
    obtaining OAuth2 credentials, go to 
    [Salesforce documentation](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
+**Create external ID field in Salesforce**
+
+Since External ID field called `My_External_Id__c` is used in the tests, follow below steps to create this external ID
+field in the salesforce.
+
+1. Log in to your salesforce account and go to the `Setup` by clicking on the settings icon in the right side of the 
+   menu.
+2. Then in the left side panel, under Platform tools click on the `Objects and Fields` and the click on 
+   `Object Manager`. 
+3. In the Object Manager page click on the `Account` since we are going to create a external field for Account SObject.
+4. In the Account page click on the `Fields & Relationships` and click `New` in the right hand side.
+5. Then select `Text` as the Data type and click `Next`.
+6. Add `My_External_Id` for "Field Label" and `255` for "Length" and click `Next`.
+7. At the end click `Save` and see whether external field is added successfully by checking `Fields & Relationships`
+   fields.
+
 **Running Tests**
 
 1. Create a `ballerina.conf` inside project root directory and replace values inside quotes (eg: <EP_URL>) with 

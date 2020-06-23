@@ -28,7 +28,7 @@ public type QueryClient client object {
 
     # The Salesforce query client initialization function.
     # + salesforceConfig - Salesforce Connector configuration
-    public function __init(SalesforceConfiguration salesforceConfig) {
+    public function init(SalesforceConfiguration salesforceConfig) {
         self.salesforceConfiguration = salesforceConfig;
         // Create the OAuth2 provider.
         oauth2:OutboundOAuth2Provider oauth2Provider = new(salesforceConfig.clientConfig);
@@ -58,8 +58,8 @@ public type QueryClient client object {
 
     # Executes the specified SOQL query.
     # + receivedQuery - Sent SOQL query
-    # + return - `SoqlResult` record if successful. Else, the occurred `ConnectorError`.
-    public remote function getQueryResult(string receivedQuery) returns @tainted SoqlResult|ConnectorError {
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    public remote function getQueryResult(string receivedQuery) returns @tainted SoqlResult|Error {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         json res = check self.getRecord(path);
         return toSoqlResult(res);
@@ -67,8 +67,8 @@ public type QueryClient client object {
 
     # If the query results are too large, retrieve the next batch of results using the nextRecordUrl.
     # + nextRecordsUrl - URL to get the next query results
-    # + return - `SoqlResult` record if successful. Else, the occurred `ConnectorError`.
-    public remote function getNextQueryResult(string nextRecordsUrl) returns @tainted SoqlResult|ConnectorError {
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    public remote function getNextQueryResult(string nextRecordsUrl) returns @tainted SoqlResult|Error {
         json res = check self.getRecord(nextRecordsUrl);
         return toSoqlResult(res);
     }
@@ -77,14 +77,14 @@ public type QueryClient client object {
 
     # Executes the specified SOSL search.
     # + searchString - Sent SOSL search query
-    # + return - `SoslResult` record if successful. Else, the occurred `ConnectorError`.
-    public remote function searchSOSLString(string searchString) returns @tainted SoslResult|ConnectorError {
+    # + return - `SoslResult` record if successful. Else, the occurred `Error`.
+    public remote function searchSOSLString(string searchString) returns @tainted SoslResult|Error {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
         json res = check self.getRecord(path);
         return toSoslResult(res);
     }
 
-    private function getRecord(string path) returns @tainted json|ConnectorError {
+    private function getRecord(string path) returns @tainted json|Error {
         http:Response|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }

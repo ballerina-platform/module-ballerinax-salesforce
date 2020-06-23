@@ -37,19 +37,19 @@ BaseClient baseClient = new(sfConfig);
 @test:Config{}
 function testGetAvailableApiVersions(){
     log:printInfo("baseClient -> getAvailableApiVersions()");
-    Version[]|ConnectorError versions = baseClient->getAvailableApiVersions();
+    Version[]|Error versions = baseClient->getAvailableApiVersions();
 
     if (versions is Version[]) {
         test:assertTrue(versions.length() > 0, msg = "Found 0 or No API versions");
     } else {
-        test:assertFail(msg = versions.detail()?.message.toString());
+        test:assertFail(msg = versions.message());
     }
 }
 
 @test:Config {}
 function testGetResourcesByApiVersion() {
     log:printInfo("baseClient -> getResourcesByApiVersion()");
-    map<string>|ConnectorError resources = baseClient->getResourcesByApiVersion(API_VERSION);
+    map<string>|Error resources = baseClient->getResourcesByApiVersion(API_VERSION);
 
     if (resources is map<string>) {
         test:assertTrue(resources.length() > 0, msg = "Found empty resource map");
@@ -63,14 +63,14 @@ function testGetResourcesByApiVersion() {
         test:assertTrue(trim(resources["chatter"].toString()).length() > 0, msg = "Found null for resource chatter");
         test:assertTrue(trim(resources["recent"].toString()).length() > 0, msg = "Found null for resource recent");
     } else {
-        test:assertFail(msg = resources.detail()?.message.toString());
+        test:assertFail(msg = resources.message());
     }
 }
 
 @test:Config {}
 function testGetOrganizationLimits() {
     log:printInfo("baseClient -> getOrganizationLimits()");
-    map<Limit>|ConnectorError limits = baseClient->getOrganizationLimits();
+    map<Limit>|Error limits = baseClient->getOrganizationLimits();
 
     if (limits is map<Limit>) {
         test:assertTrue(limits.length() > 0, msg = "Found empty resource map");
@@ -86,6 +86,6 @@ function testGetOrganizationLimits() {
             }
         }
     } else {
-        test:assertFail(msg = limits.detail()?.message.toString());
+        test:assertFail(msg = limits.message());
     }
 }

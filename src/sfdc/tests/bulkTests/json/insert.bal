@@ -20,6 +20,7 @@ import ballerina/test;
 
 @test:Config {}
 function insertJson() {
+    BulkClient bulkClient = baseClient->getBulkClient();
     log:printInfo("bulkClient -> insertJson");
     string batchId = "";
 
@@ -54,7 +55,7 @@ function insertJson() {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchId = batch.id;
         } else {
-            test:assertFail(msg = batch.detail()?.message.toString());
+            test:assertFail(msg = batch.message());
         }
 
         //get job info
@@ -62,7 +63,7 @@ function insertJson() {
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.detail()?.message.toString());
+            test:assertFail(msg = jobInfo.message());
         }
 
         //get batch info
@@ -70,7 +71,7 @@ function insertJson() {
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.detail()?.message.toString());
+            test:assertFail(msg = batchInfo.message());
         }
 
         //get all batches
@@ -78,7 +79,7 @@ function insertJson() {
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = batchInfoList.detail()?.message.toString());
+            test:assertFail(msg = batchInfoList.message());
         }
 
         //get batch request
@@ -91,7 +92,7 @@ function insertJson() {
                 test:assertFail(msg = batchRequestArr.toString());
             }
         } else if (batchRequest is error) {
-            test:assertFail(msg = batchRequest.detail()?.message.toString());
+            test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
@@ -102,7 +103,7 @@ function insertJson() {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");
         } else if (batchResult is error) {
-            test:assertFail(msg = batchResult.detail()?.message.toString());
+            test:assertFail(msg = batchResult.message());
         } else {
             test:assertFail("Invalid Batch Result!");
         }
@@ -112,15 +113,16 @@ function insertJson() {
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.detail()?.message.toString());
+            test:assertFail(msg = closedJob.message());
         }
     } else {
-        test:assertFail(msg = insertJob.detail()?.message.toString());
+        test:assertFail(msg = insertJob.message());
     }
 }
 
 @test:Config {}
 function insertJsonFromFile() {
+    BulkClient bulkClient = baseClient->getBulkClient();
     log:printInfo("bulkClient -> insertJsonFromFile");
     string batchId = "";
 
@@ -138,12 +140,12 @@ function insertJsonFromFile() {
                 test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
                 batchId = batchUsingJsonFile.id;
             } else {
-                test:assertFail(msg = batchUsingJsonFile.detail()?.message.toString());
+                test:assertFail(msg = batchUsingJsonFile.message());
             }
             // close channel.
             closeRb(rbc);
         } else {
-            test:assertFail(msg = rbc.detail()?.message.toString());
+            test:assertFail(msg = rbc.message());
         }
 
         //get job info
@@ -151,7 +153,7 @@ function insertJsonFromFile() {
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            test:assertFail(msg = jobInfo.detail()?.message.toString());
+            test:assertFail(msg = jobInfo.message());
         }
 
         //get batch info
@@ -159,7 +161,7 @@ function insertJsonFromFile() {
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
-            test:assertFail(msg = batchInfo.detail()?.message.toString());
+            test:assertFail(msg = batchInfo.message());
         }
 
         //get all batches
@@ -167,7 +169,7 @@ function insertJsonFromFile() {
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            test:assertFail(msg = batchInfoList.detail()?.message.toString());
+            test:assertFail(msg = batchInfoList.message());
         }
 
         //get batch request
@@ -180,7 +182,7 @@ function insertJsonFromFile() {
                 test:assertFail(msg = batchRequestArr.toString());
             }
         } else if (batchRequest is error) {
-            test:assertFail(msg = batchRequest.detail()?.message.toString());
+            test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
@@ -191,7 +193,7 @@ function insertJsonFromFile() {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");
         } else if (batchResult is error) {
-            test:assertFail(msg = batchResult.detail()?.message.toString());
+            test:assertFail(msg = batchResult.message());
         } else {
             test:assertFail("Invalid Batch Result!");
         }
@@ -201,9 +203,9 @@ function insertJsonFromFile() {
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
-            test:assertFail(msg = closedJob.detail()?.message.toString());
+            test:assertFail(msg = closedJob.message());
         }
     } else {
-        test:assertFail(msg = insertJob.detail()?.message.toString());
+        test:assertFail(msg = insertJob.message());
     }
 }

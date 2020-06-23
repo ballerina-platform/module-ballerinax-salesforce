@@ -28,7 +28,7 @@ public type BaseClient client object {
 
     # Salesforce Connector endpoint initialization function.
     # + salesforceConfig - Salesforce Connector configuration
-    public function __init(SalesforceConfiguration salesforceConfig) {
+    public function init(SalesforceConfiguration salesforceConfig) {
         self.salesforceConfiguration = salesforceConfig;
         // Create an OAuth2 provider.
         oauth2:OutboundOAuth2Provider oauth2Provider = new(salesforceConfig.clientConfig);
@@ -76,8 +76,8 @@ public type BaseClient client object {
     }
 
     # Lists summary details about each REST API version available.
-    # + return - List of `Version` if successful. Else, the occured ConnectorError.
-    public remote function getAvailableApiVersions() returns @tainted Version[]|ConnectorError {
+    # + return - List of `Version` if successful. Else, the occured Error.
+    public remote function getAvailableApiVersions() returns @tainted Version[]|Error {
         string path = prepareUrl([BASE_PATH]);
         json res = check self.getRecord(path);
         return toVersions(res);
@@ -85,16 +85,16 @@ public type BaseClient client object {
 
     # Lists the resources available for the specified API version.
     # + apiVersion - API version (v37)
-    # + return - `Resources` as map of strings if successful. Else, the occurred `ConnectorError`.
-    public remote function getResourcesByApiVersion(string apiVersion) returns @tainted map<string>|ConnectorError {
+    # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
+    public remote function getResourcesByApiVersion(string apiVersion) returns @tainted map<string>|Error {
         string path = prepareUrl([BASE_PATH, apiVersion]);
         json res = check self.getRecord(path);
         return toMapOfStrings(res);            
     }
 
     # Lists the Limits information for your organization.
-    # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `ConnectorError`.
-    public remote function getOrganizationLimits() returns @tainted map<Limit>|ConnectorError {
+    # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
+    public remote function getOrganizationLimits() returns @tainted map<Limit>|Error {
         string path = prepareUrl([API_BASE_PATH, LIMITS]);
         json res = check self.getRecord(path);
         return toMapOfLimits(res);
@@ -103,7 +103,7 @@ public type BaseClient client object {
     # The Util function of the get request.
     # + path - resource path 
     # + return - the JSON response or the error
-    public function getRecord(string path) returns @tainted json|ConnectorError {
+    public function getRecord(string path) returns @tainted json|Error {
         http:Response|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }

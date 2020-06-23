@@ -71,12 +71,12 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
     return url;
 }
 
-# Check HTTP response and return JSON payload if succesful, else set errors and return ConnectorError.
-# + httpResponse - HTTP respone or HttpConnectorError
+# Check HTTP response and return JSON payload if succesful, else set errors and return Error.
+# + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
-# + return - JSON result if successful, else ConnectorError occured
+# + return - JSON result if successful, else Error occured
 function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
-    returns @tainted json|ConnectorError {
+    returns @tainted json|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
             || httpResponse.statusCode == http:STATUS_NO_CONTENT) {
@@ -88,10 +88,7 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
                     return jsonResponse;
                 } else {
                     log:printError(JSON_ACCESSING_ERROR_MSG, err = jsonResponse);
-                    HttpResponseHandlingError httpResponseHandlingFailed = error(HTTP_RESPONSE_HANDLING_ERROR,
-                        message = JSON_ACCESSING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
-                        cause = jsonResponse);
-                    return httpResponseHandlingFailed;
+                    return Error(JSON_ACCESSING_ERROR_MSG, jsonResponse);
                 }
 
             } else {
@@ -119,20 +116,14 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
                     counter = counter + 1;
                 }
 
-                HttpResponseHandlingError httpResponseHandlingFailed = error(HTTP_RESPONSE_HANDLING_ERROR,
-                    message = errMssgs, errorCode = errCodes);
-                return httpResponseHandlingFailed;
+                return Error(errMssgs, errorCodes = errCodes);
             } else {
                 log:printError(ERR_EXTRACTING_ERROR_MSG, err = jsonResponse);
-                HttpResponseHandlingError httpResponseHandlingFailed = error(HTTP_RESPONSE_HANDLING_ERROR,
-                    message = ERR_EXTRACTING_ERROR_MSG, errorCode = HTTP_RESPONSE_HANDLING_ERROR,
-                    cause = jsonResponse);
-                return httpResponseHandlingFailed;
+                return Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
             }
         }
     } else {
         log:printError(HTTP_ERROR_MSG, err = httpResponse);
-        HttpError httpError = error(HTTP_ERROR, message = HTTP_ERROR_MSG, errorCode = HTTP_ERROR, cause = httpResponse);
-        return httpError;
+        return Error(HTTP_ERROR_MSG, httpResponse);
     }
 }

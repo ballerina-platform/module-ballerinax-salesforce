@@ -16,37 +16,10 @@
 // under the License.
 //
 
-import ballerina/lang.'error as errs;
+// Salesforce connector error
+public type Error distinct error;
 
-# Holds the details of an Salesforce error
-# + errorCode - Error code for the error
-type ErrorDetail record {
-    *errs:Detail;
-    string errorCode;
-};
-
-// Ballerina Salesforce Client Error Types
-const HTTP_RESPONSE_HANDLING_ERROR = "[wso2/sfdc46]HttpResponseHandlingError";
-public type HttpResponseHandlingError error<HTTP_RESPONSE_HANDLING_ERROR, ErrorDetail>;
-
-const TYPE_CONVERSION_ERROR = "[wso2/sfdc46]TypeConversionError";
-public type TypeConversionError error<TYPE_CONVERSION_ERROR, ErrorDetail>;
-
-const HTTP_ERROR = "[wso2/sfdc46]HTTPError";
-public type HttpError error<HTTP_ERROR, ErrorDetail>;
-
-const SERVER_ERROR = "[wso2/sfdc46]ServerError";
-public type ServerError error<SERVER_ERROR, ErrorDetail>;
-
-const IO_ERROR = "[wso2/sfdc46]IOError";
-public type IOError error<IO_ERROR, ErrorDetail>;
-
-// Ballerina Salesforce Union Errors
-public type ConnectorError ServerError|ClientError;
-
-public type ClientError HttpResponseHandlingError|HttpError|TypeConversionError|IOError;
-
-// Error messages
+// Error constants
 const string JSON_ACCESSING_ERROR_MSG = "Error occurred while accessing the JSON payload of the response.";
 const string XML_ACCESSING_ERROR_MSG = "Error occurred while accessing the XML payload of the response.";
 const string TEXT_ACCESSING_ERROR_MSG = "Error occurred while accessing the Text payload of the response.";

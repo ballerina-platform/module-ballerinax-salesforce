@@ -26,10 +26,10 @@ operations using SObjects relationships.
 The `ballerinax/sfdc` module support bulk data operations for CSV, JSON, and XML data types.
 
 ## Compatibility
-|                     |    Version     |
-|:-------------------:|:--------------:|
-| Ballerina Language  | 1.2.x          |
-| Salesforce API      | v48.0          |
+|                     |    Version         |
+|:-------------------:|:------------------:|
+| Ballerina Language  | swan-lake-preview1 |
+| Salesforce API      | v48.0              |
 
 ## Sample
 First, import the `ballerinax/sfdc` module into the Ballerina project.
@@ -126,11 +126,11 @@ the SObject and the SObject type.
 ```ballerina
 json account = { Name: "ABC Inc", BillingCity: "New York" };
 
-string|sfdc:ConnectorError createReponse = sobjectClient->createRecord("Account", account);
+string|sfdc:Error createReponse = sobjectClient->createRecord("Account", account);
 ```
 
 The response from `createRecord` is either the string ID of the created record (if the record was created 
-successfully) or `ConnectorError` (if the record creation was unsuccessful).
+successfully) or `Error` (if the record creation was unsuccessful).
 
 ```ballerina
 if (createReponse is string) {
@@ -149,11 +149,11 @@ remaining results.
 ```ballerina
 string sampleQuery = "SELECT name FROM Account";
 
-sfdc:SoqlResult|sfdc:ConnectorError response = queryClient->getQueryResult(sampleQuery);
+sfdc:SoqlResult|sfdc:Error response = queryClient->getQueryResult(sampleQuery);
 ```
 
 The response from `getQueryResult` is either a SoqlResult record with total size, execution status, resulting records, 
-and URL to get next record set (if query execution was successful) or `ConnectorError` (if the query execution 
+and URL to get next record set (if query execution was successful) or `Error` (if the query execution 
 was unsuccessful).
 
 ```ballerina
