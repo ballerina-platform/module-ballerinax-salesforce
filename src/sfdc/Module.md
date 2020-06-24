@@ -6,10 +6,10 @@ The Salesforce connector allows you to perform CRUD operations for SObjects, que
 describe SObjects and organizational data through the Salesforce REST API. Also, it supports adding bulk data jobs and batches of types JSON, XML, and CSV via the Salesforce Bulk API. It handles OAuth 2.0 authentication.
 
 ## Compatibility
-|                     |    Version     |
-|:-------------------:|:--------------:|
-| Ballerina Language  | 1.2.x          |
-| Salesforce API      | v48.0          |
+|                     |    Version                  |
+|:-------------------:|:---------------------------:|
+| Ballerina Language  | swan-lake-preview1          |
+| Salesforce API      | v48.0                       |
 
 ## Supported Operations
 
@@ -85,9 +85,6 @@ sfdc:SalesforceConfiguration sfConfig = {
 // Create Salesforce client.
 sfdc:BaseClient baseClient = new(sfConfig);
 
-// Create an Sobject client.
-sfdc:SObjectClient sobjectClient = baseClient->getSobjectClient();
-
 @http:ServiceConfig {
     basePath: "/salesforce"
 }
@@ -97,23 +94,31 @@ service salesforceService on new http:Listener(9090) {
         methods: ["POST"],
         path: "/account"
     }
-    // Function to create a Account record.
-    resource function createAccount(http:Caller caller, http:Request request) returns error? {
+    // Function to create an Account record.
+    resource function createAccount(http:Caller caller, http:Request request) {
         // Define new response.
         http:Response backendResponse = new ();
-        json payload = check request.getJsonPayload();
-        // Get `Account` record.
-        json account = {
-            Name: payload.Name.toString(),
-            BillingCity: payload.BillingCity.toString(),
-            Website: payload.Website.toString()
-        };
-
-        // Invoke createAccount remote function from salesforce client.
-        string response = check sobjectClient->createRecord("Account", payload);
-
-        json resPayload = { accountId: response };
-        respondAndHandleError(caller, http:STATUS_OK, <@untainted> resPayload);
+        // Extract json payload from the request.
+        json|error payload = request.getJsonPayload();
+        if (payload is json) {
+            // Create `Account` record.
+            json account = {
+                Name: payload.Name.toString(),
+                BillingCity: payload.BillingCity.toString()
+            }; 
+            // Create an Sobject client.
+            sfdc:SObjectClient sobjectClient = baseClient->getSobjectClient();
+            // Invoke createAccount remote function from salesforce client.
+            string|sfdc:Error response = sobjectClient->createAccount(<@untainted>  account);
+            if (response is string) {
+                json resPayload = { accountId: response };
+                respondAndHandleError(caller, http:STATUS_OK, <@untainted> resPayload);
+            } else {
+                respondAndHandleError(caller, http:STATUS_INTERNAL_SERVER_ERROR, <@untainted>  response.message());
+            }
+        } else {
+            respondAndHandleError(caller, http:STATUS_INTERNAL_SERVER_ERROR, <@untainted>  payload.message());
+        }      
     }
 }
 
