@@ -18,4 +18,5 @@ script:
   - sudo apt-get install -f
   - export JAVA_OPTS="-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
   - ballerina --version
-  - ballerina build -c --skip-tests sfdc
+  - mvn clean install -pl emp-wrapper
+  - ballerina build -a -c --skip-tests --sourceroot sfdc-connector

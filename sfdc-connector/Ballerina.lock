@@ -340,6 +340,16 @@ version = "0.9.0"
 
 [[imports."ballerinax/sfdc:2.0.1"]]
 org_name = "ballerina"
+name = "java"
+version = "0.9.0"
+
+[[imports."ballerinax/sfdc:2.0.1"]]
+org_name = "ballerina"
+name = "lang.object"
+version = "1.0.0"
+
+[[imports."ballerinax/sfdc:2.0.1"]]
+org_name = "ballerina"
 name = "log"
 version = "1.0.0"
 
@@ -352,11 +362,6 @@ version = "1.0.0"
 org_name = "ballerina"
 name = "encoding"
 version = "1.0.0"
-
-[[imports."ballerinax/sfdc:2.0.1"]]
-org_name = "ballerina"
-name = "java"
-version = "0.9.0"
 
 [[imports."ballerinax/sfdc:2.0.1"]]
 org_name = "ballerina"

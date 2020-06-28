@@ -5,3 +5,10 @@ license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["ballerina", "salesforce", "sfdc", "client", "connector"]
 repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
+
+[platform]
+target = "java8"
+
+  [[platform.libraries]]
+  module = "sfdc"
+  path = "../emp-wrapper/target/emp-wrapper-1.0.0.jar"
