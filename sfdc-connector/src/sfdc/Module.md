@@ -30,6 +30,11 @@ operations using SObjects relationships.
 
 The `ballerinax/sfdc` module supports bulk data operations for CSV, JSON, and XML data types.
 
+**Event Listner**
+
+The module includes a Listener that would capture events on PushTopics defined in a Salesforce instance. PushTopic
+ events provide a way to receive notifications for changes to Salesforce data that match an SOQL query.
+
 ## Configuration
 
 Instantiate the connector by giving authentication details in the HTTP client config, which has built-in support for 

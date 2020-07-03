@@ -51,6 +51,6 @@ field in the salesforce.
    ```
 2. Run the following command inside repo root folder.
    ```bash
-   $ ballerina test sfdc
+   $ ballerina test -a --sourceroot sfdc-connector
    ```
    
