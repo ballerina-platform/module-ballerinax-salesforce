@@ -56,23 +56,23 @@ public type Listener object {
 };
 
 function initListener(Listener lis) = @java:Method {
-    class: "com.ballerina.sf.ListenerUtil"
+    class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function attachService(Listener lis, service s) returns error? = @java:Method {
-    class: "com.ballerina.sf.ListenerUtil"
+    class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function startListener(handle username, handle password, Listener lis) returns error? = @java:Method {
-    class: "com.ballerina.sf.ListenerUtil"
+    class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function detachService(Listener lis, service s) returns error? = @java:Method {
-    class: "com.ballerina.sf.ListenerUtil"
+    class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function stopListener() returns error? = @java:Method {
-    class: "com.ballerina.sf.ListenerUtil"
+    class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 
