@@ -20,7 +20,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <parent>
-        <groupId>com.ballerina.sf</groupId>
+        <groupId>org.ballerinalang.sf</groupId>
         <artifactId>sfdc-parent-connector</artifactId>
         <version>2.1.0</version>
         <relativePath>../pom.xml</relativePath>

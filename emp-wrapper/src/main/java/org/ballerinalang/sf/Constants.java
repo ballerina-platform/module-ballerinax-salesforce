@@ -17,7 +17,7 @@
  *
  */
 
-package com.ballerina.sf;
+package org.ballerinalang.sf;
 
 import org.ballerinalang.jvm.StringUtils;
 import org.ballerinalang.jvm.types.BPackage;

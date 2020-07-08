@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.TXT file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package com.ballerina.sf;
+package org.ballerinalang.sf;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

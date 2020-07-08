@@ -17,7 +17,7 @@
  *
  */
 
-package com.ballerina.sf;
+package org.ballerinalang.sf;
 
 import org.ballerinalang.jvm.BallerinaErrors;
 import org.ballerinalang.jvm.values.ErrorValue;
@@ -33,7 +33,7 @@ import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 
-import static com.ballerina.sf.LoginHelper.login;
+import static org.ballerinalang.sf.LoginHelper.login;
 
 public class ListenerUtil {
 
@@ -56,7 +56,7 @@ public class ListenerUtil {
     public static Object startListener(String username, String password, ObjectValue listener) {
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
             try {
-                return login(username, password);
+                return LoginHelper.login(username, password);
             } catch (Exception e) {
                 throw sfdcError(e.getMessage());
             }
