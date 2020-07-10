@@ -8,9 +8,10 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
-            - name: Ballerina Build
-              uses: ballerina-platform/ballerina-action/@master
-              with:
-                  args:
-                      build -a -c --skip-tests --sourceroot sfdc
+          - uses: actions/checkout@v2
+          - run: mvn clean package -pl emp-wrapper
+          - name: Ballerina Build
+            uses: ballerina-platform/ballerina-action/@swan-lake-release
+            with:
+              args:
+                build -a -c --skip-tests --sourceroot sfdc-connector

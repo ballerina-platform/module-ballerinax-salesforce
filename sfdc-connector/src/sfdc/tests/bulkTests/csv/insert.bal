@@ -104,7 +104,7 @@ function insertCsvFromFile() {
     log:printInfo("bulkClient -> insertCsvFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "src/sfdc/tests/resources/contacts.csv";
+    string csvContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.csv";
 
     //create job
     error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "CSV");
