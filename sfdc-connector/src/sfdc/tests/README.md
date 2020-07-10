@@ -36,6 +36,20 @@ field in the salesforce.
 6. Add `My_External_Id` for "Field Label" and `255` for "Length" and click `Next`.
 7. At the end click `Save` and see whether external field is added successfully by checking `Fields & Relationships`
    fields.
+   
+**Create a PushTopic in Salesforce**
+
+To run the listener testcase, the following PushTopic needs to created in the Salesforce instance.
+
+```
+PushTopic pushTopic = new PushTopic();
+pushTopic.Name = 'AccountUpdate';
+pushTopic.Query = 'SELECT Id, Name FROM Account';
+pushTopic.ApiVersion = 48.0;
+pushTopic.NotifyForOperationUpdate = true;
+pushTopic.NotifyForFields = 'Referenced';
+insert pushTopic;
+```
 
 **Running Tests**
 
@@ -48,6 +62,8 @@ field in the salesforce.
    CLIENT_SECRET="<CLIENT_SECRET>"
    REFRESH_TOKEN="<REFRESH_TOKEN>"
    REFRESH_URL="<REFRESH_URL>"
+   USERNAME="<USERNAME>"
+   PASSWORD="<PASSWORD>"
    ```
 2. Run the following command inside repo root folder.
    ```bash

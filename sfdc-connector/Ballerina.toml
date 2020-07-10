@@ -1,6 +1,6 @@
 [project]
 org-name= "ballerinax"
-version= "2.1.0"
+version= "2.1.1"
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["ballerina", "salesforce", "sfdc", "client", "connector"]
@@ -11,4 +11,4 @@ target = "java8"
 
   [[platform.libraries]]
   module = "sfdc"
-  path = "../emp-wrapper/target/emp-wrapper-2.1.0.jar"
+  path = "../emp-wrapper/target/emp-wrapper-2.1.1.jar"

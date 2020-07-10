@@ -1,5 +1,5 @@
 org_name = "ballerinax"
-version = "2.1.0"
+version = "2.1.1"
 lockfile_version = "1.0.0"
 ballerina_version = "slp1"
 
@@ -313,6 +313,71 @@ org_name = "ballerina"
 name = "io"
 version = "0.5.0"
 
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "java"
+version = "0.9.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "lang.object"
+version = "1.0.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "log"
+version = "1.0.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "http"
+version = "1.0.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "encoding"
+version = "1.0.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "auth"
+version = "1.0.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "java.arrays"
+version = "0.9.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "io"
+version = "0.5.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "lang.int"
+version = "1.1.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "lang.float"
+version = "1.0.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "lang.string"
+version = "1.1.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "lang.xml"
+version = "0.8.0"
+
+[[imports."ballerinax/sfdc:2.1.1"]]
+org_name = "ballerina"
+name = "oauth2"
+version = "1.0.0"
+
 [[imports."ballerina/config:1.0.0"]]
 org_name = "ballerina"
 name = "lang.float"
@@ -337,68 +402,3 @@ version = "0.6.0"
 org_name = "ballerina"
 name = "java"
 version = "0.9.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "java"
-version = "0.9.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "lang.object"
-version = "1.0.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "log"
-version = "1.0.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "http"
-version = "1.0.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "encoding"
-version = "1.0.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "auth"
-version = "1.0.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "java.arrays"
-version = "0.9.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "io"
-version = "0.5.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "lang.int"
-version = "1.1.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "lang.float"
-version = "1.0.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "lang.string"
-version = "1.1.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "lang.xml"
-version = "0.8.0"
-
-[[imports."ballerinax/sfdc:2.1.0"]]
-org_name = "ballerina"
-name = "oauth2"
-version = "1.0.0"
