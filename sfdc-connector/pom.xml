@@ -24,7 +24,7 @@
     <parent>
         <artifactId>sfdc-parent-connector</artifactId>
         <groupId>org.ballerinalang.sf</groupId>
-        <version>1.3.0</version>
+        <version>1.3.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>sfdc-connector</artifactId>
