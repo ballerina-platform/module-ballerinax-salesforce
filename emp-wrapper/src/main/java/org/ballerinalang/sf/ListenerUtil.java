@@ -20,7 +20,9 @@
 package org.ballerinalang.sf;
 
 import org.ballerinalang.jvm.BallerinaErrors;
+import org.ballerinalang.jvm.scheduling.StrandMetadata;
 import org.ballerinalang.jvm.values.ErrorValue;
+import org.ballerinalang.jvm.values.api.BString;
 import org.cometd.bayeux.Channel;
 import org.eclipse.jetty.util.ajax.JSON;
 
@@ -40,6 +42,8 @@ public class ListenerUtil {
     private static final ArrayList<ObjectValue> services = new ArrayList<>();
     private static BRuntime runtime;
     private static EmpConnector connector;
+    private static final StrandMetadata ON_EVENT_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
+            Constants.VERSION, Constants.ON_EVENT);
 
     public static void initListener(ObjectValue listener) {
         listener.addNativeData(Constants.CONSUMER_SERVICES, services);
@@ -110,17 +114,18 @@ public class ListenerUtil {
     }
 
     private static void injectEvent(Map<String, Object> event, ObjectValue serviceObject, BRuntime runtime) {
-        runtime.invokeMethodAsync(serviceObject, Constants.ON_EVENT, JSON.toString(event), true);
+        runtime.invokeMethodAsync(serviceObject, Constants.ON_EVENT, null, ON_EVENT_METADATA, null,
+                JSON.toString(event), true);
     }
 
     private static String getTopic(ObjectValue service) {
-        MapValue topicConfig = (MapValue) service.getType()
+        MapValue<BString, Object> topicConfig = (MapValue<BString, Object>) service.getType()
                 .getAnnotation(Constants.PACKAGE, Constants.SERVICE_CONFIG);
         return topicConfig.getStringValue(Constants.TOPIC_NAME).getValue();
     }
 
     private static long getReplayFrom(ObjectValue service) {
-        MapValue topicConfig = (MapValue) service.getType()
+        MapValue<BString, Object> topicConfig = (MapValue<BString, Object>) service.getType()
                 .getAnnotation(Constants.PACKAGE, Constants.SERVICE_CONFIG);
         return topicConfig.getIntValue(Constants.REPLAY_FROM);
     }
