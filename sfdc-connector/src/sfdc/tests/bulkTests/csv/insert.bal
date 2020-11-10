@@ -20,8 +20,7 @@ import ballerina/test;
 
 @test:Config {}
 function insertCsv() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> insertCsv");
+    log:printInfo("baseClient -> insertCsv");
     string batchId = "";
 
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
@@ -29,7 +28,7 @@ function insertCsv() {
         "Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
 
     //create job
-    error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "CSV");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
 
     if (insertJob is BulkJob) {
         //add csv content
@@ -42,7 +41,7 @@ function insertCsv() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(insertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -86,7 +85,7 @@ function insertCsv() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(insertJob);
+        error|JobInfo closedJob = baseClient->closeJob(insertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
@@ -100,14 +99,13 @@ function insertCsv() {
 
 @test:Config {}
 function insertCsvFromFile() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> insertCsvFromFile");
+    log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";
 
     string csvContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.csv";
 
     //create job
-    error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "CSV");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
 
     if (insertJob is BulkJob) {
         //add csv content via file
@@ -127,7 +125,7 @@ function insertCsvFromFile() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(insertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -171,7 +169,7 @@ function insertCsvFromFile() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(insertJob);
+        error|JobInfo closedJob = baseClient->closeJob(insertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

@@ -21,14 +21,13 @@ import ballerina/test;
     dependsOn: ["updateJson", "insertJsonFromFile"]
 }
 function queryJson() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> queryJson");
+    log:printInfo("baseClient -> queryJson");
     string batchId = "";
 
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 03'";
 
     //create job
-    error|BulkJob queryJob = bulkClient->creatJob("query", "Contact", "JSON");
+    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "JSON");
 
     if (queryJob is BulkJob) {
         //add query string
@@ -41,7 +40,7 @@ function queryJson() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(queryJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -91,7 +90,7 @@ function queryJson() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(queryJob);
+        error|JobInfo closedJob = baseClient->closeJob(queryJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

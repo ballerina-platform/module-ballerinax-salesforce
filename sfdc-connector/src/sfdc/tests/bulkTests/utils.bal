@@ -52,8 +52,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string contactId = "";
     string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
         + "' AND Title='" + title + "'";
-    QueryClient queryClient = baseClient->getQueryClient();
-    SoqlResult|Error res = queryClient->getQueryResult(sampleQuery);
+    SoqlResult|Error res = baseClient->getQueryResult(sampleQuery);
 
     if (res is SoqlResult) {
         SoqlRecord[]|error records = res.records;

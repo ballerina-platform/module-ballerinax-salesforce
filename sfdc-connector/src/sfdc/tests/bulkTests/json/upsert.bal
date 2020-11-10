@@ -21,8 +21,7 @@ import ballerina/test;
     dependsOn: ["insertJson"]
 }
 function upsertJson() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> upsertJson");
+    log:printInfo("baseClient -> upsertJson");
     string batchId = "";
 
     json contacts = [
@@ -47,7 +46,7 @@ function upsertJson() {
         ];
 
     //create job
-    error|BulkJob upsertJob = bulkClient->creatJob("upsert", "Contact", "JSON", "My_External_Id__c");
+    error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "JSON", "My_External_Id__c");
 
     if (upsertJob is BulkJob) {
         //add json content
@@ -60,7 +59,7 @@ function upsertJson() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(upsertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(upsertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -110,7 +109,7 @@ function upsertJson() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(upsertJob);
+        error|JobInfo closedJob = baseClient->closeJob(upsertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

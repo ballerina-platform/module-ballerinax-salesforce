@@ -7,23 +7,22 @@ Connects to Salesforce from Ballerina.
 The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and
 describe SObjects and organizational data through the Salesforce REST API. Also, it supports adding bulk data jobs and batches of types JSON, XML, and CSV via the Salesforce Bulk API. It handles OAuth 2.0 authentication.
 
-**Base Client Operations**
+**Operations**
 
-The base client of the Salesforce connector takes the Salesforce configurations in and creates other clients such as the SObject client, Query client, and Bulk client. This also has some operations to retrieve available API versions and resources from Salesforce.
+The base client of the Salesforce connector takes the Salesforce configurations. This also has following operations and some operations to retrieve the available API versions and resources from Salesforce.
 
 **SObject Operations**
 
 The `ballerinax/sfdc` module contains operations related to standard and customized SObjects. It can get, create, update, and delete SObjects via SObject IDs.
 
-
 **SOQL & SOSL Operations**
 
-The `ballerinax/sfdc` module contains operations that query using SOQL and search using SOSL. This allows complex 
+The `ballerinax/sfdc` module contains operations, which query using SOQL and search using SOSL. This allows complex 
 operations using SObjects relationships.
 
 **Bulk Operations**
 
-The `ballerinax/sfdc` module support bulk data operations for CSV, JSON, and XML data types.
+The `ballerinax/sfdc` module supports bulk data operations for CSV, JSON, and XML data types.
 
 **Event Listner**
 
@@ -67,7 +66,7 @@ token.
    obtaining OAuth2 credentials, go to 
    [Salesforce documentation](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
-**Create the Salesforce Base client**
+**Create the Salesforce client**
 
 You can define the Salesforce configuration and create Salesforce base client as mentioned below. 
 ```ballerina
@@ -113,17 +112,8 @@ sfdc:SalesforceConfiguration sfConfig = {
 };
 ```
 
-Using the base client, we can obtain the other clients.
 
-```ballerina
-sfdc:SObjectClient sobjectClient = baseClient->getSobjectClient();
-
-sfdc:QueryClient queryClient = baseClient->getQueryClient();
-
-sfdc:BulkClient bulkClient = baseClient->getBulkClient();
-```
-
-**SObject Client Operations**
+**SObject Operations**
 
 The `createRecord` remote function of the SObject client creates an SObject record. Pass a JSON object with the relevant fields needed for 
 the SObject and the SObject type.
@@ -131,7 +121,7 @@ the SObject and the SObject type.
 ```ballerina
 json account = { Name: "ABC Inc", BillingCity: "New York" };
 
-string|sfdc:Error createReponse = sobjectClient->createAccount(account);
+string|sfdc:Error createReponse = baseClient->createAccount(account);
 ```
 
 The response from `createRecord` is either the string ID of the created record (if the record was created 
@@ -145,7 +135,7 @@ if (createReponse is string) {
 }
 ```
 
-**Query Client Operations**
+**Query Operations**
 
 The `getQueryResult` remote function of the Query client executes a SOQL query that returns all the results in a single response or if it 
 exceeds the maximum record limit, it returns part of the results and an identifier that can be used to retrieve the 
@@ -154,7 +144,7 @@ remaining results.
 ```ballerina
 string sampleQuery = "SELECT name FROM Account";
 
-sfdc:SoqlResult|sfdc:Error response = queryClient->getQueryResult(sampleQuery);
+sfdc:SoqlResult|sfdc:Error response = baseClient->getQueryResult(sampleQuery);
 ```
 
 The response from `getQueryResult` is either a SoqlResult record with total size, execution status, resulting records, 
@@ -171,12 +161,12 @@ if (response is sfdc:SoqlResult) {
 }
 ```
 
-**Bulk Client Operations**
+**Bulk Operations**
 
-Using the `createJob` remote function of the bulk client, we can create any type of job and of the data type JSON, XML and CSV. 
+Using the `createJob` remote function of the base client, we can create any type of job and of the data type JSON, XML and CSV. 
 
 ```ballerina
-error|sfdc:BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "JSON");
+error|sfdc:BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
 ```
 Using the created job object, we can add batch to it, get information about the batch and get all the batches of the job.
 
@@ -216,10 +206,10 @@ Using the created job object, we can add batch to it, get information about the 
     error|sdfc:Result[] batchResult = insertJob->getBatchResult(batchId);
 ```
 
-The `getJobInfo` remote function of the bulk client retrieves all details of an existing job.
+The `getJobInfo` remote function retrieves all details of an existing job.
 
 ```ballerina
-    error|sfdc:JobInfo jobInfo = bulkClient->getJobInfo(insertJob);
+    error|sfdc:JobInfo jobInfo = baseClient->getJobInfo(insertJob);
 ```
 
 The `closeJob` and the `abortJob` remote functions close and abort CSV insert job respectively. When a job is closed, no more 
@@ -227,7 +217,7 @@ batches can be added. When a job is aborted, no more records are processed. If c
 committed, they aren’t rolled back.
 
 ```ballerina
-    error|sfdc:JobInfo closedJob = bulkClient->closeJob(insertJob);
+    error|sfdc:JobInfo closedJob = baseClient->closeJob(insertJob);
 ```
 
 **Listening to PushTopic Events**

@@ -20,8 +20,7 @@ import ballerina/test;
 
 @test:Config {}
 function insertXml() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> insertXml");
+    log:printInfo("baseClient -> insertXml");
     string batchId = "";
 
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
@@ -46,7 +45,7 @@ function insertXml() {
     </sObjects>`;
 
     //create job
-    error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "XML");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
         if (insertJob is BulkJob) {
         //add xml content
@@ -59,7 +58,7 @@ function insertXml() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(insertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -104,7 +103,7 @@ function insertXml() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(insertJob);
+        error|JobInfo closedJob = baseClient->closeJob(insertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
@@ -118,14 +117,13 @@ function insertXml() {
 
 @test:Config {}
 function insertXmlFromFile() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> insertXmlFromFile");
+    log:printInfo("baseClient -> insertXmlFromFile");
     string batchId = "";
 
     string xmlContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.xml";
 
     //create job
-    error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "XML");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
         if (insertJob is BulkJob) {
         //add xml content via file
@@ -145,7 +143,7 @@ function insertXmlFromFile() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(insertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -190,7 +188,7 @@ function insertXmlFromFile() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(insertJob);
+        error|JobInfo closedJob = baseClient->closeJob(insertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

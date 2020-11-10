@@ -13,9 +13,9 @@ describe SObjects and organizational data through the Salesforce REST API. Also,
 
 ## Supported Operations
 
-**Base Client Operations**
+**Operations**
 
-The base client of the Salesforce connector takes the Salesforce configurations in and creates other clients such as the SObject client, Query client, and Bulk client. This also has some operations to retrieve the available API versions and resources from Salesforce.
+The base client of the Salesforce connector takes the Salesforce configurations. This also has following operations and some operations to retrieve the available API versions and resources from Salesforce.
 
 **SObject Operations**
 
@@ -111,10 +111,8 @@ service salesforceService on new http:Listener(9090) {
                 Name: payload.Name.toString(),
                 BillingCity: payload.BillingCity.toString()
             }; 
-            // Create an Sobject client.
-            sfdc:SObjectClient sobjectClient = baseClient->getSobjectClient();
             // Invoke createAccount remote function from salesforce client.
-            string|sfdc:Error response = sobjectClient->createAccount(<@untainted>  account);
+            string|sfdc:Error response = baseClient->createAccount(<@untainted>  account);
             if (response is string) {
                 json resPayload = { accountId: response };
                 respondAndHandleError(caller, http:STATUS_OK, <@untainted> resPayload);

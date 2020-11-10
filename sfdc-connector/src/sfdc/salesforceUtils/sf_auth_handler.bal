@@ -20,7 +20,7 @@ import ballerina/http;
 # Representation of the Bearer Auth header handler for both inbound and outbound HTTP traffic.
 #
 # + authProvider - The `InboundAuthProvider` instance or the `OutboundAuthProvider` instance.
-public class SalesforceBulkAuthHandler {
+public class SalesforceAuthHandler {
 
     *http:OutboundAuthHandler;
 
@@ -38,6 +38,7 @@ public class SalesforceBulkAuthHandler {
         var authProvider = self.authProvider;
         var token = authProvider.generateToken();
         if (token is string) {
+            req.setHeader(AUTHORIZATION, BEARER+token);
             req.setHeader(X_SFDC_SESSION, token);
             return req;
         } else {
@@ -56,6 +57,7 @@ public class SalesforceBulkAuthHandler {
         map<anydata> headerMap = createResponseHeaderMap(resp);
         var token = authProvider.inspect(headerMap);
         if (token is string) {
+            req.setHeader(AUTHORIZATION, BEARER+token);
             req.setHeader(X_SFDC_SESSION, token);
             return req;
         } else if (token is auth:Error) {
