@@ -22,7 +22,7 @@ import ballerina/oauth2;
 # The Salesforce SObject Client object.
 # + salesforceClient - OAuth2 client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
-public type SObjectClient client object {
+public client class SObjectClient {
     http:Client salesforceClient;
     SalesforceConfiguration salesforceConfiguration;
 
@@ -97,7 +97,7 @@ public type SObjectClient client object {
     # + path - Resource path
     # + return - `json` result if successful else Error occured
     public remote function getRecord(string path) returns @tainted json|Error {
-        http:Response|error response = self.salesforceClient->get(path);
+        http:Response|http:Payload|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }
 
@@ -358,7 +358,7 @@ public type SObjectClient client object {
         return self->updateRecord(PRODUCT, productId, productRecord);
     }
 
-    private function appendQueryParams(string[] fields) returns string {
+    private isolated function appendQueryParams(string[] fields) returns string {
         string appended = "?fields=";
         foreach string item in fields {
             appended = appended.concat(item.trim(), ",");
@@ -366,4 +366,4 @@ public type SObjectClient client object {
         appended = appended.substring(0, appended.length() - 1);
         return appended;
     }
-};
+}

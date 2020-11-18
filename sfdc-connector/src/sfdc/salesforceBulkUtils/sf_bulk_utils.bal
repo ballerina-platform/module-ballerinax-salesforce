@@ -19,15 +19,15 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/io;
-import ballerina/'lang\.int as ints;
-import ballerina/'lang\.float as floats;
+import ballerina/lang.'int as ints;
+import ballerina/lang.'float as floats;
 import ballerina/lang.'string as strings;
 import ballerina/lang.'xml as xmllib;
 
 # Check HTTP response and return XML payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - XML response if successful else Error occured
-function checkXmlPayloadAndSetErrors(http:Response|error httpResponse) returns @tainted xml|Error {
+isolated function checkXmlPayloadAndSetErrors(http:Response|http:Payload|error httpResponse) returns @tainted xml|Error {
     if (httpResponse is http:Response) {
 
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
@@ -44,7 +44,8 @@ function checkXmlPayloadAndSetErrors(http:Response|error httpResponse) returns @
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
-
+    } else if (httpResponse is http:Payload) {        
+        return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -53,7 +54,7 @@ function checkXmlPayloadAndSetErrors(http:Response|error httpResponse) returns @
 # Check HTTP response and return Text payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
-function checkTextPayloadAndSetErrors(http:Response|error httpResponse) returns @tainted string|Error {
+isolated function checkTextPayloadAndSetErrors(http:Response|http:Payload|error httpResponse) returns @tainted string|Error {
     if (httpResponse is http:Response) {
 
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
@@ -70,6 +71,8 @@ function checkTextPayloadAndSetErrors(http:Response|error httpResponse) returns 
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
+    } else if (httpResponse is http:Payload) {
+        return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -78,7 +81,7 @@ function checkTextPayloadAndSetErrors(http:Response|error httpResponse) returns 
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
-function checkJsonPayloadAndSetErrors(http:Response|error httpResponse) returns @tainted json|Error {
+isolated function checkJsonPayloadAndSetErrors(http:Response|http:Payload|error httpResponse) returns @tainted json|Error {
     if (httpResponse is http:Response) {
 
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
@@ -93,6 +96,8 @@ function checkJsonPayloadAndSetErrors(http:Response|error httpResponse) returns 
         } else {
             return handleJsonErrorResponse(httpResponse);
         }
+    } else if (httpResponse is http:Payload) {
+        return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -102,7 +107,7 @@ function checkJsonPayloadAndSetErrors(http:Response|error httpResponse) returns 
 #
 # + httpResponse - HTTP response or error occurred
 # + return - Query string response if successful or else an sfdc:Error
-function getQueryRequest(http:Response|error httpResponse, JOBTYPE jobtype) returns @tainted string|Error {
+isolated function getQueryRequest(http:Response|http:Payload|error httpResponse, JOBTYPE jobtype) returns @tainted string|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK) {
             string|error textResponse = httpResponse.getTextPayload();
@@ -119,6 +124,8 @@ function getQueryRequest(http:Response|error httpResponse, JOBTYPE jobtype) retu
                 return handleXmlErrorResponse(httpResponse);
             }
         }
+    } else if (httpResponse is http:Payload) {
+        return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -127,7 +134,7 @@ function getQueryRequest(http:Response|error httpResponse, JOBTYPE jobtype) retu
 # Handle HTTP error response and return error.
 # + httpResponse - error response
 # + return - error
-function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Error {
+isolated function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Error {
     xml|error xmlResponse = httpResponse.getXmlPayload();
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
 
@@ -143,7 +150,7 @@ function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Err
 # Handle HTTP error response and return Error.
 # + httpResponse - error response
 # + return - error
-function handleJsonErrorResponse(http:Response httpResponse) returns @tainted Error {
+isolated function handleJsonErrorResponse(http:Response httpResponse) returns @tainted Error {
     json|error response = httpResponse.getJsonPayload();
     if (response is json) {
         Error httpResponseHandlingError = Error(response.exceptionCode.toString());
@@ -156,7 +163,7 @@ function handleJsonErrorResponse(http:Response httpResponse) returns @tainted Er
 
 # Handle HTTP error and return Error.
 # + return - Constructed error
-function handleHttpError( error httpResponse) returns Error {
+isolated function handleHttpError( error httpResponse) returns Error {
     log:printError(HTTP_ERROR_MSG, err = httpResponse);
     Error httpError = Error(HTTP_ERROR_MSG, httpResponse);
     return httpError;
@@ -165,7 +172,7 @@ function handleHttpError( error httpResponse) returns Error {
 # Convert string to integer
 # + value - string value
 # + return - converted integer
-function getIntValue(string value) returns int {
+isolated function getIntValue(string value) returns int {
     int | error intValue = ints:fromString(value);
     if (intValue is int) {
         return intValue;
@@ -178,7 +185,7 @@ function getIntValue(string value) returns int {
 # Convert string to float
 # + value - string value
 # + return - converted float
-function getFloatValue(string value) returns float {
+isolated function getFloatValue(string value) returns float {
     float | error floatValue = floats:fromString(value);
     if (floatValue is float) {
         return floatValue;
@@ -191,7 +198,7 @@ function getFloatValue(string value) returns float {
 # Convert string to boolean
 # + value - string value
 # + return - converted boolean
-function getBooleanValue(string value) returns boolean {
+isolated function getBooleanValue(string value) returns boolean {
     if (value == "true") {
         return true;
     } else if (value == "false") {
@@ -207,7 +214,7 @@ function getBooleanValue(string value) returns boolean {
 # + message -The error message.
 # + err - The `error` instance.
 # + return - Returns the prepared `AuthenticationError` instance.
-function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
+isolated function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
     log:printDebug(function () returns string { return message; });
     if (err is error) {
         http:AuthenticationError preparedError = http:AuthenticationError(message, cause = err);
@@ -221,7 +228,7 @@ function prepareAuthenticationError(string message, error? err = ()) returns htt
 #
 # + resp - The `Response` instance.
 # + return - Returns the map of the response headers.
-function createResponseHeaderMap(http:Response resp) returns @tainted map<anydata> {
+isolated function createResponseHeaderMap(http:Response resp) returns @tainted map<anydata> {
     map<anydata> headerMap = {};
 
     // If session ID is invalid, set staus code as 401.
@@ -391,21 +398,21 @@ function getCsvQueryResult(xml resultlist, string path, http:Client httpClient) 
     return finalResults;  
 }
 
-function mergeJson(json[] list1, json[] list2) returns json[] {
+isolated function mergeJson(json[] list1, json[] list2) returns json[] {
     foreach var item in list2 {
         list1[list1.length()] = item;
     }
     return list1;
 }
 
-function mergeXml(xml list1, xml list2) returns xml {
+isolated function mergeXml(xml list1, xml list2) returns xml {
     xmllib:Element list1ele = <xmllib:Element>list1; 
     xmllib:Element list2ele = <xmllib:Element>list2;
     list1ele.setChildren(list1ele.getChildren().elements()+list2ele.getChildren().elements());
     return list1ele;
 }
 
-function mergeCsv(string list1, string list2) returns string{
+isolated function mergeCsv(string list1, string list2) returns string{
     int? inof = list2.indexOf("\n");
     string finalList = list1;
     if (inof is int) {

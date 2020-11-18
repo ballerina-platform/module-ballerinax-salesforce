@@ -22,7 +22,7 @@ import ballerina/oauth2;
 # The Salesforce Query Client object.
 # + salesforceClient - OAuth2 client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
-public type QueryClient client object {
+public client class QueryClient {
     http:Client salesforceClient;
     SalesforceConfiguration salesforceConfiguration;
 
@@ -85,7 +85,7 @@ public type QueryClient client object {
     }
 
     private function getRecord(string path) returns @tainted json|Error {
-        http:Response|error response = self.salesforceClient->get(path);
+        http:Response|http:Payload|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }
-};
+}

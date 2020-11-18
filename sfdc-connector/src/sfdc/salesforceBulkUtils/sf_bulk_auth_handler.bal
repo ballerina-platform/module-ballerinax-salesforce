@@ -20,13 +20,13 @@ import ballerina/http;
 # Representation of the Bearer Auth header handler for both inbound and outbound HTTP traffic.
 #
 # + authProvider - The `InboundAuthProvider` instance or the `OutboundAuthProvider` instance.
-public type SalesforceBulkAuthHandler object {
+public class SalesforceBulkAuthHandler {
 
     *http:OutboundAuthHandler;
 
     public auth:OutboundAuthProvider authProvider;
 
-    public function init(auth:OutboundAuthProvider authProvider) {
+    public isolated function init(auth:OutboundAuthProvider authProvider) {
         self.authProvider = authProvider;
     }
 
@@ -63,4 +63,4 @@ public type SalesforceBulkAuthHandler object {
         }
         return ();
     }
-};
+}

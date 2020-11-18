@@ -18,7 +18,7 @@
 
 import ballerina/log;
 
-function toVersions(json payload) returns Version[]|Error {
+isolated function toVersions(json payload) returns Version[]|Error {
     Version[] versions = [];
     json[] versionsArr = <json[]> payload;
 
@@ -38,7 +38,7 @@ function toVersions(json payload) returns Version[]|Error {
 
 type StringMap map<string>;
 
-function toMapOfStrings(json payload) returns map<string>|Error {
+isolated function toMapOfStrings(json payload) returns map<string>|Error {
     map<string>|error strMap = payload.cloneWithType(StringMap);
 
     if (strMap is map<string>) {
@@ -52,7 +52,7 @@ function toMapOfStrings(json payload) returns map<string>|Error {
 
 type JsonMap map<json>;
 
-function toMapOfLimits(json payload) returns map<Limit>|Error {
+isolated function toMapOfLimits(json payload) returns map<Limit>|Error {
     map<Limit> limits = {};
     map<json>|error payloadMap = payload.cloneWithType(JsonMap);
 
@@ -75,7 +75,7 @@ function toMapOfLimits(json payload) returns map<Limit>|Error {
     return limits;
 }
 
-function toSoqlResult(json payload) returns SoqlResult|Error {
+isolated function toSoqlResult(json payload) returns SoqlResult|Error {
     SoqlResult|error res = payload.cloneWithType(SoqlResult);
 
     if (res is SoqlResult) {
@@ -87,7 +87,7 @@ function toSoqlResult(json payload) returns SoqlResult|Error {
     }
 }
 
-function toSoslResult(json payload) returns SoslResult|Error {
+isolated function toSoslResult(json payload) returns SoslResult|Error {
     SoslResult|error res = payload.cloneWithType(SoslResult);
 
     if (res is SoslResult) {
@@ -99,7 +99,7 @@ function toSoslResult(json payload) returns SoslResult|Error {
     }
 }
 
-function toSObjectMetaData(json payload) returns SObjectMetaData|Error {
+isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error {
     SObjectMetaData|error res = payload.cloneWithType(SObjectMetaData);
 
     if (res is SObjectMetaData) {
@@ -111,7 +111,7 @@ function toSObjectMetaData(json payload) returns SObjectMetaData|Error {
     }
 }
 
-function toOrgMetadata(json payload) returns OrgMetadata|Error {
+isolated function toOrgMetadata(json payload) returns OrgMetadata|Error {
     OrgMetadata|error res = payload.cloneWithType(OrgMetadata);
 
     if (res is OrgMetadata) {
@@ -123,7 +123,7 @@ function toOrgMetadata(json payload) returns OrgMetadata|Error {
     }
 }
 
-function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Error {
+isolated function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Error {
     SObjectBasicInfo|error res = payload.cloneWithType(SObjectBasicInfo);
 
     if (res is SObjectBasicInfo) {

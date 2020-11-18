@@ -32,7 +32,7 @@ function closeRb(io:ReadableByteChannel ch) {
     }
 }
 
-function checkBatchResults(Result[] results) returns boolean {
+isolated function checkBatchResults(Result[] results) returns boolean {
     foreach Result res in results {
         if (!res.success) {
             log:printError("Failed result, res=" + res.toString(), err = ());
@@ -69,7 +69,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     return contactId;
 }
 
-function getJsonContactsToDelete(json[] resultList) returns json[] {
+isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
     json [] contacts = [];
     foreach var item in resultList {
         string id = item.Id.toString();
@@ -78,7 +78,7 @@ function getJsonContactsToDelete(json[] resultList) returns json[] {
     return contacts;
 }
 
-function getXmlContactsToDelete(xml resultList) returns xml {
+isolated function getXmlContactsToDelete(xml resultList) returns xml {
     xmllib:Element contacts = <xmllib:Element> xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
 
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;

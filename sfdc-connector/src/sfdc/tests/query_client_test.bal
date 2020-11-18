@@ -62,7 +62,7 @@ function testSearchSOSLString() {
     }
 }
 
-function assertSoqlResult(SoqlResult|Error res) {
+isolated function assertSoqlResult(SoqlResult|Error res) {
     if (res is SoqlResult) {
         test:assertTrue(res.totalSize > 0, "Total number result records is 0");
         test:assertTrue(res.'done, "Query is not completed");

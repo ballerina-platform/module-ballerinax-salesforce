@@ -19,8 +19,8 @@ import ballerina/config;
 import ballerina/io;
 
 ListenerConfiguration listenerConfig = {
-    username: config:getAsString("USERNAME"),
-    password: config:getAsString("PASSWORD")
+    username: config:getAsString("SF_USERNAME"),
+    password: config:getAsString("SF_PASSWORD")
 };
 
 listener Listener eventListener = new (listenerConfig);
