@@ -21,14 +21,13 @@ import ballerina/test;
     dependsOn: ["queryCsv"]
 }
 function deleteCsv() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> deleteCsv");
+    log:printInfo("baseClient -> deleteCsv");
     string batchId = "";
 
     string contacts = getCsvContactsToDelete(csvQueryResult);
 
     //create job
-    error|BulkJob deleteJob = bulkClient->creatJob("delete", "Contact", "CSV");
+    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
 
     if (deleteJob is BulkJob) {
         //add csv content
@@ -41,7 +40,7 @@ function deleteCsv() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(deleteJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(deleteJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -85,7 +84,7 @@ function deleteCsv() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(deleteJob);
+        error|JobInfo closedJob = baseClient->closeJob(deleteJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

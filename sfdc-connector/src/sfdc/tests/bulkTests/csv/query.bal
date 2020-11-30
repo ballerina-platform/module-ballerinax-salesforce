@@ -21,14 +21,13 @@ import ballerina/test;
     dependsOn: ["updateCsv", "insertCsvFromFile"]
 }
 function queryCsv() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> queryCsv");
+    log:printInfo("baseClient -> queryCsv");
     string batchId = "";
 
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 04'";
 
     //create job
-    error|BulkJob queryJob = bulkClient->creatJob("query", "Contact", "CSV");
+    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "CSV");
 
     if (queryJob is BulkJob) {
         //add query string
@@ -41,7 +40,7 @@ function queryCsv() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(queryJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -86,7 +85,7 @@ function queryCsv() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(queryJob);
+        error|JobInfo closedJob = baseClient->closeJob(queryJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

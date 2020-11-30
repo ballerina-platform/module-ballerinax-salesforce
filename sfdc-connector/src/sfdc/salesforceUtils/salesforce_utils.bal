@@ -23,7 +23,7 @@ import ballerina/encoding;
 # Returns the prepared URL.
 # + paths - An array of paths prefixes
 # + return - The prepared URL
-function prepareUrl(string[] paths) returns string {
+isolated function prepareUrl(string[] paths) returns string {
     string url = EMPTY_STRING;
 
     if (paths.length() > 0) {
@@ -42,7 +42,7 @@ function prepareUrl(string[] paths) returns string {
 # + queryParamNames - An array of query param names
 # + queryParamValues - An array of query param values
 # + return - The prepared URL with encoded query
-function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
+isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
 
     string url = prepareUrl(paths);
 
@@ -75,7 +75,7 @@ function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] quer
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
+isolated function checkAndSetErrors(http:Response|http:Payload|error httpResponse, boolean expectPayload = true) 
     returns @tainted json|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
@@ -122,6 +122,8 @@ function checkAndSetErrors(http:Response|error httpResponse, boolean expectPaylo
                 return Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
             }
         }
+    } else if (httpResponse is http:Payload) {     
+        return Error(UNREACHABLE_STATE);
     } else {
         log:printError(HTTP_ERROR_MSG, err = httpResponse);
         return Error(HTTP_ERROR_MSG, httpResponse);

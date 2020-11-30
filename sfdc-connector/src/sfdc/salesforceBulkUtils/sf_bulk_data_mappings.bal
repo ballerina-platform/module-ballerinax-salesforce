@@ -20,7 +20,7 @@ import ballerina/log;
 import ballerina/java;
 import ballerina/java.arrays as jarrays;
 
-function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
+isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
 
     JobInfo|error job = trap {
@@ -62,7 +62,7 @@ function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
     }
 }
 
-function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|Error {
+isolated function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
 
     BatchInfo|error batch = trap {
@@ -89,7 +89,7 @@ function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|Error {
     }
 }
 
-function createBatchResultRecordFromXml(xml payload) returns Result[]|Error {
+isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|Error {
     Result[] batchResArr = [];
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
     foreach var result in payload/<*> {

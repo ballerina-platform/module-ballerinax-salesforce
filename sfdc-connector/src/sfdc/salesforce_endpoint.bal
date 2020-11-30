@@ -19,38 +19,38 @@
 import ballerina/http;
 import ballerina/oauth2;
 
-# The Salesforce SObject Client object.
+# The Salesforce Client object.
 # + salesforceClient - OAuth2 client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
-public type SObjectClient client object {
+public client class BaseClient {
     http:Client salesforceClient;
     SalesforceConfiguration salesforceConfiguration;
 
-    # The Salesforce SOBject client initialization function.
+    # Salesforce Connector endpoint initialization function.
     # + salesforceConfig - Salesforce Connector configuration
     public function init(SalesforceConfiguration salesforceConfig) {
         self.salesforceConfiguration = salesforceConfig;
-        // Create OAuth2 provider.
-        oauth2:OutboundOAuth2Provider oauth2Provider = new (salesforceConfig.clientConfig);
-        // Create bearer auth handler using created provider.
-        http:BearerAuthHandler bearerHandler = new (oauth2Provider);
+        // Create an OAuth2 provider.
+        oauth2:OutboundOAuth2Provider oauth2Provider = new(salesforceConfig.clientConfig);
+        // Create a bearer auth handler using the a created provider.
+        SalesforceAuthHandler bearerHandler = new(oauth2Provider);
 
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
-
+        
         // Create an HTTP client.
         if (socketConfig is http:ClientSecureSocket) {
-            self.salesforceClient = new (salesforceConfig.baseUrl, {
-                    secureSocket: socketConfig,
-                    auth: {
-                        authHandler: bearerHandler
-                    }
-                });
+            self.salesforceClient = new(salesforceConfig.baseUrl, {
+                secureSocket: socketConfig,
+                auth: {
+                    authHandler: bearerHandler
+                }
+            });
         } else {
-            self.salesforceClient = new (salesforceConfig.baseUrl, {
-                    auth: {
-                        authHandler: bearerHandler
-                    }
-                });
+            self.salesforceClient = new(salesforceConfig.baseUrl, {
+                auth: {
+                    authHandler: bearerHandler
+                }
+            });
         }
     }
 
@@ -97,7 +97,7 @@ public type SObjectClient client object {
     # + path - Resource path
     # + return - `json` result if successful else Error occured
     public remote function getRecord(string path) returns @tainted json|Error {
-        http:Response|error response = self.salesforceClient->get(path);
+        http:Response|http:Payload|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }
 
@@ -192,7 +192,7 @@ public type SObjectClient client object {
         return response;
     }
 
-     //Account
+    //Account
 
     # Accesses Account SObject records based on the Account object ID.
     # + accountId - Account ID
@@ -358,7 +358,7 @@ public type SObjectClient client object {
         return self->updateRecord(PRODUCT, productId, productRecord);
     }
 
-    private function appendQueryParams(string[] fields) returns string {
+    private isolated function appendQueryParams(string[] fields) returns string {
         string appended = "?fields=";
         foreach string item in fields {
             appended = appended.concat(item.trim(), ",");
@@ -366,4 +366,173 @@ public type SObjectClient client object {
         appended = appended.substring(0, appended.length() - 1);
         return appended;
     }
+
+     //Query
+
+    # Executes the specified SOQL query.
+    # + receivedQuery - Sent SOQL query
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    public remote function getQueryResult(string receivedQuery) returns @tainted SoqlResult|Error {
+        string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
+        json res = check self->getRecord(path);
+        return toSoqlResult(res);
+    }
+
+    # If the query results are too large, retrieve the next batch of results using the nextRecordUrl.
+    # + nextRecordsUrl - URL to get the next query results
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    public remote function getNextQueryResult(string nextRecordsUrl) returns @tainted SoqlResult|Error {
+        json res = check self->getRecord(nextRecordsUrl);
+        return toSoqlResult(res);
+    }
+
+    //Search
+
+    # Executes the specified SOSL search.
+    # + searchString - Sent SOSL search query
+    # + return - `SoslResult` record if successful. Else, the occurred `Error`.
+    public remote function searchSOSLString(string searchString) returns @tainted SoslResult|Error {
+        string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
+        json res = check self->getRecord(path);
+        return toSoslResult(res);
+    }
+
+    # Lists summary details about each REST API version available.
+    # + return - List of `Version` if successful. Else, the occured Error.
+    public remote function getAvailableApiVersions() returns @tainted Version[]|Error {
+        string path = prepareUrl([BASE_PATH]);
+        json res = check self->getRecord(path);
+        return toVersions(res);
+    }
+
+    # Lists the resources available for the specified API version.
+    # + apiVersion - API version (v37)
+    # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
+    public remote function getResourcesByApiVersion(string apiVersion) returns @tainted map<string>|Error {
+        string path = prepareUrl([BASE_PATH, apiVersion]);
+        json res = check self->getRecord(path);
+        return toMapOfStrings(res);            
+    }
+
+    # Lists the Limits information for your organization.
+    # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
+    public remote function getOrganizationLimits() returns @tainted map<Limit>|Error {
+        string path = prepareUrl([API_BASE_PATH, LIMITS]);
+        json res = check self->getRecord(path);
+        return toMapOfLimits(res);
+    }
+
+    # Create a bulk job.
+    #
+    # + operation - type of operation like insert, delete, etc.
+    # + sobj - kind of sobject 
+    # + contentType - content type of the job 
+    # + extIdFieldName - field name of the external ID incase of an Upsert operation
+    # + return - returns job object or error
+    public remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|BulkJob {
+        json jobPayload = {
+            "operation" : operation,
+            "object" : sobj,
+            "contentType" : contentType
+        };
+        if (UPSERT == operation) {
+            if (extIdFieldName.length() > 0) {
+                json extField = {
+                    "externalIdFieldName" : extIdFieldName
+                };
+                jobPayload = check jobPayload.mergeJson(extField);
+            } else {
+                return error("External ID Field Name Required for UPSERT Operation!");
+            }
+        }        
+        http:Request req = new;
+        req.setJsonPayload(jobPayload);
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
+        var response = self.salesforceClient->post(path, req);
+        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+        if (jobResponse is json) {
+            BulkJob bulkJob = new(jobResponse.id.toString(), contentType, operation, self.salesforceClient);
+            return bulkJob;
+        } else {
+            return jobResponse;
+        }
+    }
+
+    # Get information about a job.
+    #
+    # + bulkJob - job object of which the info is required 
+    # + return - job information record or error
+    public remote function getJobInfo(BulkJob bulkJob) returns @tainted error|JobInfo {
+        string jobId = bulkJob.jobId;
+        JOBTYPE jobDataType = bulkJob.jobDataType;
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
+        http:Request req = new;
+        var response = self.salesforceClient->get(path, req);
+        if (JSON == jobDataType) {
+            json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+            if (jobResponse is json){            
+                JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
+                return jobInfo;
+            } else {
+                return jobResponse;
+            }
+        } else {
+            xml|Error jobResponse = checkXmlPayloadAndSetErrors(response);
+            if (jobResponse is xml){            
+                JobInfo jobInfo = check createJobRecordFromXml(jobResponse);
+                return jobInfo;
+            } else {
+                return jobResponse;
+            }
+        }
+        
+    }
+
+    # Close a job.
+    #
+    # + bulkJob - job to be closed 
+    # + return - job info after the state change of the job
+    public remote function closeJob(BulkJob bulkJob) returns @tainted error|JobInfo {
+        string jobId = bulkJob.jobId;
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
+        http:Request req = new;
+        req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
+        var response = self.salesforceClient->post(path, req);
+        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+        if (jobResponse is json){
+            JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
+            return jobInfo;
+        } else {
+            return jobResponse;
+        }
+    }
+
+    # Abort a job.
+    #
+    # + bulkJob - job to be aborted 
+    # + return - job info after the state change of the job
+    public remote function abortJob(BulkJob bulkJob) returns @tainted error|JobInfo {
+        string jobId = bulkJob.jobId;
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
+        http:Request req = new;
+        req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
+        var response = self.salesforceClient->post(path, req);
+        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+        if (jobResponse is json){
+            JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
+            return jobInfo;
+        } else {
+            return jobResponse;
+        }
+    }    
+}
+
+# Salesforce client configuration.
+# + baseUrl - The Salesforce endpoint URL
+# + clientConfig - OAuth2 direct token configuration
+# + secureSocketConfig - HTTPS secure socket configuration
+public type SalesforceConfiguration record {
+    string baseUrl;
+    oauth2:DirectTokenConfig clientConfig;
+    http:ClientSecureSocket secureSocketConfig?;
 };

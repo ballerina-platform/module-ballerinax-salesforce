@@ -21,8 +21,7 @@ import ballerina/test;
     dependsOn: ["insertCsv", "upsertCsv"]
 }
 function updateCsv() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> updateCsv");
+    log:printInfo("baseClient -> updateCsv");
     string batchId = "";
 
     string johnsID = getContactIdByName("John", "Michael", "Professor Grade 04");
@@ -33,7 +32,7 @@ function updateCsv() {
         pedrosID + ",Created_from_Ballerina_Sf_Bulk_API,Pedro,Guterez,Professor Grade 04,0445567100,pedro.gut@gmail.com,303";
 
     //create job
-    error|BulkJob updateJob = bulkClient->creatJob("update", "Contact", "CSV");
+    error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "CSV");
 
     if (updateJob is BulkJob) {
         //add csv content
@@ -46,7 +45,7 @@ function updateCsv() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(updateJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(updateJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -90,7 +89,7 @@ function updateCsv() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(updateJob);
+        error|JobInfo closedJob = baseClient->closeJob(updateJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

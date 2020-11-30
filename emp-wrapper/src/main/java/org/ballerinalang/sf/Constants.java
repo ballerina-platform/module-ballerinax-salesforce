@@ -19,21 +19,21 @@
 
 package org.ballerinalang.sf;
 
-import org.ballerinalang.jvm.StringUtils;
-import org.ballerinalang.jvm.types.BPackage;
-import org.ballerinalang.jvm.values.api.BString;
+import io.ballerina.runtime.api.StringUtils;
+import io.ballerina.runtime.api.values.BString;
+import io.ballerina.runtime.api.Module;
 
-import static org.ballerinalang.jvm.util.BLangConstants.ORG_NAME_SEPARATOR;
-import static org.ballerinalang.jvm.util.BLangConstants.VERSION_SEPARATOR;
+import static io.ballerina.runtime.util.BLangConstants.ORG_NAME_SEPARATOR;
+import static io.ballerina.runtime.util.BLangConstants.VERSION_SEPARATOR;
 
 public class Constants {
     public static final String CONSUMER_SERVICES = "consumer_services";
 
     public static final String ORG = "ballerinax";
     public static final String MODULE = "sfdc";
-    public static final String VERSION = "2.1.2";
+    public static final String VERSION = "2.1.3";
     public static final String PACKAGE = ORG + ORG_NAME_SEPARATOR + MODULE + VERSION_SEPARATOR + VERSION;
-    public static final BPackage PACKAGE_ID_SFDC = new BPackage(ORG, MODULE, VERSION);
+    public static final Module PACKAGE_ID_SFDC = new Module(ORG, MODULE, VERSION);
 
     public static final String SERVICE_CONFIG = "ServiceConfig";
     public static final String ON_EVENT = "onEvent";

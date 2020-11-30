@@ -21,14 +21,13 @@ import ballerina/test;
     dependsOn: ["queryJson"]
 }
 function deleteJson() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> deleteJson");
+    log:printInfo("baseClient -> deleteJson");
     string batchId = "";
 
     json contacts = getJsonContactsToDelete(jsonQueryResult);
 
     //create job
-    error|BulkJob deleteJob = bulkClient->creatJob("delete", "Contact", "JSON");
+    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "JSON");
 
     if (deleteJob is BulkJob) {
         //add json content
@@ -41,7 +40,7 @@ function deleteJson() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(deleteJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(deleteJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -91,7 +90,7 @@ function deleteJson() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(deleteJob);
+        error|JobInfo closedJob = baseClient->closeJob(deleteJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

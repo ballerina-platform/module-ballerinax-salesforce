@@ -20,8 +20,7 @@ import ballerina/test;
 
 @test:Config {}
 function insertJson() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> insertJson");
+    log:printInfo("baseClient -> insertJson");
     string batchId = "";
 
     json contacts = [
@@ -46,7 +45,7 @@ function insertJson() {
         ];
 
     //create job
-    error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "JSON");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
 
     if (insertJob is BulkJob) {
         //add json content
@@ -59,7 +58,7 @@ function insertJson() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(insertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -109,7 +108,7 @@ function insertJson() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(insertJob);
+        error|JobInfo closedJob = baseClient->closeJob(insertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
@@ -122,14 +121,13 @@ function insertJson() {
 
 @test:Config {}
 function insertJsonFromFile() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> insertJsonFromFile");
+    log:printInfo("baseClient -> insertJsonFromFile");
     string batchId = "";
 
     string jsonContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.json";
 
     //create job
-    error|BulkJob insertJob = bulkClient->creatJob("insert", "Contact", "JSON");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
 
     if (insertJob is BulkJob) {
         //add json content
@@ -149,7 +147,7 @@ function insertJsonFromFile() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(insertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -199,7 +197,7 @@ function insertJsonFromFile() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(insertJob);
+        error|JobInfo closedJob = baseClient->closeJob(insertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

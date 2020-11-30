@@ -30,8 +30,8 @@ field in the salesforce.
    menu.
 2. Then in the left side panel, under Platform tools click on the `Objects and Fields` and the click on 
    `Object Manager`. 
-3. In the Object Manager page click on the `Account` since we are going to create a external field for Account SObject.
-4. In the Account page click on the `Fields & Relationships` and click `New` in the right hand side.
+3. In the Object Manager page click on the `Contact` since we are going to create a external field for Contact SObject.
+4. In the Contact page click on the `Fields & Relationships` and click `New` in the right hand side.
 5. Then select `Text` as the Data type and click `Next`.
 6. Add `My_External_Id` for "Field Label" and `255` for "Length" and click `Next`.
 7. At the end click `Save` and see whether external field is added successfully by checking `Fields & Relationships`
@@ -62,8 +62,8 @@ insert pushTopic;
    CLIENT_SECRET="<CLIENT_SECRET>"
    REFRESH_TOKEN="<REFRESH_TOKEN>"
    REFRESH_URL="<REFRESH_URL>"
-   USERNAME="<USERNAME>"
-   PASSWORD="<PASSWORD>"
+   SF_USERNAME="<USERNAME>"
+   SF_PASSWORD="<PASSWORD>"
    ```
 2. Run the following command inside repo root folder.
    ```bash

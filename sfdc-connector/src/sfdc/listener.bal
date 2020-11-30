@@ -17,11 +17,11 @@
 //
 
 import ballerina/java;
-import ballerina/ 'lang\.object as lang;
+import ballerina/lang.'object as lang;
 
 handle JAVA_NULL = java:createNull();
 
-public type Listener object {
+public class Listener {
 
     *lang:Listener;
 
@@ -50,29 +50,29 @@ public type Listener object {
         return stopListener();
     }
 
-    public function __immediateStop() returns error? {
+    public isolated function __immediateStop() returns error? {
 
     }
-};
+}
 
 function initListener(Listener lis) = @java:Method {
-    class: "org.ballerinalang.sf.ListenerUtil"
+    'class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function attachService(Listener lis, service s) returns error? = @java:Method {
-    class: "org.ballerinalang.sf.ListenerUtil"
+    'class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function startListener(handle username, handle password, Listener lis) returns error? = @java:Method {
-    class: "org.ballerinalang.sf.ListenerUtil"
+    'class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function detachService(Listener lis, service s) returns error? = @java:Method {
-    class: "org.ballerinalang.sf.ListenerUtil"
+    'class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 function stopListener() returns error? = @java:Method {
-    class: "org.ballerinalang.sf.ListenerUtil"
+    'class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
 

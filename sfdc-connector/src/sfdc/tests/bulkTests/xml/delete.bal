@@ -21,14 +21,13 @@ import ballerina/test;
     dependsOn: ["queryXml"]
 }
 function deleteXml() {
-    BulkClient bulkClient = baseClient->getBulkClient();
-    log:printInfo("bulkClient -> deleteXml");
+    log:printInfo("baseClient -> deleteXml");
     string batchId = "";
 
     xml contacts = getXmlContactsToDelete(xmlQueryResult);
 
     //create job
-    error|BulkJob deleteJob = bulkClient->creatJob("delete", "Contact", "XML");
+    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "XML");
 
         if (deleteJob is BulkJob) {
         //add xml content
@@ -41,7 +40,7 @@ function deleteXml() {
         }
 
         //get job info
-        error|JobInfo jobInfo = bulkClient->getJobInfo(deleteJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(deleteJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -86,7 +85,7 @@ function deleteXml() {
         }
 
         //close job
-        error|JobInfo closedJob = bulkClient->closeJob(deleteJob);
+        error|JobInfo closedJob = baseClient->closeJob(deleteJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {

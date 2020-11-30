@@ -217,6 +217,13 @@ const CONTENT_TYPE = "Content-Type";
 # Holds the value of "X-SFDC-Session" which used as Authorization header name of bulk API.
 const X_SFDC_SESSION = "X-SFDC-Session";
 
+# Constant field `AUTHORIZATION`. 
+# Holds the value of "Authorization" which used as Authorization header name of REST API.
+const AUTHORIZATION = "Authorization";
+
+# Constant field `BEARER`. Holds the value of "Bearer".
+const BEARER = "Bearer ";
+
 # Constant field `ENABLE_PK_CHUNKING`. 
 # Holds the value of "Sforce-Enable-PKChunking" which used to handle large data set extracts.
 const ENABLE_PK_CHUNKING = "Sforce-Enable-PKChunking";

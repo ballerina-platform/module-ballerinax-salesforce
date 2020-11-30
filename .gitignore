@@ -7,6 +7,9 @@
 #conf file
 ballerina.conf
 
+#lock file
+Ballerina.lock
+
 # BlueJ files
 *.ctxt
 
