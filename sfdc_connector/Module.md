@@ -6,10 +6,10 @@ The Salesforce connector allows you to perform CRUD operations for SObjects, que
 describe SObjects and organizational data through the Salesforce REST API. Also, it supports adding bulk data jobs and batches of types JSON, XML, and CSV via the Salesforce Bulk API. It handles OAuth 2.0 authentication.
 
 ## Compatibility
-|                     |    Version                  |
-|:-------------------:|:---------------------------:|
-| Ballerina Language  | swan-lake-preview5          |
-| Salesforce API      | v48.0                       |
+|                     |    Version                          |
+|:-------------------:|:-----------------------------------:|
+| Ballerina Language  | swan-lake-preview7 SNAPSHOT         |
+| Salesforce API      | v48.0                               |
 
 ## Supported Operations
 
