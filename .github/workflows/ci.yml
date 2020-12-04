@@ -18,6 +18,6 @@ jobs:
             uses: SanduDS/ballerina-action/@swan-lake-connector-release
             with:
               args:
-                build -c --skip-tests --sourceroot sfdc-connector
+                build --skip-tests ./sfdc_connector 
             env:
                 JAVA_HOME: /usr/lib/jvm/default-jvm
