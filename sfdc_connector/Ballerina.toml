@@ -1,0 +1,14 @@
+[package]
+org = "lakshitha"
+name = "sfdc_connector"
+version = "0.1.0"
+
+[build-options]
+observabilityIncluded = true
+
+[[platform.java11.dependency]]
+path = "../emp-wrapper/target/emp-wrapper-2.1.3-jar-with-dependencies.jar"
+groupId = "org.ballerinalang.sf"
+artifactId = "emp-wrapper"
+module = "emp-wrapper" 
+version = "2.1.3"
