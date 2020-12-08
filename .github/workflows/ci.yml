@@ -21,3 +21,11 @@ jobs:
                 build -c ./sfdc
             env:
                 JAVA_HOME: /usr/lib/jvm/default-jvm
+                ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+                CLIENT_ID: ${{ secrets.CLIENT_ID }}
+                CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+                EP_URL: ${{ secrets.EP_URL }}       
+                REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+                REFRESH_URL: ${{ secrets.REFRESH_URL }}
+                SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+                SF_USERNAME: ${{ secrets.SF_USERNAME }}
