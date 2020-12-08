@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/ballerina-platform/module-ballerinax-sfdc.svg?branch=master)](https://travis-ci.org/ballerina-platform/module-ballerinax-sfdc)
-
 # Module Salesforce
 
 Connects to Salesforce from Ballerina. 
