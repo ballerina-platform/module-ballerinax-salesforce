@@ -20,8 +20,9 @@ jobs:
             uses: ballerina-platform/ballerina-action/@swan-lake-connector-release
             with:
               args:
-                build -a -c --skip-tests --sourceroot sfdc-connector
-
+                build -c ./sfdc
+            env:
+                JAVA_HOME: /usr/lib/jvm/default-jvm
           - name: Ballerina Push
             uses: ballerina-platform/ballerina-action/@swan-lake-connector-release
             with:
