@@ -66,7 +66,7 @@ final string UPDATED = "updated";
 final string DESCRIBE = "describe";
 
 # Constant field `QUERY`. Holds the value query for SOQL query resource prefix and bulk API query operator.
-const  QUERY = "query";
+const QUERY = "query";
 
 # Constant field `search`. Holds the value search for SOSL search resource prefix.
 final string SEARCH = "search";
@@ -188,10 +188,10 @@ const XML_NAMESPACE = "http://www.force.com/2009/06/asyncapi/dataload";
 // Content types
 
 # Constant field `APP_XML`. Holds the value of "application/xml".
-const APP_XML =  "application/xml";
+const APP_XML = "application/xml";
 
 # Constant field `APP_JSON`. Holds the value of "application/xml".
-const APP_JSON =  "application/json";
+const APP_JSON = "application/json";
 
 # Constant field `TEXT_CSV`. Holds the value of "text/csv".
 const TEXT_CSV = "text/csv";
@@ -235,10 +235,10 @@ const INVALID_SESSION_ID = "InvalidSessionId";
 // Payloads
 
 # Constant field `JSON_STATE_CLOSED_PAYLOAD`. Holds the value of JSON body which needs to close the job.
-final json JSON_STATE_CLOSED_PAYLOAD = { state : "Closed" };
+final json JSON_STATE_CLOSED_PAYLOAD = {state: "Closed"};
 
 # Constant field `JSON_STATE_ABORTED_PAYLOAD`. Holds the value of JSON body which needs to abort the job.
-final json JSON_STATE_ABORTED_PAYLOAD = { state : "Aborted" };
+final json JSON_STATE_ABORTED_PAYLOAD = {state: "Aborted"};
 
 # Constant field `XML_STATE_CLOSED_PAYLOAD`. Holds the value of XML body which needs to close the job.
 final xml XML_STATE_CLOSED_PAYLOAD = xml `<jobInfo xmlns="http://www.force.com/2009/06/asyncapi/dataload">

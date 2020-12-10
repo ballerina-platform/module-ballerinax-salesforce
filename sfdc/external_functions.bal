@@ -13,16 +13,13 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/java;
 
 function trim(string receiver) returns string {
     return java:toString(trimExternal(java:fromString(receiver))).toString();
 }
 
-function split(handle receiver, handle delimeter) returns handle = @java:Method {
-    'class: "java.lang.String"
-} external;
+function split(handle receiver, handle delimeter) returns handle = @java:Method {'class: "java.lang.String"} external;
 
 function replace(handle receiver, handle oldStr, handle newStr) returns handle = @java:Method {
     'class: "java.lang.String",

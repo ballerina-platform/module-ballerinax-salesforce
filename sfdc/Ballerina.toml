@@ -1,0 +1,21 @@
+[package]
+org = "ballerinax"
+name = "sfdc"
+version = "2.1.3"
+
+[build-options]
+observabilityIncluded = true
+
+[[platform.java11.dependency]]
+path = "../emp-wrapper/target/emp-wrapper-2.1.3.jar"
+groupId = "org.ballerinalang.sf"
+artifactId = "emp-wrapper"
+module = "emp-wrapper" 
+version = "2.1.3"
+
+
+
+
+
+
+

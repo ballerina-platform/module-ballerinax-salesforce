@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-
 import ballerina/http;
 import ballerina/oauth2;
 
@@ -31,26 +30,20 @@ public client class BaseClient {
     public function init(SalesforceConfiguration salesforceConfig) {
         self.salesforceConfiguration = salesforceConfig;
         // Create an OAuth2 provider.
-        oauth2:OutboundOAuth2Provider oauth2Provider = new(salesforceConfig.clientConfig);
+        oauth2:OutboundOAuth2Provider oauth2Provider = new (salesforceConfig.clientConfig);
         // Create a bearer auth handler using the a created provider.
-        SalesforceAuthHandler bearerHandler = new(oauth2Provider);
+        SalesforceAuthHandler bearerHandler = new (oauth2Provider);
 
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
-        
+
         // Create an HTTP client.
         if (socketConfig is http:ClientSecureSocket) {
-            self.salesforceClient = new(salesforceConfig.baseUrl, {
+            self.salesforceClient = new (salesforceConfig.baseUrl, {
                 secureSocket: socketConfig,
-                auth: {
-                    authHandler: bearerHandler
-                }
+                auth: {authHandler: bearerHandler}
             });
         } else {
-            self.salesforceClient = new(salesforceConfig.baseUrl, {
-                auth: {
-                    authHandler: bearerHandler
-                }
-            });
+            self.salesforceClient = new (salesforceConfig.baseUrl, {auth: {authHandler: bearerHandler}});
         }
     }
 
@@ -125,8 +118,8 @@ public client class BaseClient {
     # + id - SObject id
     # + recordPayload - JSON record to be updated
     # + return - true if successful else false or Error occured
-    public remote function updateRecord(string sObjectName, string id, json recordPayload)
-    returns @tainted boolean|Error {
+    public remote function updateRecord(string sObjectName, string id, json recordPayload) returns @tainted boolean|
+    Error {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
@@ -165,8 +158,7 @@ public client class BaseClient {
     # + id - sobject id 
     # + fields - fields to retrieve 
     # + return - `json` result if successful else `Error` occured
-    public remote function getRecordById(string sobject, string id, string... fields) 
-    returns @tainted json|Error {
+    public remote function getRecordById(string sobject, string id, string... fields) returns @tainted json|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
         if (fields.length() > 0) {
             path = path.concat(self.appendQueryParams(fields));
@@ -182,8 +174,8 @@ public client class BaseClient {
     # + extId - external Id value 
     # + fields - fields to retrieve 
     # + return - `json` result if successful else `Error` occured
-    public remote function getRecordByExtId(string sobject, string extIdField, string extId, string... fields) 
-    returns @tainted json|Error {
+    public remote function getRecordByExtId(string sobject, string extIdField, string extId, string... fields) returns @tainted json|
+    Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
         if (fields.length() > 0) {
             path = path.concat(self.appendQueryParams(fields));
@@ -221,8 +213,7 @@ public client class BaseClient {
     # + accountId - Account ID
     # + accountRecord - account record json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function updateAccount(string accountId, json accountRecord)
-    returns @tainted boolean|Error {
+    public remote function updateAccount(string accountId, json accountRecord) returns @tainted boolean|Error {
         return self->updateRecord(ACCOUNT, accountId, accountRecord);
     }
 
@@ -320,8 +311,8 @@ public client class BaseClient {
     # + opportunityId - Opportunity ID
     # + opportunityRecord - Opportunity json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function updateOpportunity(string opportunityId, json opportunityRecord)
-    returns @tainted boolean|Error {
+    public remote function updateOpportunity(string opportunityId, json opportunityRecord) returns @tainted boolean|
+    Error {
         return self->updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
     }
 
@@ -367,7 +358,7 @@ public client class BaseClient {
         return appended;
     }
 
-     //Query
+    //Query
 
     # Executes the specified SOQL query.
     # + receivedQuery - Sent SOQL query
@@ -411,7 +402,7 @@ public client class BaseClient {
     public remote function getResourcesByApiVersion(string apiVersion) returns @tainted map<string>|Error {
         string path = prepareUrl([BASE_PATH, apiVersion]);
         json res = check self->getRecord(path);
-        return toMapOfStrings(res);            
+        return toMapOfStrings(res);
     }
 
     # Lists the Limits information for your organization.
@@ -429,29 +420,28 @@ public client class BaseClient {
     # + contentType - content type of the job 
     # + extIdFieldName - field name of the external ID incase of an Upsert operation
     # + return - returns job object or error
-    public remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|BulkJob {
+    public remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|
+    BulkJob {
         json jobPayload = {
-            "operation" : operation,
-            "object" : sobj,
-            "contentType" : contentType
+            "operation": operation,
+            "object": sobj,
+            "contentType": contentType
         };
         if (UPSERT == operation) {
             if (extIdFieldName.length() > 0) {
-                json extField = {
-                    "externalIdFieldName" : extIdFieldName
-                };
+                json extField = {"externalIdFieldName": extIdFieldName};
                 jobPayload = check jobPayload.mergeJson(extField);
             } else {
                 return error("External ID Field Name Required for UPSERT Operation!");
             }
-        }        
+        }
         http:Request req = new;
         req.setJsonPayload(jobPayload);
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
         var response = self.salesforceClient->post(path, req);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
-            BulkJob bulkJob = new(jobResponse.id.toString(), contentType, operation, self.salesforceClient);
+            BulkJob bulkJob = new (jobResponse.id.toString(), contentType, operation, self.salesforceClient);
             return bulkJob;
         } else {
             return jobResponse;
@@ -470,7 +460,7 @@ public client class BaseClient {
         var response = self.salesforceClient->get(path, req);
         if (JSON == jobDataType) {
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
-            if (jobResponse is json){            
+            if (jobResponse is json) {
                 JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
                 return jobInfo;
             } else {
@@ -478,14 +468,13 @@ public client class BaseClient {
             }
         } else {
             xml|Error jobResponse = checkXmlPayloadAndSetErrors(response);
-            if (jobResponse is xml){            
+            if (jobResponse is xml) {
                 JobInfo jobInfo = check createJobRecordFromXml(jobResponse);
                 return jobInfo;
             } else {
                 return jobResponse;
             }
         }
-        
     }
 
     # Close a job.
@@ -499,7 +488,7 @@ public client class BaseClient {
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.salesforceClient->post(path, req);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
-        if (jobResponse is json){
+        if (jobResponse is json) {
             JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
             return jobInfo;
         } else {
@@ -518,13 +507,13 @@ public client class BaseClient {
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
         var response = self.salesforceClient->post(path, req);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
-        if (jobResponse is json){
+        if (jobResponse is json) {
             JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
             return jobInfo;
         } else {
             return jobResponse;
         }
-    }    
+    }
 }
 
 # Salesforce client configuration.

@@ -19,8 +19,8 @@
 
 package org.ballerinalang.sf;
 
-import io.ballerina.runtime.api.ErrorCreator;
-import io.ballerina.runtime.api.StringUtils;
+import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.async.StrandMetadata;
@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.values.MapValue;
-import io.ballerina.runtime.values.ObjectValue;
+import io.ballerina.runtime.internal.values.MapValue;
+import io.ballerina.runtime.internal.values.ObjectValue;
 
 import static org.ballerinalang.sf.LoginHelper.login;
 
@@ -61,7 +61,7 @@ public class ListenerUtil {
     public static Object startListener(String username, String password, ObjectValue listener) {
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
             try {
-                return LoginHelper.login(username, password);
+                return LoginHelper.login(username, password);   
             } catch (Exception e) {
                 throw sfdcError(e.getMessage());
             }
@@ -121,7 +121,7 @@ public class ListenerUtil {
 
     private static String getTopic(ObjectValue service) {
         MapValue<BString, Object> topicConfig = (MapValue<BString, Object>) service.getType()
-                .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));
+                .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));       
         return topicConfig.getStringValue(Constants.TOPIC_NAME).getValue();
     }
 
@@ -133,5 +133,6 @@ public class ListenerUtil {
 
     private static BError sfdcError(String errorMessage) {
         return ErrorCreator.createDistinctError(Constants.SFDC_ERROR, Constants.PACKAGE_ID_SFDC, StringUtils.fromString(errorMessage));
+ 
     }
 }

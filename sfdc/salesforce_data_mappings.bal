@@ -15,12 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-
 import ballerina/log;
 
 isolated function toVersions(json payload) returns Version[]|Error {
     Version[] versions = [];
-    json[] versionsArr = <json[]> payload;
+    json[] versionsArr = <json[]>payload;
 
     foreach json ele in versionsArr {
         Version|error ver = ele.cloneWithType(Version);

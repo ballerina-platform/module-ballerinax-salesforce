@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/test;
 import ballerina/config;
 import ballerina/io;
@@ -27,24 +26,20 @@ listener Listener eventListener = new (listenerConfig);
 
 boolean isUpdated = false;
 
-@ServiceConfig {
-    topic:"/topic/AccountUpdate"
-}
+@ServiceConfig {topic: "/topic/AccountUpdate"}
 service workflowOne on eventListener {
-    resource function onEvent(json op) {  
-        io:StringReader sr = new(op.toJsonString());
+    resource function onEvent(json op) {
+        io:StringReader sr = new (op.toJsonString());
         json|error account = sr.readJson();
-        if (account is json) { 
+        if (account is json) {
             if (account.sobject.Name == "WSO2 Inc") {
                 isUpdated = true;
-            }            
+            }
         }
     }
 }
 
-@test:Config {
-    dependsOn: ["testUpdateRecord"]
-}
+@test:Config {dependsOn: ["testUpdateRecord"]}
 function testUpdated() {
     test:assertTrue(isUpdated, "Error in retrieving account update!");
 }

@@ -15,10 +15,9 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-
 import ballerina/log;
 import ballerina/java;
-import ballerina/java.arrays as jarrays;
+import ballerina/jarrays;
 
 isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
@@ -110,7 +109,8 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|E
 
                     if ((errors/<*>).length() > 0) {
                         log:printInfo("Failed batch result, err=" + (errors/<*>).toString());
-                        batchRes.errors = "[" + (errors/<ns:statusCode>/*).toString() + "] " + (errors/<ns:message>/*).toString();
+                        batchRes.errors = "[" + (errors/<ns:statusCode>/*).toString() + "] " + (errors/<ns:message>/*).
+                        toString();
                     }
                 }
                 // Add to the batch results array.
@@ -130,7 +130,7 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|E
 
 function createBatchResultRecordFromJson(json payload) returns Result[]|Error {
     Result[] batchResArr = [];
-    json[] payloadArr = <json[]> payload;
+    json[] payloadArr = <json[]>payload;
 
     foreach json ele in payloadArr {
         Result|error batchRes = trap {
@@ -150,7 +150,7 @@ function createBatchResultRecordFromJson(json payload) returns Result[]|Error {
 
                 if (trim(errors.toString()).length() > 0) {
                     log:printError("Failed batch result, errors=" + errors.toString(), err = ());
-                    json[] errorsArr = <json[]> errors;
+                    json[] errorsArr = <json[]>errors;
                     string errMsg = "";
                     int counter = 1;
                     foreach json err in errorsArr {
@@ -198,10 +198,10 @@ function createBatchResultRecordFromCsv(string payload) returns Result[]|Error {
 
             // Remove quotes of "true" or "false".
             if (successStr is string && createdStr is string) {
-                successStr = java:toString(replace(java:fromString(successStr), java:fromString("\""),
-                    java:fromString("")));
-                createdStr = java:toString(replace(java:fromString(createdStr), java:fromString("\""),
-                    java:fromString("")));
+                successStr = java:toString(replace(java:fromString(successStr), java:fromString("\""), java:fromString(
+                "")));
+                createdStr = java:toString(replace(java:fromString(createdStr), java:fromString("\""), java:fromString(
+                "")));
             }
 
             if (successStr is string && successStr.length() > 0 && createdStr is string && createdStr.length() > 0) {
@@ -227,13 +227,13 @@ function createBatchResultRecordFromCsv(string payload) returns Result[]|Error {
                 }
 
             } else {
-                log:printError("Error occurred while accessing success & created fields from batch result, success="
-                    + successStr.toString() + " created=" + createdStr.toString(), err = ());
-            return Error("Error occurred while creating BatchResult record using json payload.");
+                log:printError("Error occurred while accessing success & created fields from batch result, success=" + 
+                successStr.toString() + " created=" + createdStr.toString(), err = ());
+                return Error("Error occurred while creating BatchResult record using json payload.");
             }
         } else {
-            log:printError("Error occrred while retrieveing batch result line from batch results csv, line="
-                + line.toString(), err = ());
+            log:printError("Error occrred while retrieveing batch result line from batch results csv, line=" + line.
+            toString(), err = ());
             return Error("Error occurred while accessing batch results from csv payload.");
         }
         counter = counter + 1;

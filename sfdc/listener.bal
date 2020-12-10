@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-
 import ballerina/java;
 import ballerina/lang.'object as lang;
 
@@ -28,7 +27,7 @@ public class Listener {
     private handle username = JAVA_NULL;
     private handle password = JAVA_NULL;
 
-    public function init(ListenerConfiguration config){
+    public function init(ListenerConfiguration config) {
         self.username = java:fromString(config.username);
         self.password = java:fromString(config.password);
         initListener(self);
@@ -55,26 +54,18 @@ public class Listener {
     }
 }
 
-function initListener(Listener lis) = @java:Method {
-    'class: "org.ballerinalang.sf.ListenerUtil"
-} external;
+function initListener(Listener lis) = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
-function attachService(Listener lis, service s) returns error? = @java:Method {
-    'class: "org.ballerinalang.sf.ListenerUtil"
-} external;
+function attachService(Listener lis, service s) returns error? = @java:Method {'class: 
+    "org.ballerinalang.sf.ListenerUtil"} external;
 
-function startListener(handle username, handle password, Listener lis) returns error? = @java:Method {
-    'class: "org.ballerinalang.sf.ListenerUtil"
-} external;
+function startListener(handle username, handle password, Listener lis) returns error? = @java:Method {'class: 
+    "org.ballerinalang.sf.ListenerUtil"} external;
 
-function detachService(Listener lis, service s) returns error? = @java:Method {
-    'class: "org.ballerinalang.sf.ListenerUtil"
-} external;
+function detachService(Listener lis, service s) returns error? = @java:Method {'class: 
+    "org.ballerinalang.sf.ListenerUtil"} external;
 
-function stopListener() returns error? = @java:Method {
-    'class: "org.ballerinalang.sf.ListenerUtil"
-} external;
-
+function stopListener() returns error? = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
 public type ListenerConfiguration record {|
     string username;

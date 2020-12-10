@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/test;
 import ballerina/log;
 import ballerina/config;
@@ -32,11 +31,11 @@ SalesforceConfiguration sfConfig = {
     }
 };
 
-BaseClient baseClient = new(sfConfig);
+BaseClient baseClient = new (sfConfig);
 
-json accountRecord = { 
-    Name: "John Keells Holdings", 
-    BillingCity: "Colombo 3" 
+json accountRecord = {
+    Name: "John Keells Holdings",
+    BillingCity: "Colombo 3"
 };
 
 string testRecordId = "";
@@ -48,15 +47,13 @@ function testCreateRecord() {
 
     if (stringResponse is string) {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
-        testRecordId = <@untainted> stringResponse;
+        testRecordId = <@untainted>stringResponse;
     } else {
         test:assertFail(msg = stringResponse.message());
     }
 }
 
-@test:Config {
-    dependsOn: ["testCreateRecord"]
-}
+@test:Config {dependsOn: ["testCreateRecord"]}
 function testGetRecord() {
     json|Error response;
     log:printInfo("baseClient -> getRecord()");
@@ -72,12 +69,14 @@ function testGetRecord() {
     }
 }
 
-@test:Config {
-    dependsOn: ["testCreateRecord", "testGetRecord"]
-}
+@test:Config {dependsOn: ["testCreateRecord", "testGetRecord"]}
 function testUpdateRecord() {
     log:printInfo("baseClient -> updateRecord()");
-    json account = { Name: "WSO2 Inc", BillingCity: "Jaffna", Phone: "+94110000000" };
+    json account = {
+        Name: "WSO2 Inc",
+        BillingCity: "Jaffna",
+        Phone: "+94110000000"
+    };
     boolean|Error response = baseClient->updateRecord(ACCOUNT, testRecordId, account);
 
     if (response is boolean) {
@@ -87,9 +86,7 @@ function testUpdateRecord() {
     }
 }
 
-@test:Config {
-    dependsOn: ["testSearchSOSLString"]
-}
+@test:Config {dependsOn: ["testSearchSOSLString"]}
 function testDeleteRecord() {
     log:printInfo("baseClient -> deleteRecord()");
     boolean|Error response = baseClient->deleteRecord(ACCOUNT, testRecordId);
@@ -113,7 +110,7 @@ function testGetQueryResult() {
 
         while (nextRecordsUrl is string && trim(nextRecordsUrl) != EMPTY_STRING) {
             log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-            SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted> nextRecordsUrl);
+            SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
 
             if (resp is SoqlResult) {
                 assertSoqlResult(resp);
@@ -127,9 +124,7 @@ function testGetQueryResult() {
     }
 }
 
-@test:Config {
-    dependsOn: ["testUpdateRecord"]
-}
+@test:Config {dependsOn: ["testUpdateRecord"]}
 function testSearchSOSLString() {
     log:printInfo("baseClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
@@ -137,8 +132,8 @@ function testSearchSOSLString() {
 
     if (res is SoslResult) {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, 
-            msg = "Matched search record is not an Account type!");
+        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, msg = 
+        "Matched search record is not an Account type!");
     } else {
         test:assertFail(msg = res.message());
     }
@@ -154,8 +149,8 @@ isolated function assertSoqlResult(SoqlResult|Error res) {
     }
 }
 
-@test:Config{}
-function testGetAvailableApiVersions(){
+@test:Config {}
+function testGetAvailableApiVersions() {
     log:printInfo("baseClient -> getAvailableApiVersions()");
     Version[]|Error versions = baseClient->getAvailableApiVersions();
 
@@ -176,8 +171,7 @@ function testGetResourcesByApiVersion() {
         test:assertTrue(trim(resources["sobjects"].toString()).length() > 0, msg = "Found null for resource sobjects");
         test:assertTrue(trim(resources["search"].toString()).length() > 0, msg = "Found null for resource search");
         test:assertTrue(trim(resources["query"].toString()).length() > 0, msg = "Found null for resource query");
-        test:assertTrue(trim(resources["licensing"].toString()).length() > 0, 
-            msg = "Found null for resource licensing");
+        test:assertTrue(trim(resources["licensing"].toString()).length() > 0, msg = "Found null for resource licensing");
         test:assertTrue(trim(resources["connect"].toString()).length() > 0, msg = "Found null for resource connect");
         test:assertTrue(trim(resources["tooling"].toString()).length() > 0, msg = "Found null for resource tooling");
         test:assertTrue(trim(resources["chatter"].toString()).length() > 0, msg = "Found null for resource chatter");

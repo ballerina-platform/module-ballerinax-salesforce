@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-
 import ballerina/log;
 import ballerina/http;
 import ballerina/encoding;
@@ -34,7 +33,7 @@ isolated function prepareUrl(string[] paths) returns string {
             url = url + path;
         }
     }
-    return <@untainted> url;
+    return <@untainted>url;
 }
 
 # Returns the prepared URL with encoded query.
@@ -75,11 +74,11 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-isolated function checkAndSetErrors(http:Response|http:Payload|error httpResponse, boolean expectPayload = true) 
-    returns @tainted json|Error {
+isolated function checkAndSetErrors(http:Response|http:Payload|error httpResponse, boolean expectPayload = true) returns @tainted json|
+Error {
     if (httpResponse is http:Response) {
-        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED 
-            || httpResponse.statusCode == http:STATUS_NO_CONTENT) {
+        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
+        statusCode == http:STATUS_NO_CONTENT) {
 
             if (expectPayload) {
                 json|error jsonResponse = httpResponse.getJsonPayload();
@@ -100,7 +99,7 @@ isolated function checkAndSetErrors(http:Response|http:Payload|error httpRespons
             json|error jsonResponse = httpResponse.getJsonPayload();
 
             if (jsonResponse is json) {
-                json[] errArr = <json[]> jsonResponse;
+                json[] errArr = <json[]>jsonResponse;
 
                 string errCodes = "";
                 string errMssgs = "";
@@ -122,7 +121,7 @@ isolated function checkAndSetErrors(http:Response|http:Payload|error httpRespons
                 return Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
             }
         }
-    } else if (httpResponse is http:Payload) {     
+    } else if (httpResponse is http:Payload) {
         return Error(UNREACHABLE_STATE);
     } else {
         log:printError(HTTP_ERROR_MSG, err = httpResponse);

@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/auth;
 import ballerina/http;
 
@@ -38,7 +37,7 @@ public class SalesforceAuthHandler {
         var authProvider = self.authProvider;
         var token = authProvider.generateToken();
         if (token is string) {
-            req.setHeader(AUTHORIZATION, BEARER+token);
+            req.setHeader(AUTHORIZATION, BEARER + token);
             req.setHeader(X_SFDC_SESSION, token);
             return req;
         } else {
@@ -57,7 +56,7 @@ public class SalesforceAuthHandler {
         map<anydata> headerMap = createResponseHeaderMap(resp);
         var token = authProvider.inspect(headerMap);
         if (token is string) {
-            req.setHeader(AUTHORIZATION, BEARER+token);
+            req.setHeader(AUTHORIZATION, BEARER + token);
             req.setHeader(X_SFDC_SESSION, token);
             return req;
         } else if (token is auth:Error) {
