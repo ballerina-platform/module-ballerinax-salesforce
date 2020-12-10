@@ -121,13 +121,7 @@ public class ListenerUtil {
 
     private static String getTopic(ObjectValue service) {
         MapValue<BString, Object> topicConfig = (MapValue<BString, Object>) service.getType()
-                .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));
-                System.out.println(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));
-        if(topicConfig == null){
-            System.out.println("it null");
-        }else{
-            System.out.println("it is not null");
-        }        
+                .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));       
         return topicConfig.getStringValue(Constants.TOPIC_NAME).getValue();
     }
 
