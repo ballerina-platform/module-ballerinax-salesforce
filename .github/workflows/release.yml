@@ -17,7 +17,7 @@ jobs:
               java-version: 11
           - run: mvn clean install -pl emp-wrapper
           - name: Ballerina Build
-            uses: ballerina-platform/ballerina-action/@swan-lake-connector-release
+            uses: ballerina-platform/ballerina-action/@slp7
             with:
               args:
                 build -c --skip-tests ./sfdc
@@ -32,11 +32,12 @@ jobs:
                 SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
                 SF_USERNAME: ${{ secrets.SF_USERNAME }}
           - name: Ballerina Push
-            uses: ballerina-platform/ballerina-action/@swan-lake-connector-release
+            uses: ballerina-platform/ballerina-action/@slp7
             with:
               args:
                 push 
             env:
               WORKING_DIR: ./sfdc
               BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
+              JAVA_HOME: /usr/lib/jvm/default-jvm
               
