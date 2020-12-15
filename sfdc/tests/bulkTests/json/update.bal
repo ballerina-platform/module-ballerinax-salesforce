@@ -21,7 +21,7 @@ import ballerina/test;
     dependsOn: ["insertJson", "upsertJson"]
 }
 function updateJson() {
-    log:printInfo("baseClient -> updateJson");
+    log:print("baseClient -> updateJson");
     string batchId = "";
     string mornsId = getContactIdByName("Morne", "Morkel", "Professor Grade 03");
     string andisId = getContactIdByName("Andi", "Flower", "Professor Grade 03");

@@ -20,7 +20,7 @@ import ballerina/test;
 
 @test:Config {}
 function insertXml() {
-    log:printInfo("baseClient -> insertXml");
+    log:print("baseClient -> insertXml");
     string batchId = "";
 
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
@@ -117,10 +117,10 @@ function insertXml() {
 
 @test:Config {}
 function insertXmlFromFile() {
-    log:printInfo("baseClient -> insertXmlFromFile");
+    log:print("baseClient -> insertXmlFromFile");
     string batchId = "";
 
-    string xmlContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.xml";
+    string xmlContactsFilePath = "tests/resources/contacts.xml";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");

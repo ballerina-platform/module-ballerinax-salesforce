@@ -20,7 +20,7 @@ import ballerina/test;
 
 @test:Config {}
 function insertJson() {
-    log:printInfo("baseClient -> insertJson");
+    log:print("baseClient -> insertJson");
     string batchId = "";
 
     json contacts = [
@@ -121,10 +121,10 @@ function insertJson() {
 
 @test:Config {}
 function insertJsonFromFile() {
-    log:printInfo("baseClient -> insertJsonFromFile");
+    log:print("baseClient -> insertJsonFromFile");
     string batchId = "";
 
-    string jsonContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.json";
+    string jsonContactsFilePath = "tests/resources/contacts.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");

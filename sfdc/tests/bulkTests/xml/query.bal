@@ -21,7 +21,7 @@ import ballerina/test;
     dependsOn: ["updateXml", "insertXmlFromFile"]
 }
 function queryXml() {
-    log:printInfo("baseClient -> queryXml");
+    log:print("baseClient -> queryXml");
     string batchId = "";
 
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 05'";

@@ -21,7 +21,7 @@ import ballerina/test;
     dependsOn: ["insertXml", "upsertXml"]
 }
 function updateXml() {
-    log:printInfo("baseClient -> updateXml");
+    log:print("baseClient -> updateXml");
     string batchId = "";
 
     string lucasID = getContactIdByName("Lucas", "Podolski", "Professor Grade 05");

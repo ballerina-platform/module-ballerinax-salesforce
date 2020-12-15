@@ -20,11 +20,11 @@ import ballerina/test;
 
 @test:Config {}
 function insertCsv() {
-    log:printInfo("baseClient -> insertCsv");
+    log:print("baseClient -> insertCsv");
     string batchId = "";
 
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-        "Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301\n" +
+"Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301\n" +
         "Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
 
     //create job
@@ -99,10 +99,10 @@ function insertCsv() {
 
 @test:Config {}
 function insertCsvFromFile() {
-    log:printInfo("baseClient -> insertCsvFromFile");
+    log:print("baseClient -> insertCsvFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.csv";
+    string csvContactsFilePath = "tests/resources/contacts.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");

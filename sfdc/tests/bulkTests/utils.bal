@@ -19,11 +19,27 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/lang.'xml as xmllib;
 import ballerina/java;
-import ballerina/java.arrays as jarrays;
+import ballerina/jarrays;
+//import ballerina/config;
 
 json[] jsonQueryResult = [];
 xml xmlQueryResult = xml `<test/>`;
 string csvQueryResult = "";
+
+// SalesforceConfiguration sfConfig = {
+//     baseUrl: config:getAsString("EP_URL"),
+//     clientConfig: {
+//         accessToken: config:getAsString("ACCESS_TOKEN"),
+//         refreshConfig: {
+//             clientId: config:getAsString("CLIENT_ID"),
+//             clientSecret: config:getAsString("CLIENT_SECRET"),
+//             refreshToken: config:getAsString("REFRESH_TOKEN"),
+//             refreshUrl: config:getAsString("REFRESH_URL")
+//         }
+//     }
+// };
+
+// BaseClient baseClient = new (sfConfig);
 
 function closeRb(io:ReadableByteChannel ch) {
     var cr = ch.close();
