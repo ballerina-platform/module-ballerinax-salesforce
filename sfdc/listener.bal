@@ -33,7 +33,7 @@ public class Listener {
         initListener(self);
     }
 
-    public function attach(SubscriberService s, string? name) returns error? {
+    public function attach(SubscriberService s, string[] | string? name) returns error? {
         return attachService(self, s);
     }
 
