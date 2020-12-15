@@ -13,10 +13,9 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//import ballerina/test;
+import ballerina/test;
 import ballerina/config;
-//import ballerina/io;
-//import ballerina/http;
+import ballerina/io;
 
 ListenerConfiguration listenerConfig = {
     username: config:getAsString("SF_USERNAME"),
@@ -27,22 +26,23 @@ listener Listener eventListener = new (listenerConfig);
 
 boolean isUpdated = false;
 
-//@ServiceConfig {topic: "/topic/AccountUpdate"}
+@ServiceConfig {topic: "/topic/AccountUpdate"}
 
-// service http:Service on eventListener {
+service /topic/AccountUpdate  on eventListener {
+    remote function onEvent(json op) {
+        io:StringReader sr = new (op.toJsonString());
+        json|error account = sr.readJson();
+        if (account is json) {
+            if (account.sobject.Name == "WSO2 Inc") {
+                isUpdated = true;
+            }else{
+                io:println(account.toString());
+            }
+        }
+    }
+}
 
-//     resource function get onEvent(json op) {
-//         io:StringReader sr = new (op.toJsonString());
-//         json|error account = sr.readJson();
-//         if (account is json) {
-//             if (account.sobject.Name == "WSO2 Inc") {
-//                 isUpdated = true;
-//             }
-//         }
-//     }
-// }
-
-// @test:Config {dependsOn: ["testUpdateRecord"]}
-// function testUpdated() {
-//     test:assertTrue(isUpdated, "Error in retrieving account update!");
-// }
+@test:Config {dependsOn: ["testUpdateRecord"]}
+function testUpdated() {
+    test:assertTrue(isUpdated, "Error in retrieving account update!");
+}
