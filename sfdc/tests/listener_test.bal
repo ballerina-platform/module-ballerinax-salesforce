@@ -13,10 +13,10 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import ballerina/test;
+//import ballerina/test;
 import ballerina/config;
-import ballerina/io;
-import ballerina/http;
+//import ballerina/io;
+//import ballerina/http;
 
 ListenerConfiguration listenerConfig = {
     username: config:getAsString("SF_USERNAME"),
@@ -29,7 +29,7 @@ boolean isUpdated = false;
 
 //@ServiceConfig {topic: "/topic/AccountUpdate"}
 
-// service http:Service /topic/AccountUpdate on eventListener {
+// service http:Service on eventListener {
 
 //     resource function get onEvent(json op) {
 //         io:StringReader sr = new (op.toJsonString());
