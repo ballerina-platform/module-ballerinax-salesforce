@@ -217,7 +217,7 @@ isolated function getBooleanValue(string value) returns boolean {
 # + err - The `error` instance.
 # + return - Returns the prepared `AuthenticationError` instance.
 isolated function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
-    log:printDebug(message);
+    log:print(message);
     if (err is error) {
         http:AuthenticationError preparedError = http:AuthenticationError(message, cause = err);
         return preparedError;

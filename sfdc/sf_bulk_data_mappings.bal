@@ -108,7 +108,7 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|E
                 if (errors is xml) {
 
                     if ((errors/<*>).length() > 0) {
-                        log:printInfo("Failed batch result, err=" + (errors/<*>).toString());
+                        log:print("Failed batch result, err=" + (errors/<*>).toString());
                         batchRes.errors = "[" + (errors/<ns:statusCode>/*).toString() + "] " + (errors/<ns:message>/*).
                         toString();
                     }

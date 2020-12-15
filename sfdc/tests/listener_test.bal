@@ -16,6 +16,7 @@
 import ballerina/test;
 import ballerina/config;
 import ballerina/io;
+import ballerina/http;
 
 ListenerConfiguration listenerConfig = {
     username: config:getAsString("SF_USERNAME"),
@@ -26,20 +27,22 @@ listener Listener eventListener = new (listenerConfig);
 
 boolean isUpdated = false;
 
-@ServiceConfig {topic: "/topic/AccountUpdate"}
-service workflowOne on eventListener {
-    resource function onEvent(json op) {
-        io:StringReader sr = new (op.toJsonString());
-        json|error account = sr.readJson();
-        if (account is json) {
-            if (account.sobject.Name == "WSO2 Inc") {
-                isUpdated = true;
-            }
-        }
-    }
-}
+//@ServiceConfig {topic: "/topic/AccountUpdate"}
 
-@test:Config {dependsOn: ["testUpdateRecord"]}
-function testUpdated() {
-    test:assertTrue(isUpdated, "Error in retrieving account update!");
-}
+// service http:Service /topic/AccountUpdate on eventListener {
+
+//     resource function get onEvent(json op) {
+//         io:StringReader sr = new (op.toJsonString());
+//         json|error account = sr.readJson();
+//         if (account is json) {
+//             if (account.sobject.Name == "WSO2 Inc") {
+//                 isUpdated = true;
+//             }
+//         }
+//     }
+// }
+
+// @test:Config {dependsOn: ["testUpdateRecord"]}
+// function testUpdated() {
+//     test:assertTrue(isUpdated, "Error in retrieving account update!");
+// }

@@ -51,7 +51,7 @@ public client class BaseClient {
 
     # Lists the available objects and their metadata for your organization and available to the logged-in user.
     # + return - `OrgMetadata` record if successful else Error occured
-    public remote function describeAvailableObjects() returns @tainted OrgMetadata|Error {
+    remote function describeAvailableObjects() returns @tainted OrgMetadata|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
         json res = check self->getRecord(path);
         return toOrgMetadata(res);
@@ -60,7 +60,7 @@ public client class BaseClient {
     # Describes the individual metadata for the specified object.
     # + sobjectName - sobject name
     # + return - `SObjectBasicInfo` record if successful else Error occured
-    public remote function getSObjectBasicInfo(string sobjectName) returns @tainted SObjectBasicInfo|Error {
+    remote function getSObjectBasicInfo(string sobjectName) returns @tainted SObjectBasicInfo|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
         json res = check self->getRecord(path);
         return toSObjectBasicInfo(res);
@@ -70,7 +70,7 @@ public client class BaseClient {
     # the fields, URLs, and child relationships.
     # + sObjectName - SObject name value
     # + return - `SObjectMetaData` record if successful else Error occured
-    public remote function describeSObject(string sObjectName) returns @tainted SObjectMetaData|Error {
+    remote function describeSObject(string sObjectName) returns @tainted SObjectMetaData|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
         json res = check self->getRecord(path);
         return toSObjectMetaData(res);
@@ -78,7 +78,7 @@ public client class BaseClient {
 
     # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
     # + return - `SObjectBasicInfo` record if successful else Error occured
-    public remote function sObjectPlatformAction() returns @tainted SObjectBasicInfo|Error {
+    remote function sObjectPlatformAction() returns @tainted SObjectBasicInfo|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
         json res = check self->getRecord(path);
         return toSObjectBasicInfo(res);
@@ -89,7 +89,7 @@ public client class BaseClient {
     # Accesses records based on the specified object ID, can be used with external objects.
     # + path - Resource path
     # + return - `json` result if successful else Error occured
-    public remote function getRecord(string path) returns @tainted json|Error {
+    remote function getRecord(string path) returns @tainted json|Error {
         http:Response|http:Payload|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }
@@ -98,7 +98,7 @@ public client class BaseClient {
     # + sObjectName - SObject name value
     # + recordPayload - JSON record to be inserted
     # + return - created entity ID if successful else Error occured
-    public remote function createRecord(string sObjectName, json recordPayload) returns @tainted string|Error {
+    remote function createRecord(string sObjectName, json recordPayload) returns @tainted string|Error {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(recordPayload);
@@ -118,7 +118,7 @@ public client class BaseClient {
     # + id - SObject id
     # + recordPayload - JSON record to be updated
     # + return - true if successful else false or Error occured
-    public remote function updateRecord(string sObjectName, string id, json recordPayload) returns @tainted boolean|
+    remote function updateRecord(string sObjectName, string id, json recordPayload) returns @tainted boolean|
     Error {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
@@ -139,7 +139,7 @@ public client class BaseClient {
     # + sObjectName - SObject name value
     # + id - SObject id
     # + return - true if successful else false or Error occured
-    public remote function deleteRecord(string sObjectName, string id) returns @tainted boolean|Error {
+    remote function deleteRecord(string sObjectName, string id) returns @tainted boolean|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         var response = self.salesforceClient->delete(path, ());
 
@@ -158,7 +158,7 @@ public client class BaseClient {
     # + id - sobject id 
     # + fields - fields to retrieve 
     # + return - `json` result if successful else `Error` occured
-    public remote function getRecordById(string sobject, string id, string... fields) returns @tainted json|Error {
+    remote function getRecordById(string sobject, string id, string... fields) returns @tainted json|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
         if (fields.length() > 0) {
             path = path.concat(self.appendQueryParams(fields));
@@ -174,7 +174,7 @@ public client class BaseClient {
     # + extId - external Id value 
     # + fields - fields to retrieve 
     # + return - `json` result if successful else `Error` occured
-    public remote function getRecordByExtId(string sobject, string extIdField, string extId, string... fields) returns @tainted json|
+    remote function getRecordByExtId(string sobject, string extIdField, string extId, string... fields) returns @tainted json|
     Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
         if (fields.length() > 0) {
@@ -190,7 +190,7 @@ public client class BaseClient {
     # + accountId - Account ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
-    public remote function getAccountById(string accountId, string... fields) returns @tainted json|Error {
+    remote function getAccountById(string accountId, string... fields) returns @tainted json|Error {
         json res = check self->getRecordById(ACCOUNT, accountId, ...fields);
         return res;
     }
@@ -198,14 +198,14 @@ public client class BaseClient {
     # Creates new Account object record.
     # + accountRecord - Account JSON record to be inserted
     # + return - Account ID if successful or else an sfdc:Error
-    public remote function createAccount(json accountRecord) returns @tainted string|Error {
+    remote function createAccount(json accountRecord) returns @tainted string|Error {
         return self->createRecord(ACCOUNT, accountRecord);
     }
 
     # Deletes existing Account's records.
     # + accountId - Account ID
     # + return - `true` if successful `false` otherwise, or an sfdc:Error in case of an error
-    public remote function deleteAccount(string accountId) returns @tainted boolean|Error {
+    remote function deleteAccount(string accountId) returns @tainted boolean|Error {
         return self->deleteRecord(ACCOUNT, accountId);
     }
 
@@ -213,7 +213,7 @@ public client class BaseClient {
     # + accountId - Account ID
     # + accountRecord - account record json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function updateAccount(string accountId, json accountRecord) returns @tainted boolean|Error {
+    remote function updateAccount(string accountId, json accountRecord) returns @tainted boolean|Error {
         return self->updateRecord(ACCOUNT, accountId, accountRecord);
     }
 
@@ -223,21 +223,21 @@ public client class BaseClient {
     # + leadId - Lead ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
-    public remote function getLeadById(string leadId, string... fields) returns @tainted json|Error {
+    remote function getLeadById(string leadId, string... fields) returns @tainted json|Error {
         json res = check self->getRecordById(LEAD, leadId, ...fields);
         return res;
     }
     # Creates new Lead object record.
     # + leadRecord - Lead JSON record to be inserted
     # + return - Lead ID if successful or else an sfdc:Error
-    public remote function createLead(json leadRecord) returns @tainted string|Error {
+    remote function createLead(json leadRecord) returns @tainted string|Error {
         return self->createRecord(LEAD, leadRecord);
     }
 
     # Deletes existing Lead's records.
     # + leadId - Lead ID
     # + return - `true`  if successful, `false` otherwise or an sfdc:Error incase of an error
-    public remote function deleteLead(string leadId) returns @tainted boolean|Error {
+    remote function deleteLead(string leadId) returns @tainted boolean|Error {
         return self->deleteRecord(LEAD, leadId);
     }
 
@@ -245,7 +245,7 @@ public client class BaseClient {
     # + leadId - Lead ID
     # + leadRecord - Lead JSON record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function updateLead(string leadId, json leadRecord) returns @tainted boolean|Error {
+    remote function updateLead(string leadId, json leadRecord) returns @tainted boolean|Error {
         return self->updateRecord(LEAD, leadId, leadRecord);
     }
 
@@ -255,7 +255,7 @@ public client class BaseClient {
     # + contactId - Contact ID
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
-    public remote function getContactById(string contactId, string... fields) returns @tainted json|Error {
+    remote function getContactById(string contactId, string... fields) returns @tainted json|Error {
         json res = check self->getRecordById(CONTACT, contactId, ...fields);
         return res;
     }
@@ -263,14 +263,14 @@ public client class BaseClient {
     # Creates new Contact object record.
     # + contactRecord - JSON contact record
     # + return - Contact ID if successful or else an sfdc:Error
-    public remote function createContact(json contactRecord) returns @tainted string|Error {
+    remote function createContact(json contactRecord) returns @tainted string|Error {
         return self->createRecord(CONTACT, contactRecord);
     }
 
     # Deletes existing Contact's records.
     # + contactId - Contact ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function deleteContact(string contactId) returns @tainted boolean|Error {
+    remote function deleteContact(string contactId) returns @tainted boolean|Error {
         return self->deleteRecord(CONTACT, contactId);
     }
 
@@ -278,7 +278,7 @@ public client class BaseClient {
     # + contactId - Contact ID
     # + contactRecord - JSON contact record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function updateContact(string contactId, json contactRecord) returns @tainted boolean|Error {
+    remote function updateContact(string contactId, json contactRecord) returns @tainted boolean|Error {
         return self->updateRecord(CONTACT, contactId, contactRecord);
     }
 
@@ -288,7 +288,7 @@ public client class BaseClient {
     # + opportunityId - Opportunity ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
-    public remote function getOpportunityById(string opportunityId, string... fields) returns @tainted json|Error {
+    remote function getOpportunityById(string opportunityId, string... fields) returns @tainted json|Error {
         json res = check self->getRecordById(OPPORTUNITY, opportunityId, ...fields);
         return res;
     }
@@ -296,14 +296,14 @@ public client class BaseClient {
     # Creates new Opportunity object record.
     # + opportunityRecord - JSON opportunity record
     # + return - Opportunity ID if successful or else an sfdc:Error
-    public remote function createOpportunity(json opportunityRecord) returns @tainted string|Error {
+    remote function createOpportunity(json opportunityRecord) returns @tainted string|Error {
         return self->createRecord(OPPORTUNITY, opportunityRecord);
     }
 
     # Deletes existing Opportunity's records.
     # + opportunityId - Opportunity ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function deleteOpportunity(string opportunityId) returns @tainted boolean|Error {
+    remote function deleteOpportunity(string opportunityId) returns @tainted boolean|Error {
         return self->deleteRecord(OPPORTUNITY, opportunityId);
     }
 
@@ -311,7 +311,7 @@ public client class BaseClient {
     # + opportunityId - Opportunity ID
     # + opportunityRecord - Opportunity json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function updateOpportunity(string opportunityId, json opportunityRecord) returns @tainted boolean|
+    remote function updateOpportunity(string opportunityId, json opportunityRecord) returns @tainted boolean|
     Error {
         return self->updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
     }
@@ -322,7 +322,7 @@ public client class BaseClient {
     # + productId - Product ID
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
-    public remote function getProductById(string productId, string... fields) returns @tainted json|Error {
+    remote function getProductById(string productId, string... fields) returns @tainted json|Error {
         json res = check self->getRecordById(PRODUCT, productId, ...fields);
         return res;
     }
@@ -330,14 +330,14 @@ public client class BaseClient {
     # Creates new Product object record.
     # + productRecord - JSON product record
     # + return - Product ID if successful or else an sfdc:Error
-    public remote function createProduct(json productRecord) returns @tainted string|Error {
+    remote function createProduct(json productRecord) returns @tainted string|Error {
         return self->createRecord(PRODUCT, productRecord);
     }
 
     # Deletes existing product's records.
     # + productId - Product ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function deleteProduct(string productId) returns @tainted boolean|Error {
+    remote function deleteProduct(string productId) returns @tainted boolean|Error {
         return self->deleteRecord(PRODUCT, productId);
     }
 
@@ -345,7 +345,7 @@ public client class BaseClient {
     # + productId - Product ID
     # + productRecord - JSON product record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    public remote function updateProduct(string productId, json productRecord) returns @tainted boolean|Error {
+    remote function updateProduct(string productId, json productRecord) returns @tainted boolean|Error {
         return self->updateRecord(PRODUCT, productId, productRecord);
     }
 
@@ -363,7 +363,7 @@ public client class BaseClient {
     # Executes the specified SOQL query.
     # + receivedQuery - Sent SOQL query
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
-    public remote function getQueryResult(string receivedQuery) returns @tainted SoqlResult|Error {
+    remote function getQueryResult(string receivedQuery) returns @tainted SoqlResult|Error {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         json res = check self->getRecord(path);
         return toSoqlResult(res);
@@ -372,7 +372,7 @@ public client class BaseClient {
     # If the query results are too large, retrieve the next batch of results using the nextRecordUrl.
     # + nextRecordsUrl - URL to get the next query results
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
-    public remote function getNextQueryResult(string nextRecordsUrl) returns @tainted SoqlResult|Error {
+    remote function getNextQueryResult(string nextRecordsUrl) returns @tainted SoqlResult|Error {
         json res = check self->getRecord(nextRecordsUrl);
         return toSoqlResult(res);
     }
@@ -382,7 +382,7 @@ public client class BaseClient {
     # Executes the specified SOSL search.
     # + searchString - Sent SOSL search query
     # + return - `SoslResult` record if successful. Else, the occurred `Error`.
-    public remote function searchSOSLString(string searchString) returns @tainted SoslResult|Error {
+    remote function searchSOSLString(string searchString) returns @tainted SoslResult|Error {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
         json res = check self->getRecord(path);
         return toSoslResult(res);
@@ -390,7 +390,7 @@ public client class BaseClient {
 
     # Lists summary details about each REST API version available.
     # + return - List of `Version` if successful. Else, the occured Error.
-    public remote function getAvailableApiVersions() returns @tainted Version[]|Error {
+    remote function getAvailableApiVersions() returns @tainted Version[]|Error {
         string path = prepareUrl([BASE_PATH]);
         json res = check self->getRecord(path);
         return toVersions(res);
@@ -399,7 +399,7 @@ public client class BaseClient {
     # Lists the resources available for the specified API version.
     # + apiVersion - API version (v37)
     # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
-    public remote function getResourcesByApiVersion(string apiVersion) returns @tainted map<string>|Error {
+    remote function getResourcesByApiVersion(string apiVersion) returns @tainted map<string>|Error {
         string path = prepareUrl([BASE_PATH, apiVersion]);
         json res = check self->getRecord(path);
         return toMapOfStrings(res);
@@ -407,7 +407,7 @@ public client class BaseClient {
 
     # Lists the Limits information for your organization.
     # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
-    public remote function getOrganizationLimits() returns @tainted map<Limit>|Error {
+    remote function getOrganizationLimits() returns @tainted map<Limit>|Error {
         string path = prepareUrl([API_BASE_PATH, LIMITS]);
         json res = check self->getRecord(path);
         return toMapOfLimits(res);
@@ -420,7 +420,7 @@ public client class BaseClient {
     # + contentType - content type of the job 
     # + extIdFieldName - field name of the external ID incase of an Upsert operation
     # + return - returns job object or error
-    public remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|
+    remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|
     BulkJob {
         json jobPayload = {
             "operation": operation,
@@ -452,7 +452,7 @@ public client class BaseClient {
     #
     # + bulkJob - job object of which the info is required 
     # + return - job information record or error
-    public remote function getJobInfo(BulkJob bulkJob) returns @tainted error|JobInfo {
+    remote function getJobInfo(BulkJob bulkJob) returns @tainted error|JobInfo {
         string jobId = bulkJob.jobId;
         JOBTYPE jobDataType = bulkJob.jobDataType;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
@@ -481,7 +481,7 @@ public client class BaseClient {
     #
     # + bulkJob - job to be closed 
     # + return - job info after the state change of the job
-    public remote function closeJob(BulkJob bulkJob) returns @tainted error|JobInfo {
+    remote function closeJob(BulkJob bulkJob) returns @tainted error|JobInfo {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
@@ -500,7 +500,7 @@ public client class BaseClient {
     #
     # + bulkJob - job to be aborted 
     # + return - job info after the state change of the job
-    public remote function abortJob(BulkJob bulkJob) returns @tainted error|JobInfo {
+    remote function abortJob(BulkJob bulkJob) returns @tainted error|JobInfo {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;

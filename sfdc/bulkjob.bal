@@ -36,7 +36,7 @@ public client class BulkJob {
     #
     # + content - batch content 
     # + return - batch info or error
-    public remote function addBatch(json|string|xml|io:ReadableByteChannel content) returns @tainted error|BatchInfo {
+    remote function addBatch(json|string|xml|io:ReadableByteChannel content) returns @tainted error|BatchInfo {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH]);
         http:Request req = new;
         // https://github.com/ballerina-platform/ballerina-lang/issues/26798
@@ -116,7 +116,7 @@ public client class BulkJob {
     #
     # + batchId - ID of the batch of which info is required 
     # + return - batch info or error
-    public remote function getBatchInfo(string batchId) returns @tainted error|BatchInfo {
+    remote function getBatchInfo(string batchId) returns @tainted error|BatchInfo {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH, batchId]);
         http:Request req = new;
         var response = self.httpClient->get(path, req);
@@ -142,7 +142,7 @@ public client class BulkJob {
     # Get all batches of the job.
     #
     # + return - list of batch infos
-    public remote function getAllBatches() returns @tainted error|BatchInfo[] {
+    remote function getAllBatches() returns @tainted error|BatchInfo[] {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH]);
         http:Request req = new;
         var response = self.httpClient->get(path, req);
@@ -170,7 +170,7 @@ public client class BulkJob {
     #
     # + batchId - ID of the batch of which the request is required 
     # + return - batch content
-    public remote function getBatchRequest(string batchId) returns @tainted error|json|xml|string {
+    remote function getBatchRequest(string batchId) returns @tainted error|json|xml|string {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH, batchId, REQUEST]);
         http:Request req = new;
         var response = self.httpClient->get(path, req);
@@ -198,7 +198,7 @@ public client class BulkJob {
     #
     # + batchId - batch ID
     # + return - result list
-    public remote function getBatchResult(string batchId) returns @tainted error|json|xml|string|Result[] {
+    remote function getBatchResult(string batchId) returns @tainted error|json|xml|string|Result[] {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH, batchId, RESULT]);
         Result[] results = [];
         http:Request req = new;
