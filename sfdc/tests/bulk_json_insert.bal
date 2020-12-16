@@ -12,7 +12,7 @@
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
-// under the License.
+//under the License.
 
 import ballerina/io;
 import ballerina/log;
@@ -26,21 +26,21 @@ function insertJson() {
     json contacts = [
             {
                 description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Morne",
-                LastName: "Morkel",
-                Title: "Professor Grade 03",
+                FirstName: "Remus",
+                LastName: "Lupin",
+                Title: "Professor Level 03",
                 Phone: "0442226670",
-                Email: "morne89@gmail.com",
-                My_External_Id__c: "201"
+                Email: "lupinWolf@gmail.com",
+                My_External_Id__c: "846"
             },
             {
                 description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Andi",
-                LastName: "Flower",
-                Title: "Professor Grade 03",
+                FirstName: "Minerva",
+                LastName: "McGonagall",
+                Title: "Professor Level 03",
                 Phone: "0442216170",
-                Email: "flower.andie@gmail.com",
-                My_External_Id__c: "202"
+                Email: "minerva@gmail.com",
+                My_External_Id__c: "847"
             }
         ];
 
@@ -124,7 +124,7 @@ function insertJsonFromFile() {
     log:print("baseClient -> insertJsonFromFile");
     string batchId = "";
 
-    string jsonContactsFilePath = "tests/resources/contacts.csv";
+    string jsonContactsFilePath = "tests/resources/contacts.json";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");

@@ -18,27 +18,46 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    dependsOn: ["insertCsv", "upsertCsv"]
+    dependsOn: ["insertJson", "upsertJson"]
 }
-function updateCsv() {
-    log:print("baseClient -> updateCsv");
+function updateJson() {
+    log:print("baseClient -> updateJson");
     string batchId = "";
+    string mornsId = getContactIdByName("Remus", "Lupin", "Professor Level 03");
+    string andisId = getContactIdByName("Minerva", "McGonagall", "Professor Level 03");
 
-    string johnsID = getContactIdByName("John", "Michael", "Professor Grade 04");
-    string pedrosID = getContactIdByName("Pedro", "Guterez", "Professor Grade 04");
+    json contacts = [
+            {
+                description: "Created_from_Ballerina_Sf_Bulk_API",
+                Id: mornsId,
+                FirstName: "Remus",
+                LastName: "Lupin",
+                Title: "Professor Level 03",
+                Phone: "0552226670",
+                Email: "lupinn@w3c.com",
+                My_External_Id__c: "846"
+            },
+            {
+                description: "Created_from_Ballerina_Sf_Bulk_API",
+                Id: andisId,
+                FirstName: "Minerva",
+                LastName: "McGonagall",
+                Title: "Professor Level 03",
+                Phone: "0442216170",
+                Email: "minervam@w3c.com",
+                My_External_Id__c: "847"
+            }
+        ];
 
-    string contacts = "Id,description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-        johnsID + ",Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john.michael@gmail.com,301\n" +
-        pedrosID + ",Created_from_Ballerina_Sf_Bulk_API,Pedro,Guterez,Professor Grade 04,0445567100,pedro.gut@gmail.com,303";
 
     //create job
-    error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "CSV");
+    error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "JSON");
 
     if (updateJob is BulkJob) {
-        //add csv content
+        //add json content
         error|BatchInfo batch = updateJob->addBatch(<@untainted>contacts);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
@@ -70,14 +89,20 @@ function updateCsv() {
 
         //get batch request
         var batchRequest = updateJob->getBatchRequest(batchId);
-        if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
+        if (batchRequest is json) {
+            json[]|error batchRequestArr = <json[]>batchRequest;
+            if (batchRequestArr is json[]) {
+                test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
+            } else {
+                test:assertFail(msg = batchRequestArr.toString());
+            }
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
 
+        //get batch result
         var batchResult = updateJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -95,7 +120,6 @@ function updateCsv() {
         } else {
             test:assertFail(msg = closedJob.message());
         }
-
     } else {
         test:assertFail(msg = updateJob.message());
     }

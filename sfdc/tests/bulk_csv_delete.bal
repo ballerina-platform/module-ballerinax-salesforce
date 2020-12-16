@@ -66,7 +66,7 @@ function deleteCsv() {
         //get batch request
         var batchRequest = deleteJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 5, msg = "Retrieving batch request failed.");
+            test:assertTrue(checkCsvResult(batchRequest) == 4, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {

@@ -19,22 +19,39 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {}
-function insertCsv() {
-    log:print("baseClient -> insertCsv");
+function insertXml() {
+    log:print("baseClient -> insertXml");
     string batchId = "";
 
-    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-"Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john434@gmail.com,301\n" +
-        "Created_from_Ballerina_Sf_Bulk_API,Peter,Shane,Professor Grade 04,0332211777,peter77@gmail.com,302";
+    xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+        <sObject>
+            <description>Created_from_Ballerina_Sf_Bulk_API</description>
+            <FirstName>Argus</FirstName>
+            <LastName>Filch</LastName>
+            <Title>Professor Level 01</Title>
+            <Phone>099116123</Phone>
+            <Email>argus@yahoo.com</Email>
+            <My_External_Id__c>851</My_External_Id__c>
+        </sObject>
+        <sObject>
+            <description>Created_from_Ballerina_Sf_Bulk_API</description>
+            <FirstName>Poppy</FirstName>
+            <LastName>Pomfrey</LastName>
+            <Title>Professor Level 01</Title>
+            <Phone>086755643</Phone>
+            <Email>madampomfrey@gmail.com</Email>
+            <My_External_Id__c>852</My_External_Id__c>
+        </sObject>
+    </sObjects>`;
 
     //create job
-    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
-    if (insertJob is BulkJob) {
-        //add csv content
+        if (insertJob is BulkJob) {
+        //add xml content
         error|BatchInfo batch = insertJob->addBatch(contacts);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using xml.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
@@ -66,14 +83,15 @@ function insertCsv() {
 
         //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
-        if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
+            if (batchRequest is xml) {
+            test:assertTrue ((batchRequest/<*>).length() == 2, msg ="Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
-            test:assertFail(msg = "Invalid Batch Request!");
+            test:assertFail("Invalid batch request!");
         }
 
+        //get batch result
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -98,22 +116,22 @@ function insertCsv() {
 }
 
 @test:Config {}
-function insertCsvFromFile() {
-    log:print("baseClient -> insertCsvFromFile");
+function insertXmlFromFile() {
+    log:print("baseClient -> insertXmlFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "tests/resources/contacts.csv";
+    string xmlContactsFilePath = "tests/resources/contacts.xml";
 
     //create job
-    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
+    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
-    if (insertJob is BulkJob) {
-        //add csv content via file
-        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(csvContactsFilePath);
+        if (insertJob is BulkJob) {
+        //add xml content via file
+        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(xmlContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
             error|BatchInfo batchUsingXmlFile = insertJob->addBatch(<@untainted>rbc);
             if (batchUsingXmlFile is BatchInfo) {
-                test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using CSV file.");
+                test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using xml file.");
                 batchId = batchUsingXmlFile.id;
             } else {
                 test:assertFail(msg = batchUsingXmlFile.message());
@@ -150,14 +168,15 @@ function insertCsvFromFile() {
 
         //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
-        if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
+            if (batchRequest is xml) {
+            test:assertTrue ((batchRequest/<*>).length() == 2, msg ="Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
-            test:assertFail(msg = "Invalid Batch Request!");
+            test:assertFail("Invalid batch request!");
         }
 
+        //get batch result
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");

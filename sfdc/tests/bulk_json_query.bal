@@ -17,49 +17,31 @@
 import ballerina/log;
 import ballerina/test;
 
+
 @test:Config {
-    dependsOn: ["insertJson"]
+    dependsOn: ["updateJson", "insertJsonFromFile"]
 }
-function upsertJson() {
-    log:print("baseClient -> upsertJson");
+function queryJson() {
+    log:print("baseClient -> queryJson");
     string batchId = "";
 
-    json contacts = [
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Andi",
-                LastName: "Flower",
-                Title: "Professor Grade 03",
-                Phone: "0552216170",
-                Email: "flower@gmail.com",
-                My_External_Id__c: "202"
-            },
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Andrew",
-                LastName: "Strauss",
-                Title: "Professor Grade 03",
-                Phone: "0113232445",
-                Email: "andrew.s@gmail.com",
-                My_External_Id__c: "203"
-            }
-        ];
+    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 03'";
 
     //create job
-    error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "JSON", "My_External_Id__c");
+    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "JSON");
 
-    if (upsertJob is BulkJob) {
-        //add json content
-        error|BatchInfo batch = upsertJob->addBatch(contacts);
+    if (queryJob is BulkJob) {
+        //add query string
+        error|BatchInfo batch = queryJob->addBatch(queryStr);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
         }
 
         //get job info
-        error|JobInfo jobInfo = baseClient->getJobInfo(upsertJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -67,7 +49,7 @@ function upsertJson() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = upsertJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = queryJob->getBatchInfo(batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -75,7 +57,7 @@ function upsertJson() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = upsertJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = queryJob->getAllBatches();
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -83,14 +65,9 @@ function upsertJson() {
         }
 
         //get batch request
-        var batchRequest = upsertJob->getBatchRequest(batchId);
-        if (batchRequest is json) {
-            json[]|error batchRequestArr = <json[]>batchRequest;
-            if (batchRequestArr is json[]) {
-                test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
-            } else {
-                test:assertFail(msg = batchRequestArr.toString());
-            }
+        var batchRequest = queryJob->getBatchRequest(batchId);
+        if (batchRequest is string) {
+            test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
@@ -98,10 +75,16 @@ function upsertJson() {
         }
 
         //get batch result
-        var batchResult = upsertJob->getBatchResult(batchId);
-        if (batchResult is Result[]) {
-            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-            test:assertTrue(checkBatchResults(batchResult), msg = "Upsert was not successful.");
+        var batchResult = queryJob->getBatchResult(batchId);
+        if (batchResult is json) {
+            json[]|error batchResultArr = <json[]>batchResult;
+            if (batchResultArr is json[]) {
+                jsonQueryResult = <@untainted>batchResultArr;
+                //io:println("count : " + batchResultArr.length().toString());
+                test:assertTrue(batchResultArr.length() == 4, msg = "Retrieving batch result failed.");
+            } else {
+                test:assertFail(msg = batchResultArr.toString());
+            }
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());
         } else {
@@ -109,13 +92,13 @@ function upsertJson() {
         }
 
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(upsertJob);
+        error|JobInfo closedJob = baseClient->closeJob(queryJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message());
         }
     } else {
-        test:assertFail(msg = upsertJob.message());
+        test:assertFail(msg = queryJob.message());
     }
 }

@@ -17,14 +17,15 @@
 import ballerina/log;
 import ballerina/test;
 
+
 @test:Config {
-    dependsOn: ["updateCsv", "insertCsvFromFile"]
+    dependsOn: ["updateCsv", "insertCsvFromFile", "insertCsv"]
 }
 function queryCsv() {
     log:print("baseClient -> queryCsv");
     string batchId = "";
 
-    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 04'";
+    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
 
     //create job
     error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "CSV");
@@ -76,7 +77,8 @@ function queryCsv() {
         //get batch result
         var batchResult = queryJob->getBatchResult(batchId);
         if (batchResult is string) {
-            test:assertTrue(checkCsvResult(batchResult) == 5, msg = "Retrieving batch result failed.");
+            //io:println("count : ", checkCsvResult(batchResult).toString());
+            test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed." );
             csvQueryResult = <@untainted>batchResult;
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());
