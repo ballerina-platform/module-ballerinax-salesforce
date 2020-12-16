@@ -120,7 +120,7 @@ function insertXmlFromFile() {
     log:print("baseClient -> insertXmlFromFile");
     string batchId = "";
 
-    string xmlContactsFilePath = "tests/resources/contacts.xml";
+    string xmlContactsFilePath = "sfdc/tests/resources/contacts.xml";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
