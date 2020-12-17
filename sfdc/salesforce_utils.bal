@@ -74,7 +74,7 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-isolated function checkAndSetErrors(http:Response|http:Payload|error httpResponse, boolean expectPayload = true) returns @tainted json|
+isolated function checkAndSetErrors(http:Response|http:PayloadType|error httpResponse, boolean expectPayload = true) returns @tainted json|
 Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
@@ -121,7 +121,7 @@ Error {
                 return Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
             }
         }
-    } else if (httpResponse is http:Payload) {
+    } else if (httpResponse is http:PayloadType) {
         return Error(UNREACHABLE_STATE);
     } else {
         log:printError(HTTP_ERROR_MSG, err = httpResponse);

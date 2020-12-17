@@ -26,7 +26,7 @@ import ballerina/lang.'xml as xmllib;
 # Check HTTP response and return XML payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - XML response if successful else Error occured
-isolated function checkXmlPayloadAndSetErrors(http:Response|http:Payload|error httpResponse) returns @tainted xml|Error {
+isolated function checkXmlPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted xml|Error {
     if (httpResponse is http:Response) {
 
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
@@ -43,7 +43,7 @@ isolated function checkXmlPayloadAndSetErrors(http:Response|http:Payload|error h
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
-    } else if (httpResponse is http:Payload) {
+    } else if (httpResponse is http:PayloadType) {
         return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
@@ -53,7 +53,7 @@ isolated function checkXmlPayloadAndSetErrors(http:Response|http:Payload|error h
 # Check HTTP response and return Text payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
-isolated function checkTextPayloadAndSetErrors(http:Response|http:Payload|error httpResponse) returns @tainted string|
+isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted string|
 Error {
     if (httpResponse is http:Response) {
 
@@ -71,7 +71,7 @@ Error {
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
-    } else if (httpResponse is http:Payload) {
+    } else if (httpResponse is http:PayloadType) {
         return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
@@ -81,7 +81,7 @@ Error {
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
-isolated function checkJsonPayloadAndSetErrors(http:Response|http:Payload|error httpResponse) returns @tainted json|
+isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted json|
 Error {
     if (httpResponse is http:Response) {
 
@@ -97,7 +97,7 @@ Error {
         } else {
             return handleJsonErrorResponse(httpResponse);
         }
-    } else if (httpResponse is http:Payload) {
+    } else if (httpResponse is http:PayloadType) {
         return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
@@ -108,7 +108,7 @@ Error {
 #
 # + httpResponse - HTTP response or error occurred
 # + return - Query string response if successful or else an sfdc:Error
-isolated function getQueryRequest(http:Response|http:Payload|error httpResponse, JOBTYPE jobtype) returns @tainted string|
+isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns @tainted string|
 Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK) {
@@ -126,7 +126,7 @@ Error {
                 return handleXmlErrorResponse(httpResponse);
             }
         }
-    } else if (httpResponse is http:Payload) {
+    } else if (httpResponse is http:PayloadType) {
         return Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);

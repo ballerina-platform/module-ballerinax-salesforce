@@ -90,7 +90,7 @@ public client class BaseClient {
     # + path - Resource path
     # + return - `json` result if successful else Error occured
     remote function getRecord(string path) returns @tainted json|Error {
-        http:Response|http:Payload|error response = self.salesforceClient->get(path);
+        http:Response|http:PayloadType|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }
 
