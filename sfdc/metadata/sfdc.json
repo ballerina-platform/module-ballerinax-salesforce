@@ -1,0 +1,691 @@
+{
+    "connector": {
+        "name": "sfdc",
+        "displayName": "Salesforce",
+        "module": "ballerinax-sfdc",
+        "icon": "sfdc.png",
+        "operations": [
+            {
+                "name": "describeAvailableObjects",
+                "displayName": "Get Available Objects",
+                "parameters" : [],
+                "returnValue": {
+                    "name": "OrgMetadata",
+                    "displayName": "Organization Metadata"
+                }
+
+            },
+            {
+                "name": "getSObjectBasicInfo",
+                "displayName": "Get SObject Basic Information",
+                "parameters" : [
+                    {
+                        "name": "sobjectName",
+                        "displayName": "SObject Name"
+                    }
+                ],
+                "returnValue": {
+                    "name": "SObjectBasicInfo",
+                    "displayName": "SObject Basic Information"
+                }
+
+            },            {
+                "name": "describeSObject",
+                "displayName": "Get SObject All Information",
+                "parameters" : [
+                    {
+                        "name": "sObjectName",
+                        "displayName": "SObject Name"
+                    }
+                ],
+                "returnValue": {
+                    "name": "SObjectMetaData",
+                    "displayName": "SObject Metadata"
+                }
+
+            },            {
+                "name": "sObjectPlatformAction",
+                "displayName": "Get SObject Platform Action",
+                "parameters" : [],
+                "returnValue": {
+                    "name": "SObjectBasicInfo",
+                    "displayName": "SObject Basic Information"
+                }
+
+            },            
+            {
+                "name": "getRecord",
+                "displayName": "Get Record",
+                "parameters" : [
+                    {
+                        "name": "path",
+                        "displayName": "Resource Path"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },            
+            {
+                "name": "createRecord",
+                "displayName": "Create Record",
+                "parameters" : [
+                    {
+                        "name": "sObjectName",
+                        "displayName": "SObject Name"
+                    },
+                    {
+                        "name": "recordPayload",
+                        "displayName": "Record Payload"
+                    }
+                ],
+                "returnValue": {
+                    "name": "string",
+                    "displayName": "Created Entity ID"
+                }
+
+            },            
+            {
+                "name": "updateRecord",
+                "displayName": "Update Record",
+                "parameters" : [
+                    {
+                        "name": "sObjectName",
+                        "displayName": "SObject Name"
+                    },
+                    {
+                        "name": "id",
+                        "displayName": "SObject ID"
+                    },
+                    {
+                        "name": "recordPayload",
+                        "displayName": "Record Payload"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },            
+            {
+                "name": "deleteRecord",
+                "displayName": "Delete Record",
+                "parameters" : [
+                    {
+                        "name": "sObjectName",
+                        "displayName": "SObject Name"
+                    },
+                    {
+                        "name": "id",
+                        "displayName": "SObject ID"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "getRecordById",
+                "displayName": "Get Record By ID",
+                "parameters" : [
+                    {
+                        "name": "sobject",
+                        "displayName": "SObject Name"
+                    },
+                    {
+                        "name": "id",
+                        "displayName": "SObject ID"
+                    },
+                    {
+                        "name": "fields",
+                        "displayName": "Fields To Retrieve"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "getRecordByExtId",
+                "displayName": "Get Record By External ID",
+                "parameters" : [
+                    {
+                        "name": "sobject",
+                        "displayName": "SObject Name"
+                    },
+                    {
+                        "name": "extIdField",
+                        "displayName": "External ID Field Name"
+                    },
+                    {
+                        "name": "extId",
+                        "displayName": "External ID"
+                    },
+                    {
+                        "name": "fields",
+                        "displayName": "Fields To Retrieve"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "getAccountById",
+                "displayName": "Get Account By ID",
+                "parameters" : [
+                    {
+                        "name": "accountId",
+                        "displayName": "Account ID"
+                    },
+                    {
+                        "name": "fields",
+                        "displayName": "Fields To Retrieve"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "createAccount",
+                "displayName": "Create Account",
+                "parameters" : [
+                    {
+                        "name": "accountRecord",
+                        "displayName": "Account Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "string",
+                    "displayName": "Account ID"
+                }
+
+            },
+            {
+                "name": "deleteAccount",
+                "displayName": "Delete Account",
+                "parameters" : [
+                    {
+                        "name": "accountId",
+                        "displayName": "Account ID"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "updateAccount",
+                "displayName": "Update Account",
+                "parameters" : [
+                    {
+                        "name": "accountId",
+                        "displayName": "Account ID"
+                    },
+                    {
+                        "name": "accountRecord",
+                        "displayName": "Account Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "getLeadById",
+                "displayName": "Get Lead By ID",
+                "parameters" : [
+                    {
+                        "name": "leadId",
+                        "displayName": "Lead ID"
+                    },
+                    {
+                        "name": "fields",
+                        "displayName": "Field To Retrieve"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "createLead",
+                "displayName": "Create Lead",
+                "parameters" : [
+                    {
+                        "name": "leadRecord",
+                        "displayName": "Lead Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "string",
+                    "displayName": "Lead ID"
+                }
+
+            },
+            {
+                "name": "deleteLead",
+                "displayName": "Delete Lead",
+                "parameters" : [
+                    {
+                        "name": "leadId",
+                        "displayName": "Lead ID"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "updateLead",
+                "displayName": "Update Lead",
+                "parameters" : [
+                    {
+                        "name": "leadId",
+                        "displayName": "Lead ID"
+                    },
+                    {
+                        "name": "leadRecord",
+                        "displayName": "Lead Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "getContactById",
+                "displayName": "Get Contact By ID",
+                "parameters" : [
+                    {
+                        "name": "contactId",
+                        "displayName": "Contact ID"
+                    },
+                    {
+                        "name": "fields",
+                        "displayName": "Fields To Retrieve"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "createContact",
+                "displayName": "Create Contact",
+                "parameters" : [
+                    {
+                        "name": "contactRecord",
+                        "displayName": "Contact Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "string",
+                    "displayName": "Contact ID"
+                }
+
+            },
+            {
+                "name": "deleteContact",
+                "displayName": "Delete Contact",
+                "parameters" : [
+                    {
+                        "name": "contactId",
+                        "displayName": "Contact ID"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "updateContact",
+                "displayName": "Update Contact",
+                "parameters" : [
+                    {
+                        "name": "contactId",
+                        "displayName": "Contact ID"
+                    },
+                    {
+                        "name": "contactRecord",
+                        "displayName": "Contact Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "getOpportunityById",
+                "displayName": "Get Opportunity By ID",
+                "parameters" : [
+                    {
+                        "name": "opportunityId",
+                        "displayName": "Opportunity ID"
+                    },
+                    {
+                        "name": "fields",
+                        "displayName": "Fields To Retrieve"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "createOpportunity",
+                "displayName": "Create Opportunity",
+                "parameters" : [
+                    {
+                        "name": "opportunityRecord",
+                        "displayName": "Opportunity Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "string",
+                    "displayName": "Opportunity ID"
+                }
+
+            },
+            {
+                "name": "deleteOpportunity",
+                "displayName": "Delete Opportunity",
+                "parameters" : [
+                    {
+                        "name": "opportunityId",
+                        "displayName": "Opportunity ID"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "updateOpportunity",
+                "displayName": "Update Opportunity",
+                "parameters" : [
+                    {
+                        "name": "opportunityId",
+                        "displayName": "Opportunity ID"
+                    },
+                    {
+                        "name": "opportunityRecord",
+                        "displayName": "Opportunity Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "getProductById",
+                "displayName": "Get Product By ID",
+                "parameters" : [
+                    {
+                        "name": "productId",
+                        "displayName": "Product ID"
+                    },
+                    {
+                        "name": "fields",
+                        "displayName": "Fields To Retrieve"
+                    }
+                ],
+                "returnValue": {
+                    "name": "json",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "createProduct",
+                "displayName": "Create Product",
+                "parameters" : [
+                    {
+                        "name": "productRecord",
+                        "displayName": "Product Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "string",
+                    "displayName": "Product ID"
+                }
+
+            },
+            {
+                "name": "deleteProduct",
+                "displayName": "Delete Product",
+                "parameters" : [
+                    {
+                        "name": "productId",
+                        "displayName": "Product ID"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "updateProduct",
+                "displayName": "Update Product",
+                "parameters" : [
+                    {
+                        "name": "productId",
+                        "displayName": "Product ID"
+                    },
+                    {
+                        "name": "productRecord",
+                        "displayName": "Product Record"
+                    }
+                ],
+                "returnValue": {
+                    "name": "boolean",
+                    "displayName": "Result"
+                }
+
+            },
+            {
+                "name": "appendQueryParams",
+                "displayName": "Append Query Params",
+                "parameters" : [
+                    {
+                        "name": "fields",
+                        "displayName": "Fields"
+                    }
+                ],
+                "returnValue": {
+                    "name": "string",
+                    "displayName": "Appended String"
+                }
+
+            },
+            {
+                "name": "getQueryResult",
+                "displayName": "Get Query Result",
+                "parameters" : [
+                    {
+                        "name": "receivedQuery",
+                        "displayName": "SOQL Query"
+                    }
+                ],
+                "returnValue": {
+                    "name": "SoqlResult",
+                    "displayName": "SOQL Result"
+                }
+
+            },
+            {
+                "name": "getNextQueryResult",
+                "displayName": "Get Next Query Result",
+                "parameters" : [
+                    {
+                        "name": "nextRecordsUrl",
+                        "displayName": "Next Records URL"
+                    }
+                ],
+                "returnValue": {
+                    "name": "SoqlResult",
+                    "displayName": "SOQL Result"
+                }
+
+            },
+            {
+                "name": "searchSOSLString",
+                "displayName": "Search SOSL String",
+                "parameters" : [
+                    {
+                        "name": "searchString",
+                        "displayName": "SOSL Search Query"
+                    }
+                ],
+                "returnValue": {
+                    "name": "SoslResult",
+                    "displayName": "SOSL Result"
+                }
+
+            },
+            {
+                "name": "getAvailableApiVersions",
+                "displayName": "Get Available API Versions",
+                "parameters" : [],
+                "returnValue": {
+                    "name": "Version[]",
+                    "displayName": "Versions"
+                }
+
+            },
+            {
+                "name": "getResourcesByApiVersion",
+                "displayName": "Get Resources By API Version",
+                "parameters" : [
+                    {
+                        "name": "apiVersion",
+                        "displayName": "API Version"
+                    }
+                ],
+                "returnValue": {
+                    "name": "map<string>",
+                    "displayName": "Resources"
+                }
+
+            },
+            {
+                "name": "getOrganizationLimits",
+                "displayName": "Get Organization Limits",
+                "parameters" : [],
+                "returnValue": {
+                    "name": "map<Limit>",
+                    "displayName": "Organization Limits"
+                }
+
+            },
+            {
+                "name": "creatJob",
+                "displayName": "Create Job",
+                "parameters" : [
+                    {
+                        "name": "operation",
+                        "displayName": "Operation"
+                    },
+                    {
+                        "name": "sobj",
+                        "displayName": "SObject"
+                    },
+                    {
+                        "name": "contentType",
+                        "displayName": "Content Type"
+                    },
+                    {
+                        "name": "extIdFieldName",
+                        "displayName": "External ID Field Name"
+                    }
+                ],
+                "returnValue": {
+                    "name": "BulkJob",
+                    "displayName": "Bulk Job"
+                }
+
+            },
+            {
+                "name": "getJobInfo",
+                "displayName": "Get Job Information",
+                "parameters" : [
+                    {
+                        "name": "bulkJob",
+                        "displayName": "Bulk Job"
+                    }
+                ],
+                "returnValue": {
+                    "name": "JobInfo",
+                    "displayName": "Job Information"
+                }
+
+            },
+            {
+                "name": "closeJob",
+                "displayName": "Close Job",
+                "parameters" : [
+                    {
+                        "name": "bulkJob",
+                        "displayName": "Bulk Job"
+                    }
+                ],
+                "returnValue": {
+                    "name": "JobInfo",
+                    "displayName": "Job Information"
+                }
+
+            },
+            {
+                "name": "abortJob",
+                "displayName": "Abort Job",
+                "parameters" : [
+                    {
+                        "name": "bulkJob",
+                        "displayName": "Bulk Job"
+                    }
+                ],
+                "returnValue": {
+                    "name": "JobInfo",
+                    "displayName": "Job Information"
+                }
+
+            }
+        ]
+    }
+}
