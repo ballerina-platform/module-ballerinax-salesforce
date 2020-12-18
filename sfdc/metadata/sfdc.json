@@ -2,6 +2,7 @@
     "connector": {
         "name": "sfdc",
         "displayName": "Salesforce",
+        "organization":"ballerinax",
         "module": "sfdc",
         "icon": "sfdc.png",
         "clients":[
@@ -692,7 +693,89 @@
         
                     }
                 ]
+            },
+            {
+                "name":"BulkJob",
+                "displayName":"Bulk Job Client",
+                "operations": [
+                    {
+                        "name": "addBatch",
+                        "displayName": "Add Batch to Job",
+                        "parameters" : [
+                            {
+                                "name": "content",
+                                "displayName": "Batch Content"
+                            }
+                        ],
+                        "returnValue": {
+                            "name": "BatchInfo",
+                            "displayName": "Batch Information"
+                        }
+        
+                    },
+                    {
+                        "name":"getBatchInfo",
+                        "displayName": "Get Batch Information",
+                        "parameters" : [
+                            {
+                                "name": "batchId",
+                                "displayName": "Batch ID"
+                            }
+                        ],
+                        "returnValue": {
+                            "name": "BatchInfo",
+                            "displayName": "Batch Information"
+                        }
+                    },
+                    {
+                        "name":"getAllBatches",
+                        "displayName": "Get All Batches",
+                        "parameters" : [],
+                        "returnValue": {
+                            "name": "BatchInfo[]",
+                            "displayName": "List of Batch Information"
+                        }
+                    },
+                    {
+                        "name":"getBatchRequest",
+                        "displayName": "Get Batch Request Payload",
+                        "parameters" : [
+                            {
+                                "name": "batchId",
+                                "displayName": "Batch ID"
+                            }
+                        ],
+                        "returnValue": {
+                            "name": "json|xml|string",
+                            "displayName": "Batch Content"
+                        }
+                    },
+                    {
+                        "name":"getBatchResult",
+                        "displayName": "Get Processed Batch Result",
+                        "parameters" : [
+                            {
+                                "name": "batchId",
+                                "displayName": "Batch ID"
+                            }
+                        ],
+                        "returnValue": {
+                            "name": "json|xml|string|Result[]",
+                            "displayName": "Result List"
+                        }
+                    }
+                ]
             }
-        ]
+        ],
+        "listener":{
+            "name":"Listener",
+            "displayName":"Salesforce Listener",
+            "trigers":[
+                {
+                    "name":"onEvent",
+                    "displayName" : "On Event"
+                }
+            ]
+        }
     }
 }
