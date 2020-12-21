@@ -16,14 +16,10 @@
 // under the License.
 //
 import ballerina/java;
-//import ballerina/lang.'object as lang;
-//import ballerina/http;
-
 
 handle JAVA_NULL = java:createNull();
 
 public class Listener {
-
 
     private handle username = JAVA_NULL;
     private handle password = JAVA_NULL;
@@ -34,20 +30,20 @@ public class Listener {
         initListener(self);
     }
 
-    public function attach(service object {} s, string[] | string? name) returns error? {
-        return attachService(self, s);  
+    public function attach(service  object {} s, string[]|string? name) returns error? {
+        return attachService(self, s);
     }
 
-    public function detach(service object {} s) returns error? {
-        return detachService(self, s);       
+    public function detach(service  object {} s) returns error? {
+        return detachService(self, s);
     }
 
     public function 'start() returns error? {
-        return startListener(self.username, self.password, self);      
+        return startListener(self.username, self.password, self);
     }
 
     public function gracefulStop() returns error? {
-        return stopListener();      
+        return stopListener();
     }
 
     public isolated function immediateStop() returns error? {
@@ -57,13 +53,13 @@ public class Listener {
 
 function initListener(Listener lis) = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
-function attachService(Listener lis, service object {} s) returns error? = @java:Method {'class: 
+function attachService(Listener lis, service  object {} s) returns error? = @java:Method {'class: 
     "org.ballerinalang.sf.ListenerUtil"} external;
 
 function startListener(handle username, handle password, Listener lis) returns error? = @java:Method {'class: 
     "org.ballerinalang.sf.ListenerUtil"} external;
 
-function detachService(Listener lis, service object {} s) returns error? = @java:Method {'class: 
+function detachService(Listener lis, service  object {} s) returns error? = @java:Method {'class: 
     "org.ballerinalang.sf.ListenerUtil"} external;
 
 function stopListener() returns error? = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;

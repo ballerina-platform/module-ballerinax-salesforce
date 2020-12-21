@@ -19,7 +19,6 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/runtime;
 
-
 @test:Config {}
 function insertCsv() {
     log:print("baseClient -> insertCsv");
