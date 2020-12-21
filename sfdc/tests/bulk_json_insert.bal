@@ -31,7 +31,7 @@ function insertJson() {
                 Title: "Professor Level 03",
                 Phone: "0442226670",
                 Email: "lupinWolf@gmail.com",
-                My_External_Id__c: "846"
+                My_External_Id__c: "848"
             },
             {
                 description: "Created_from_Ballerina_Sf_Bulk_API",
@@ -40,7 +40,7 @@ function insertJson() {
                 Title: "Professor Level 03",
                 Phone: "0442216170",
                 Email: "minerva@gmail.com",
-                My_External_Id__c: "847"
+                My_External_Id__c: "849"
             }
         ];
 

@@ -32,7 +32,7 @@ function upsertJson() {
                 Title: "Professor Level 03",
                 Phone: "0552216170",
                 Email: "lupin@gmail.com",
-                My_External_Id__c: "846"
+                My_External_Id__c: "848"
             },
             {
                 description: "Created_from_Ballerina_Sf_Bulk_API",
@@ -41,7 +41,7 @@ function upsertJson() {
                 Title: "Professor Level 03",
                 Phone: "0113232445",
                 Email: "minervas@gmail.com",
-                My_External_Id__c: "847"
+                My_External_Id__c: "849"
             }
         ];
 
