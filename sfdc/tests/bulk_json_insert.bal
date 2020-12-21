@@ -12,35 +12,36 @@
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
-// under the License.
+//under the License.
 
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
+import ballerina/runtime;
 
 @test:Config {}
 function insertJson() {
-    log:printInfo("baseClient -> insertJson");
+    log:print("baseClient -> insertJson");
     string batchId = "";
 
     json contacts = [
             {
                 description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Morne",
-                LastName: "Morkel",
-                Title: "Professor Grade 03",
+                FirstName: "Remus",
+                LastName: "Lupin",
+                Title: "Professor Level 03",
                 Phone: "0442226670",
-                Email: "morne89@gmail.com",
-                My_External_Id__c: "201"
+                Email: "lupinWolf@gmail.com",
+                My_External_Id__c: "848"
             },
             {
                 description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Andi",
-                LastName: "Flower",
-                Title: "Professor Grade 03",
+                FirstName: "Minerva",
+                LastName: "McGonagall",
+                Title: "Professor Level 03",
                 Phone: "0442216170",
-                Email: "flower.andie@gmail.com",
-                My_External_Id__c: "202"
+                Email: "minerva@gmail.com",
+                My_External_Id__c: "849"
             }
         ];
 
@@ -97,6 +98,7 @@ function insertJson() {
         }
 
         //get batch result
+        runtime:sleep(3000);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -121,10 +123,10 @@ function insertJson() {
 
 @test:Config {}
 function insertJsonFromFile() {
-    log:printInfo("baseClient -> insertJsonFromFile");
+    log:print("baseClient -> insertJsonFromFile");
     string batchId = "";
 
-    string jsonContactsFilePath = "sfdc-connector/src/sfdc/tests/resources/contacts.json";
+    string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
@@ -186,6 +188,7 @@ function insertJsonFromFile() {
         }
 
         //get batch result
+        runtime:sleep(3000);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");

@@ -18,22 +18,22 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    dependsOn: ["queryJson"]
+    dependsOn: ["queryCsv"]
 }
-function deleteJson() {
-    log:printInfo("baseClient -> deleteJson");
+function deleteCsv() {
+    log:print("baseClient -> deleteCsv");
     string batchId = "";
 
-    json contacts = getJsonContactsToDelete(jsonQueryResult);
+    string contacts = getCsvContactsToDelete(csvQueryResult);
 
     //create job
-    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "JSON");
+    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
 
     if (deleteJob is BulkJob) {
-        //add json content
-        error|BatchInfo batch = deleteJob->addBatch(contacts);
+        //add csv content
+        error|BatchInfo batch = deleteJob->addBatch(<@untainted>contacts);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using json.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using CSV.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
@@ -65,20 +65,14 @@ function deleteJson() {
 
         //get batch request
         var batchRequest = deleteJob->getBatchRequest(batchId);
-        if (batchRequest is json) {
-            json[]|error batchRequestArr = <json[]>batchRequest;
-            if (batchRequestArr is json[]) {
-                test:assertTrue(batchRequestArr.length() == 5, msg = "Retrieving batch request failed.");
-            } else {
-                test:assertFail(msg = batchRequestArr.toString());
-            }
+        if (batchRequest is string) {
+            test:assertTrue(checkCsvResult(batchRequest) == 4, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
 
-        //get batch result
         var batchResult = deleteJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -96,6 +90,7 @@ function deleteJson() {
         } else {
             test:assertFail(msg = closedJob.message());
         }
+
     } else {
         test:assertFail(msg = deleteJob.message());
     }

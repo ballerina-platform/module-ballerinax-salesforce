@@ -18,29 +18,31 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    dependsOn: ["updateXml", "insertXmlFromFile"]
+    dependsOn: ["insertCsv"]
 }
-function queryXml() {
-    log:printInfo("baseClient -> queryXml");
+function upsertCsv() {
+    log:print("baseClient -> upsertCsv");
     string batchId = "";
 
-    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 05'";
+    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
+        "Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0332236677,bins98@gmail.com,845\n" +
+        "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,shane78@gmail.com,846";
 
     //create job
-    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "XML");
+    error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "CSV", "My_External_Id__c");
 
-        if (queryJob is BulkJob) {
-        //add xml content
-        error|BatchInfo batch = queryJob->addBatch(queryStr);
+    if (upsertJob is BulkJob) {
+        //add csv content
+        error|BatchInfo batch = upsertJob->addBatch(contacts);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not upload batch.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
         }
 
         //get job info
-        error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(upsertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -48,7 +50,7 @@ function queryXml() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = queryJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = upsertJob->getBatchInfo(batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -56,7 +58,7 @@ function queryXml() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = queryJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = upsertJob->getAllBatches();
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -64,20 +66,19 @@ function queryXml() {
         }
 
         //get batch request
-        var batchRequest = queryJob->getBatchRequest(batchId);
+        var batchRequest = upsertJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
+            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
 
-        //get batch result
-        var batchResult = queryJob->getBatchResult(batchId);
-            if (batchResult is xml) {
-            test:assertTrue ((batchResult/<*>).length() == 5, msg ="Retrieving batch result failed.");
-            xmlQueryResult = <@untainted>batchResult;
+        var batchResult = upsertJob->getBatchResult(batchId);
+        if (batchResult is Result[]) {
+            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
+            test:assertTrue(checkBatchResults(batchResult), msg = "Upsert was not successful.");
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());
         } else {
@@ -85,7 +86,7 @@ function queryXml() {
         }
 
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(queryJob);
+        error|JobInfo closedJob = baseClient->closeJob(upsertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
@@ -93,6 +94,6 @@ function queryXml() {
         }
 
     } else {
-        test:assertFail(msg = queryJob.message());
+        test:assertFail(msg = upsertJob.message());
     }
 }

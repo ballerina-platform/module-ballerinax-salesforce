@@ -17,14 +17,15 @@
 import ballerina/log;
 import ballerina/test;
 
+
 @test:Config {
     dependsOn: ["updateJson", "insertJsonFromFile"]
 }
 function queryJson() {
-    log:printInfo("baseClient -> queryJson");
+    log:print("baseClient -> queryJson");
     string batchId = "";
 
-    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 03'";
+    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 03'";
 
     //create job
     error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "JSON");
@@ -79,7 +80,8 @@ function queryJson() {
             json[]|error batchResultArr = <json[]>batchResult;
             if (batchResultArr is json[]) {
                 jsonQueryResult = <@untainted>batchResultArr;
-                test:assertTrue(batchResultArr.length() == 5, msg = "Retrieving batch result failed.");
+                //io:println("count : " + batchResultArr.length().toString());
+                test:assertTrue(batchResultArr.length() == 4, msg = "Retrieving batch result failed.");
             } else {
                 test:assertFail(msg = batchResultArr.toString());
             }

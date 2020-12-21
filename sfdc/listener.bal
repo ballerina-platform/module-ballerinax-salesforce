@@ -16,13 +16,10 @@
 // under the License.
 //
 import ballerina/java;
-import ballerina/lang.'object as lang;
 
 handle JAVA_NULL = java:createNull();
 
 public class Listener {
-
-    *lang:Listener;
 
     private handle username = JAVA_NULL;
     private handle password = JAVA_NULL;
@@ -33,36 +30,36 @@ public class Listener {
         initListener(self);
     }
 
-    public function __attach(service s, string? name) returns error? {
+    public function attach(service  object {} s, string[]|string? name) returns error? {
         return attachService(self, s);
     }
 
-    public function __detach(service s) returns error? {
+    public function detach(service  object {} s) returns error? {
         return detachService(self, s);
     }
 
-    public function __start() returns error? {
+    public function 'start() returns error? {
         return startListener(self.username, self.password, self);
     }
 
-    public function __gracefulStop() returns error? {
+    public function gracefulStop() returns error? {
         return stopListener();
     }
 
-    public isolated function __immediateStop() returns error? {
+    public isolated function immediateStop() returns error? {
 
     }
 }
 
 function initListener(Listener lis) = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
-function attachService(Listener lis, service s) returns error? = @java:Method {'class: 
+function attachService(Listener lis, service  object {} s) returns error? = @java:Method {'class: 
     "org.ballerinalang.sf.ListenerUtil"} external;
 
 function startListener(handle username, handle password, Listener lis) returns error? = @java:Method {'class: 
     "org.ballerinalang.sf.ListenerUtil"} external;
 
-function detachService(Listener lis, service s) returns error? = @java:Method {'class: 
+function detachService(Listener lis, service  object {} s) returns error? = @java:Method {'class: 
     "org.ballerinalang.sf.ListenerUtil"} external;
 
 function stopListener() returns error? = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;

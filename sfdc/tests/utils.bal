@@ -19,7 +19,7 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/lang.'xml as xmllib;
 import ballerina/java;
-import ballerina/java.arrays as jarrays;
+import ballerina/jarrays;
 
 json[] jsonQueryResult = [];
 xml xmlQueryResult = xml `<test/>`;

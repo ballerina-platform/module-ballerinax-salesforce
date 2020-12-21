@@ -108,7 +108,7 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|E
                 if (errors is xml) {
 
                     if ((errors/<*>).length() > 0) {
-                        log:printInfo("Failed batch result, err=" + (errors/<*>).toString());
+                        log:print("Failed batch result, err=" + (errors/<*>).toString());
                         batchRes.errors = "[" + (errors/<ns:statusCode>/*).toString() + "] " + (errors/<ns:message>/*).
                         toString();
                     }
@@ -148,7 +148,7 @@ function createBatchResultRecordFromJson(json payload) returns Result[]|Error {
 
             if (errors is json) {
 
-                if (trim(errors.toString()).length() > 0) {
+                if (trim(errors.toString()).length() > 2) {
                     log:printError("Failed batch result, errors=" + errors.toString(), err = ());
                     json[] errorsArr = <json[]>errors;
                     string errMsg = "";

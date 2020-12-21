@@ -18,29 +18,29 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    dependsOn: ["queryXml"]
+    dependsOn: ["updateXml", "insertXmlFromFile"]
 }
-function deleteXml() {
-    log:printInfo("baseClient -> deleteXml");
+function queryXml() {
+    log:print("baseClient -> queryXml");
     string batchId = "";
 
-    xml contacts = getXmlContactsToDelete(xmlQueryResult);
+    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 01'";
 
     //create job
-    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "XML");
+    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "XML");
 
-        if (deleteJob is BulkJob) {
+        if (queryJob is BulkJob) {
         //add xml content
-        error|BatchInfo batch = deleteJob->addBatch(contacts);
+        error|BatchInfo batch = queryJob->addBatch(queryStr);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using xml.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not upload batch.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
         }
 
         //get job info
-        error|JobInfo jobInfo = baseClient->getJobInfo(deleteJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -48,7 +48,7 @@ function deleteXml() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = deleteJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = queryJob->getBatchInfo(batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -56,7 +56,7 @@ function deleteXml() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = deleteJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = queryJob->getAllBatches();
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -64,20 +64,21 @@ function deleteXml() {
         }
 
         //get batch request
-        var batchRequest = deleteJob->getBatchRequest(batchId);
-            if (batchRequest is xml) {
-            test:assertTrue ((batchRequest/<*>).length() == 5, msg ="Retrieving batch request failed.");
+        var batchRequest = queryJob->getBatchRequest(batchId);
+        if (batchRequest is string) {
+            test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
-            test:assertFail("Invalid batch request!");
+            test:assertFail(msg = "Invalid Batch Request!");
         }
 
         //get batch result
-        var batchResult = deleteJob->getBatchResult(batchId);
-        if (batchResult is Result[]) {
-            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-            test:assertTrue(checkBatchResults(batchResult), msg = "Delete was not successful.");
+        var batchResult = queryJob->getBatchResult(batchId);
+            if (batchResult is xml) {
+                //io:println("count : ", (batchResult/<*>).length().toString());
+            test:assertTrue ((batchResult/<*>).length() == 4, msg ="Retrieving batch result failed.");
+            xmlQueryResult = <@untainted>batchResult;
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());
         } else {
@@ -85,7 +86,7 @@ function deleteXml() {
         }
 
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(deleteJob);
+        error|JobInfo closedJob = baseClient->closeJob(queryJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
@@ -93,6 +94,6 @@ function deleteXml() {
         }
 
     } else {
-        test:assertFail(msg = deleteJob.message());
+        test:assertFail(msg = queryJob.message());
     }
 }

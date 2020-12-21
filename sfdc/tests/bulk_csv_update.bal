@@ -21,15 +21,15 @@ import ballerina/test;
     dependsOn: ["insertCsv", "upsertCsv"]
 }
 function updateCsv() {
-    log:printInfo("baseClient -> updateCsv");
+    log:print("baseClient -> updateCsv");
     string batchId = "";
 
-    string johnsID = getContactIdByName("John", "Michael", "Professor Grade 04");
-    string pedrosID = getContactIdByName("Pedro", "Guterez", "Professor Grade 04");
+    string binnsID = getContactIdByName("Cuthbert", "Binns", "Professor Level 02");
+    string shanesID = getContactIdByName("Burbage", "Shane", "Professor Level 02");
 
     string contacts = "Id,description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-        johnsID + ",Created_from_Ballerina_Sf_Bulk_API,John,Michael,Professor Grade 04,0332236677,john.michael@gmail.com,301\n" +
-        pedrosID + ",Created_from_Ballerina_Sf_Bulk_API,Pedro,Guterez,Professor Grade 04,0445567100,pedro.gut@gmail.com,303";
+        binnsID + ",Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0222236677,bins98@gmail.com,845\n" +
+        shanesID + ",Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211788,shane78@gmail.com,846";
 
     //create job
     error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "CSV");

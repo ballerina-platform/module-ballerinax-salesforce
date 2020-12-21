@@ -18,29 +18,48 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    dependsOn: ["updateCsv", "insertCsvFromFile"]
+    dependsOn: ["insertXml"]
 }
-function queryCsv() {
-    log:printInfo("baseClient -> queryCsv");
+function upsertXml() {
+    log:print("baseClient -> upsertXml");
     string batchId = "";
 
-    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Grade 04'";
+    xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
+        <sObject>
+            <description>Created_from_Ballerina_Sf_Bulk_API</description>
+            <FirstName>Argus</FirstName>
+            <LastName>Filch</LastName>
+            <Title>Professor Level 01</Title>
+            <Phone>099111123</Phone>
+            <Email>argusD@yahoo.com</Email>
+            <My_External_Id__c>851</My_External_Id__c>
+        </sObject>
+        <sObject>
+            <description>Created_from_Ballerina_Sf_Bulk_API</description>
+            <FirstName>Poppy</FirstName>
+            <LastName>Pomfrey</LastName>
+            <Title>Professor Level 01</Title>
+            <Phone>016755643</Phone>
+            <Email>poppyF@gmail.com</Email>
+            <My_External_Id__c>852</My_External_Id__c>
+        </sObject>
+    </sObjects>`;
 
     //create job
-    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "CSV");
+    error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "XML", "My_External_Id__c");
 
-    if (queryJob is BulkJob) {
-        //add query string
-        error|BatchInfo batch = queryJob->addBatch(queryStr);
+        if (upsertJob is BulkJob) {
+        //add xml content
+        error|BatchInfo batch = upsertJob->addBatch(contacts);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using xml.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
         }
 
         //get job info
-        error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(upsertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -48,7 +67,7 @@ function queryCsv() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = queryJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = upsertJob->getBatchInfo(batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -56,7 +75,7 @@ function queryCsv() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = queryJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = upsertJob->getAllBatches();
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -64,20 +83,20 @@ function queryCsv() {
         }
 
         //get batch request
-        var batchRequest = queryJob->getBatchRequest(batchId);
-        if (batchRequest is string) {
-            test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
+        var batchRequest = upsertJob->getBatchRequest(batchId);
+            if (batchRequest is xml) {
+            test:assertTrue ((batchRequest/<*>).length() == 2, msg ="Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
-            test:assertFail(msg = "Invalid Batch Request!");
+            test:assertFail("Invalid batch request!");
         }
 
         //get batch result
-        var batchResult = queryJob->getBatchResult(batchId);
-        if (batchResult is string) {
-            test:assertTrue(checkCsvResult(batchResult) == 5, msg = "Retrieving batch result failed.");
-            csvQueryResult = <@untainted>batchResult;
+        var batchResult = upsertJob->getBatchResult(batchId);
+        if (batchResult is Result[]) {
+            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
+            test:assertTrue(checkBatchResults(batchResult), msg = "Upsert was not successful.");
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());
         } else {
@@ -85,13 +104,14 @@ function queryCsv() {
         }
 
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(queryJob);
+        error|JobInfo closedJob = baseClient->closeJob(upsertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message());
         }
+
     } else {
-        test:assertFail(msg = queryJob.message());
+        test:assertFail(msg = upsertJob.message());
     }
 }

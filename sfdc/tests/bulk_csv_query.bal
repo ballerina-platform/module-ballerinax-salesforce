@@ -17,30 +17,31 @@
 import ballerina/log;
 import ballerina/test;
 
+
 @test:Config {
-    dependsOn: ["queryCsv"]
+    dependsOn: ["updateCsv", "insertCsvFromFile", "insertCsv"]
 }
-function deleteCsv() {
-    log:printInfo("baseClient -> deleteCsv");
+function queryCsv() {
+    log:print("baseClient -> queryCsv");
     string batchId = "";
 
-    string contacts = getCsvContactsToDelete(csvQueryResult);
+    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
 
     //create job
-    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
+    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "CSV");
 
-    if (deleteJob is BulkJob) {
-        //add csv content
-        error|BatchInfo batch = deleteJob->addBatch(<@untainted>contacts);
+    if (queryJob is BulkJob) {
+        //add query string
+        error|BatchInfo batch = queryJob->addBatch(queryStr);
         if (batch is BatchInfo) {
-            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using CSV.");
+            test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
             batchId = batch.id;
         } else {
             test:assertFail(msg = batch.message());
         }
 
         //get job info
-        error|JobInfo jobInfo = baseClient->getJobInfo(deleteJob);
+        error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
@@ -48,7 +49,7 @@ function deleteCsv() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = deleteJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = queryJob->getBatchInfo(batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -56,7 +57,7 @@ function deleteCsv() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = deleteJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = queryJob->getAllBatches();
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -64,19 +65,21 @@ function deleteCsv() {
         }
 
         //get batch request
-        var batchRequest = deleteJob->getBatchRequest(batchId);
+        var batchRequest = queryJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 5, msg = "Retrieving batch request failed.");
+            test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
         }
 
-        var batchResult = deleteJob->getBatchResult(batchId);
-        if (batchResult is Result[]) {
-            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-            test:assertTrue(checkBatchResults(batchResult), msg = "Delete was not successful.");
+        //get batch result
+        var batchResult = queryJob->getBatchResult(batchId);
+        if (batchResult is string) {
+            //io:println("count : ", checkCsvResult(batchResult).toString());
+            test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed." );
+            csvQueryResult = <@untainted>batchResult;
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());
         } else {
@@ -84,14 +87,13 @@ function deleteCsv() {
         }
 
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(deleteJob);
+        error|JobInfo closedJob = baseClient->closeJob(queryJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message());
         }
-
     } else {
-        test:assertFail(msg = deleteJob.message());
+        test:assertFail(msg = queryJob.message());
     }
 }

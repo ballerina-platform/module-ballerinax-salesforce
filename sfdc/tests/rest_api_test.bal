@@ -42,7 +42,7 @@ string testRecordId = "";
 
 @test:Config {}
 function testCreateRecord() {
-    log:printInfo("baseClient -> createRecord()");
+    log:print("baseClient -> createRecord()");
     string|Error stringResponse = baseClient->createRecord(ACCOUNT, accountRecord);
 
     if (stringResponse is string) {
@@ -56,7 +56,7 @@ function testCreateRecord() {
 @test:Config {dependsOn: ["testCreateRecord"]}
 function testGetRecord() {
     json|Error response;
-    log:printInfo("baseClient -> getRecord()");
+    log:print("baseClient -> getRecord()");
     string path = "/services/data/v48.0/sobjects/Account/" + testRecordId;
     response = baseClient->getRecord(path);
 
@@ -71,7 +71,7 @@ function testGetRecord() {
 
 @test:Config {dependsOn: ["testCreateRecord", "testGetRecord"]}
 function testUpdateRecord() {
-    log:printInfo("baseClient -> updateRecord()");
+    log:print("baseClient -> updateRecord()");
     json account = {
         Name: "WSO2 Inc",
         BillingCity: "Jaffna",
@@ -88,7 +88,7 @@ function testUpdateRecord() {
 
 @test:Config {dependsOn: ["testSearchSOSLString"]}
 function testDeleteRecord() {
-    log:printInfo("baseClient -> deleteRecord()");
+    log:print("baseClient -> deleteRecord()");
     boolean|Error response = baseClient->deleteRecord(ACCOUNT, testRecordId);
 
     if (response is boolean) {
@@ -100,7 +100,7 @@ function testDeleteRecord() {
 
 @test:Config {}
 function testGetQueryResult() {
-    log:printInfo("baseClient -> getQueryResult()");
+    log:print("baseClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
     SoqlResult|Error res = baseClient->getQueryResult(sampleQuery);
 
@@ -109,7 +109,7 @@ function testGetQueryResult() {
         string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
 
         while (nextRecordsUrl is string && trim(nextRecordsUrl) != EMPTY_STRING) {
-            log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
+            log:print("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
             SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
 
             if (resp is SoqlResult) {
@@ -126,7 +126,7 @@ function testGetQueryResult() {
 
 @test:Config {dependsOn: ["testUpdateRecord"]}
 function testSearchSOSLString() {
-    log:printInfo("baseClient -> searchSOSLString()");
+    log:print("baseClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
     SoslResult|Error res = baseClient->searchSOSLString(searchString);
 
@@ -151,7 +151,7 @@ isolated function assertSoqlResult(SoqlResult|Error res) {
 
 @test:Config {}
 function testGetAvailableApiVersions() {
-    log:printInfo("baseClient -> getAvailableApiVersions()");
+    log:print("baseClient -> getAvailableApiVersions()");
     Version[]|Error versions = baseClient->getAvailableApiVersions();
 
     if (versions is Version[]) {
@@ -163,7 +163,7 @@ function testGetAvailableApiVersions() {
 
 @test:Config {}
 function testGetResourcesByApiVersion() {
-    log:printInfo("baseClient -> getResourcesByApiVersion()");
+    log:print("baseClient -> getResourcesByApiVersion()");
     map<string>|Error resources = baseClient->getResourcesByApiVersion(API_VERSION);
 
     if (resources is map<string>) {
@@ -183,7 +183,7 @@ function testGetResourcesByApiVersion() {
 
 @test:Config {}
 function testGetOrganizationLimits() {
-    log:printInfo("baseClient -> getOrganizationLimits()");
+    log:print("baseClient -> getOrganizationLimits()");
     map<Limit>|Error limits = baseClient->getOrganizationLimits();
 
     if (limits is map<Limit>) {
