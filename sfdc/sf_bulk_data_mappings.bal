@@ -148,7 +148,7 @@ function createBatchResultRecordFromJson(json payload) returns Result[]|Error {
 
             if (errors is json) {
 
-                if (trim(errors.toString()).length() > 0) {
+                if (trim(errors.toString()).length() > 2) {
                     log:printError("Failed batch result, errors=" + errors.toString(), err = ());
                     json[] errorsArr = <json[]>errors;
                     string errMsg = "";

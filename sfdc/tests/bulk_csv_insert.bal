@@ -17,6 +17,8 @@
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
+import ballerina/runtime;
+
 
 @test:Config {}
 function insertCsv() {
@@ -102,7 +104,7 @@ function insertCsvFromFile() {
     log:print("baseClient -> insertCsvFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "sfdc/tests/resources/contacts.csv";
+    string csvContactsFilePath = "tests/resources/contacts.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
@@ -158,6 +160,7 @@ function insertCsvFromFile() {
             test:assertFail(msg = "Invalid Batch Request!");
         }
 
+        runtime:sleep(3000);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
