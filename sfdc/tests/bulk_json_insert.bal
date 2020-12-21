@@ -17,6 +17,7 @@
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
+import ballerina/runtime;
 
 @test:Config {}
 function insertJson() {
@@ -97,6 +98,7 @@ function insertJson() {
         }
 
         //get batch result
+        runtime:sleep(3000);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -186,6 +188,7 @@ function insertJsonFromFile() {
         }
 
         //get batch result
+        runtime:sleep(3000);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");

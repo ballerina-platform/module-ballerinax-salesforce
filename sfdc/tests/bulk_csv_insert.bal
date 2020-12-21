@@ -76,6 +76,7 @@ function insertCsv() {
             test:assertFail(msg = "Invalid Batch Request!");
         }
 
+        runtime:sleep(3000);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
