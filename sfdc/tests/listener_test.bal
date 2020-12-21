@@ -16,6 +16,8 @@
 import ballerina/test;
 import ballerina/config;
 import ballerina/io;
+import ballerina/runtime;
+
 
 ListenerConfiguration listenerConfig = {
     username: config:getAsString("SF_USERNAME"),
@@ -44,5 +46,6 @@ service /topic/AccountUpdate  on eventListener {
 
 @test:Config {dependsOn: ["testUpdateRecord"]}
 function testUpdated() {
+    runtime:sleep(3000);
     test:assertTrue(isUpdated, "Error in retrieving account update!");
 }
