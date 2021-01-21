@@ -17,7 +17,6 @@
 import ballerina/log;
 import ballerina/test;
 
-
 @test:Config {
     dependsOn: ["updateCsv", "insertCsvFromFile", "insertCsv"]
 }
@@ -32,7 +31,7 @@ function queryCsv() {
 
     if (queryJob is BulkJob) {
         //add query string
-        error|BatchInfo batch = queryJob->addBatch(queryStr);
+        error|BatchInfo batch = baseClient->addBatch(queryJob, queryStr);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
             batchId = batch.id;
@@ -49,7 +48,7 @@ function queryCsv() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = queryJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = baseClient->getBatchInfo(queryJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -57,7 +56,7 @@ function queryCsv() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = queryJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = baseClient->getAllBatches(queryJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -65,7 +64,7 @@ function queryCsv() {
         }
 
         //get batch request
-        var batchRequest = queryJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(queryJob, batchId);
         if (batchRequest is string) {
             test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
@@ -75,9 +74,8 @@ function queryCsv() {
         }
 
         //get batch result
-        var batchResult = queryJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(queryJob, batchId);
         if (batchResult is string) {
-            //io:println("count : ", checkCsvResult(batchResult).toString());
             test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed." );
             csvQueryResult = <@untainted>batchResult;
         } else if (batchResult is error) {

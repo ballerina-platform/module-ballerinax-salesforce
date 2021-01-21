@@ -13,11 +13,11 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/test;
 import ballerina/config;
 import ballerina/io;
 import ballerina/runtime;
-
 
 ListenerConfiguration listenerConfig = {
     username: config:getAsString("SF_USERNAME"),
@@ -37,8 +37,6 @@ service /topic/AccountUpdate  on eventListener {
         if (account is json) {
             if (account.sobject.Name == "WSO2 Inc") {
                 isUpdated = true;
-            }else{
-                io:println(account.toString());
             }
         }
     }

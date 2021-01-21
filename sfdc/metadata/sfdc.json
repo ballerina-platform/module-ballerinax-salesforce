@@ -691,17 +691,15 @@
                             "displayName": "Job Information"
                         }
         
-                    }
-                ]
-            },
-            {
-                "name":"BulkJob",
-                "displayName":"Bulk Job Client",
-                "operations": [
+                    },
                     {
                         "name": "addBatch",
                         "displayName": "Add Batch to Job",
                         "parameters" : [
+                            {
+                                "name": "bulkJob",
+                                "displayName": "Bulk Job"
+                            },
                             {
                                 "name": "content",
                                 "displayName": "Batch Content"
@@ -718,6 +716,10 @@
                         "displayName": "Get Batch Information",
                         "parameters" : [
                             {
+                                "name": "bulkJob",
+                                "displayName": "Bulk Job"
+                            },
+                            {
                                 "name": "batchId",
                                 "displayName": "Batch ID"
                             }
@@ -730,7 +732,12 @@
                     {
                         "name":"getAllBatches",
                         "displayName": "Get All Batches",
-                        "parameters" : [],
+                        "parameters" : [
+                            {
+                                "name": "bulkJob",
+                                "displayName": "Bulk Job"
+                            }
+                        ],
                         "returnValue": {
                             "name": "BatchInfo[]",
                             "displayName": "List of Batch Information"
@@ -740,6 +747,10 @@
                         "name":"getBatchRequest",
                         "displayName": "Get Batch Request Payload",
                         "parameters" : [
+                            {
+                                "name": "bulkJob",
+                                "displayName": "Bulk Job"
+                            },
                             {
                                 "name": "batchId",
                                 "displayName": "Batch ID"
@@ -754,6 +765,10 @@
                         "name":"getBatchResult",
                         "displayName": "Get Processed Batch Result",
                         "parameters" : [
+                            {
+                                "name": "bulkJob",
+                                "displayName": "Bulk Job"
+                            },
                             {
                                 "name": "batchId",
                                 "displayName": "Batch ID"
