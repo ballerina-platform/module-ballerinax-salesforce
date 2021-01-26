@@ -20,10 +20,12 @@ import ballerina/io;
 import ballerina/oauth2;
 
 # The Salesforce Client object.
-# + salesforceClient - OAuth2 client endpoint
+# + restClient - RestAPI client endpoint
+# + bulkClient - BulkAPI client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
 public client class BaseClient {
-    http:Client salesforceClient;
+    http:Client restClient;
+    http:Client bulkClient;
     SalesforceConfiguration salesforceConfiguration;
 
     # Salesforce Connector endpoint initialization function.
@@ -33,19 +35,19 @@ public client class BaseClient {
         // Create an OAuth2 provider.
         oauth2:OutboundOAuth2Provider oauth2Provider = new (salesforceConfig.clientConfig);
         // Create a bearer auth handler using the a created provider.
-        SalesforceAuthHandler bearerHandler = new (oauth2Provider);
+        http:BearerAuthHandler restBearerHandler = new(oauth2Provider);
+        SalesforceBulkAuthHandler bulkBearerHandler = new (oauth2Provider);
 
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
-
-        // Create an HTTP client.
-        if (socketConfig is http:ClientSecureSocket) {
-            self.salesforceClient = new (salesforceConfig.baseUrl, {
-                secureSocket: socketConfig,
-                auth: {authHandler: bearerHandler}
-            });
-        } else {
-            self.salesforceClient = new (salesforceConfig.baseUrl, {auth: {authHandler: bearerHandler}});
-        }
+        self.restClient = new (salesforceConfig.baseUrl, {
+            auth: { authHandler: restBearerHandler },
+            secureSocket: socketConfig
+        });
+        self.bulkClient = new (salesforceConfig.baseUrl, {
+            secureSocket: socketConfig,
+            auth: { authHandler: bulkBearerHandler }
+        });
+     
     }
 
     //Describe SObjects
@@ -91,7 +93,7 @@ public client class BaseClient {
     # + path - Resource path
     # + return - `json` result if successful else Error occured
     remote function getRecord(string path) returns @tainted json|Error {
-        http:Response|http:PayloadType|error response = self.salesforceClient->get(path);
+        http:Response|http:PayloadType|error response = self.restClient->get(path);
         return checkAndSetErrors(response);
     }
 
@@ -104,7 +106,7 @@ public client class BaseClient {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(recordPayload);
 
-        var response = self.salesforceClient->post(path, req);
+        var response = self.restClient->post(path, req);
 
         json|Error result = checkAndSetErrors(response);
         if (result is json) {
@@ -125,7 +127,7 @@ public client class BaseClient {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
 
-        var response = self.salesforceClient->patch(path, req);
+        var response = self.restClient->patch(path, req);
 
         json|Error result = checkAndSetErrors(response, false);
 
@@ -142,7 +144,7 @@ public client class BaseClient {
     # + return - true if successful else false or Error occured
     remote function deleteRecord(string sObjectName, string id) returns @tainted boolean|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-        var response = self.salesforceClient->delete(path, ());
+        var response = self.restClient->delete(path, ());
 
         json|Error result = checkAndSetErrors(response, false);
 
@@ -439,10 +441,10 @@ public client class BaseClient {
         http:Request req = new;
         req.setJsonPayload(jobPayload);
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
-        var response = self.salesforceClient->post(path, req);
+        var response = self.bulkClient->post(path, req);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
-            BulkJob bulkJob = new (jobResponse.id.toString(), contentType, operation, self.salesforceClient);
+            BulkJob bulkJob = new (jobResponse.id.toString(), contentType, operation, self.bulkClient);
             return bulkJob;
         } else {
             return jobResponse;
@@ -458,7 +460,7 @@ public client class BaseClient {
         JOBTYPE jobDataType = bulkJob.jobDataType;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
-        var response = self.salesforceClient->get(path, req);
+        var response = self.bulkClient->get(path, req);
         if (JSON == jobDataType) {
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json) {
@@ -487,7 +489,7 @@ public client class BaseClient {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
-        var response = self.salesforceClient->post(path, req);
+        var response = self.bulkClient->post(path, req);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
             JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
@@ -506,7 +508,7 @@ public client class BaseClient {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
         req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
-        var response = self.salesforceClient->post(path, req);
+        var response = self.bulkClient->post(path, req);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
             JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
@@ -541,7 +543,7 @@ public client class BaseClient {
                 }
             }
             req.setHeader(CONTENT_TYPE, APP_JSON);
-            var response = self.salesforceClient->post(path, req);
+            var response = self.bulkClient->post(path, req);
             json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
             if (batchResponse is json) {
                 BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
@@ -566,7 +568,7 @@ public client class BaseClient {
                 }
             }
             req.setHeader(CONTENT_TYPE, APP_XML);
-            var response = self.salesforceClient->post(path, req);
+            var response = self.bulkClient->post(path, req);
             xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
             if (batchResponse is xml) {
                 BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
@@ -583,7 +585,7 @@ public client class BaseClient {
                 req.setTextPayload(<@untainted>textcontent);
             }
             req.setHeader(CONTENT_TYPE, TEXT_CSV);
-            var response = self.salesforceClient->post(path, req);
+            var response = self.bulkClient->post(path, req);
             xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
             if (batchResponse is xml) {
                 BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
@@ -603,7 +605,7 @@ public client class BaseClient {
     remote function getBatchInfo(@tainted BulkJob bulkJob, string batchId) returns @tainted error|BatchInfo {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
         http:Request req = new;
-        var response = self.salesforceClient->get(path, req);
+        var response = self.bulkClient->get(path, req);
         if (JSON == bulkJob.jobDataType) {
             json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
             if (batchResponse is json) {
@@ -629,7 +631,7 @@ public client class BaseClient {
     remote function getAllBatches(@tainted BulkJob bulkJob) returns @tainted error|BatchInfo[] {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         http:Request req = new;
-        var response = self.salesforceClient->get(path, req);
+        var response = self.bulkClient->get(path, req);
         BatchInfo[] batchInfoList = [];
         if (JSON == bulkJob.jobDataType) {
             json batchResponse = check checkJsonPayloadAndSetErrors(response);
@@ -657,7 +659,7 @@ public client class BaseClient {
     remote function getBatchRequest(@tainted BulkJob bulkJob, string batchId) returns @tainted error|json|xml|string {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
         http:Request req = new;
-        var response = self.salesforceClient->get(path, req);
+        var response = self.bulkClient->get(path, req);
         if (QUERY == bulkJob.operation) {
             return getQueryRequest(response, bulkJob.jobDataType);
         } else {
@@ -686,27 +688,27 @@ public client class BaseClient {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, RESULT]);
         Result[] results = [];
         http:Request req = new;
-        var response = self.salesforceClient->get(path, req);
+        var response = self.bulkClient->get(path, req);
 
         match bulkJob.jobDataType {
             JSON => {
                 json resultResponse = check checkJsonPayloadAndSetErrors(response);
                 if (QUERY == bulkJob.operation) {
-                    return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient);
+                    return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.bulkClient);
                 }
                 return createBatchResultRecordFromJson(resultResponse);
             }
             XML => {
                 xml resultResponse = check checkXmlPayloadAndSetErrors(response);
                 if (QUERY == bulkJob.operation) {
-                    return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient);
+                    return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.bulkClient);
                 }
                 return createBatchResultRecordFromXml(resultResponse);
             }
             CSV => {
                 if (QUERY == bulkJob.operation) {
                     xml resultResponse = check checkXmlPayloadAndSetErrors(response);
-                    return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient);
+                    return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.bulkClient);
                 }
                 string resultResponse = check checkTextPayloadAndSetErrors(response);
                 return createBatchResultRecordFromCsv(resultResponse);
