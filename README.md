@@ -85,7 +85,7 @@ The `ballerinax/sfdc` module includes a Listener that would capture events on Pu
 
 # Quickstart(s)
 
-## Step 1: Import Ballerina Salesforce module**
+## Step 1: Import Ballerina Salesforce module
 
 First, import the `ballerinax/sfdc` module into the Ballerina project.
 
@@ -113,7 +113,7 @@ Instantiate the connector by giving authentication details in the HTTP client co
 4. Provide the client ID and client secret to obtain the refresh token and access token. For more information on obtaining OAuth2 credentials, go to [Salesforce documentation](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
 
-## **Step 3: Create the Salesforce client**
+## **Step 3: Create the Salesforce client
 
 You can define the Salesforce configuration and create Salesforce base client as mentioned below.
 
