@@ -125,7 +125,7 @@ You can define the Salesforce configuration and create Salesforce base client as
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 
-SalesforceConfiguration sfConfig = {
+sfdc:SalesforceConfiguration sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
        accessToken: <"ACCESS_TOKEN">,
@@ -138,7 +138,7 @@ SalesforceConfiguration sfConfig = {
    }
 };
 
-BaseClient baseClient = new (sfConfig);
+sfdc:BaseClient baseClient = new (sfConfig);
 ```
 
 
@@ -148,7 +148,7 @@ If you want to add your own key store to define the `secureSocketConfig`, change
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 
-SalesforceConfiguration sfConfig = {
+sfdc:SalesforceConfiguration sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
        accessToken: <"ACCESS_TOKEN">,
@@ -168,7 +168,7 @@ SalesforceConfiguration sfConfig = {
 
 };
 
-BaseClient baseClient = new (sfConfig);
+sfdc:BaseClient baseClient = new (sfConfig);
 ```
 
 
