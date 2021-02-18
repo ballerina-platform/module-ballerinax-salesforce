@@ -174,7 +174,7 @@ As described earlier Ballerina Salesforce connector facilitates users to perform
 
 #### Create Record
 
-The ‘createRecord’ remote function of the baseclient can be used to create SObject records for a given SObject type. Users need to pass SObject name and the SObject record in json format to the ‘createRecord’ function and it will return newly created record Id as a string at the success and will return an error at the failure. 
+The `createRecord` remote function of the baseclient can be used to create SObject records for a given SObject type. Users need to pass SObject name and the SObject record in json format to the `createRecord` function and it will return newly created record Id as a string at the success and will return an error at the failure. 
 
 
 ```ballerina
@@ -188,7 +188,7 @@ string|sdfc:Error recordId = baseClient->createRecord(ACCOUNT,       accountReco
 
 #### Get Record
 
-The ‘getRecord’ remote function of the baseclient can be used to get SObject record by SObject Id. Users need to pass the path to the SObject including the SObject Id to the ‘getRecord’ function and it will return the record in json at the success and will return an error at the failure. 
+The `getRecord` remote function of the baseclient can be used to get SObject record by SObject Id. Users need to pass the path to the SObject including the SObject Id to the `getRecord` function and it will return the record in json at the success and will return an error at the failure. 
 
 
 ```ballerina
@@ -199,7 +199,7 @@ json|Error response = baseClient->getRecord(path);
 
 #### Update Record
 
-The ‘updateRecord’ remote function of the baseclient can be used to update SObject records for a given SObject type. Users need to pass SObject name, SObject Id and the SObject record in json format to the updateRecord’ function and it will return ‘true’ at the success and will return an error at the failure. 
+The `updateRecord` remote function of the baseclient can be used to update SObject records for a given SObject type. Users need to pass SObject name, SObject Id and the SObject record in json format to the updateRecord’ function and it will return `true` at the success and will return an error at the failure. 
 
 
 ```ballerina
@@ -230,7 +230,7 @@ Following are the sample codes for Account’s CRUD operations and the other abo
 
 #### Create Account
 
-‘createAccount’ remote function accepts an account record in json as an argument and returns Id of the account created at success. 
+`createAccount` remote function accepts an account record in json as an argument and returns Id of the account created at success. 
 
 
 ```ballerina
@@ -257,7 +257,7 @@ json|sfdc:Error account = baseClient->getAccountById(accountId, Name, BillingCit
 
 #### Update Account
 
-‘updateAccount’ remote function accepts account id and the account record needed to update in json as arguments and returns true at success. 
+`updateAccount` remote function accepts account id and the account record needed to update in json as arguments and returns true at success. 
 
 
 ```ballerina
@@ -272,7 +272,7 @@ boolean|sfdc:Error isSuccess = baseClient->updateRecord(accountId, account);
 
 #### Delete Account
 
-User needs to pass the Id of the account he needs to delete for the ‘deleteAccount’ remote function. Function will return true at success. 
+User needs to pass the Id of the account he needs to delete for the `deleteAccount` remote function. Function will return true at success. 
 
 ```ballerina
 string accountId = "001xa000003DIlo";
@@ -281,7 +281,7 @@ boolean|sfdc:Error isDeleted = baseClient->deleteAccount(accountId);
 
 ## Query Operations
 
-The ‘getQueryResult’ remote function executes a SOQL query that returns all the results in a single response or if it exceeds the maximum record limit, it returns part of the results and an identifier that can be used to retrieve the remaining results.
+The `getQueryResult` remote function executes a SOQL query that returns all the results in a single response or if it exceeds the maximum record limit, it returns part of the results and an identifier that can be used to retrieve the remaining results.
 
 
 ```ballerina
@@ -290,7 +290,7 @@ SoqlResult|Error res = baseClient->getQueryResult(sampleQuery);
 ```
 
 
-The response from ‘getQueryResult’ is either a ‘SoqlResult’ record with total size, execution status, resulting records, and URL to get the next record set (if query execution was successful) or Error (if the query execution was unsuccessful).
+The response from `getQueryResult` is either a `SoqlResult` record with total size, execution status, resulting records, and URL to get the next record set (if query execution was successful) or Error (if the query execution was unsuccessful).
 
 
 ```ballerina
@@ -303,7 +303,7 @@ if (response is sfdc:SoqlResult) {
 }
 ```
 
-If response has exceeded the maximum record limit, response will contain a key named ‘nextRecordsUrl’ and then the user can call ‘getNextQueryResult’ remote function to get the next record set. 
+If response has exceeded the maximum record limit, response will contain a key named ‘nextRecordsUrl’ and then the user can call `getNextQueryResult` remote function to get the next record set. 
 
 
 ```ballerina
@@ -312,7 +312,7 @@ sfdc:SoqlResult|sfdc:Error resp = baseClient->getNextQueryResult(<@untainted>nex
 
 ## Search Operations
 
-The ‘searchSOSLString’ remote function allows users to search using a string and returns all the occurrences of the string back to the user. SOSL searches are faster and can return more relevant results.
+The `searchSOSLString` remote function allows users to search using a string and returns all the occurrences of the string back to the user. SOSL searches are faster and can return more relevant results.
 
 
 ```
@@ -357,7 +357,7 @@ Apart from the main SObject related functions Ballerina Salesforce Connector fac
 
 ## Bulk Operations 
 
-Using the ‘createJob’ remote function of the base client, we can create any type of job and of the data type JSON, XML and CSV. ‘createJob’ remote function has three parameters.
+Using the `createJob` remote function of the base client, we can create any type of job and of the data type JSON, XML and CSV. `createJob` remote function has three parameters.
 
 
 1. Operation - INSERT, UPDATE, DELETE, UPSERT or QUERY
@@ -384,25 +384,35 @@ Using the created job object, we can add a batch to it, get information about th
             Email: "morne89@gmail.com"
         }
     ];
+```
 
+```ballerina
     //Add json content.
     error|sfdc:BatchInfo batch = insertJob->addBatch(contacts);
+```
 
+```ballerina
     //Get batch info.
     error|sfdc:BatchInfo batchInfo = insertJob->getBatchInfo(batch.id
+```
 
+```ballerina
     //Get all batches.
     error|sfdc:BatchInfo[] batchInfoList = insertJob->getAllBatches();
+```
 
+```ballerina
     //Get the batch request.
     var batchRequest = insertJob->getBatchRequest(batchId);
+```
 
+```ballerina
     //Get the batch result.
     error|sdfc:Result[] batchResult = insertJob->getBatchResult(batchId);
 ```
 
 
-The ‘getJobInfo’ remote function retrieves all details of an existing job.
+The `getJobInfo` remote function retrieves all details of an existing job.
 
 
 ```ballerina
@@ -410,7 +420,7 @@ The ‘getJobInfo’ remote function retrieves all details of an existing job.
 ```
 
 
-The ‘closeJob’ and the ‘abortJob’ remote functions close and abort the bulk job respectively. When a job is closed, no more batches can be added. When a job is aborted, no more records are processed. If changes to data have already been committed, they aren’t rolled back.
+The `closeJob` and the `abortJob` remote functions close and abort the bulk job respectively. When a job is closed, no more batches can be added. When a job is aborted, no more records are processed. If changes to data have already been committed, they aren’t rolled back.
 
 
 ```ballerina
@@ -453,7 +463,7 @@ Now, a service has to be defined on the ‘eventListener’ like the following.
 ```
 
 
-The above service is listening to the PushTopic ‘QuoteUpdate’ defined in the Salesforce like the following.
+The above service is listening to the PushTopic `QuoteUpdate` defined in the Salesforce like the following.
 
 
 ```ballerina
@@ -474,8 +484,8 @@ The above service is listening to the PushTopic ‘QuoteUpdate’ defined in the
 
 
 *   Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
-*   [Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
-*   [OpenJDK](https://adoptopenjdk.net/)
+	[Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html),
+	[OpenJDK](https://adoptopenjdk.net/)  
 
     **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
