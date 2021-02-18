@@ -402,7 +402,7 @@ Using the created job object, we can add a batch to it, get information about th
 
 ```ballerina
     //Get batch info.
-    error|sfdc:BatchInfo batchInfo = insertJob->getBatchInfo(batch.id
+    error|sfdc:BatchInfo batchInfo = insertJob->getBatchInfo(batch.id);
 ```
 
 ```ballerina
