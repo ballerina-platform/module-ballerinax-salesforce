@@ -117,7 +117,7 @@ Instantiate the connector by giving authentication details in the HTTP client co
 4. Provide the client ID and client secret to obtain the refresh token and access token. For more information on obtaining OAuth2 credentials, go to [Salesforce documentation](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
 
-## **Step 3: Create the Salesforce client
+## Step 3: Create the Salesforce client
 
 You can define the Salesforce configuration and create Salesforce base client as mentioned below.
 
@@ -172,7 +172,7 @@ BaseClient baseClient = new (sfConfig);
 ```
 
 
-## Step 3: Implement Operations
+## Step 4: Implement Operations
 
 
 ### SObject Operations
