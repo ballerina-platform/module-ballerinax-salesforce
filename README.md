@@ -14,6 +14,10 @@ Ballerina Salesforce connector currently utilizes the Salesforce REST API and Bu
 
 The Salesforce connector allows users to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and describe SObjects and organizational data through the Salesforce REST API. Also, it supports adding bulk data jobs and batches of types JSON, XML, and CSV via the Salesforce Bulk API. Apart from these functionalities Ballerina Salesforce Connector includes a listener module to capture events. This connector follows OAuth 2.0 authentication for secure access. 
 
+
+![Ballerina Salesforce Connector Overview](./docs/images/connector_overview.png)
+
+
 ### REST API Operations
 
 REST API provides a powerful, convenient, and simple Web services API for interacting with Salesforce Lightning Platform providing access to all the Salesforce functionalities through REST resources and HTTP methods. Ballerina Salesforce Connector utilizes the REST API for Salesforce Object (SObject) operations and for searching and querying data. At the same time, the connector provides users to get SObject details and organizational data using the REST API. 
