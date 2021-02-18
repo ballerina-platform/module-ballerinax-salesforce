@@ -34,7 +34,7 @@ The `ballerinax/sfdc` module contains operations, which query using Salesforce O
 
 Salesforce Bulk API is a specialized asynchronous RESTful API for loading and querying bulk of data at once.  The `ballerinax/sfdc` module supports bulk data operations for CSV, JSON, and XML data types. 
 
-## Event Listener
+### Event Listener
 
 The Salesforce Streaming API let users push a stream of notification from Salesforce to client apps based push topics. Push topics are SObjects that contain criterias for the events that users want to listen to such as data changes for a particular SObject.  
 
@@ -157,8 +157,8 @@ SalesforceConfiguration sfConfig = {
    },
 	secureSocketConfig: {
         trustStore: {
-            path: "<TRUSTSTORE_PATH>",
-            password: "<TRUSTSTORE_PASSWORD>"
+            path: <"TRUSTSTORE_PATH"">,
+            password: <"TRUSTSTORE_PASSWORD">
         }
     }
 
@@ -168,7 +168,7 @@ BaseClient baseClient = new (sfConfig);
 ```
 
 
-## Step 3: Initializing Operations
+## Step 3: Implement Operations
 
 
 ### SObject Operations
@@ -187,7 +187,7 @@ json accountRecord = {
    BillingCity: "Colombo 3"
  };
 
-string|sdfc:Error recordId = baseClient->createRecord(ACCOUNT,       accountRecord);
+string|sdfc:Error recordId = baseClient->createRecord(ACCOUNT, accountRecord);
 ```
 
 #### Get Record
@@ -249,7 +249,7 @@ string|sdfc:Error accountId = baseClient->createAccount(accountRecord);
 
 #### Get Account by Id
 
-User needs to pass the Id of the account and the names of the fields needed parameters for the ‘getAccountById’ remote function. Function will return the record in json format at success. 
+User needs to pass the Id of the account and the names of the fields needed parameters for the `getAccountById` remote function. Function will return the record in json format at success. 
 
 
 ```ballerina
@@ -361,7 +361,7 @@ Apart from the main SObject related functions Ballerina Salesforce Connector fac
 
 ## Bulk Operations 
 
-Using the `createJob` remote function of the base client, we can create any type of job and of the data type JSON, XML and CSV. `createJob` remote function has three parameters.
+Using the `createJob` remote function of the base client, we can create any type of job and of the data type JSON, XML and CSV. `createJob` remote function has four parameters.
 
 
 1. Operation - INSERT, UPDATE, DELETE, UPSERT or QUERY
@@ -369,6 +369,7 @@ Using the `createJob` remote function of the base client, we can create any type
 3. Content Type - JSON, XML or CSV
 4. ExternalIdFieldName (optional) - Field name of the external ID incase of an Upsert operation
 
+Step by step implementation of an `insert` bulk operation has described below. Follow the same process for other operation types too. 
 
 ```ballerina
 error|sfdc:BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
