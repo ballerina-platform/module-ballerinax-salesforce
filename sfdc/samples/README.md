@@ -44,7 +44,6 @@ public function main(){
     } else {
         log:printError(msg = res.message());
     }
-
 }
 ```
 
@@ -88,7 +87,6 @@ public function main(){
     } else {
         log:printError(msg = res.message());
     }
-
 }
 
 ```
@@ -138,7 +136,6 @@ public function main(){
     else{
         log:printError(res.message());
     }
-
 }
 ```
 
@@ -181,7 +178,6 @@ public function main(){
     else{
         log:printError(res.message());
     }
-
 }
 
 ```
@@ -256,7 +252,6 @@ public function main(){
     } else {
         log:printError(msg = res.message());
     }
-
 }
 
 ```
@@ -299,7 +294,6 @@ public function main(){
     else{
         log:printError(res.message());
     }
-
 }
 ```
 
