@@ -2,31 +2,34 @@ import ballerina/config;
 import ballerina/log;
 import ballerinax/sfdc;
 
+// Create Salesforce client configuration by reading from config file.
+sfdc:SalesforceConfiguration sfConfig = {
+    baseUrl: config:getAsString("EP_URL"),
+    clientConfig: {
+        accessToken: config:getAsString("ACCESS_TOKEN"),
+        refreshConfig: {
+            clientId: config:getAsString("CLIENT_ID"),
+            clientSecret: config:getAsString("CLIENT_SECRET"),
+            refreshToken: config:getAsString("REFRESH_TOKEN"),
+            refreshUrl: config:getAsString("REFRESH_URL")
+        }
+    }
+};
+
+// Create Salesforce client.
+sfdc:BaseClient baseClient = new(sfConfig);
+
 public function main(){
 
     string batchId = "";
 
-    // Create Salesforce client configuration by reading from config file.
-    sfdc:SalesforceConfiguration sfConfig = {
-        baseUrl: config:getAsString("EP_URL"),
-        clientConfig: {
-            accessToken: config:getAsString("ACCESS_TOKEN"),
-            refreshConfig: {
-                clientId: config:getAsString("CLIENT_ID"),
-                clientSecret: config:getAsString("CLIENT_SECRET"),
-                refreshToken: config:getAsString("REFRESH_TOKEN"),
-                refreshUrl: config:getAsString("REFRESH_URL")
-            }
-        }
-    };
-
-    // Create Salesforce client.
-    sfdc:BaseClient baseClient = new(sfConfig);
+    string id1 = getContactIdByName("Wanda", "Davidson", "Software Engineer Level 3");
+    string id2 = getContactIdByName("Natasha", "Romenoff", "Software Engineer Level 3");
 
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>
-            <Id>0032w00000QD4G2AAL</Id>
+            <Id>${id1}</Id>
             <FirstName>Wanda</FirstName>
             <LastName>Davidson</LastName>
             <Title>Sofware Engineer Level 3</Title>
@@ -37,7 +40,7 @@ public function main(){
         </sObject>
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>
-            <Id>0032w00000QD4G3AAL</Id>
+            <Id>${id2}</Id>
             <FirstName>Natasha</FirstName>
             <LastName>Romenoff</LastName>
             <Title>Software Engineer Level 3</Title>
@@ -52,13 +55,66 @@ public function main(){
     sfdc:BulkJob|error updateJob = baseClient->creatJob("upsert", "Contact", "XML","My_External_Id__c");
 
     if (updateJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = updateJob->addBatch(contacts);
+        error|sfdc:BatchInfo batch = updateJob->addBatch(<@untainted>contacts);
         if (batch is sfdc:BatchInfo) {
-           string message = batch.id.length() > 0 ? "Batch Upserted Successfully" :"Failed to Upsert the Batch";
-           batchId = batch.id;
-           log:print(message);
+            batchId = batch.id;
+            string message = batch.id.length() > 0 ? "Batch added to upsert Successfully" :"Failed to add the batch";
+            log:print(message);
         } else {
            log:printError(batch.message());
+        }
+
+        //get job info
+        error|sfdc:JobInfo jobInfo = baseClient->getJobInfo(updateJob);
+        if (jobInfo is sfdc:JobInfo) {
+            string message = jobInfo.id.length() > 0 ? "Jon Info Received Successfully" :"Failed Retrieve Job Info";
+            log:print(message);
+        } else {
+            log:printError(jobInfo.message());
+        }
+
+        //get batch info
+        error|sfdc:BatchInfo batchInfo = updateJob->getBatchInfo(batchId);
+        if (batchInfo is sfdc:BatchInfo) {
+            string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
+            log:print(message);
+        } else {
+            log:printError(batchInfo.message());
+        }
+
+        //get all batches
+        error|sfdc:BatchInfo[] batchInfoList = updateJob->getAllBatches();
+        if (batchInfoList is sfdc:BatchInfo[]) {
+            string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
+            log:print(message);
+        } else {
+            log:printError(batchInfoList.message());
+        }
+
+        //get batch request
+        var batchRequest = updateJob->getBatchRequest(batchId);
+        if (batchRequest is xml) {
+            string message = (batchRequest/<*>).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
+            log:print(message);
+            
+        } else if (batchRequest is error) {
+            log:printError(batchRequest.message());
+        } else {
+            log:printError(batchRequest.toString());
+        }
+
+        //get batch result
+        var batchResult = updateJob->getBatchResult(batchId);
+        if (batchResult is sfdc:Result[]) {
+            foreach sfdc:Result res in batchResult {
+                if (!res.success) {
+                    log:printError("Failed result, res=" + res.toString(), err = ());
+                }
+            }
+        } else if (batchResult is error) {
+            log:printError(batchResult.message());
+        } else {
+            log:printError(batchResult.toString());
         }
 
         //close job
@@ -73,6 +129,25 @@ public function main(){
 
 }
 
+function getContactIdByName(string firstName, string lastName, string title) returns @tainted string {
+    string contactId = "";
+    string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
+        + "' AND Title='" + title + "'";
+    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
+
+    if (res is sfdc:SoqlResult) {
+        sfdc:SoqlRecord[]|error records = res.records;
+        if (records is sfdc:SoqlRecord[]) {
+            string id = records[0]["Id"].toString();
+            contactId = id;
+        } else {
+            log:print("Getting contact ID by name failed. err=" + records.toString());            
+        }
+    } else {
+        log:print("Getting contact ID by name failed. err=" + res.toString());
+    }
+    return contactId;
+}
 
 
 

@@ -44,6 +44,7 @@ service /topic/AccountUpdate  on eventListener {
     }
 }
 
+
 @test:Config {dependsOn: ["testUpdateRecord"]}
 function testUpdated() {
     runtime:sleep(3000);

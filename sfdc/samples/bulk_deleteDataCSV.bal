@@ -25,7 +25,7 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = new(sfConfig);
     
-    string contactsToDelete = "Id\n" + "0032w00000QD4GNAA1\n" + "0032w00000QD4G2AAL\n" 
+    string contactsToDelete = "Id\n0032w00000QD5I7AAL\n0032w00000QD5I8AAL";
     sfdc:BulkJob|error deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
 
     if (deleteJob is sfdc:BulkJob){
@@ -38,17 +38,48 @@ public function main(){
            log:printError(batch.message());
         }
 
+        //get batch info
+        error|sfdc:BatchInfo batchInfo = deleteJob->getBatchInfo(batchId);
+        if (batchInfo is sfdc:BatchInfo) {
+            string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
+            log:print(message);
+        } else {
+            log:printError(batchInfo.message());
+        }
+
+        //get all batches
+        error|sfdc:BatchInfo[] batchInfoList = deleteJob->getAllBatches();
+        if (batchInfoList is sfdc:BatchInfo[]) {
+            string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
+            log:print(message);
+        } else {
+            log:printError(batchInfoList.message());
+        }
+
+        //get batch request
+        var batchRequest = deleteJob->getBatchRequest(batchId);
+        if (batchRequest is string) {
+            string message = (stringutils:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
+            log:print(message);
+            
+        } else if (batchRequest is error) {
+            log:printError(batchRequest.message());
+        } else {
+            log:printError(batchRequest.toString());
+        }
+
         //get batch result
         var batchResult = deleteJob->getBatchResult(batchId);
-        if (batchResult is string) {
-            string[] records = stringutils:split(batchResult, "\n");
-            log:print("Number of Records Received :" + records.toString());
-
+        if (batchResult is sfdc:Result[]) {
+            foreach sfdc:Result res in batchResult {
+                if (!res.success) {
+                    log:printError("Failed result, res=" + res.toString(), err = ());
+                }
+            }
         } else if (batchResult is error) {
-           string msg = batchResult.message();
-           log:printError(msg);
+            log:printError(batchResult.message());
         } else {
-            log:printError("Invalid Batch Result!");
+            log:printError(batchResult.toString());
         }
 
         //close job

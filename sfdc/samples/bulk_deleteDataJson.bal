@@ -6,8 +6,8 @@ public function main(){
 
     string batchId = "";
     json contactsToDelete = [
-        {"Id":"0032w00000QD4v8AAD"}, 
-        {"Id":"0032w00000QD4v9AAD"}
+        {"Id":"0032w00000QD5HJAA1"}, 
+        {"Id":"0032w00000QD5HKAA1"}
     ];
 
     // Create Salesforce client configuration by reading from config file.
@@ -41,23 +41,49 @@ public function main(){
            log:printError(batch.message());
         }
         
+                //get batch info
+        error|sfdc:BatchInfo batchInfo = deleteJob->getBatchInfo(batchId);
+        if (batchInfo is sfdc:BatchInfo) {
+            string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
+            log:print(message);
+        } else {
+            log:printError(batchInfo.message());
+        }
+
+        //get all batches
+        error|sfdc:BatchInfo[] batchInfoList = deleteJob->getAllBatches();
+        if (batchInfoList is sfdc:BatchInfo[]) {
+            string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
+            log:print(message);
+        } else {
+            log:printError(batchInfoList.message());
+        }
+
+        //get batch request
+        var batchRequest = deleteJob->getBatchRequest(batchId);
+        if (batchRequest is json) {
+            json[]|error batchRequestArr = <json[]>batchRequest;
+            if (batchRequestArr is json[]) {
+                string message = batchRequestArr.length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
+                log:print(message);
+            } else {
+                log:printError(batchRequestArr.message());
+            }
+        } else if (batchRequest is error) {
+            log:printError(batchRequest.message());
+        } else {
+            log:printError(batchRequest.toString());
+        }
+
         //get batch result
         var batchResult = deleteJob->getBatchResult(batchId);
         if (batchResult is sfdc:Result[]) {
-            foreach sfdc:Result res in batchResult {
-                if (!res.success) {
-                    log:printError("Failed result, res=" + res.toString(), err = ());
-                }
-            }
+           string message = batchResult.length() > 0 ? "Batch Result Received Successfully" :"Failed to Retrieve Batch Result";
+           log:print(message);
         } else if (batchResult is error) {
-            if (batchResult.message() == "InvalidBatch"){
-                log:print("Records Deleted successfully");
-            }
-            else{
-                log:printError(batchResult.message());
-            }          
+            log:printError(batchResult.message());
         } else {
-            log:printError("Invalid Batch Result!");
+            log:printError(batchResult.toString());
         }
 
         //close job

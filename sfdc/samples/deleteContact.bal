@@ -21,12 +21,12 @@ sfdc:BaseClient baseClient = new(sfConfig);
 
 public function main(){
 
-    string accountId = getAccountIdByName("WSO2 Inc");
+    string contactId = getContactIdByName("Peter", "Potts");
 
-    boolean|sfdc:Error res = baseClient->deleteAccount(accountId);
+    boolean|sfdc:Error res = baseClient->deleteContact(contactId);
 
     if res is boolean{
-        string outputMessage = (res == true) ? "Account Deleted Successfully!" : "Failed to Delete the Account";
+        string outputMessage = (res == true) ? "Contact Deleted Successfully!" : "Failed to Delete the Contact";
         log:print(outputMessage);
     }
     else{
@@ -35,9 +35,9 @@ public function main(){
 
 }
 
-function getAccountIdByName(string name) returns @tainted string {
+function getContactIdByName(string firstName, string lastName) returns @tainted string {
     string contactId = "";
-    string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
+    string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName + "'";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
     if (res is sfdc:SoqlResult) {
