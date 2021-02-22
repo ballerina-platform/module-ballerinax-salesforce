@@ -3,7 +3,7 @@ import ballerina/log;
 import ballerinax/sfdc;
 import ballerina/stringutils;
 
-public function main(){
+public function main() {
 
     string batchId = "";
 
@@ -22,29 +22,28 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = new(sfConfig);
+    sfdc:BaseClient baseClient = new (sfConfig);
 
-    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-        "Created_from_Ballerina_Sf_Bulk_API,Tony,Stark,Software Engineer Level 02,0332236677,tonys@gmail.com,862\n" +
-        "Created_from_Ballerina_Sf_Bulk_API,Peter,Parker,Software Engineer Level 02,0332211777,peter77@gmail.com,863";
-    
+    string contacts = 
+    "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" + "Created_from_Ballerina_Sf_Bulk_API,Tony,Stark,Software Engineer Level 02,0332236677,tonys@gmail.com,862\n" + "Created_from_Ballerina_Sf_Bulk_API,Peter,Parker,Software Engineer Level 02,0332211777,peter77@gmail.com,863";
 
     sfdc:BulkJob|error insertJob = baseClient->creatJob("insert", "Contact", "CSV");
 
-    if (insertJob is sfdc:BulkJob){
+    if (insertJob is sfdc:BulkJob) {
         error|sfdc:BatchInfo batch = insertJob->addBatch(contacts);
         if (batch is sfdc:BatchInfo) {
-           string message = batch.id.length() > 0 ? "Batch Added Successfully" :"Failed to add the Batch";
-           batchId = batch.id;
-           log:print(message + " : " + message + " " + batchId);
+            string message = batch.id.length() > 0 ? "Batch Added Successfully" : "Failed to add the Batch";
+            batchId = batch.id;
+            log:print(message + " : " + message + " " + batchId);
         } else {
-           log:printError(batch.message());
+            log:printError(batch.message());
         }
 
         //get batch info
         error|sfdc:BatchInfo batchInfo = insertJob->getBatchInfo(batchId);
         if (batchInfo is sfdc:BatchInfo) {
-            string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
+            string message = 
+            batchInfo.id == batchId ? "Batch Info Received Successfully" : "Failed to Retrieve Batch Info";
             log:print(message);
         } else {
             log:printError(batchInfo.message());
@@ -53,7 +52,8 @@ public function main(){
         //get all batches
         error|sfdc:BatchInfo[] batchInfoList = insertJob->getAllBatches();
         if (batchInfoList is sfdc:BatchInfo[]) {
-            string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
+            string message = 
+            batchInfoList.length() == 1 ? "All Batches Received Successfully" : "Failed to Retrieve All Batches";
             log:print(message);
         } else {
             log:printError(batchInfoList.message());
@@ -62,9 +62,10 @@ public function main(){
         //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            string message = (stringutils:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
+            string message = 
+            (stringutils:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" : "Failed to Retrieve Batch Request";
             log:print(message);
-            
+
         } else if (batchRequest is error) {
             log:printError(batchRequest.message());
         } else {
@@ -88,13 +89,11 @@ public function main(){
         //close job
         error|sfdc:JobInfo closedJob = baseClient->closeJob(insertJob);
         if (closedJob is sfdc:JobInfo) {
-            string message = closedJob.state == "Closed" ? "Job Closed Successfully" :"Failed to Close the Job";
+            string message = closedJob.state == "Closed" ? "Job Closed Successfully" : "Failed to Close the Job";
             log:print(message);
         } else {
             log:printError(closedJob.message());
         }
     }
-
-
 
 }

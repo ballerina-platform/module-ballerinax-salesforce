@@ -138,8 +138,3 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     }
     return contactId;
 }
-
-
-
-
-

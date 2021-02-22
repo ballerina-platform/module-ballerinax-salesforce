@@ -3,8 +3,7 @@ import ballerina/log;
 import ballerinax/sfdc;
 import ballerina/stringutils;
 
-
-public function main(){
+public function main() {
 
     string batchId = "";
 
@@ -23,25 +22,27 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = new(sfConfig);
-    
+    sfdc:BaseClient baseClient = new (sfConfig);
+
     string contactsToDelete = "Id\n0032w00000QD5I7AAL\n0032w00000QD5I8AAL";
     sfdc:BulkJob|error deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
 
-    if (deleteJob is sfdc:BulkJob){
+    if (deleteJob is sfdc:BulkJob) {
         error|sfdc:BatchInfo batch = deleteJob->addBatch(contactsToDelete);
         if (batch is sfdc:BatchInfo) {
             batchId = batch.id;
-            string message = batch.id.length() > 0 ? "Contacts Successfully uploaded to delete" :"Failed to upload the Contacts to delete";
-            log:print(message); 
+            string message = 
+            batch.id.length() > 0 ? "Contacts Successfully uploaded to delete" : "Failed to upload the Contacts to delete";
+            log:print(message);
         } else {
-           log:printError(batch.message());
+            log:printError(batch.message());
         }
 
         //get batch info
         error|sfdc:BatchInfo batchInfo = deleteJob->getBatchInfo(batchId);
         if (batchInfo is sfdc:BatchInfo) {
-            string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
+            string message = 
+            batchInfo.id == batchId ? "Batch Info Received Successfully" : "Failed to Retrieve Batch Info";
             log:print(message);
         } else {
             log:printError(batchInfo.message());
@@ -50,7 +51,8 @@ public function main(){
         //get all batches
         error|sfdc:BatchInfo[] batchInfoList = deleteJob->getAllBatches();
         if (batchInfoList is sfdc:BatchInfo[]) {
-            string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
+            string message = 
+            batchInfoList.length() == 1 ? "All Batches Received Successfully" : "Failed to Retrieve All Batches";
             log:print(message);
         } else {
             log:printError(batchInfoList.message());
@@ -59,9 +61,10 @@ public function main(){
         //get batch request
         var batchRequest = deleteJob->getBatchRequest(batchId);
         if (batchRequest is string) {
-            string message = (stringutils:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
+            string message = 
+            (stringutils:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" : "Failed to Retrieve Batch Request";
             log:print(message);
-            
+
         } else if (batchRequest is error) {
             log:printError(batchRequest.message());
         } else {
@@ -85,7 +88,7 @@ public function main(){
         //close job
         error|sfdc:JobInfo closedJob = baseClient->closeJob(deleteJob);
         if (closedJob is sfdc:JobInfo) {
-            string message = closedJob.state == "Closed" ? "Job Closed Successfully" :"Failed to Close the Job";
+            string message = closedJob.state == "Closed" ? "Job Closed Successfully" : "Failed to Close the Job";
             log:print(message);
         } else {
             log:printError(closedJob.message());
@@ -93,7 +96,3 @@ public function main(){
     }
 
 }
-
-
-
-

@@ -31,5 +31,4 @@ public function main(){
     } else {
         log:printError(msg = account.message());
     }
-
 }

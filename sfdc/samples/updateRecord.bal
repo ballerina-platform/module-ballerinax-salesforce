@@ -38,5 +38,4 @@ public function main(){
     else{
         log:printError(res.message());
     }
-
 }

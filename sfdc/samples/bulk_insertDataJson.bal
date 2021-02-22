@@ -120,7 +120,4 @@ public function main(){
             log:printError(closedJob.message());
         }
     }
-
-
-
 }

@@ -4,7 +4,6 @@ import ballerinax/sfdc;
 
 public function main(){
 
-
     // Create Salesforce client configuration by reading from config file.
     sfdc:SalesforceConfiguration sfConfig = {
         baseUrl: config:getAsString("EP_URL"),

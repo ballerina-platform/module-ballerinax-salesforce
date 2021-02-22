@@ -17,19 +17,18 @@ sfdc:SalesforceConfiguration sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:BaseClient baseClient = new(sfConfig);
+sfdc:BaseClient baseClient = new (sfConfig);
 
-public function main(){
+public function main() {
 
     string contactId = getContactIdByName("Peter", "Potts");
 
     boolean|sfdc:Error res = baseClient->deleteContact(contactId);
 
-    if res is boolean{
+    if res is boolean {
         string outputMessage = (res == true) ? "Contact Deleted Successfully!" : "Failed to Delete the Contact";
         log:print(outputMessage);
-    }
-    else{
+    } else {
         log:printError(res.message());
     }
 
@@ -46,7 +45,7 @@ function getContactIdByName(string firstName, string lastName) returns @tainted 
             string id = records[0]["Id"].toString();
             contactId = id;
         } else {
-            log:print("Getting contact ID by name failed. err=" + records.toString());            
+            log:print("Getting contact ID by name failed. err=" + records.toString());
         }
     } else {
         log:print("Getting contact ID by name failed. err=" + res.toString());

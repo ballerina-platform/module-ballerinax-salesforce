@@ -33,5 +33,4 @@ public function main(){
     } else {
         log:printError(msg = res.message());
     }
-
 }
