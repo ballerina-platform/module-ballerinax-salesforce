@@ -13,12 +13,10 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 import ballerina/runtime;
-
 
 @test:Config {}
 function insertXml() {
@@ -49,7 +47,7 @@ function insertXml() {
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
-        if (insertJob is BulkJob) {
+    if (insertJob is BulkJob) {
         //add xml content
         error|BatchInfo batch = insertJob->addBatch(contacts);
         if (batch is BatchInfo) {
@@ -85,8 +83,8 @@ function insertXml() {
 
         //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
-            if (batchRequest is xml) {
-            test:assertTrue ((batchRequest/<*>).length() == 2, msg ="Retrieving batch request failed.");
+        if (batchRequest is xml) {
+            test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {
@@ -128,12 +126,13 @@ function insertXmlFromFile() {
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
-        if (insertJob is BulkJob) {
+    if (insertJob is BulkJob) {
         //add xml content via file
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(xmlContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
             error|BatchInfo batchUsingXmlFile = insertJob->addBatch(<@untainted>rbc);
             if (batchUsingXmlFile is BatchInfo) {
+
                 test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using xml file.");
                 batchId = batchUsingXmlFile.id;
             } else {
@@ -171,8 +170,8 @@ function insertXmlFromFile() {
 
         //get batch request
         var batchRequest = insertJob->getBatchRequest(batchId);
-            if (batchRequest is xml) {
-            test:assertTrue ((batchRequest/<*>).length() == 2, msg ="Retrieving batch request failed.");
+        if (batchRequest is xml) {
+            test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {

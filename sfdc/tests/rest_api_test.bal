@@ -132,8 +132,8 @@ function testSearchSOSLString() {
 
     if (res is SoslResult) {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, msg = 
-        "Matched search record is not an Account type!");
+        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, 
+        msg = "Matched search record is not an Account type!");
     } else {
         test:assertFail(msg = res.message());
     }

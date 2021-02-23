@@ -13,13 +13,10 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    dependsOn: ["insertCsv", "upsertCsv"]
-}
+@test:Config {dependsOn: ["insertCsv", "upsertCsv"]}
 function updateCsv() {
     log:print("baseClient -> updateCsv");
     string batchId = "";
@@ -27,9 +24,9 @@ function updateCsv() {
     string binnsID = getContactIdByName("Cuthbert", "Binns", "Professor Level 02");
     string shanesID = getContactIdByName("Burbage", "Shane", "Professor Level 02");
 
-    string contacts = "Id,description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-        binnsID + ",Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0222236677,bins98@gmail.com,845\n" +
-        shanesID + ",Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211788,shane78@gmail.com,846";
+    string contacts = 
+    "Id,description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" + binnsID + ",Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0222236677,bins98@gmail.com,845\n" + 
+    shanesID + ",Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211788,shane78@gmail.com,846";
 
     //create job
     error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "CSV");

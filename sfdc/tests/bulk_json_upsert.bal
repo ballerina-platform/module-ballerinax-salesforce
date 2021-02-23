@@ -13,38 +13,31 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    dependsOn: ["insertJson"]
-}
+@test:Config {dependsOn: ["insertJson"]}
 function upsertJson() {
     log:print("baseClient -> upsertJson");
     string batchId = "";
 
-    json contacts = [
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Remus",
-                LastName: "Lupin",
-                Title: "Professor Level 03",
-                Phone: "0552216170",
-                Email: "lupin@gmail.com",
-                My_External_Id__c: "848"
-            },
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Minerva",
-                LastName: "McGonagall",
-                Title: "Professor Level 03",
-                Phone: "0113232445",
-                Email: "minervas@gmail.com",
-                My_External_Id__c: "849"
-            }
-        ];
-
+    json contacts = [{
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        FirstName: "Remus",
+        LastName: "Lupin",
+        Title: "Professor Level 03",
+        Phone: "0552216170",
+        Email: "lupin@gmail.com",
+        My_External_Id__c: "848"
+    }, {
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        FirstName: "Minerva",
+        LastName: "McGonagall",
+        Title: "Professor Level 03",
+        Phone: "0113232445",
+        Email: "minervas@gmail.com",
+        My_External_Id__c: "849"
+    }];
 
     //create job
     error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "JSON", "My_External_Id__c");

@@ -18,7 +18,6 @@ import ballerina/config;
 import ballerina/io;
 import ballerina/runtime;
 
-
 ListenerConfiguration listenerConfig = {
     username: config:getAsString("SF_USERNAME"),
     password: config:getAsString("SF_PASSWORD")
@@ -29,21 +28,19 @@ listener Listener eventListener = new (listenerConfig);
 boolean isUpdated = false;
 
 @ServiceConfig {topic: "/topic/AccountUpdate"}
-
-service /topic/AccountUpdate  on eventListener {
+service /topic/AccountUpdate on eventListener {
     remote function onEvent(json op) {
         io:StringReader sr = new (op.toJsonString());
         json|error account = sr.readJson();
         if (account is json) {
             if (account.sobject.Name == "WSO2 Inc") {
                 isUpdated = true;
-            }else{
+            } else {
                 io:println(account.toString());
             }
         }
     }
 }
-
 
 @test:Config {dependsOn: ["testUpdateRecord"]}
 function testUpdated() {

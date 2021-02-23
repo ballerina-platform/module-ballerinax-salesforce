@@ -13,13 +13,10 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    dependsOn: ["updateXml", "insertXmlFromFile"]
-}
+@test:Config {dependsOn: ["updateXml", "insertXmlFromFile"]}
 function queryXml() {
     log:print("baseClient -> queryXml");
     string batchId = "";
@@ -29,7 +26,7 @@ function queryXml() {
     //create job
     error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "XML");
 
-        if (queryJob is BulkJob) {
+    if (queryJob is BulkJob) {
         //add xml content
         error|BatchInfo batch = queryJob->addBatch(queryStr);
         if (batch is BatchInfo) {
@@ -75,9 +72,9 @@ function queryXml() {
 
         //get batch result
         var batchResult = queryJob->getBatchResult(batchId);
-            if (batchResult is xml) {
-                //io:println("count : ", (batchResult/<*>).length().toString());
-            test:assertTrue ((batchResult/<*>).length() == 4, msg ="Retrieving batch result failed.");
+        if (batchResult is xml) {
+            //io:println("count : ", (batchResult/<*>).length().toString());
+            test:assertTrue((batchResult/<*>).length() == 4, msg = "Retrieving batch result failed.");
             xmlQueryResult = <@untainted>batchResult;
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());

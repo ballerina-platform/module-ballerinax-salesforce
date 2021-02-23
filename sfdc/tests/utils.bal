@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
@@ -50,8 +49,8 @@ function checkCsvResult(string result) returns int {
 
 function getContactIdByName(string firstName, string lastName, string title) returns @tainted string {
     string contactId = "";
-    string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
-        + "' AND Title='" + title + "'";
+    string sampleQuery = 
+    "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName + "' AND Title='" + title + "'";
     SoqlResult|Error res = baseClient->getQueryResult(sampleQuery);
 
     if (res is SoqlResult) {
@@ -60,7 +59,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
             string id = records[0]["Id"].toString();
             contactId = id;
         } else {
-            test:assertFail(msg = "Getting contact ID by name failed. err=" + records.toString());            
+            test:assertFail(msg = "Getting contact ID by name failed. err=" + records.toString());
         }
     } else {
         test:assertFail(msg = "Getting contact ID by name failed. err=" + res.toString());
@@ -69,16 +68,16 @@ function getContactIdByName(string firstName, string lastName, string title) ret
 }
 
 isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
-    json [] contacts = [];
+    json[] contacts = [];
     foreach var item in resultList {
         string id = item.Id.toString();
-        contacts[contacts.length()] = {"Id":id};
+        contacts[contacts.length()] = {"Id": id};
     }
     return contacts;
 }
 
 isolated function getXmlContactsToDelete(xml resultList) returns xml {
-    xmllib:Element contacts = <xmllib:Element> xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
+    xmllib:Element contacts = <xmllib:Element>xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
 
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
 
@@ -89,7 +88,7 @@ isolated function getXmlContactsToDelete(xml resultList) returns xml {
             xml child = xml `<sObject><Id>${id}</Id></sObject>`;
             contacts.setChildren(contacts.getChildren() + child);
         }
-        
+
     }
     return contacts;
 }
@@ -105,7 +104,7 @@ function getCsvContactsToDelete(string resultString) returns string {
             int? inof = line.indexOf(",");
             if (inof is int) {
                 string id = line.substring(0, inof);
-                contacts = contacts.concat("\n",id);
+                contacts = contacts.concat("\n", id);
             }
         }
         counter = counter + 1;
