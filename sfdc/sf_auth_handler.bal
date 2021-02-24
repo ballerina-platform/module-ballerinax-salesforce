@@ -13,55 +13,28 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-import ballerina/auth;
+import ballerina/oauth2;
 import ballerina/http;
 
 # Representation of the Bearer Auth header handler for both inbound and outbound HTTP traffic.
 #
 # + authProvider - The `InboundAuthProvider` instance or the `OutboundAuthProvider` instance.
-public class SalesforceAuthHandler {
+public client class SalesforceAuthHandler {
 
-    *http:OutboundAuthHandler;
+    oauth2:ClientOAuth2Provider authProvider;
 
-    public auth:OutboundAuthProvider authProvider;
-
-    public isolated function init(auth:OutboundAuthProvider authProvider) {
-        self.authProvider = authProvider;
+    public isolated function init(http:OAuth2DirectTokenConfig auth2Congif) {
+        self.authProvider = new (auth2Congif);
     }
 
-    # Prepares the request with the Bearer Auth header.
-    #
-    # + req - The`Request` instance.
-    # + return - Returns the updated `Request` instance or the `AuthenticationError` in case of an error.
-    public function prepare(http:Request req) returns http:Request|http:AuthenticationError {
-        var authProvider = self.authProvider;
-        var token = authProvider.generateToken();
+    public isolated function enrich(http:Request req) returns http:Request|http:ClientAuthError {
+        string|oauth2:Error token = self.authProvider.generateToken();
         if (token is string) {
             req.setHeader(AUTHORIZATION, BEARER + token);
             req.setHeader(X_SFDC_SESSION, token);
             return req;
         } else {
-            return prepareAuthenticationError("Failed to prepare request at bearer auth handler.", token);
+            return prepareClientAuthError("Failed to enrich request with OAuth2 token.", token);
         }
-    }
-
-    # Inspects the request and response and calls the Auth provider for inspection.
-    #
-    # + req - The `Request` instance.
-    # + resp - The `Response` instance.
-    # + return - Returns the updated `Request` instance, the `AuthenticationError` in case of an error,
-    # or `()` if nothing is to be returned.
-    public function inspect(http:Request req, http:Response resp) returns http:Request|http:AuthenticationError? {
-        var authProvider = self.authProvider;
-        map<anydata> headerMap = createResponseHeaderMap(resp);
-        var token = authProvider.inspect(headerMap);
-        if (token is string) {
-            req.setHeader(AUTHORIZATION, BEARER + token);
-            req.setHeader(X_SFDC_SESSION, token);
-            return req;
-        } else if (token is auth:Error) {
-            return prepareAuthenticationError("Failed to inspect at bearer auth handler.", token);
-        }
-        return ();
     }
 }

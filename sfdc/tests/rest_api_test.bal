@@ -15,23 +15,28 @@
 // under the License.
 import ballerina/test;
 import ballerina/log;
-import ballerina/config;
+//import ballerina/lang.config;
 
 // Create Salesforce client configuration by reading from config file.
+
+configurable string ep_url = ?;
+configurable string client_id = ?;
+configurable string client_secret = ?;
+configurable string refresh_token = ?;
+configurable string refresh_url = ?;
+
+
 SalesforceConfiguration sfConfig = {
-    baseUrl: config:getAsString("EP_URL"),
+    baseUrl: ep_url,
     clientConfig: {
-        accessToken: config:getAsString("ACCESS_TOKEN"),
-        refreshConfig: {
-            clientId: config:getAsString("CLIENT_ID"),
-            clientSecret: config:getAsString("CLIENT_SECRET"),
-            refreshToken: config:getAsString("REFRESH_TOKEN"),
-            refreshUrl: config:getAsString("REFRESH_URL")
-        }
+        clientId: client_id,
+        clientSecret: client_secret,
+        refreshToken: refresh_token,
+        refreshUrl: refresh_url
     }
 };
 
-BaseClient baseClient = new (sfConfig);
+BaseClient baseClient = check new (sfConfig);
 
 json accountRecord = {
     Name: "John Keells Holdings",
@@ -53,7 +58,7 @@ function testCreateRecord() {
     }
 }
 
-@test:Config {dependsOn: ["testCreateRecord"]}
+@test:Config {dependsOn: [testCreateRecord]}
 function testGetRecord() {
     json|Error response;
     log:print("baseClient -> getRecord()");
@@ -69,7 +74,7 @@ function testGetRecord() {
     }
 }
 
-@test:Config {dependsOn: ["testCreateRecord", "testGetRecord"]}
+@test:Config {dependsOn: [testCreateRecord, testGetRecord]}
 function testUpdateRecord() {
     log:print("baseClient -> updateRecord()");
     json account = {
@@ -86,7 +91,7 @@ function testUpdateRecord() {
     }
 }
 
-@test:Config {dependsOn: ["testSearchSOSLString"]}
+@test:Config {dependsOn: [testSearchSOSLString]}
 function testDeleteRecord() {
     log:print("baseClient -> deleteRecord()");
     boolean|Error response = baseClient->deleteRecord(ACCOUNT, testRecordId);
@@ -124,7 +129,7 @@ function testGetQueryResult() {
     }
 }
 
-@test:Config {dependsOn: ["testUpdateRecord"]}
+@test:Config {dependsOn: [testUpdateRecord]}
 function testSearchSOSLString() {
     log:print("baseClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";

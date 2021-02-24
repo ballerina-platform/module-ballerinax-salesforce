@@ -14,13 +14,16 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/test;
-import ballerina/config;
+//import ballerina/lang.config;
 import ballerina/io;
-import ballerina/runtime;
+import ballerina/lang.runtime;
+
+configurable string sf_username = ?;
+configurable string sf_password = ?;
 
 ListenerConfiguration listenerConfig = {
-    username: config:getAsString("SF_USERNAME"),
-    password: config:getAsString("SF_PASSWORD")
+    username: sf_username,
+    password: sf_password
 };
 
 listener Listener eventListener = new (listenerConfig);
@@ -42,8 +45,8 @@ service /topic/AccountUpdate on eventListener {
     }
 }
 
-@test:Config {dependsOn: ["testUpdateRecord"]}
+@test:Config {dependsOn: [testUpdateRecord]}
 function testUpdated() {
-    runtime:sleep(3000);
+    runtime:sleep(3.0);
     test:assertTrue(isUpdated, "Error in retrieving account update!");
 }

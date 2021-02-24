@@ -6,6 +6,7 @@
 
 #conf file
 ballerina.conf
+Config.toml
 
 #lock file
 Ballerina.lock

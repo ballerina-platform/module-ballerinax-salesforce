@@ -16,8 +16,7 @@
 // under the License.
 //
 import ballerina/log;
-import ballerina/java;
-import ballerina/jarrays;
+import ballerina/regex;
 
 isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
@@ -57,7 +56,7 @@ isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
     } else {
         string errMsg = "Error occurred while creating JobInfo record using xml payload.";
         log:printError(errMsg, err = job);
-        return Error(errMsg, job);
+        return error Error(errMsg, job);
     }
 }
 
@@ -84,7 +83,7 @@ isolated function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|E
     } else {
         string errMsg = "Error occurred while creating BatchInfo record using xml payload.";
         log:printError(errMsg, err = batch);
-        return Error(errMsg, batch);
+        return error Error(errMsg, batch);
     }
 }
 
@@ -92,116 +91,118 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|E
     Result[] batchResArr = [];
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
     foreach var result in payload/<*> {
-        if (result is xml) {
-            Result|error batchRes = trap {
-                success: getBooleanValue((result/<ns:success>/*).toString()),
-                created: getBooleanValue((result/<ns:created>/*).toString())
-            };
+        Result|error batchRes = trap {
+            success: getBooleanValue((result/<ns:success>/*).toString()),
+            created: getBooleanValue((result/<ns:created>/*).toString())
+        };
 
-            if (batchRes is Result) {
-                // Check whether the ID exists,
-                if ((result/<ns:id>/*).length() > 0) {
-                    batchRes.id = (result/<ns:id>/*).toString();
-                }
-                // Check whether an error occured.
-                xml|error errors = result/<ns:errors>/*;
-                if (errors is xml) {
-
-                    if ((errors/<*>).length() > 0) {
-                        log:print("Failed batch result, err=" + (errors/<*>).toString());
-                        batchRes.errors = "[" + (errors/<ns:statusCode>/*).toString() + "] " + (errors/<ns:message>/*).
-                        toString();
-                    }
-                }
-                // Add to the batch results array.
-                batchResArr[batchResArr.length()] = batchRes;
-            } else {
-                string errMsg = "Error occurred while creating BatchResult record using xml payload.";
-                log:printError(errMsg, err = batchRes);
-                return Error(errMsg, batchRes);
+        if (batchRes is Result) {
+            // Check whether the ID exists,
+            if ((result/<ns:id>/*).length() > 0) {
+                batchRes.id = (result/<ns:id>/*).toString();
             }
+            // Check whether an error occured.
+            xml|error errors = result/<ns:errors>/*;
+            if (errors is xml) {
+
+                if ((errors/<*>).length() > 0) {
+                    log:print("Failed batch result, err=" + (errors/<*>).toString());
+                    batchRes.errors = "[" + (errors/<ns:statusCode>/*).toString() + "] " + (errors/<ns:message>/*).
+                    toString();
+                }
+            }
+            // Add to the batch results array.
+            batchResArr[batchResArr.length()] = batchRes;
         } else {
-            log:printError(XML_ACCESSING_ERROR_MSG + ", result=" + result.toString(), err = ());
-            return Error(XML_ACCESSING_ERROR_MSG);
+            string errMsg = "Error occurred while creating BatchResult record using xml payload.";
+            log:printError(errMsg, err = batchRes);
+            return error Error(errMsg, batchRes);
         }
     }
     return batchResArr;
 }
 
-function createBatchResultRecordFromJson(json payload) returns Result[]|Error {
+function createBatchResultRecordFromJson(json payload) returns Result[]|Error|error {
     Result[] batchResArr = [];
     json[] payloadArr = <json[]>payload;
 
     foreach json ele in payloadArr {
-        Result|error batchRes = trap {
-            success: getBooleanValue(ele.success.toString()),
-            created: getBooleanValue(ele.created.toString())
-        };
+        json eleSuccess = check ele.success;
+        json eleCreated = check ele.created;
+        //if(eleSuccess is json && eleCreated is json){
+            Result|error batchRes = trap {
+                success: getBooleanValue(eleSuccess.toString()),
+                created: getBooleanValue(eleCreated.toString())
+            };
 
-        if (batchRes is Result) {
+            if (batchRes is Result) {
             // Check whether the ID exists.
-            if (ele.id.toString().length() > 0 && ele.id.toString() != "null") {
-                batchRes.id = ele.id.toString();
-            }
-            // Check whether an error occured.
-            json|error errors = ele.errors;
-
-            if (errors is json) {
-
-                if (trim(errors.toString()).length() > 2) {
-                    log:printError("Failed batch result, errors=" + errors.toString(), err = ());
-                    json[] errorsArr = <json[]>errors;
-                    string errMsg = "";
-                    int counter = 1;
-                    foreach json err in errorsArr {
-                        errMsg = errMsg + "[" + err.statusCode.toString() + "] " + err.message.toString();
-                        if (errorsArr.length() != counter) {
-                            errMsg = errMsg + ", ";
-                        }
-                        counter = counter + 1;
-                    }
-                    batchRes.errors = errMsg;
+                json|error eleId = ele.id;
+                if (eleId is json && eleId.toString().length() > 0 && eleId.toString() != "null") {
+                    batchRes.id = eleId.toString();
                 }
+                // Check whether an error occured.
+                json|error errors = ele.errors;
 
+                if (errors is json) {
+
+                    if (trim(errors.toString()).length() > 2) {
+                        log:printError("Failed batch result, errors=" + errors.toString(), err = ());
+                        json[] errorsArr = <json[]>errors;
+                        string errMsg = "";
+                        int counter = 1;
+                        foreach json err in errorsArr {
+                            json|error errStatusCode = err.statusCode;
+                            json|error errMessage = err.message;
+                            if(errStatusCode is json && errMessage is json){
+                                errMsg = errMsg + "[" + errStatusCode.toString() + "] " + errMessage.toString();
+                                if (errorsArr.length() != counter) {
+                                    errMsg = errMsg + ", ";
+                                }
+                                counter = counter + 1;
+                            }
+                        }
+                        batchRes.errors = errMsg;
+                    }
+
+                } else {
+                    string errMsg = "Error occurred while accessing errors from batch result.";
+                    log:printError(errMsg, err = errors);
+                    return error Error(errMsg, errors);
+                }
+                batchResArr[batchResArr.length()] = batchRes;
             } else {
-                string errMsg = "Error occurred while accessing errors from batch result.";
-                log:printError(errMsg, err = errors);
-                return Error(errMsg, errors);
+                string errMsg = "Error occurred while creating BatchResult record using json payload.";
+                log:printError(errMsg, err = batchRes);
+                return error Error(errMsg, batchRes);
             }
-            batchResArr[batchResArr.length()] = batchRes;
-        } else {
-            string errMsg = "Error occurred while creating BatchResult record using json payload.";
-            log:printError(errMsg, err = batchRes);
-            return Error(errMsg, batchRes);
-        }
+        //}
     }
     return batchResArr;
 }
 
-function createBatchResultRecordFromCsv(string payload) returns Result[]|Error {
+isolated function createBatchResultRecordFromCsv(string payload) returns Result[]|Error {
     Result[] batchResArr = [];
 
-    handle payloadArr = split(java:fromString(payload), java:fromString("\n"));
-    int arrLength = jarrays:getLength(payloadArr);
+    string[] payloadArr = regex:split(payload, "\n");
+    int arrLength = payloadArr.length();
 
     int counter = 1;
     while (counter < arrLength) {
-        string? line = java:toString(jarrays:get(payloadArr, counter));
+        string? line = payloadArr[counter];
 
         if (line is string) {
-            handle lineArr = split(java:fromString(line), java:fromString(","));
+            string[] lineArr = regex:split(line, ",");
 
-            string? idStr = java:toString(jarrays:get(lineArr, 0));
-            string? successStr = java:toString(jarrays:get(lineArr, 1));
-            string? createdStr = java:toString(jarrays:get(lineArr, 2));
-            string? errorStr = java:toString(jarrays:get(lineArr, 3));
+            string? idStr = lineArr[0];
+            string? successStr = lineArr[1];
+            string? createdStr = lineArr[2];
+            string? errorStr = lineArr[3];
 
             // Remove quotes of "true" or "false".
             if (successStr is string && createdStr is string) {
-                successStr = java:toString(replace(java:fromString(successStr), java:fromString("\""), java:fromString(
-                "")));
-                createdStr = java:toString(replace(java:fromString(createdStr), java:fromString("\""), java:fromString(
-                "")));
+                successStr = regex:replaceAll(successStr, "\"", "");
+                createdStr = regex:replaceAll(createdStr, "\"", "");
             }
 
             if (successStr is string && successStr.length() > 0 && createdStr is string && createdStr.length() > 0) {
@@ -223,18 +224,18 @@ function createBatchResultRecordFromCsv(string payload) returns Result[]|Error {
                 } else {
                     string errMsg = "Error occurred while creating BatchResult record using csv payload.";
                     log:printError(errMsg, err = batchRes);
-                    return Error(errMsg, batchRes);
+                    return error Error(errMsg, batchRes);
                 }
 
             } else {
                 log:printError("Error occurred while accessing success & created fields from batch result, success=" + 
                 successStr.toString() + " created=" + createdStr.toString(), err = ());
-                return Error("Error occurred while creating BatchResult record using json payload.");
+                return error Error("Error occurred while creating BatchResult record using json payload.");
             }
         } else {
             log:printError("Error occrred while retrieveing batch result line from batch results csv, line=" + line.
             toString(), err = ());
-            return Error("Error occurred while accessing batch results from csv payload.");
+            return error Error("Error occurred while accessing batch results from csv payload.");
         }
         counter = counter + 1;
     }

@@ -29,7 +29,7 @@ isolated function toVersions(json payload) returns Version[]|Error {
         } else {
             string errMsg = "Error occurred while constructing Version record.";
             log:printError(errMsg + " ele:" + ele.toJsonString(), err = ver);
-            return Error(errMsg, ver);
+            return error Error(errMsg, ver);
         }
     }
     return versions;
@@ -45,7 +45,7 @@ isolated function toMapOfStrings(json payload) returns map<string>|Error {
     } else {
         string errMsg = "Error occurred while constructing map<string>.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = strMap);
-        return Error(errMsg, strMap);
+        return error Error(errMsg, strMap);
     }
 }
 
@@ -58,7 +58,7 @@ isolated function toMapOfLimits(json payload) returns map<Limit>|Error {
     if (payloadMap is error) {
         string errMsg = "Error occurred while constructing map<json> using json payload.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = payloadMap);
-        return Error(errMsg, payloadMap);
+        return error Error(errMsg, payloadMap);
     } else {
         foreach var [key, value] in payloadMap.entries() {
             Limit|error lim = value.cloneWithType(Limit);
@@ -67,7 +67,7 @@ isolated function toMapOfLimits(json payload) returns map<Limit>|Error {
             } else {
                 string errMsg = "Error occurred while constructing Limit record.";
                 log:printError(errMsg + " value:" + value.toJsonString(), err = lim);
-                return Error(errMsg, lim);
+                return error Error(errMsg, lim);
             }
         }
     }
@@ -82,7 +82,7 @@ isolated function toSoqlResult(json payload) returns SoqlResult|Error {
     } else {
         string errMsg = "Error occurred while constructing SoqlResult record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        return Error(errMsg, res);
+        return error Error(errMsg, res);
     }
 }
 
@@ -94,7 +94,7 @@ isolated function toSoslResult(json payload) returns SoslResult|Error {
     } else {
         string errMsg = "Error occurred while constructing SoslResult record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        return Error(errMsg, res);
+        return error Error(errMsg, res);
     }
 }
 
@@ -106,7 +106,7 @@ isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error 
     } else {
         string errMsg = "Error occurred while constructing SObjectMetaData record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        return Error(errMsg, res);
+        return error Error(errMsg, res);
     }
 }
 
@@ -118,7 +118,7 @@ isolated function toOrgMetadata(json payload) returns OrgMetadata|Error {
     } else {
         string errMsg = "Error occurred while constructing OrgMetadata record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        return Error(errMsg, res);
+        return error Error(errMsg, res);
     }
 }
 
@@ -130,6 +130,6 @@ isolated function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Erro
     } else {
         string errMsg = "Error occurred while constructing SObjectBasicInfo record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), err = res);
-        return Error(errMsg, res);
+        return error Error(errMsg, res);
     }
 }

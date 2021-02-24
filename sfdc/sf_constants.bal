@@ -257,3 +257,5 @@ const COMPLETED = "Completed";
 
 # Constant field `Failed`. Holds the value of failed batch state.
 const FAILED = "Failed";
+
+const STATUS_CODE = "STATUS_CODE";

@@ -16,7 +16,7 @@
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {dependsOn: ["insertXml"]}
+@test:Config {dependsOn: [insertXml]}
 function upsertXml() {
     log:print("baseClient -> upsertXml");
     string batchId = "";

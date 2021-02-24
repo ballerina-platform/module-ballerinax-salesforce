@@ -16,7 +16,7 @@
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {dependsOn: ["queryCsv"]}
+@test:Config {dependsOn: [queryCsv]}
 function deleteCsv() {
     log:print("baseClient -> deleteCsv");
     string batchId = "";

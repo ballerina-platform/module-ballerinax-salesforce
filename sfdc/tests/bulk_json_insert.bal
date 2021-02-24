@@ -17,7 +17,7 @@
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
-import ballerina/runtime;
+import ballerina/lang.runtime;
 
 @test:Config {}
 function insertJson() {
@@ -98,7 +98,7 @@ function insertJson() {
         }
 
         //get batch result
-        runtime:sleep(3000);
+        runtime:sleep(3.0);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -126,7 +126,7 @@ function insertJsonFromFile() {
     log:print("baseClient -> insertJsonFromFile");
     string batchId = "";
 
-    string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";
+    string jsonContactsFilePath = "tests/resources/contacts.json";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
@@ -188,7 +188,7 @@ function insertJsonFromFile() {
         }
 
         //get batch result
-        runtime:sleep(3000);
+        runtime:sleep(3.0);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");

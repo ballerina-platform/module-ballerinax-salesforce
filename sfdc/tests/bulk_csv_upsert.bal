@@ -18,7 +18,7 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    dependsOn: ["insertCsv"]
+    dependsOn: [insertCsv]
 }
 function upsertCsv() {
     log:print("baseClient -> upsertCsv");

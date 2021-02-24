@@ -17,8 +17,8 @@ import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.'xml as xmllib;
-import ballerina/java;
-import ballerina/jarrays;
+import ballerina/jballerina.java;
+import ballerinax/java.arrays as jarrays;
 
 json[] jsonQueryResult = [];
 xml xmlQueryResult = xml `<test/>`;
@@ -70,8 +70,11 @@ function getContactIdByName(string firstName, string lastName, string title) ret
 isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
     json[] contacts = [];
     foreach var item in resultList {
-        string id = item.Id.toString();
-        contacts[contacts.length()] = {"Id": id};
+        json|error itemId = item.Id;
+        if (itemId is json){
+            string id = itemId.toString();
+            contacts[contacts.length()] = {"Id": id};
+        }
     }
     return contacts;
 }
@@ -83,12 +86,9 @@ isolated function getXmlContactsToDelete(xml resultList) returns xml {
 
     xmllib:Element ele = <xmllib:Element>resultList;
     foreach var item in ele.getChildren().elements() {
-        if (item is xml) {
-            string id = (item/<ns:Id>[0]/*).toString();
-            xml child = xml `<sObject><Id>${id}</Id></sObject>`;
-            contacts.setChildren(contacts.getChildren() + child);
-        }
-
+        string id = (item/<ns:Id>[0]/*).toString();
+        xml child = xml `<sObject><Id>${id}</Id></sObject>`;
+        contacts.setChildren(contacts.getChildren() + child);
     }
     return contacts;
 }

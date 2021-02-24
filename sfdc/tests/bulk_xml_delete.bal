@@ -16,7 +16,7 @@
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {dependsOn: ["queryXml"]}
+@test:Config {dependsOn: [queryXml]}
 function deleteXml() {
     log:print("baseClient -> deleteXml");
     string batchId = "";

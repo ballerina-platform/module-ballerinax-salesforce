@@ -16,7 +16,7 @@
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {dependsOn: ["insertJson", "upsertJson"]}
+@test:Config {dependsOn: [insertJson, upsertJson]}
 function updateJson() {
     log:print("baseClient -> updateJson");
     string batchId = "";

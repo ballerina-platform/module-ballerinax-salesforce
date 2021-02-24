@@ -16,7 +16,7 @@
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
-import ballerina/runtime;
+import ballerina/lang.runtime;
 
 @test:Config {}
 function insertXml() {
@@ -92,7 +92,7 @@ function insertXml() {
         }
 
         //get batch result
-        runtime:sleep(3000);
+        runtime:sleep(3.0);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -121,7 +121,7 @@ function insertXmlFromFile() {
     log:print("baseClient -> insertXmlFromFile");
     string batchId = "";
 
-    string xmlContactsFilePath = "sfdc/tests/resources/contacts.xml";
+    string xmlContactsFilePath = "tests/resources/contacts.xml";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
@@ -179,7 +179,7 @@ function insertXmlFromFile() {
         }
 
         //get batch result
-        runtime:sleep(3000);
+        runtime:sleep(3.0);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");

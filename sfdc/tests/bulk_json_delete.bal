@@ -16,7 +16,7 @@
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {dependsOn: ["queryJson"]}
+@test:Config {dependsOn: [queryJson]}
 function deleteJson() {
     log:print("baseClient -> deleteJson");
     string batchId = "";

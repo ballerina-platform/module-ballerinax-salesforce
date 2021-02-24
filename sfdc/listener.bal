@@ -15,7 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-import ballerina/java;
+import ballerina/jballerina.java;
 
 handle JAVA_NULL = java:createNull();
 

@@ -16,7 +16,7 @@
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {dependsOn: ["insertCsv", "upsertCsv"]}
+@test:Config {dependsOn: [insertCsv, upsertCsv]}
 function updateCsv() {
     log:print("baseClient -> updateCsv");
     string batchId = "";
