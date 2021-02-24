@@ -19,20 +19,20 @@ import ballerina/log;
 
 // Create Salesforce client configuration by reading from config file.
 
-configurable string ep_url = ?;
-configurable string client_id = ?;
-configurable string client_secret = ?;
-configurable string refresh_token = ?;
-configurable string refresh_url = ?;
+configurable string EP_URL = ?;
+configurable string CLIENT_ID = ?;
+configurable string CLIENT_SECRET = ?;
+configurable string REFRESH_TOKEN = ?;
+configurable string REFRESH_URL = ?;
 
 
 SalesforceConfiguration sfConfig = {
-    baseUrl: ep_url,
+    baseUrl: EP_URL,
     clientConfig: {
-        clientId: client_id,
-        clientSecret: client_secret,
-        refreshToken: refresh_token,
-        refreshUrl: refresh_url
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        refreshUrl: REFRESH_URL
     }
 };
 

@@ -22,8 +22,8 @@ configurable string sf_username = ?;
 configurable string sf_password = ?;
 
 ListenerConfiguration listenerConfig = {
-    username: sf_username,
-    password: sf_password
+    username: SF_PASSWORD,
+    password: SF_USERNAME
 };
 
 listener Listener eventListener = new (listenerConfig);
