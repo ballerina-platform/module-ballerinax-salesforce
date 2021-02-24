@@ -18,8 +18,8 @@ import ballerina/test;
 import ballerina/io;
 import ballerina/lang.runtime;
 
-configurable string SF_USERNAME = ?;
-configurable string SF_PASSWORD = ?;
+configurable string SF_USERNAME = os:getEnv("SF_USERNAME");
+configurable string SF_PASSWORD = os:getEnv("SF_PASSWORD");
 
 ListenerConfiguration listenerConfig = {
     username: SF_USERNAME,
