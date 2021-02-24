@@ -20,20 +20,20 @@ import ballerina/os;
 
 // Create Salesforce client configuration by reading from config file.
 
-configurable string EP_URL = os:getEnv("EP_URL");
-configurable string SF_CLIENT_ID = os:getEnv("SF_CLIENT_ID");
-configurable string SF_CLIENT_SECRET = os:getEnv("SF_CLIENT_SECRET");
-configurable string SF_REFRESH_TOKEN = os:getEnv("SF_REFRESH_TOKEN");
-configurable string SF_REFRESH_URL = os:getEnv("SF_REFRESH_URL");
+// configurable string EP_URL = ?;
+// configurable string SF_CLIENT_ID = ?;
+// configurable string SF_CLIENT_SECRET = ?;
+// configurable string SF_REFRESH_TOKEN = ?;
+// configurable string SF_REFRESH_URL = ?;
 
 
 SalesforceConfiguration sfConfig = {
-    baseUrl: EP_URL,
+    baseUrl: os:getEnv("EP_URL"),
     clientConfig: {
-        clientId: SF_CLIENT_ID,
-        clientSecret: SF_CLIENT_SECRET,
-        refreshToken: SF_REFRESH_TOKEN,
-        refreshUrl: SF_REFRESH_URL
+        clientId: os:getEnv("SF_CLIENT_ID"),
+        clientSecret: os:getEnv("SF_CLIENT_SECRET"),
+        refreshToken: os:getEnv("SF_REFRESH_TOKEN"),
+        refreshUrl: os:getEnv("SF_REFRESH_URL")
     }
 };
 
