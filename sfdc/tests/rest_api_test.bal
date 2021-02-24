@@ -15,6 +15,7 @@
 // under the License.
 import ballerina/test;
 import ballerina/log;
+import ballerina/os;
 //import ballerina/lang.config;
 
 // Create Salesforce client configuration by reading from config file.

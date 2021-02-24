@@ -17,6 +17,7 @@ import ballerina/test;
 //import ballerina/lang.config;
 import ballerina/io;
 import ballerina/lang.runtime;
+import ballerina/os;
 
 configurable string SF_USERNAME = os:getEnv("SF_USERNAME");
 configurable string SF_PASSWORD = os:getEnv("SF_PASSWORD");
