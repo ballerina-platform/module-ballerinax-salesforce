@@ -18,12 +18,12 @@ import ballerina/test;
 import ballerina/io;
 import ballerina/lang.runtime;
 
-configurable string sf_username = ?;
-configurable string sf_password = ?;
+configurable string SF_USERNAME = ?;
+configurable string SF_PASSWORD = ?;
 
 ListenerConfiguration listenerConfig = {
-    username: SF_PASSWORD,
-    password: SF_USERNAME
+    username: SF_USERNAME,
+    password: SF_PASSWORD
 };
 
 listener Listener eventListener = new (listenerConfig);
