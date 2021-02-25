@@ -30,11 +30,11 @@ public class Listener {
         initListener(self);
     }
 
-    public function attach(service  object {} s, string[]|string? name) returns error? {
+    public function attach(service object {} s, string[]|string? name) returns error? {
         return attachService(self, s);
     }
 
-    public function detach(service  object {} s) returns error? {
+    public function detach(service object {} s) returns error? {
         return detachService(self, s);
     }
 
@@ -53,14 +53,14 @@ public class Listener {
 
 function initListener(Listener lis) = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
-function attachService(Listener lis, service  object {} s) returns error? = @java:Method {'class: 
-    "org.ballerinalang.sf.ListenerUtil"} external;
+function attachService(Listener lis, service object {} s) returns error? = @java:Method 
+{'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
-function startListener(handle username, handle password, Listener lis) returns error? = @java:Method {'class: 
-    "org.ballerinalang.sf.ListenerUtil"} external;
+function startListener(handle username, handle password, Listener lis) returns error? = @java:Method 
+{'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
-function detachService(Listener lis, service  object {} s) returns error? = @java:Method {'class: 
-    "org.ballerinalang.sf.ListenerUtil"} external;
+function detachService(Listener lis, service object {} s) returns error? = @java:Method 
+{'class: "org.ballerinalang.sf.ListenerUtil"} external;
 
 function stopListener() returns error? = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
 

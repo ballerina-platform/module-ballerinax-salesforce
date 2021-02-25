@@ -29,21 +29,21 @@ public function main(){
             refreshUrl: "<REFRESH_URL>"
         }
     };
-
+    
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    string contactId = "0032w00000QD5PcAAL";
+    string productId = "01t2w000008nOXcAAM";
 
-    json|sfdc:Error contact = baseClient->getContactById(contactId, "FirstName", "LastName", "Title");
+    json|sfdc:Error product = baseClient->getProductById(productId, "Name");
 
-    if (contact is json) {
-        json|error contactName = contact.FirstName; 
-        if (contactName is json){
-            log:print("Contact data retrieved successfully. Contact's Name : " + contactName.toString());
+    if (product is json) {
+        json|error productName = product.Name; 
+        if (productName is json){
+            log:print("Product data retrieved successfully. Product's Name : " + productName.toString());
         }
     } else {
-        log:printError(msg = contact.message());
+        log:printError(msg = product.message());
     }
 
 }

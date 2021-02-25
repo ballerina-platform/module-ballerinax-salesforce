@@ -48,7 +48,7 @@ public function main(){
 }
 
 function getAccountIdByName(string name) returns @tainted string {
-    string contactId = "";
+    string accountId = "";
     string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
@@ -56,12 +56,12 @@ function getAccountIdByName(string name) returns @tainted string {
         sfdc:SoqlRecord[]|error records = res.records;
         if (records is sfdc:SoqlRecord[]) {
             string id = records[0]["Id"].toString();
-            contactId = id;
+            accountId = id;
         } else {
-            log:print("Getting contact ID by name failed. err=" + records.toString());            
+            log:print("Getting Account ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting contact ID by name failed. err=" + res.toString());
+        log:print("Getting Account ID by name failed. err=" + res.toString());
     }
-    return contactId;
+    return accountId;
 }

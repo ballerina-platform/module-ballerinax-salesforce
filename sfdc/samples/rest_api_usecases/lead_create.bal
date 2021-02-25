@@ -17,9 +17,8 @@
 import ballerina/log;
 import ballerinax/sfdc;
 
-public function main(){
+public function main() {
 
-    // Create Salesforce client configuration by reading from config file.
     sfdc:SalesforceConfiguration sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
@@ -33,16 +32,18 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    string accountId = "0015Y00002adsuhQAA";
+    json leadRecord = {
+        FirstName: "Mark",
+        LastName: "Wahlberg",
+        Title: "Director",
+        Company: "IT World"
+    };
 
-    boolean|sfdc:Error res = baseClient->deleteRecord("Account", accountId);
+    string|sfdc:Error res = baseClient->createLead(leadRecord);
 
-    if res is boolean{
-        string outputMessage = (res == true) ? "Record Deleted Successfully!" : "Failed to Delete the Record";
-        log:print(outputMessage);
+    if (res is string) {
+        log:print("Leade Created Successfully. Lead ID : " + res);
+    } else {
+        log:printError(msg = res.message());
     }
-    else{
-        log:printError(res.message());
-    }
-
 }

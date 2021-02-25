@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/sfdc;
 
-public function main(){
+public function main() {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:SalesforceConfiguration sfConfig = {
@@ -33,17 +33,15 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    json accountRecord = {
-        Name: "IT World",
-        BillingCity: "Colombo 1"
+    json productRecord = {
+        Name: "P2"
     };
 
-    string|sfdc:Error res = baseClient->createRecord("Account", accountRecord);
+    string|sfdc:Error res = baseClient->createProduct(productRecord);
 
     if (res is string) {
-        log:print("Account Created Successfully. Account ID : " + res);
+        log:print("Product Created Successfully. Product ID : " + res);
     } else {
         log:printError(msg = res.message());
     }
-
 }

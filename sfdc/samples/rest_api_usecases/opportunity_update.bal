@@ -33,17 +33,18 @@ sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
 public function main(){
 
-    string accountId = getAccountIdByName("WSO2 Inc, Sri Lanka");
+    string opportunityId = getOpportunityIdByName("Alan Kimberly", "New");
 
-    json accountRecord = {
-        Name: "WSO2 Inc",
-        BillingCity: "Colombo 3"
+    json opportunityRecord = {
+        Name: "Alan Kimberly",
+        CloseDate: "2020-02-25",
+        StageName: "Prospecting"
     };
 
-    boolean|sfdc:Error res = baseClient->updateAccount(accountId,accountRecord);
+    boolean|sfdc:Error res = baseClient->updateOpportunity(opportunityId,opportunityRecord);
 
    if res is boolean{
-        string outputMessage = (res == true) ? "Account Updated Successfully!" : "Failed to Update the Account";
+        string outputMessage = (res == true) ? "Opportunity Updated Successfully!" : "Failed to Update the Opportunity";
         log:print(outputMessage);
     } else {
         log:printError(msg = res.message());
@@ -51,21 +52,21 @@ public function main(){
 
 }
 
-function getAccountIdByName(string name) returns @tainted string {
-    string accountId = "";
-    string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
+function getOpportunityIdByName(string name, string stageName) returns @tainted string {
+    string opportunityId = "";
+    string sampleQuery = "SELECT Id FROM Opportunity WHERE Name='" + name + "' AND StageName='" + stageName + "'";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
     if (res is sfdc:SoqlResult) {
         sfdc:SoqlRecord[]|error records = res.records;
         if (records is sfdc:SoqlRecord[]) {
             string id = records[0]["Id"].toString();
-            accountId = id;
+            opportunityId = id;
         } else {
-            log:print("Getting account ID by name failed. err=" + records.toString());            
+            log:print("Getting Opportunity ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting account ID by name failed. err=" + res.toString());
+        log:print("Getting Opportunity ID by name failed. err=" + res.toString());
     }
-    return accountId;
+    return opportunityId;
 }

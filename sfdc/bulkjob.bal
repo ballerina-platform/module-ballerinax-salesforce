@@ -17,7 +17,6 @@
 //
 import ballerina/http;
 import ballerina/io;
-//import ballerina/log;
 
 # The Job object.
 public client class BulkJob {
@@ -27,7 +26,8 @@ public client class BulkJob {
     http:Client httpClient;
     SalesforceAuthHandler authHandler;
 
-    public isolated function init(string jobId, JOBTYPE jobDataType, OPERATION operation, http:Client httpClient, SalesforceAuthHandler authHandler) {
+    public isolated function init(string jobId, JOBTYPE jobDataType, OPERATION operation, http:Client httpClient, 
+                                  SalesforceAuthHandler authHandler) {
         self.jobId = jobId;
         self.jobDataType = jobDataType;
         self.operation = operation;
@@ -44,32 +44,32 @@ public client class BulkJob {
         // https://github.com/ballerina-platform/ballerina-lang/issues/26798
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             if (self.jobDataType == JSON) {
-            if (content is json) {
-                authorizedReq.setJsonPayload(content);
-            }
-            if (content is string) {
-                authorizedReq.setTextPayload(content);
-            }
-            if (content is io:ReadableByteChannel) {
-                if (QUERY == self.operation) {
-                    string payload = check convertToString(content);
-                    authorizedReq.setTextPayload(<@untainted>payload);
-                } else {
-                    json payload = check convertToJson(content);
-                    authorizedReq.setJsonPayload(<@untainted>payload);
+                if (content is json) {
+                    authorizedReq.setJsonPayload(content);
                 }
-            }
-            authorizedReq.setHeader(CONTENT_TYPE, APP_JSON);
-            var response = self.httpClient->post(path, authorizedReq);
-            json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
-            if (batchResponse is json) {
-                BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
-                return binfo;
-            } else {
-                return batchResponse;
-            }
+                if (content is string) {
+                    authorizedReq.setTextPayload(content);
+                }
+                if (content is io:ReadableByteChannel) {
+                    if (QUERY == self.operation) {
+                        string payload = check convertToString(content);
+                        authorizedReq.setTextPayload(<@untainted>payload);
+                    } else {
+                        json payload = check convertToJson(content);
+                        authorizedReq.setJsonPayload(<@untainted>payload);
+                    }
+                }
+                authorizedReq.setHeader(CONTENT_TYPE, APP_JSON);
+                var response = self.httpClient->post(path, authorizedReq);
+                json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
+                if (batchResponse is json) {
+                    BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
             } else if (self.jobDataType == XML) {
                 if (content is xml) {
                     authorizedReq.setXmlPayload(content);
@@ -115,12 +115,10 @@ public client class BulkJob {
             } else {
                 return error("Invalid Job Type!");
             }
-        }
-        else{
+        } else {
             return authorizedReq;
         }
-        
-        
+
     }
 
     # Get information about a batch.
@@ -131,7 +129,7 @@ public client class BulkJob {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH, batchId]);
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             var response = self.httpClient->get(path, authorizedReq);
             if (JSON == self.jobDataType) {
                 json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
@@ -150,11 +148,10 @@ public client class BulkJob {
                     return batchResponse;
                 }
             }
-        }
-        else{
+        } else {
             return authorizedReq;
         }
-        
+
     }
 
     # Get all batches of the job.
@@ -164,13 +161,13 @@ public client class BulkJob {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH]);
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             var response = self.httpClient->get(path, authorizedReq);
             BatchInfo[] batchInfoList = [];
             if (JSON == self.jobDataType) {
                 json batchResponse = check checkJsonPayloadAndSetErrors(response);
                 json batchInfoRes = check batchResponse.batchInfo;
-                json[] batchInfoArr =  <json[]>batchInfoRes;
+                json[] batchInfoArr = <json[]>batchInfoRes;
                 foreach json batchInfo in batchInfoArr {
                     BatchInfo batch = check batchInfo.cloneWithType(BatchInfo);
                     batchInfoList[batchInfoList.length()] = batch;
@@ -183,8 +180,7 @@ public client class BulkJob {
                 }
             }
             return batchInfoList;
-        }
-        else{
+        } else {
             return authorizedReq;
         }
     }
@@ -197,7 +193,7 @@ public client class BulkJob {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, self.jobId, BATCH, batchId, REQUEST]);
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             var response = self.httpClient->get(path, authorizedReq);
             if (QUERY == self.operation) {
                 return getQueryRequest(response, self.jobDataType);
@@ -217,11 +213,10 @@ public client class BulkJob {
                     }
                 }
             }
-        }
-        else{
+        } else {
             return authorizedReq;
         }
-        
+
     }
 
     # Get result of the records processed in a batch.
@@ -233,27 +228,30 @@ public client class BulkJob {
         Result[] results = [];
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             var response = self.httpClient->get(path, authorizedReq);
             match self.jobDataType {
                 JSON => {
                     json resultResponse = check checkJsonPayloadAndSetErrors(response);
                     if (QUERY == self.operation) {
-                        return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient, <@untainted> self.authHandler);
+                        return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient, <@untainted>
+                        self.authHandler);
                     }
                     return createBatchResultRecordFromJson(resultResponse);
                 }
                 XML => {
                     xml resultResponse = check checkXmlPayloadAndSetErrors(response);
                     if (QUERY == self.operation) {
-                        return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient, <@untainted> self.authHandler);
+                        return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient, <@untainted>
+                        self.authHandler);
                     }
                     return createBatchResultRecordFromXml(resultResponse);
                 }
                 CSV => {
                     if (QUERY == self.operation) {
                         xml resultResponse = check checkXmlPayloadAndSetErrors(response);
-                        return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient, <@untainted> self.authHandler);
+                        return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.httpClient, <@untainted>
+                        self.authHandler);
                     }
                     string resultResponse = check checkTextPayloadAndSetErrors(response);
                     return createBatchResultRecordFromCsv(resultResponse);
@@ -262,8 +260,7 @@ public client class BulkJob {
                     return error("Invalid Job Type!");
                 }
             }
-        }
-        else{
+        } else {
             return authorizedReq;
         }
     }

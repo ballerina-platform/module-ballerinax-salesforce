@@ -108,7 +108,7 @@ Error {
                 foreach json err in errArr {
                     json|error errorCode = err.errorCode;
                     json|error errMessage = err.message;
-                    if(errorCode is json && errMessage is json){
+                    if (errorCode is json && errMessage is json) {
                         errCodes = errCodes + errorCode.toString();
                         errMssgs = errMssgs + errMessage.toString();
                         if (counter != errArr.length()) {

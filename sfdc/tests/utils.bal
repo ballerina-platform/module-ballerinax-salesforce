@@ -13,12 +13,12 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+//
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.'xml as xmllib;
-import ballerina/jballerina.java;
-import ballerinax/java.arrays as jarrays;
+import ballerina/regex;
 
 json[] jsonQueryResult = [];
 xml xmlQueryResult = xml `<test/>`;
@@ -42,8 +42,8 @@ isolated function checkBatchResults(Result[] results) returns boolean {
 }
 
 function checkCsvResult(string result) returns int {
-    handle lineArray = split(java:fromString(result), java:fromString("\n"));
-    int arrLength = jarrays:getLength(lineArray);
+    string[] lineArray = regex:split(jresult, "\n");
+    int arrLength = lineArray.length();
     return arrLength - 1;
 }
 
@@ -71,7 +71,7 @@ isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
     json[] contacts = [];
     foreach var item in resultList {
         json|error itemId = item.Id;
-        if (itemId is json){
+        if (itemId is json) {
             string id = itemId.toString();
             contacts[contacts.length()] = {"Id": id};
         }
@@ -95,8 +95,8 @@ isolated function getXmlContactsToDelete(xml resultList) returns xml {
 
 function getCsvContactsToDelete(string resultString) returns string {
     string contacts = "Id";
-    handle lineArray = split(java:fromString(resultString), java:fromString("\n"));
-    int arrLength = jarrays:getLength(lineArray);
+    string[] lineArray = regex:split(resultString, "\n");
+    int arrLength = lineArray.length();
     int counter = 1;
     while (counter < arrLength) {
         string? line = java:toString(jarrays:get(lineArray, counter));

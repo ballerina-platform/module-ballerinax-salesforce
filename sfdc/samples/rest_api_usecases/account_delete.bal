@@ -33,26 +33,22 @@ sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
 public function main(){
 
-    string accountId = getAccountIdByName("WSO2 Inc, Sri Lanka");
+    string accountId = getAccountIdByName("University of Kelaniya");
 
-    json accountRecord = {
-        Name: "WSO2 Inc",
-        BillingCity: "Colombo 3"
-    };
+    boolean|sfdc:Error res = baseClient->deleteAccount(accountId);
 
-    boolean|sfdc:Error res = baseClient->updateAccount(accountId,accountRecord);
-
-   if res is boolean{
-        string outputMessage = (res == true) ? "Account Updated Successfully!" : "Failed to Update the Account";
+    if res is boolean{
+        string outputMessage = (res == true) ? "Account Deleted Successfully!" : "Failed to Delete the Account";
         log:print(outputMessage);
-    } else {
-        log:printError(msg = res.message());
+    }
+    else{
+        log:printError(res.message());
     }
 
 }
 
 function getAccountIdByName(string name) returns @tainted string {
-    string accountId = "";
+    string contactId = "";
     string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
@@ -60,12 +56,12 @@ function getAccountIdByName(string name) returns @tainted string {
         sfdc:SoqlRecord[]|error records = res.records;
         if (records is sfdc:SoqlRecord[]) {
             string id = records[0]["Id"].toString();
-            accountId = id;
+            contactId = id;
         } else {
-            log:print("Getting account ID by name failed. err=" + records.toString());            
+            log:print("Getting contact ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting account ID by name failed. err=" + res.toString());
+        log:print("Getting contact ID by name failed. err=" + res.toString());
     }
-    return accountId;
+    return contactId;
 }

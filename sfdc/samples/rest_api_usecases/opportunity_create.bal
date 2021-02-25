@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/sfdc;
 
-public function main(){
+public function main() {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:SalesforceConfiguration sfConfig = {
@@ -33,17 +33,16 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    string accountId = "0015Y00002adeBWQAY";
+    json opportunityRecord = {
+        Name: "Alan Kimberly",
+        CloseDate: "2020-02-25",
+        StageName: "New"
+    };
 
-    string path = "/services/data/v48.0/sobjects/Account/" + accountId;
+    string|sfdc:Error res = baseClient->createOpportunity(opportunityRecord);
 
-    json|sfdc:Error res = baseClient->getRecord(path);
-
-    if (res is json) {
-        json|error recName = res.Name;
-        if (recName is json){
-            log:print("Account data received successfully. Account Name : " + recName.toString());
-        }
+    if (res is string) {
+        log:print("opportunity Created Successfully. opportunity ID : " + res);
     } else {
         log:printError(msg = res.message());
     }

@@ -19,7 +19,6 @@ import ballerinax/sfdc;
 
 public function main(){
 
-    // Create Salesforce client configuration by reading from config file.
     sfdc:SalesforceConfiguration sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
@@ -33,17 +32,17 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    string contactId = "0032w00000QD5PcAAL";
+    string leadId = "00Q2w000006q5gSEAQ";
 
-    json|sfdc:Error contact = baseClient->getContactById(contactId, "FirstName", "LastName", "Title");
+    json|sfdc:Error lead = baseClient->getLeadById(leadId, "FirstName", "LastName", "Title");
 
-    if (contact is json) {
-        json|error contactName = contact.FirstName; 
-        if (contactName is json){
-            log:print("Contact data retrieved successfully. Contact's Name : " + contactName.toString());
+    if (lead is json) {
+        json|error leadName = lead.FirstName; 
+        if (leadName is json){
+            log:print("Lead data retrieved successfully. Lead's Name : " + leadName.toString());
         }
     } else {
-        log:printError(msg = contact.message());
+        log:printError(msg = lead.message());
     }
 
 }

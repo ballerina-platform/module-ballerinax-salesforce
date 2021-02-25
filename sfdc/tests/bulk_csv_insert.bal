@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+//
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
@@ -24,9 +24,8 @@ function insertCsv() {
     log:print("baseClient -> insertCsv");
     string batchId = "";
 
-    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
-        "Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0332236677,john434@gmail.com,845\n" +
-        "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,peter77@gmail.com,846";
+    string contacts = 
+    "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" + "Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0332236677,john434@gmail.com,845\n" + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,peter77@gmail.com,846";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
@@ -115,6 +114,7 @@ function insertCsvFromFile() {
         if (rbc is io:ReadableByteChannel) {
             error|BatchInfo batchUsingXmlFile = insertJob->addBatch(<@untainted>rbc);
             if (batchUsingXmlFile is BatchInfo) {
+
                 test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using CSV file.");
                 batchId = batchUsingXmlFile.id;
             } else {

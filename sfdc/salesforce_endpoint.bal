@@ -109,10 +109,9 @@ public client class BaseClient {
         json|Error result = checkAndSetErrors(response);
         if (result is json) {
             json|error resultId = result.id;
-            if (resultId is json){
+            if (resultId is json) {
                 return resultId.toString();
-            }
-            else{
+            } else {
                 return error Error(resultId.message());
             }
         } else {
@@ -125,8 +124,7 @@ public client class BaseClient {
     # + id - SObject id
     # + recordPayload - JSON record to be updated
     # + return - true if successful else false or Error occured
-    remote function updateRecord(string sObjectName, string id, json recordPayload) returns @tainted boolean|
-    Error {
+    remote function updateRecord(string sObjectName, string id, json recordPayload) returns @tainted boolean|Error {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
@@ -318,8 +316,7 @@ public client class BaseClient {
     # + opportunityId - Opportunity ID
     # + opportunityRecord - Opportunity json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    remote function updateOpportunity(string opportunityId, json opportunityRecord) returns @tainted boolean|
-    Error {
+    remote function updateOpportunity(string opportunityId, json opportunityRecord) returns @tainted boolean|Error {
         return self->updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
     }
 
@@ -427,7 +424,8 @@ public client class BaseClient {
     # + contentType - content type of the job 
     # + extIdFieldName - field name of the external ID incase of an Upsert operation
     # + return - returns job object or error
-    remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|BulkJob {
+    remote function creatJob(OPERATION operation, string sobj, JOBTYPE contentType, string extIdFieldName = "") returns @tainted error|
+    BulkJob {
         json jobPayload = {
             "operation": operation,
             "object": sobj,
@@ -443,28 +441,26 @@ public client class BaseClient {
         }
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             authorizedReq.setJsonPayload(jobPayload);
             string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
             var response = self.salesforceClient->post(path, authorizedReq);
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json) {
                 json|error jobResponseId = jobResponse.id;
-                if (jobResponseId is json){
-                    BulkJob bulkJob = new (jobResponseId.toString(), contentType, operation, self.salesforceClient, self.authHandler);
+                if (jobResponseId is json) {
+                    BulkJob bulkJob = new (jobResponseId.toString(), contentType, operation, self.salesforceClient, self.
+                    authHandler);
                     return bulkJob;
-                }
-                else{
+                } else {
                     return jobResponseId;
                 }
             } else {
                 return jobResponse;
             }
-        }
-        else{
+        } else {
             return authorizedReq;
         }
-            
 
     }
 
@@ -478,7 +474,7 @@ public client class BaseClient {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             var response = self.salesforceClient->get(path, authorizedReq);
             if (JSON == jobDataType) {
                 json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
@@ -497,11 +493,10 @@ public client class BaseClient {
                     return jobResponse;
                 }
             }
-        }
-        else{
+        } else {
             return authorizedReq;
         }
-        
+
     }
 
     # Close a job.
@@ -513,7 +508,7 @@ public client class BaseClient {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             authorizedReq.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
             var response = self.salesforceClient->post(path, authorizedReq);
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
@@ -523,11 +518,10 @@ public client class BaseClient {
             } else {
                 return jobResponse;
             }
-        }
-        else{
+        } else {
             return authorizedReq;
         }
-        
+
     }
 
     # Abort a job.
@@ -539,7 +533,7 @@ public client class BaseClient {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
         http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request){
+        if (authorizedReq is http:Request) {
             req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
             var response = self.salesforceClient->post(path, req);
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
@@ -550,7 +544,7 @@ public client class BaseClient {
                 return jobResponse;
             }
         } else {
-                return authorizedReq;
+            return authorizedReq;
         }
     }
 }

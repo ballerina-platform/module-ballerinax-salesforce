@@ -17,7 +17,6 @@
 import ballerina/log;
 import ballerinax/sfdc;
 
-// Create Salesforce client configuration by reading from config file.
 sfdc:SalesforceConfiguration sfConfig = {
     baseUrl: "<BASE_URL>",
     clientConfig: {
@@ -33,17 +32,12 @@ sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
 public function main(){
 
-    string accountId = getAccountIdByName("WSO2 Inc, Sri Lanka");
+    string leadId = getLeadIdByName("Mark", "Wahlberg", "IT World");
 
-    json accountRecord = {
-        Name: "WSO2 Inc",
-        BillingCity: "Colombo 3"
-    };
-
-    boolean|sfdc:Error res = baseClient->updateAccount(accountId,accountRecord);
+    boolean|sfdc:Error res = baseClient->deleteLead(leadId);
 
    if res is boolean{
-        string outputMessage = (res == true) ? "Account Updated Successfully!" : "Failed to Update the Account";
+        string outputMessage = (res == true) ? "Lead Deleted Successfully!" : "Failed to Delete the Lead";
         log:print(outputMessage);
     } else {
         log:printError(msg = res.message());
@@ -51,21 +45,22 @@ public function main(){
 
 }
 
-function getAccountIdByName(string name) returns @tainted string {
-    string accountId = "";
-    string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
+function getLeadIdByName(string firstName, string lastName, string compnay) returns @tainted string {
+    string leadId = "";
+    string sampleQuery = "SELECT Id FROM Lead WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
+        + "' AND Company='" + compnay + "'";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
     if (res is sfdc:SoqlResult) {
         sfdc:SoqlRecord[]|error records = res.records;
         if (records is sfdc:SoqlRecord[]) {
             string id = records[0]["Id"].toString();
-            accountId = id;
+            leadId = id;
         } else {
-            log:print("Getting account ID by name failed. err=" + records.toString());            
+            log:print("Getting Lead ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting account ID by name failed. err=" + res.toString());
+        log:print("Getting Lead ID by name failed. err=" + res.toString());
     }
-    return accountId;
+    return leadId;
 }

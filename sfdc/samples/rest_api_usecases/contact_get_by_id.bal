@@ -33,22 +33,17 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    string accountId = "0015Y00002adeBWQAY";
+    string contactId = "0032w00000QD5PcAAL";
 
-    json accountRecord = {
-        Name: "University of Kelaniya",
-        BillingCity: "Kelaniya",
-        Phone: "+94110000000"
-    };
+    json|sfdc:Error contact = baseClient->getContactById(contactId, "FirstName", "LastName", "Title");
 
-    boolean|sfdc:Error res = baseClient->updateRecord("Account", accountId, accountRecord);
-
-    if res is boolean{
-        string outputMessage = (res == true) ? "Record Updated Successfully!" : "Failed to Update the Record";
-        log:print(outputMessage);
-    }
-    else{
-        log:printError(res.message());
+    if (contact is json) {
+        json|error contactName = contact.FirstName; 
+        if (contactName is json){
+            log:print("Contact data retrieved successfully. Cotact's Name : " + contactName.toString());
+        }
+    } else {
+        log:printError(msg = contact.message());
     }
 
 }

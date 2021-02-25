@@ -33,17 +33,17 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    string contactId = "0032w00000QD5PcAAL";
+    string opportunityId = "0062w000008E6moAAC";
 
-    json|sfdc:Error contact = baseClient->getContactById(contactId, "FirstName", "LastName", "Title");
+    json|sfdc:Error opportunity = baseClient->getOpportunityById(opportunityId, "Name", "CloseDate", "StageName");
 
-    if (contact is json) {
-        json|error contactName = contact.FirstName; 
-        if (contactName is json){
-            log:print("Contact data retrieved successfully. Contact's Name : " + contactName.toString());
+    if (opportunity is json) {
+        json|error opportunityName = opportunity.Name; 
+        if (opportunityName is json){
+            log:print("Opportunity data retrieved successfully. Opportunity's Name : " + opportunityName.toString());
         }
     } else {
-        log:printError(msg = contact.message());
+        log:printError(msg = opportunity.message());
     }
 
 }
