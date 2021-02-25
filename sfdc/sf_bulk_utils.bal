@@ -53,8 +53,7 @@ isolated function checkXmlPayloadAndSetErrors(http:Response|http:PayloadType|err
 # Check HTTP response and return Text payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
-isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted string|
-Error {
+isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted string|Error {
     if (httpResponse is http:Response) {
 
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
@@ -81,8 +80,7 @@ Error {
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
-isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted json|
-Error {
+isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted json|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
@@ -107,8 +105,7 @@ Error {
 #
 # + httpResponse - HTTP response or error occurred
 # + return - Query string response if successful or else an sfdc:Error
-isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns @tainted string|
-Error {
+isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns @tainted string|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK) {
             string|error textResponse = httpResponse.getTextPayload();
@@ -355,8 +352,7 @@ function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|Error {
     }
 }
 
-function getJsonQueryResult(json resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted json|
-Error {
+function getJsonQueryResult(json resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted json|Error {
     json[] finalResults = [];
     http:Request req = new;
     http:ClientAuthError|http:Request authorizedReq = authHandler.enrich(req);
@@ -381,8 +377,7 @@ Error {
 
 }
 
-function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted xml|
-Error {
+function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted xml|Error {
     xml finalResults = xml `<queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
     http:Request req = new;
     http:ClientAuthError|http:Request authorizedReq = authHandler.enrich(req);
@@ -399,8 +394,7 @@ Error {
     }
 }
 
-function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted string|
-Error {
+function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted string|Error {
     string finalResults = "";
     http:Request req = new;
     http:ClientAuthError|http:Request authorizedReq = authHandler.enrich(req);
