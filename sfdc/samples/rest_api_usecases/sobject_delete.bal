@@ -33,17 +33,16 @@ public function main(){
     // Create Salesforce client.
     sfdc:BaseClient baseClient = checkpanic new(sfConfig);
 
-    string contactId = "0032w00000QD5PcAAL";
+    string accountId = "0015Y00002adsuhQAA";
 
-    json|sfdc:Error contact = baseClient->getContactById(contactId, "FirstName", "LastName", "Title");
+    boolean|sfdc:Error res = baseClient->deleteRecord("Account", accountId);
 
-    if (contact is json) {
-        json|error contactName = contact.FirstName; 
-        if (contactName is json){
-            log:print("Contact data retrieved successfully. Contact's Name : " + contactName.toString());
-        }
-    } else {
-        log:printError(msg = contact.message());
+    if res is boolean{
+        string outputMessage = (res == true) ? "Record Deleted Successfully!" : "Failed to Delete the Record";
+        log:print(outputMessage);
+    }
+    else{
+        log:printError(res.message());
     }
 
 }
