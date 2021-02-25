@@ -13,14 +13,11 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/test;
-//import ballerina/lang.config;
 import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/os;
-
-//configurable string SF_USERNAME = ?;
-//configurable string SF_PASSWORD = ?;
 
 ListenerConfiguration listenerConfig = {
     username: os:getEnv("SF_USERNAME"),

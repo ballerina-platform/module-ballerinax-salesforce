@@ -13,27 +13,19 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/test;
 import ballerina/log;
 import ballerina/os;
-//import ballerina/lang.config;
 
-// Create Salesforce client configuration by reading from config file.
-
-// configurable string EP_URL = ?;
-// configurable string SF_CLIENT_ID = ?;
-// configurable string SF_CLIENT_SECRET = ?;
-// configurable string SF_REFRESH_TOKEN = ?;
-// configurable string SF_REFRESH_URL = ?;
-
-
+// Create Salesforce client configuration by reading from environemnt.
 SalesforceConfiguration sfConfig = {
     baseUrl: os:getEnv("EP_URL"),
     clientConfig: {
-        clientId: os:getEnv("SF_CLIENT_ID"),
-        clientSecret: os:getEnv("SF_CLIENT_SECRET"),
-        refreshToken: os:getEnv("SF_REFRESH_TOKEN"),
-        refreshUrl: os:getEnv("SF_REFRESH_URL")
+        clientId: os:getEnv("CLIENT_ID"),
+        clientSecret: os:getEnv("CLIENT_SECRET"),
+        refreshToken: os:getEnv("REFRESH_TOKEN"),
+        refreshUrl: os:getEnv("REFRESH_URL")
     }
 };
 
