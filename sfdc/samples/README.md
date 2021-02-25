@@ -2,19 +2,19 @@
 
 Please find the samples for above mentioned use cases through following links.
 
-## [Samples for Salesforce REST API use cases](sfdc/samples/rest_api_usecases)  
+## [Samples for Salesforce REST API use cases](rest_api_usecases)  
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce REST API related operations. The samples can be further divided as following
-* Samples that can be used with any SObject's CRUD operations (`create_record`/`get_record_by_id`/`update_record`/`delete_record`)
+* Samples that can be used with any SObject's CRUD operations ([`record_create`](record_create.bal),[`record_delete`](record_delete.bal),[`record_update`](record_update.bal),[`record_get`](record_get_by_id.bal))
 * Samples for convenient access of Account, Contact, Product, Opportunity and Target SObjects's CRUD operations
 * Samples for SOSL and SOQL related operations
 * Samples for retrieving Organization and SObject metadata
 
 
-## [Samples for Salesforce Bulk API use cases](sfdc/samples/bulk_api_usecases)
+## [Samples for Salesforce Bulk API use cases](bulk_api_usecases)
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
 
-## [Samples for Event Listener](sfdc/samples/event_listener_usecases)
+## [Samples for Event Listener](event_listener_usecases)
 
 This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
