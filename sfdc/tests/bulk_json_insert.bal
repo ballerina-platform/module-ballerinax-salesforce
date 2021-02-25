@@ -126,7 +126,7 @@ function insertJsonFromFile() {
     log:print("baseClient -> insertJsonFromFile");
     string batchId = "";
 
-    string jsonContactsFilePath = "tests/resources/contacts.json";
+    string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
