@@ -41,7 +41,7 @@ isolated function checkBatchResults(Result[] results) returns boolean {
     return true;
 }
 
-function checkCsvResult(string result) returns int {
+isolated function checkCsvResult(string result) returns int {
     string[] lineArray = regex:split(result, "\n");
     int arrLength = lineArray.length();
     return arrLength - 1;
@@ -93,7 +93,7 @@ isolated function getXmlContactsToDelete(xml resultList) returns xml {
     return contacts;
 }
 
-function getCsvContactsToDelete(string resultString) returns string {
+isolated function getCsvContactsToDelete(string resultString) returns string {
     string contacts = "Id";
     string[] lineArray = regex:split(resultString, "\n");
     int arrLength = lineArray.length();
