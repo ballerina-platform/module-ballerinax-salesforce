@@ -19,12 +19,12 @@ import ballerinax/sfdc;
 
 // Create Salesforce client configuration by reading from config file.
 sfdc:SalesforceConfiguration sfConfig = {
-    baseUrl: "https://ap16.salesforce.com",
+    baseUrl: "<BASE_URL>",
     clientConfig: {
-        clientId: "3MVG9n_HvETGhr3Dm.obTecp.rfikLFnhU3J8o5clXBctP1_6M4.mNzUAbydYMRg_K4JMEiAJy1iMXUP7L3Zk",
-        clientSecret: "1FD8500266F290C6FF56298B182405E2EFD179E7B633DFEDA503BB2CCB77B9E7",
-        refreshToken: "5Aep861ZBQbtA4s3JVLtejrUPRTfrmN99FPoEvnxkWp.55TmMV3dXZpevBGN7NNcmNzq22vNZ.Jbi_a3.iGvmlF",
-        refreshUrl: "https://login.salesforce.com/services/oauth2/token"
+        clientId: "<CLIENT_ID>",
+        clientSecret: "<CLIENT_SECRET>",
+        refreshToken: "<REFESH_TOKEN>",
+        refreshUrl: "<REFRESH_URL>"
     }
 };
 
