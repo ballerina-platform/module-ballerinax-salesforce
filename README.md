@@ -529,7 +529,7 @@ These samples demonstrate the employment of Ballerina Salesforce Connector in Sa
 
 ## [Samples for Salesforce Bulk API use cases](sfdc/samples/bulk_api_usecases)
 
-These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets can be found here.
+These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
 
 ## [Samples for Event Listener](sfdc/samples/event_listener_usecases)
 
