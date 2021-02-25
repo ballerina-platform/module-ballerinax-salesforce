@@ -24,11 +24,11 @@ jobs:
             env:
                 JAVA_HOME: /usr/lib/jvm/default-jvm
                 ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-                CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
-                CLIENT_SECRET: ${{ secrets.SF_CLIENT_SECRET }}
+                SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+                SF_CLIENT_SECRET: ${{ secrets.SF_CLIENT_SECRET }}
                 EP_URL: ${{ secrets.EP_URL }}       
-                REFRESH_TOKEN: ${{ secrets.SF_REFRESH_TOKEN }}
-                REFRESH_URL: ${{ secrets.SF_REFRESH_URL }}
+                SF_REFRESH_TOKEN: ${{ secrets.SF_REFRESH_TOKEN }}
+                SF_REFRESH_URL: ${{ secrets.SF_REFRESH_URL }}
                 SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
                 SF_USERNAME: ${{ secrets.SF_USERNAME }}
           - name: Ballerina Push
