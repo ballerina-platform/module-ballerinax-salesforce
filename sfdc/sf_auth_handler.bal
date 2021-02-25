@@ -18,7 +18,7 @@ import ballerina/http;
 
 # Representation of the Bearer Auth header handler for both inbound and outbound HTTP traffic.
 #
-# + authProvider - The `InboundAuthProvider` instance or the `OutboundAuthProvider` instance.
+# + authProvider - The `ClientOAuth2Provider` instance to handle auth requests. 
 public client class SalesforceAuthHandler {
 
     oauth2:ClientOAuth2Provider authProvider;

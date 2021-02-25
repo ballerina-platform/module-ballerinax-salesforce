@@ -215,21 +215,11 @@ isolated function getBooleanValue(string value) returns boolean {
     }
 }
 
-// # Logs, prepares, and returns the `AuthenticationError`.
-// #
-// # + message -The error message.
-// # + err - The `error` instance.
-// # + return - Returns the prepared `AuthenticationError` instance.
-// isolated function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
-//     log:print(message);
-//     if (err is error) {
-//         http:AuthenticationError preparedError = error http:AuthenticationError(message, cause = err);
-//         return preparedError;
-//     }
-//     http:AuthenticationError preparedError = error  http:AuthenticationError(message);
-//     return preparedError;
-// }
-
+# Logs, prepares, and returns the `ClientAuthError`.
+#
+# + message -The error message.
+# + err - The `error` instance.
+# + return - Returns the prepared `ClientAuthError` instance.
 isolated function prepareClientAuthError(string message, error? err = ()) returns http:ClientAuthError {
     log:printError(message, err = err);
     if (err is error) {

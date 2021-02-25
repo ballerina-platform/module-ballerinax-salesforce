@@ -16,14 +16,14 @@
 // under the License.
 //
 import ballerina/http;
-//import ballerina/oauth2;
 
 # The Salesforce Client object.
 # + salesforceClient - OAuth2 client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
+# + authHandler - SalesforceAuthHandler class object 
 public client class BaseClient {
+
     http:Client salesforceClient;
-    //oauth2:ClientOAuth2Provider OAuth2Provider;
     SalesforceConfiguration salesforceConfiguration;
     SalesforceAuthHandler authHandler;
 
