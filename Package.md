@@ -320,6 +320,44 @@ string searchString = "FIND {WSO2 Inc}";
 sfdc:SoslResult|Error res = baseClient->searchSOSLString(searchString);
 ```
 
+## Operations to get SObject Metadata
+
+Ballerina Salesforce Connector facilitates users to retrieve SObject related information and metadata through Salesforce REST API. Following are the remote functions available for retrieving SObject metadata. 
+
+
+<table>
+  <tr>
+   <td><strong>Remote Function</strong>
+   </td>
+   <td><strong>Description</strong>
+   </td>
+  </tr>
+  <tr>
+   <td>describeAvailableObjects
+   </td>
+   <td>Lists the available objects and their metadata for your organization and available to the logged-in user
+   </td>
+  </tr>
+  <tr>
+   <td>getSObjectBasicInfo
+   </td>
+   <td>Returns metadata of the specified SObject
+   </td>
+  </tr>
+  <tr>
+   <td>describeSObject
+   </td>
+   <td>Returns  metadata at all levels for the specified object including the fields, URLs, and child relationships
+   </td>
+  </tr>
+  <tr>
+   <td>sObjectPlatformAction
+   </td>
+   <td>Query for actions displayed in the UI, given a user, a context, device format, and a record ID
+   </td>
+  </tr>
+</table>
+
 
 ## Operations to get Organizational Data
 
@@ -477,6 +515,26 @@ The above service is listening to the PushTopic `QuoteUpdate` defined in the Sal
    insert pushTopic;
 ```
 
+# Samples
+
+Please find the samples for above mentioned use cases through following links.
+
+## [Samples for Salesforce REST API use cases](sfdc/samples/rest_api_usecases)  
+
+These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce REST API related operations. The samples can be further divided as following
+* Samples that can be used with any SObject's CRUD operations
+* Samples for convenient access of Account, Contact, Product, Opportunity and Target SObjects's CRUD operations
+* Samples for SOSL and SOQL related operations
+* Samples for retrieving Organization and SObject metadata
+
+
+## [Samples for Salesforce Bulk API use cases](sfdc/samples/bulk_api_usecases)
+
+These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
+
+## [Samples for Event Listener](sfdc/samples/event_listener_usecases)
+
+This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
 
 # Building from the Source
 
