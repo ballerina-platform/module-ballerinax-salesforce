@@ -42,7 +42,7 @@ isolated function checkBatchResults(Result[] results) returns boolean {
 }
 
 function checkCsvResult(string result) returns int {
-    string[] lineArray = regex:split(jresult, "\n");
+    string[] lineArray = regex:split(result, "\n");
     int arrLength = lineArray.length();
     return arrLength - 1;
 }
@@ -99,7 +99,7 @@ function getCsvContactsToDelete(string resultString) returns string {
     int arrLength = lineArray.length();
     int counter = 1;
     while (counter < arrLength) {
-        string? line = java:toString(jarrays:get(lineArray, counter));
+        string? line = lineArray[counter];
         if (line is string) {
             int? inof = line.indexOf(",");
             if (inof is int) {
