@@ -13,42 +13,36 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+//
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    dependsOn: ["insertJson", "upsertJson"]
-}
+@test:Config {dependsOn: [insertJson, upsertJson]}
 function updateJson() {
     log:print("baseClient -> updateJson");
     string batchId = "";
     string mornsId = getContactIdByName("Remus", "Lupin", "Professor Level 03");
     string andisId = getContactIdByName("Minerva", "McGonagall", "Professor Level 03");
 
-    json contacts = [
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                Id: mornsId,
-                FirstName: "Remus",
-                LastName: "Lupin",
-                Title: "Professor Level 03",
-                Phone: "0552226670",
-                Email: "lupinn@w3c.com",
-                My_External_Id__c: "848"
-            },
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                Id: andisId,
-                FirstName: "Minerva",
-                LastName: "McGonagall",
-                Title: "Professor Level 03",
-                Phone: "0442216170",
-                Email: "minervam@w3c.com",
-                My_External_Id__c: "849"
-            }
-        ];
-
+    json contacts = [{
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        Id: mornsId,
+        FirstName: "Remus",
+        LastName: "Lupin",
+        Title: "Professor Level 03",
+        Phone: "0552226670",
+        Email: "lupinn@w3c.com",
+        My_External_Id__c: "848"
+    }, {
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        Id: andisId,
+        FirstName: "Minerva",
+        LastName: "McGonagall",
+        Title: "Professor Level 03",
+        Phone: "0442216170",
+        Email: "minervam@w3c.com",
+        My_External_Id__c: "849"
+    }];
 
     //create job
     error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "JSON");

@@ -13,13 +13,11 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+//
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    dependsOn: ["queryJson"]
-}
+@test:Config {dependsOn: [queryJson]}
 function deleteJson() {
     log:print("baseClient -> deleteJson");
     string batchId = "";

@@ -37,14 +37,14 @@ isolated function checkXmlPayloadAndSetErrors(http:Response|http:PayloadType|err
                 return xmlResponse;
             } else {
                 log:printError(XML_ACCESSING_ERROR_MSG, err = xmlResponse);
-                return Error(XML_ACCESSING_ERROR_MSG, xmlResponse);
+                return error Error(XML_ACCESSING_ERROR_MSG, xmlResponse);
             }
 
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
     } else if (httpResponse is http:PayloadType) {
-        return Error(UNREACHABLE_STATE);
+        return error Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -53,8 +53,7 @@ isolated function checkXmlPayloadAndSetErrors(http:Response|http:PayloadType|err
 # Check HTTP response and return Text payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
-isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted string|
-Error {
+isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted string|Error {
     if (httpResponse is http:Response) {
 
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
@@ -65,14 +64,14 @@ Error {
                 return textResponse;
             } else {
                 log:printError(TEXT_ACCESSING_ERROR_MSG, err = textResponse);
-                return Error(TEXT_ACCESSING_ERROR_MSG, textResponse);
+                return error Error(TEXT_ACCESSING_ERROR_MSG, textResponse);
             }
 
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
     } else if (httpResponse is http:PayloadType) {
-        return Error(UNREACHABLE_STATE);
+        return error Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -81,10 +80,8 @@ Error {
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
-isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted json|
-Error {
+isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted json|Error {
     if (httpResponse is http:Response) {
-
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
             json|error response = httpResponse.getJsonPayload();
@@ -92,13 +89,13 @@ Error {
                 return response;
             } else {
                 log:printError(JSON_ACCESSING_ERROR_MSG, err = response);
-                return Error(JSON_ACCESSING_ERROR_MSG, response);
+                return error Error(JSON_ACCESSING_ERROR_MSG, response);
             }
         } else {
             return handleJsonErrorResponse(httpResponse);
         }
     } else if (httpResponse is http:PayloadType) {
-        return Error(UNREACHABLE_STATE);
+        return error Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -108,8 +105,7 @@ Error {
 #
 # + httpResponse - HTTP response or error occurred
 # + return - Query string response if successful or else an sfdc:Error
-isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns @tainted string|
-Error {
+isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns @tainted string|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK) {
             string|error textResponse = httpResponse.getTextPayload();
@@ -117,7 +113,7 @@ Error {
                 return textResponse;
             } else {
                 log:printError(TEXT_ACCESSING_ERROR_MSG, err = textResponse);
-                return Error(TEXT_ACCESSING_ERROR_MSG, textResponse);
+                return error Error(TEXT_ACCESSING_ERROR_MSG, textResponse);
             }
         } else {
             if (JSON == jobtype) {
@@ -127,7 +123,7 @@ Error {
             }
         }
     } else if (httpResponse is http:PayloadType) {
-        return Error(UNREACHABLE_STATE);
+        return error Error(UNREACHABLE_STATE);
     } else {
         return handleHttpError(httpResponse);
     }
@@ -141,11 +137,11 @@ isolated function handleXmlErrorResponse(http:Response httpResponse) returns @ta
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
 
     if (xmlResponse is xml) {
-        Error httpResponseHandlingError = Error((xmlResponse/<ns:exceptionCode>/*).toString());
+        Error httpResponseHandlingError = error Error((xmlResponse/<ns:exceptionCode>/*).toString());
         return httpResponseHandlingError;
     } else {
         log:printError(ERR_EXTRACTING_ERROR_MSG, err = xmlResponse);
-        return Error(ERR_EXTRACTING_ERROR_MSG, xmlResponse);
+        return error Error(ERR_EXTRACTING_ERROR_MSG, xmlResponse);
     }
 }
 
@@ -155,11 +151,16 @@ isolated function handleXmlErrorResponse(http:Response httpResponse) returns @ta
 isolated function handleJsonErrorResponse(http:Response httpResponse) returns @tainted Error {
     json|error response = httpResponse.getJsonPayload();
     if (response is json) {
-        Error httpResponseHandlingError = Error(response.exceptionCode.toString());
-        return httpResponseHandlingError;
+        json|error resExceptionCode = response.exceptionCode;
+        if (resExceptionCode is json) {
+            Error httpResponseHandlingError = error Error(resExceptionCode.toString());
+            return httpResponseHandlingError;
+        } else {
+            return error Error(resExceptionCode.message());
+        }
     } else {
         log:printError(ERR_EXTRACTING_ERROR_MSG, err = response);
-        return Error(ERR_EXTRACTING_ERROR_MSG, response);
+        return error Error(ERR_EXTRACTING_ERROR_MSG, response);
     }
 }
 
@@ -167,7 +168,7 @@ isolated function handleJsonErrorResponse(http:Response httpResponse) returns @t
 # + return - Constructed error
 isolated function handleHttpError(error httpResponse) returns Error {
     log:printError(HTTP_ERROR_MSG, err = httpResponse);
-    Error httpError = Error(HTTP_ERROR_MSG, httpResponse);
+    Error httpError = error Error(HTTP_ERROR_MSG, httpResponse);
     return httpError;
 }
 
@@ -211,19 +212,17 @@ isolated function getBooleanValue(string value) returns boolean {
     }
 }
 
-# Logs, prepares, and returns the `AuthenticationError`.
+# Logs, prepares, and returns the `ClientAuthError`.
 #
 # + message -The error message.
 # + err - The `error` instance.
-# + return - Returns the prepared `AuthenticationError` instance.
-isolated function prepareAuthenticationError(string message, error? err = ()) returns http:AuthenticationError {
-    log:print(message);
+# + return - Returns the prepared `ClientAuthError` instance.
+isolated function prepareClientAuthError(string message, error? err = ()) returns http:ClientAuthError {
+    log:printError(message, err = err);
     if (err is error) {
-        http:AuthenticationError preparedError = http:AuthenticationError(message, cause = err);
-        return preparedError;
+        return error http:ClientAuthError(message, err);
     }
-    http:AuthenticationError preparedError = http:AuthenticationError(message);
-    return preparedError;
+    return error http:ClientAuthError(message);
 }
 
 # Creates a map out of the headers of the HTTP response.
@@ -235,36 +234,42 @@ isolated function createResponseHeaderMap(http:Response resp) returns @tainted m
 
     // If session ID is invalid, set staus code as 401.
     if (resp.statusCode == http:STATUS_BAD_REQUEST) {
-        string contentType = resp.getHeader(CONTENT_TYPE);
-        if (contentType == APP_JSON) {
-            json|error payload = resp.getJsonPayload();
-            if (payload is json) {
-                if (payload.exceptionCode == INVALID_SESSION_ID) {
-                    headerMap[http:STATUS_CODE] = http:STATUS_UNAUTHORIZED;
+        string|http:HeaderNotFoundError contentType = resp.getHeader(CONTENT_TYPE);
+        if (contentType is string) {
+            if (contentType == APP_JSON) {
+                json|error payload = resp.getJsonPayload();
+                if (payload is json) {
+                    if (payload.exceptionCode == INVALID_SESSION_ID) {
+                        headerMap[STATUS_CODE] = http:STATUS_UNAUTHORIZED;
+                    }
+                } else {
+                    log:printError("Invalid payload", err = payload);
+                }
+            } else if (contentType == APP_XML) {
+                xml|error payload = resp.getXmlPayload();
+                if (payload is xml) {
+                    if ((payload/<exceptionCode>/*).toString() == INVALID_SESSION_ID) {
+                        headerMap[STATUS_CODE] = http:STATUS_UNAUTHORIZED;
+                    }
+                } else {
+                    log:printError("Invalid payload", err = payload);
                 }
             } else {
-                log:printError("Invalid payload", err = payload);
-            }
-        } else if (contentType == APP_XML) {
-            xml|error payload = resp.getXmlPayload();
-            if (payload is xml) {
-                if ((payload/<exceptionCode>/*).toString() == INVALID_SESSION_ID) {
-                    headerMap[http:STATUS_CODE] = http:STATUS_UNAUTHORIZED;
-                }
-            } else {
-                log:printError("Invalid payload", err = payload);
+                log:printError("Invalid contentType, contentType='" + contentType + "' ", err = ());
             }
         } else {
-            log:printError("Invalid contentType, contentType='" + contentType + "' ", err = ());
+            log:printError("CONTENT_TYPE Header not found ", err = contentType);
         }
     } else {
-        headerMap[http:STATUS_CODE] = resp.statusCode;
+        headerMap[STATUS_CODE] = resp.statusCode;
     }
 
     string[] headerNames = resp.getHeaderNames();
     foreach string header in headerNames {
-        string[] headerValues = resp.getHeaders(<@untainted>header);
-        headerMap[header] = headerValues;
+        string[]|http:HeaderNotFoundError headerValues = resp.getHeaders(<@untainted>header);
+        if (headerValues is string[]) {
+            headerMap[header] = headerValues;
+        }
     }
     return headerMap;
 }
@@ -283,7 +288,7 @@ function convertToString(io:ReadableByteChannel rbc) returns @tainted string|Err
         } else if (result is io:Error) {
             string errMsg = "Error occurred while reading from Readable Byte Channel.";
             log:printError(errMsg, err = result);
-            return Error(errMsg, result);
+            return error Error(errMsg, result);
         } else {
             readContent = result;
             string|error readContentStr = strings:fromBytes(readContent);
@@ -292,7 +297,7 @@ function convertToString(io:ReadableByteChannel rbc) returns @tainted string|Err
             } else {
                 string errMsg = "Error occurred while converting readContent byte array to string.";
                 log:printError(errMsg, err = readContentStr);
-                return Error(errMsg, readContentStr);
+                return error Error(errMsg, readContentStr);
             }
         }
     }
@@ -309,7 +314,7 @@ function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|Error {
     if (rch is io:Error) {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, err = rch);
-        return Error(errMsg, rch);
+        return error Error(errMsg, rch);
     } else {
         json|error jsonContent = rch.readJson();
 
@@ -318,7 +323,7 @@ function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|Error {
         } else {
             string errMsg = "Error occurred while reading ReadableCharacterChannel as json.";
             log:printError(errMsg, err = jsonContent);
-            return Error(errMsg, jsonContent);
+            return error Error(errMsg, jsonContent);
         }
     }
 }
@@ -333,7 +338,7 @@ function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|Error {
     if (rch is io:Error) {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, err = rch);
-        return Error(errMsg, rch);
+        return error Error(errMsg, rch);
     } else {
         xml|error xmlContent = rch.readXml();
 
@@ -342,50 +347,60 @@ function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|Error {
         } else {
             string errMsg = "Error occurred while reading ReadableCharacterChannel as xml.";
             log:printError(errMsg, err = xmlContent);
-            return Error(errMsg, xmlContent);
+            return error Error(errMsg, xmlContent);
         }
     }
 }
 
-function getJsonQueryResult(json resultlist, string path, http:Client httpClient) returns @tainted json|Error {
+function getJsonQueryResult(json resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted json|Error {
     json[] finalResults = [];
     http:Request req = new;
-    //result list is always a json[]
-    if (resultlist is json[]) {
-        foreach var item in resultlist {
-            string resultId = item.toString();
-            var response = httpClient->get(path + "/" + resultId, req);
-            json result = check checkJsonPayloadAndSetErrors(response);
-            //result is always a json[]
-            if (result is json[]) {
-                finalResults = mergeJson(finalResults, result);
+    http:ClientAuthError|http:Request authorizedReq = authHandler.enrich(req);
+    if (authorizedReq is http:Request) {
+        //result list is always a json[]
+        if (resultlist is json[]) {
+            foreach var item in resultlist {
+                string resultId = item.toString();
+                var response = httpClient->get(path + "/" + resultId, authorizedReq);
+                json result = check checkJsonPayloadAndSetErrors(response);
+                //result is always a json[]
+                if (result is json[]) {
+                    finalResults = mergeJson(finalResults, result);
+                }
             }
+            return finalResults;
         }
-        return finalResults;
+        return resultlist;
+    } else {
+        return error Error(authorizedReq.message(), err = authorizedReq);
     }
-    return resultlist;
+
 }
 
-function getXmlQueryResult(xml resultlist, string path, http:Client httpClient) returns @tainted xml|Error {
+function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted xml|Error {
     xml finalResults = xml `<queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
     http:Request req = new;
-    foreach var item in resultlist/<*> {
-        if (item is xml) {
+    http:ClientAuthError|http:Request authorizedReq = authHandler.enrich(req);
+    if (authorizedReq is http:Request) {
+        foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
-            var response = httpClient->get(path + "/" + resultId, req);
+            var response = httpClient->get(path + "/" + resultId, authorizedReq);
             xml result = check checkXmlPayloadAndSetErrors(response);
             finalResults = mergeXml(finalResults, result);
         }
+        return finalResults;
+    } else {
+        return error Error(authorizedReq.message(), err = authorizedReq);
     }
-    return finalResults;
 }
 
-function getCsvQueryResult(xml resultlist, string path, http:Client httpClient) returns @tainted string|Error {
+function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, SalesforceAuthHandler authHandler) returns @tainted string|Error {
     string finalResults = "";
     http:Request req = new;
-    int i = 0;
-    foreach var item in resultlist/<*> {
-        if (item is xml) {
+    http:ClientAuthError|http:Request authorizedReq = authHandler.enrich(req);
+    if (authorizedReq is http:Request) {
+        int i = 0;
+        foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
             var response = httpClient->get(path + "/" + resultId, req);
             string result = check checkTextPayloadAndSetErrors(response);
@@ -394,10 +409,13 @@ function getCsvQueryResult(xml resultlist, string path, http:Client httpClient) 
             } else {
                 finalResults = mergeCsv(finalResults, result);
             }
+            i = i + 1;
         }
-        i = i + 1;
+        return finalResults;
+    } else {
+        return error Error(authorizedReq.message(), err = authorizedReq);
     }
-    return finalResults;
+
 }
 
 isolated function mergeJson(json[] list1, json[] list2) returns json[] {

@@ -13,14 +13,11 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+//
 import ballerina/log;
 import ballerina/test;
 
-
-@test:Config {
-    dependsOn: ["updateCsv", "insertCsvFromFile", "insertCsv"]
-}
+@test:Config {dependsOn: [updateCsv, insertCsvFromFile, insertCsv]}
 function queryCsv() {
     log:print("baseClient -> queryCsv");
     string batchId = "";
@@ -78,7 +75,7 @@ function queryCsv() {
         var batchResult = queryJob->getBatchResult(batchId);
         if (batchResult is string) {
             //io:println("count : ", checkCsvResult(batchResult).toString());
-            test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed." );
+            test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed.");
             csvQueryResult = <@untainted>batchResult;
         } else if (batchResult is error) {
             test:assertFail(msg = batchResult.message());

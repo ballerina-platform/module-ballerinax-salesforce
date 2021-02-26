@@ -13,13 +13,11 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+//
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    dependsOn: ["insertXml"]
-}
+@test:Config {dependsOn: [insertXml]}
 function upsertXml() {
     log:print("baseClient -> upsertXml");
     string batchId = "";
@@ -48,7 +46,7 @@ function upsertXml() {
     //create job
     error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "XML", "My_External_Id__c");
 
-        if (upsertJob is BulkJob) {
+    if (upsertJob is BulkJob) {
         //add xml content
         error|BatchInfo batch = upsertJob->addBatch(contacts);
         if (batch is BatchInfo) {
@@ -84,8 +82,8 @@ function upsertXml() {
 
         //get batch request
         var batchRequest = upsertJob->getBatchRequest(batchId);
-            if (batchRequest is xml) {
-            test:assertTrue ((batchRequest/<*>).length() == 2, msg ="Retrieving batch request failed.");
+        if (batchRequest is xml) {
+            test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {

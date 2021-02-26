@@ -13,37 +13,34 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 //under the License.
-
+//
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
-import ballerina/runtime;
+import ballerina/lang.runtime;
 
 @test:Config {}
 function insertJson() {
     log:print("baseClient -> insertJson");
     string batchId = "";
 
-    json contacts = [
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Remus",
-                LastName: "Lupin",
-                Title: "Professor Level 03",
-                Phone: "0442226670",
-                Email: "lupinWolf@gmail.com",
-                My_External_Id__c: "848"
-            },
-            {
-                description: "Created_from_Ballerina_Sf_Bulk_API",
-                FirstName: "Minerva",
-                LastName: "McGonagall",
-                Title: "Professor Level 03",
-                Phone: "0442216170",
-                Email: "minerva@gmail.com",
-                My_External_Id__c: "849"
-            }
-        ];
+    json contacts = [{
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        FirstName: "Remus",
+        LastName: "Lupin",
+        Title: "Professor Level 03",
+        Phone: "0442226670",
+        Email: "lupinWolf@gmail.com",
+        My_External_Id__c: "848"
+    }, {
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        FirstName: "Minerva",
+        LastName: "McGonagall",
+        Title: "Professor Level 03",
+        Phone: "0442216170",
+        Email: "minerva@gmail.com",
+        My_External_Id__c: "849"
+    }];
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
@@ -98,7 +95,7 @@ function insertJson() {
         }
 
         //get batch result
-        runtime:sleep(3000);
+        runtime:sleep(3.0);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -137,7 +134,8 @@ function insertJsonFromFile() {
         if (rbc is io:ReadableByteChannel) {
             error|BatchInfo batchUsingJsonFile = insertJob->addBatch(<@untainted>rbc);
             if (batchUsingJsonFile is BatchInfo) {
-                test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
+                test:assertTrue(batchUsingJsonFile.id.length() > 0, 
+                msg = "Could not upload the contacts using json file.");
                 batchId = batchUsingJsonFile.id;
             } else {
                 test:assertFail(msg = batchUsingJsonFile.message());
@@ -188,7 +186,7 @@ function insertJsonFromFile() {
         }
 
         //get batch result
-        runtime:sleep(3000);
+        runtime:sleep(3.0);
         var batchResult = insertJob->getBatchResult(batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");

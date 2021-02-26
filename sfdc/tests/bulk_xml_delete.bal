@@ -13,13 +13,11 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+//
 import ballerina/log;
 import ballerina/test;
 
-@test:Config {
-    dependsOn: ["queryXml"]
-}
+@test:Config {dependsOn: [queryXml]}
 function deleteXml() {
     log:print("baseClient -> deleteXml");
     string batchId = "";
@@ -29,7 +27,7 @@ function deleteXml() {
     //create job
     error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "XML");
 
-        if (deleteJob is BulkJob) {
+    if (deleteJob is BulkJob) {
         //add xml content
         error|BatchInfo batch = deleteJob->addBatch(contacts);
         if (batch is BatchInfo) {
@@ -65,8 +63,8 @@ function deleteXml() {
 
         //get batch request
         var batchRequest = deleteJob->getBatchRequest(batchId);
-            if (batchRequest is xml) {
-            test:assertTrue ((batchRequest/<*>).length() == 4, msg ="Retrieving batch request failed.");
+        if (batchRequest is xml) {
+            test:assertTrue((batchRequest/<*>).length() == 4, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
             test:assertFail(msg = batchRequest.message());
         } else {

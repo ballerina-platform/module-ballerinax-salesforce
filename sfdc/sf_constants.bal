@@ -180,6 +180,9 @@ const REQUEST = "request";
 # Constant field `RESULT`. Holds the value of "result".
 const RESULT = "result";
 
+# Constant field `STATUS_CODE`. Header name for bulk API response .
+const STATUS_CODE = "STATUS_CODE";
+
 // XML namespace used by salesforce responses
 
 # Constant field `XML_NAMESPACE`. Holds the value of XML namespace used by salesforce bulk API.

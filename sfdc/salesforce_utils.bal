@@ -87,7 +87,7 @@ Error {
                     return jsonResponse;
                 } else {
                     log:printError(JSON_ACCESSING_ERROR_MSG, err = jsonResponse);
-                    return Error(JSON_ACCESSING_ERROR_MSG, jsonResponse);
+                    return error Error(JSON_ACCESSING_ERROR_MSG, jsonResponse);
                 }
 
             } else {
@@ -106,25 +106,29 @@ Error {
                 int counter = 1;
 
                 foreach json err in errArr {
-                    errCodes = errCodes + err.errorCode.toString();
-                    errMssgs = errMssgs + err.message.toString();
-                    if (counter != errArr.length()) {
-                        errCodes = errCodes + ", ";
-                        errMssgs = errMssgs + ", ";
+                    json|error errorCode = err.errorCode;
+                    json|error errMessage = err.message;
+                    if (errorCode is json && errMessage is json) {
+                        errCodes = errCodes + errorCode.toString();
+                        errMssgs = errMssgs + errMessage.toString();
+                        if (counter != errArr.length()) {
+                            errCodes = errCodes + ", ";
+                            errMssgs = errMssgs + ", ";
+                        }
+                        counter = counter + 1;
                     }
-                    counter = counter + 1;
                 }
 
-                return Error(errMssgs, errorCodes = errCodes);
+                return error Error(errMssgs, errorCodes = errCodes);
             } else {
                 log:printError(ERR_EXTRACTING_ERROR_MSG, err = jsonResponse);
-                return Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
+                return error Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
             }
         }
     } else if (httpResponse is http:PayloadType) {
-        return Error(UNREACHABLE_STATE);
+        return error Error(UNREACHABLE_STATE);
     } else {
         log:printError(HTTP_ERROR_MSG, err = httpResponse);
-        return Error(HTTP_ERROR_MSG, httpResponse);
+        return error Error(HTTP_ERROR_MSG, httpResponse);
     }
 }

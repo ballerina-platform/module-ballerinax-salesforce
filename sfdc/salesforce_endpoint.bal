@@ -16,34 +16,35 @@
 // under the License.
 //
 import ballerina/http;
-import ballerina/oauth2;
 
 # The Salesforce Client object.
 # + salesforceClient - OAuth2 client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
+# + authHandler - SalesforceAuthHandler class object 
 public client class BaseClient {
+
     http:Client salesforceClient;
     SalesforceConfiguration salesforceConfiguration;
+    SalesforceAuthHandler authHandler;
 
     # Salesforce Connector endpoint initialization function.
     # + salesforceConfig - Salesforce Connector configuration
-    public function init(SalesforceConfiguration salesforceConfig) {
+    public function init(SalesforceConfiguration salesforceConfig) returns error? {
+
         self.salesforceConfiguration = salesforceConfig;
-        // Create an OAuth2 provider.
-        oauth2:OutboundOAuth2Provider oauth2Provider = new (salesforceConfig.clientConfig);
-        // Create a bearer auth handler using the a created provider.
-        SalesforceAuthHandler bearerHandler = new (oauth2Provider);
 
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
-
+        self.authHandler = new (salesforceConfig.clientConfig);
         // Create an HTTP client.
         if (socketConfig is http:ClientSecureSocket) {
-            self.salesforceClient = new (salesforceConfig.baseUrl, {
-                secureSocket: socketConfig,
-                auth: {authHandler: bearerHandler}
+            self.salesforceClient = check new (salesforceConfig.baseUrl, {
+                auth: salesforceConfig.clientConfig,
+                secureSocket: socketConfig
             });
         } else {
-            self.salesforceClient = new (salesforceConfig.baseUrl, {auth: {authHandler: bearerHandler}});
+            self.salesforceClient = check new (salesforceConfig.baseUrl, {
+                auth: salesforceConfig.clientConfig
+            });
         }
     }
 
@@ -107,7 +108,12 @@ public client class BaseClient {
 
         json|Error result = checkAndSetErrors(response);
         if (result is json) {
-            return result.id.toString();
+            json|error resultId = result.id;
+            if (resultId is json) {
+                return resultId.toString();
+            } else {
+                return error Error(resultId.message());
+            }
         } else {
             return result;
         }
@@ -118,8 +124,7 @@ public client class BaseClient {
     # + id - SObject id
     # + recordPayload - JSON record to be updated
     # + return - true if successful else false or Error occured
-    remote function updateRecord(string sObjectName, string id, json recordPayload) returns @tainted boolean|
-    Error {
+    remote function updateRecord(string sObjectName, string id, json recordPayload) returns @tainted boolean|Error {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
@@ -311,8 +316,7 @@ public client class BaseClient {
     # + opportunityId - Opportunity ID
     # + opportunityRecord - Opportunity json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    remote function updateOpportunity(string opportunityId, json opportunityRecord) returns @tainted boolean|
-    Error {
+    remote function updateOpportunity(string opportunityId, json opportunityRecord) returns @tainted boolean|Error {
         return self->updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
     }
 
@@ -436,16 +440,28 @@ public client class BaseClient {
             }
         }
         http:Request req = new;
-        req.setJsonPayload(jobPayload);
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
-        var response = self.salesforceClient->post(path, req);
-        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
-        if (jobResponse is json) {
-            BulkJob bulkJob = new (jobResponse.id.toString(), contentType, operation, self.salesforceClient);
-            return bulkJob;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            authorizedReq.setJsonPayload(jobPayload);
+            string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
+            var response = self.salesforceClient->post(path, authorizedReq);
+            json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+            if (jobResponse is json) {
+                json|error jobResponseId = jobResponse.id;
+                if (jobResponseId is json) {
+                    BulkJob bulkJob = new (jobResponseId.toString(), contentType, operation, self.salesforceClient, self.
+                    authHandler);
+                    return bulkJob;
+                } else {
+                    return jobResponseId;
+                }
+            } else {
+                return jobResponse;
+            }
         } else {
-            return jobResponse;
+            return authorizedReq;
         }
+
     }
 
     # Get information about a job.
@@ -457,24 +473,30 @@ public client class BaseClient {
         JOBTYPE jobDataType = bulkJob.jobDataType;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
-        var response = self.salesforceClient->get(path, req);
-        if (JSON == jobDataType) {
-            json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
-            if (jobResponse is json) {
-                JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
-                return jobInfo;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            var response = self.salesforceClient->get(path, authorizedReq);
+            if (JSON == jobDataType) {
+                json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+                if (jobResponse is json) {
+                    JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
+                    return jobInfo;
+                } else {
+                    return jobResponse;
+                }
             } else {
-                return jobResponse;
+                xml|Error jobResponse = checkXmlPayloadAndSetErrors(response);
+                if (jobResponse is xml) {
+                    JobInfo jobInfo = check createJobRecordFromXml(jobResponse);
+                    return jobInfo;
+                } else {
+                    return jobResponse;
+                }
             }
         } else {
-            xml|Error jobResponse = checkXmlPayloadAndSetErrors(response);
-            if (jobResponse is xml) {
-                JobInfo jobInfo = check createJobRecordFromXml(jobResponse);
-                return jobInfo;
-            } else {
-                return jobResponse;
-            }
+            return authorizedReq;
         }
+
     }
 
     # Close a job.
@@ -485,15 +507,21 @@ public client class BaseClient {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
-        req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
-        var response = self.salesforceClient->post(path, req);
-        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
-        if (jobResponse is json) {
-            JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
-            return jobInfo;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            authorizedReq.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
+            var response = self.salesforceClient->post(path, authorizedReq);
+            json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+            if (jobResponse is json) {
+                JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
+                return jobInfo;
+            } else {
+                return jobResponse;
+            }
         } else {
-            return jobResponse;
+            return authorizedReq;
         }
+
     }
 
     # Abort a job.
@@ -504,14 +532,19 @@ public client class BaseClient {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         http:Request req = new;
-        req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
-        var response = self.salesforceClient->post(path, req);
-        json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
-        if (jobResponse is json) {
-            JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
-            return jobInfo;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
+            var response = self.salesforceClient->post(path, req);
+            json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
+            if (jobResponse is json) {
+                JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
+                return jobInfo;
+            } else {
+                return jobResponse;
+            }
         } else {
-            return jobResponse;
+            return authorizedReq;
         }
     }
 }
@@ -522,6 +555,6 @@ public client class BaseClient {
 # + secureSocketConfig - HTTPS secure socket configuration
 public type SalesforceConfiguration record {
     string baseUrl;
-    oauth2:DirectTokenConfig clientConfig;
+    http:OAuth2DirectTokenConfig clientConfig;
     http:ClientSecureSocket secureSocketConfig?;
 };

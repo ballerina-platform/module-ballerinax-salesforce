@@ -13,15 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+//
 import ballerina/test;
-import ballerina/config;
 import ballerina/io;
-import ballerina/runtime;
-
+import ballerina/lang.runtime;
+import ballerina/os;
 
 ListenerConfiguration listenerConfig = {
-    username: config:getAsString("SF_USERNAME"),
-    password: config:getAsString("SF_PASSWORD")
+    username: os:getEnv("SF_USERNAME"),
+    password: os:getEnv("SF_PASSWORD")
 };
 
 listener Listener eventListener = new (listenerConfig);
@@ -29,23 +29,22 @@ listener Listener eventListener = new (listenerConfig);
 boolean isUpdated = false;
 
 @ServiceConfig {topic: "/topic/AccountUpdate"}
-
-service /topic/AccountUpdate  on eventListener {
+service /topic/AccountUpdate on eventListener {
     remote function onEvent(json op) {
         io:StringReader sr = new (op.toJsonString());
         json|error account = sr.readJson();
         if (account is json) {
             if (account.sobject.Name == "WSO2 Inc") {
                 isUpdated = true;
-            }else{
+            } else {
                 io:println(account.toString());
             }
         }
     }
 }
 
-@test:Config {dependsOn: ["testUpdateRecord"]}
+@test:Config {dependsOn: [testUpdateRecord]}
 function testUpdated() {
-    runtime:sleep(3000);
+    runtime:sleep(3.0);
     test:assertTrue(isUpdated, "Error in retrieving account update!");
 }

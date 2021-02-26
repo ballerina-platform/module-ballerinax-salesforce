@@ -13,25 +13,23 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+//
 import ballerina/test;
 import ballerina/log;
-import ballerina/config;
+import ballerina/os;
 
-// Create Salesforce client configuration by reading from config file.
+// Create Salesforce client configuration by reading from environemnt.
 SalesforceConfiguration sfConfig = {
-    baseUrl: config:getAsString("EP_URL"),
+    baseUrl: os:getEnv("EP_URL"),
     clientConfig: {
-        accessToken: config:getAsString("ACCESS_TOKEN"),
-        refreshConfig: {
-            clientId: config:getAsString("CLIENT_ID"),
-            clientSecret: config:getAsString("CLIENT_SECRET"),
-            refreshToken: config:getAsString("REFRESH_TOKEN"),
-            refreshUrl: config:getAsString("REFRESH_URL")
-        }
+        clientId: os:getEnv("CLIENT_ID"),
+        clientSecret: os:getEnv("CLIENT_SECRET"),
+        refreshToken: os:getEnv("REFRESH_TOKEN"),
+        refreshUrl: os:getEnv("REFRESH_URL")
     }
 };
 
-BaseClient baseClient = new (sfConfig);
+BaseClient baseClient = check new (sfConfig);
 
 json accountRecord = {
     Name: "John Keells Holdings",
@@ -53,7 +51,7 @@ function testCreateRecord() {
     }
 }
 
-@test:Config {dependsOn: ["testCreateRecord"]}
+@test:Config {dependsOn: [testCreateRecord]}
 function testGetRecord() {
     json|Error response;
     log:print("baseClient -> getRecord()");
@@ -69,7 +67,7 @@ function testGetRecord() {
     }
 }
 
-@test:Config {dependsOn: ["testCreateRecord", "testGetRecord"]}
+@test:Config {dependsOn: [testCreateRecord, testGetRecord]}
 function testUpdateRecord() {
     log:print("baseClient -> updateRecord()");
     json account = {
@@ -86,7 +84,7 @@ function testUpdateRecord() {
     }
 }
 
-@test:Config {dependsOn: ["testSearchSOSLString"]}
+@test:Config {dependsOn: [testSearchSOSLString]}
 function testDeleteRecord() {
     log:print("baseClient -> deleteRecord()");
     boolean|Error response = baseClient->deleteRecord(ACCOUNT, testRecordId);
@@ -124,7 +122,7 @@ function testGetQueryResult() {
     }
 }
 
-@test:Config {dependsOn: ["testUpdateRecord"]}
+@test:Config {dependsOn: [testUpdateRecord]}
 function testSearchSOSLString() {
     log:print("baseClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
@@ -132,8 +130,8 @@ function testSearchSOSLString() {
 
     if (res is SoslResult) {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, msg = 
-        "Matched search record is not an Account type!");
+        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, 
+        msg = "Matched search record is not an Account type!");
     } else {
         test:assertFail(msg = res.message());
     }
