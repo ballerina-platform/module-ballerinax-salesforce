@@ -100,7 +100,7 @@ import ballerinax/sfdc;
 Instantiate the connector by giving authentication details in the HTTP client config, which has built-in support for OAuth 2.0 to authenticate and authorize requests. The Salesforce connector can be instantiated in the HTTP client config using the access token or using the client ID, client secret, and refresh token.
 
 
-## Stap 2: Obtain Tokens for authentication
+## Step 2: Obtain Tokens for authentication
 
 1. Visit [Salesforce](https://www.salesforce.com/) and create a Salesforce Account.
 2. Create a connected app and obtain the following credentials:
