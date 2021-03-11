@@ -29,7 +29,7 @@ function deleteXml() {
 
     if (deleteJob is BulkJob) {
         //add xml content
-        error|BatchInfo batch = deleteJob->addBatch(contacts);
+        error|BatchInfo batch = baseClient->addBatch(deleteJob, contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using xml.");
             batchId = batch.id;
@@ -46,7 +46,7 @@ function deleteXml() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = deleteJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = baseClient->getBatchInfo(deleteJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -54,7 +54,7 @@ function deleteXml() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = deleteJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = baseClient->getAllBatches(deleteJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -62,7 +62,7 @@ function deleteXml() {
         }
 
         //get batch request
-        var batchRequest = deleteJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(deleteJob, batchId);
         if (batchRequest is xml) {
             test:assertTrue((batchRequest/<*>).length() == 4, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
@@ -72,7 +72,7 @@ function deleteXml() {
         }
 
         //get batch result
-        var batchResult = deleteJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(deleteJob, batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Delete was not successful.");

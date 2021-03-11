@@ -45,7 +45,7 @@ function upsertJson() {
 
     if (upsertJob is BulkJob) {
         //add json content
-        error|BatchInfo batch = upsertJob->addBatch(contacts);
+        error|BatchInfo batch = baseClient->addBatch(upsertJob, contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchId = batch.id;
@@ -62,7 +62,7 @@ function upsertJson() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = upsertJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = baseClient->getBatchInfo(upsertJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -70,7 +70,7 @@ function upsertJson() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = upsertJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = baseClient->getAllBatches(upsertJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -78,7 +78,7 @@ function upsertJson() {
         }
 
         //get batch request
-        var batchRequest = upsertJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(upsertJob, batchId);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]>batchRequest;
             if (batchRequestArr is json[]) {
@@ -93,7 +93,7 @@ function upsertJson() {
         }
 
         //get batch result
-        var batchResult = upsertJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(upsertJob, batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Upsert was not successful.");

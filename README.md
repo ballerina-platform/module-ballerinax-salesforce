@@ -100,7 +100,7 @@ import ballerinax/sfdc;
 Instantiate the connector by giving authentication details in the HTTP client config, which has built-in support for OAuth 2.0 to authenticate and authorize requests. The Salesforce connector can be instantiated in the HTTP client config using the access token or using the client ID, client secret, and refresh token.
 
 
-## Stap 2: Obtain Tokens for authentication
+## Step 2: Obtain Tokens for authentication
 
 1. Visit [Salesforce](https://www.salesforce.com/) and create a Salesforce Account.
 2. Create a connected app and obtain the following credentials:
@@ -548,13 +548,13 @@ This sample demonstrates on capturing events using the Event Listener of Balleri
 
     **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
-*   Download and install[ Ballerina SLP8](https://ballerina.io/).
+*   Download and install[ Ballerina SL Alpha2](https://ballerina.io/).
 *   Install Apache Maven  
 
 
 ## Building the Source
 
-Execute the commands below to build from the source after installing the Ballerina SLP8 version.
+Execute the commands below to build from the source after installing the Ballerina SL Alpha2 version.
 
 
 ### To install the emp-wrapper :
@@ -567,14 +567,14 @@ Execute the commands below to build from the source after installing the Balleri
 ### To build the library:
 
 ```ballerina
-   ballerina build ./sfdc
+   bal build ./sfdc
 ```
 
 
 ### To build the module without the tests:
 
 ```
-   ballerina build --skip-tests ./sfdc
+   bal build --skip-tests ./sfdc
 ```
 
 ## Contribution to Ballerina
