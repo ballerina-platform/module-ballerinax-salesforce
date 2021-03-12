@@ -106,7 +106,7 @@ function testGetQueryResult() {
         assertSoqlResult(res);
         string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
 
-        while (nextRecordsUrl is string && trim(nextRecordsUrl) != EMPTY_STRING) {
+        while (nextRecordsUrl is string && nextRecordsUrl.trim() != EMPTY_STRING) {
             log:print("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
             SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
 
@@ -166,14 +166,14 @@ function testGetResourcesByApiVersion() {
 
     if (resources is map<string>) {
         test:assertTrue(resources.length() > 0, msg = "Found empty resource map");
-        test:assertTrue(trim(resources["sobjects"].toString()).length() > 0, msg = "Found null for resource sobjects");
-        test:assertTrue(trim(resources["search"].toString()).length() > 0, msg = "Found null for resource search");
-        test:assertTrue(trim(resources["query"].toString()).length() > 0, msg = "Found null for resource query");
-        test:assertTrue(trim(resources["licensing"].toString()).length() > 0, msg = "Found null for resource licensing");
-        test:assertTrue(trim(resources["connect"].toString()).length() > 0, msg = "Found null for resource connect");
-        test:assertTrue(trim(resources["tooling"].toString()).length() > 0, msg = "Found null for resource tooling");
-        test:assertTrue(trim(resources["chatter"].toString()).length() > 0, msg = "Found null for resource chatter");
-        test:assertTrue(trim(resources["recent"].toString()).length() > 0, msg = "Found null for resource recent");
+        test:assertTrue((resources["sobjects"].toString().trim()).length() > 0, msg = "Found null for resource sobjects");
+        test:assertTrue((resources["search"].toString().trim()).length() > 0, msg = "Found null for resource search");
+        test:assertTrue((resources["query"].toString().trim()).length() > 0, msg = "Found null for resource query");
+        test:assertTrue((resources["licensing"].toString().trim()).length() > 0, msg = "Found null for resource licensing");
+        test:assertTrue((resources["connect"].toString().trim()).length() > 0, msg = "Found null for resource connect");
+        test:assertTrue((resources["tooling"].toString().trim()).length() > 0, msg = "Found null for resource tooling");
+        test:assertTrue((resources["chatter"].toString().trim()).length() > 0, msg = "Found null for resource chatter");
+        test:assertTrue((resources["recent"].toString().trim()).length() > 0, msg = "Found null for resource recent");
     } else {
         test:assertFail(msg = resources.message());
     }
