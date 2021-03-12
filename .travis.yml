@@ -18,7 +18,7 @@ script:
   - sudo apt-get install -f
   - export JAVA_OPTS="-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
   - bal --version
-  - cd ~ | ls -a
+  - cd ~ && ls -a
   - mvn clean install -pl emp-wrapper
   - bal build --skip-tests ./sfdc
   
