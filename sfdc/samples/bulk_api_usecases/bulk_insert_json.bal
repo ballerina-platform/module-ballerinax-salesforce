@@ -60,7 +60,7 @@ public function main(){
     sfdc:BulkJob|error insertJob = baseClient->creatJob("insert", "Contact", "JSON");
     
     if (insertJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = insertJob->addBatch(contacts);
+        error|sfdc:BatchInfo batch = baseClient->addBatch(insertJob, contacts);
         if (batch is sfdc:BatchInfo) {
            string message = batch.id.length() > 0 ? "Batch Added Successfully" :"Failed to add the Batch";
            batchId = batch.id;
@@ -79,7 +79,7 @@ public function main(){
         }
 
         //get batch info
-        error|sfdc:BatchInfo batchInfo = insertJob->getBatchInfo(batchId);
+        error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
         if (batchInfo is sfdc:BatchInfo) {
             string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
             log:print(message);
@@ -88,7 +88,7 @@ public function main(){
         }
 
         //get all batches
-        error|sfdc:BatchInfo[] batchInfoList = insertJob->getAllBatches();
+        error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
         if (batchInfoList is sfdc:BatchInfo[]) {
             string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
             log:print(message);
@@ -97,7 +97,7 @@ public function main(){
         }
 
         //get batch request
-        var batchRequest = insertJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]>batchRequest;
             if (batchRequestArr is json[]) {
@@ -113,7 +113,7 @@ public function main(){
         }
 
         //get batch result
-        var batchResult = insertJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(insertJob, batchId);
         if (batchResult is sfdc:Result[]) {
            string message = batchResult.length() > 0 ? "Batch Result Received Successfully" :"Failed to Retrieve Batch Result";
            log:print(message);

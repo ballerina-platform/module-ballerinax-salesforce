@@ -44,7 +44,7 @@ public function main(){
     sfdc:BulkJob|error deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
 
     if (deleteJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = deleteJob->addBatch(contactsToDelete);
+        error|sfdc:BatchInfo batch = baseClient->addBatch(deleteJob, contactsToDelete);
         if (batch is sfdc:BatchInfo) {
             batchId = batch.id;
             string message = batch.id.length() > 0 ? "Contacts Successfully uploaded to delete" :"Failed to upload the Contacts to delete";
@@ -54,7 +54,7 @@ public function main(){
         }
 
         //get batch info
-        error|sfdc:BatchInfo batchInfo = deleteJob->getBatchInfo(batchId);
+        error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(deleteJob, batchId);
         if (batchInfo is sfdc:BatchInfo) {
             string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
             log:print(message);
@@ -63,7 +63,7 @@ public function main(){
         }
 
         //get all batches
-        error|sfdc:BatchInfo[] batchInfoList = deleteJob->getAllBatches();
+        error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(deleteJob);
         if (batchInfoList is sfdc:BatchInfo[]) {
             string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
             log:print(message);
@@ -72,7 +72,7 @@ public function main(){
         }
 
         //get batch request
-        var batchRequest = deleteJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(deleteJob, batchId);
         if (batchRequest is string) {
             string message = (regex:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
             log:print(message);
@@ -84,7 +84,7 @@ public function main(){
         }
 
         //get batch result
-        var batchResult = deleteJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(deleteJob, batchId);
         if (batchResult is sfdc:Result[]) {
             foreach sfdc:Result res in batchResult {
                 if (!res.success) {
