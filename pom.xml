@@ -33,9 +33,9 @@
     <url>http://maven.apache.org</url>
     <repositories>
         <repository>
-            <id>wso2-nexus</id>
-            <name>WSO2 internal Repository</name>
-            <url>http://maven.wso2.org/nexus/content/groups/wso2-public/</url>
+            <id>github.releases</id>
+            <name>GitHub ballerina-platform Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/ballerina-platform/ballerina-lang</url>
             <releases>
                 <enabled>true</enabled>
                 <updatePolicy>daily</updatePolicy>
@@ -62,7 +62,7 @@
     <properties>
         <project-home>${project.basedir}</project-home>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ballerina.version>2.0.0-Preview8</ballerina.version>
+        <ballerina.version>2.0.0-alpha2</ballerina.version>
         <exec.maven.plugin.version>1.6.0</exec.maven.plugin.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <maven.dependency.plugin.version>3.0.2</maven.dependency.plugin.version>
