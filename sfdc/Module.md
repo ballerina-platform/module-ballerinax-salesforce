@@ -62,7 +62,7 @@ import ballerinax/sfdc;
 Instantiate the connector by giving authentication details in the HTTP client config, which has built-in support for OAuth 2.0 to authenticate and authorize requests. The Salesforce connector can be instantiated in the HTTP client config using the access token or using the client ID, client secret, and refresh token.
 
 
-## Stap 2: Obtain Tokens for authentication
+## Step 2: Obtain Tokens for authentication
 
 1. Visit [Salesforce](https://www.salesforce.com/) and create a Salesforce Account.
 2. Create a connected app and obtain the following credentials:
@@ -79,7 +79,7 @@ Instantiate the connector by giving authentication details in the HTTP client co
 4. Provide the client ID and client secret to obtain the refresh token and access token. For more information on obtaining OAuth2 credentials, go to [Salesforce documentation](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
 
 
-## **Step 3: Create the Salesforce client
+## Step 3: Create the Salesforce client
 
 You can define the Salesforce configuration and create Salesforce base client as mentioned below.
 
@@ -87,20 +87,17 @@ You can define the Salesforce configuration and create Salesforce base client as
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 
-SalesforceConfiguration sfConfig = {
+sfdc:SalesforceConfiguration sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
-       accessToken: <"ACCESS_TOKEN">,
-       refreshConfig: {
-           clientId: <"CLIENT_ID">,
-           clientSecret: <"CLIENT_SECRET">,
-           refreshToken: <"REFRESH_TOKEN">,
-           refreshUrl: <"REFRESH_URL">
-       }
+     clientId: <"CLIENT_ID">,
+     clientSecret: <"CLIENT_SECRET">,
+     refreshToken: <"REFRESH_TOKEN">,
+     refreshUrl: <"REFRESH_URL"> 
    }
 };
 
-BaseClient baseClient = new (sfConfig);
+sfdc:Client baseClient = new (sfConfig);
 ```
 
 
@@ -110,31 +107,27 @@ If you want to add your own key store to define the `secureSocketConfig`, change
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
 
-SalesforceConfiguration sfConfig = {
+sfdc:SalesforceConfiguration sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
-       accessToken: <"ACCESS_TOKEN">,
-       refreshConfig: {
-           clientId: <"CLIENT_ID">,
-           clientSecret: <"CLIENT_SECRET">,
-           refreshToken: <"REFRESH_TOKEN">,
-           refreshUrl: <"REFRESH_URL">
-       }
+     clientId: <"CLIENT_ID">,
+     clientSecret: <"CLIENT_SECRET">,
+     refreshToken: <"REFRESH_TOKEN">,
+     refreshUrl: <"REFRESH_URL"> 
    },
-	secureSocketConfig: {
-        trustStore: {
-            path: <"TRUSTSTORE_PATH"">,
-            password: <"TRUSTSTORE_PASSWORD">
-        }
+   secureSocketConfig: {
+     trustStore: {
+       path: <"TRUSTSTORE_PATH"">,
+       password: <"TRUSTSTORE_PASSWORD">
+      }
     }
-
 };
 
-BaseClient baseClient = new (sfConfig);
+sfdc:Client baseClient = new (sfConfig);
 ```
 
 
-## Step 3: Implement Operations
+## Step 4: Implement Operations
 
 
 ### SObject Operations
@@ -289,6 +282,43 @@ The `searchSOSLString` remote function allows users to search using a string and
 string searchString = "FIND {WSO2 Inc}";
 sfdc:SoslResult|Error res = baseClient->searchSOSLString(searchString);
 ```
+## Operations to get SObject Metadata
+
+Ballerina Salesforce Connector facilitates users to retrieve SObject related information and metadata through Salesforce REST API. Following are the remote functions available for retrieving SObject metadata. 
+
+
+<table>
+  <tr>
+   <td><strong>Remote Function</strong>
+   </td>
+   <td><strong>Description</strong>
+   </td>
+  </tr>
+  <tr>
+   <td>describeAvailableObjects
+   </td>
+   <td>Lists the available objects and their metadata for your organization and available to the logged-in user
+   </td>
+  </tr>
+  <tr>
+   <td>getSObjectBasicInfo
+   </td>
+   <td>Returns metadata of the specified SObject
+   </td>
+  </tr>
+  <tr>
+   <td>describeSObject
+   </td>
+   <td>Returns  metadata at all levels for the specified object including the fields, URLs, and child relationships
+   </td>
+  </tr>
+  <tr>
+   <td>sObjectPlatformAction
+   </td>
+   <td>Query for actions displayed in the UI, given a user, a context, device format, and a record ID
+   </td>
+  </tr>
+</table>
 
 
 ## Operations to get Organizational Data
@@ -336,7 +366,6 @@ Using the `createJob` remote function of the base client, we can create any type
 4. ExternalIdFieldName (optional) - Field name of the external ID incase of an Upsert operation
 
 Step by step implementation of an `insert` bulk operation has described below. Follow the same process for other operation types too. 
-
 
 ```ballerina
 error|sfdc:BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
@@ -447,6 +476,85 @@ The above service is listening to the PushTopic `QuoteUpdate` defined in the Sal
    pushTopic.NotifyForFields = 'Referenced';
    insert pushTopic;
 ```
+# Samples
+
+Please find the samples for above mentioned use cases through following links.
+
+## [Samples for Salesforce REST API use cases](../samples/rest_api_usecases)  
+
+These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce REST API related operations. The samples can be further divided as following
+* Samples that can be used with any SObject's CRUD operations
+* Samples for convenient access of Account, Contact, Product, Opportunity and Target SObjects's CRUD operations
+* Samples for SOSL and SOQL related operations
+* Samples for retrieving Organization and SObject metadata
+
+
+## [Samples for Salesforce Bulk API use cases](../samples/bulk_api_usecases)
+
+These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
+
+## [Samples for Event Listener](../samples/event_listener_usecases)
+
+This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
+
+
+# Building from the Source
+
+
+## Setting up the prerequisites
+
+
+*   Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
+	[Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html),
+	[OpenJDK](https://adoptopenjdk.net/)  
+
+    **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
+
+*   Download and install[ Ballerina SL Alpha2](https://ballerina.io/).
+*   Install Apache Maven  
+
+
+## Building the Source
+
+Execute the commands below to build from the source after installing the Ballerina SL Alpha2 version.
+
+
+### To install the emp-wrapper :
+
+```ballerina
+   mvn clean install -pl emp-wrapper
+```
+
+
+### To build the library:
+
+```ballerina
+   bal build ./sfdc
+```
+
+
+### To build the module without the tests:
+
+```
+   bal build --skip-tests ./sfdc
+```
+
+## Contribution to Ballerina
+
+As an open source project, Ballerina welcomes contributions from the community.  
+
+For more information, go to the [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md).  
+
+## Code of Conduct
+
+All the contributors are encouraged to read the Ballerina [Code of Conduct](https://ballerina.io/code-of-conduct).
+
+## Useful Links
+
+* Discuss the code changes of the Ballerina project in [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).
+* Chat live with us via our [Slack channel](https://ballerina.io/community/slack/).
+* Post all technical questions on Stack Overflow with the [#ballerina tag](https://stackoverflow.com/questions/tagged/ballerina).
+
 
 # References
 
@@ -457,5 +565,3 @@ Trailhead Salesforce Documentation -
 Salesforce REST API Documentation -
 
 [https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest](https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta/api_rest)
-
-
