@@ -22,25 +22,34 @@ import ballerina/http;
 # + authProvider - The `ClientOAuth2Provider` instance to handle auth requests. 
 public client class SalesforceAuthHandler {
 
-    oauth2:ClientOAuth2Provider authProvider;
+    oauth2:ClientOAuth2Provider|() authProvider;
+    string accessToken = "";
 
     public isolated function init(http:OAuth2DirectTokenConfig|http:BearerTokenConfig auth2Config) {
-        if auth2Config is http:OAuth2DirectTokenConfig {
+        if (auth2Config is http:OAuth2DirectTokenConfig){
             self.authProvider = new (auth2Config);
         }
         else {
-
+            self.authProvider = ();
+            self.accessToken = auth2Config.token;
         }
     }
 
     public isolated function enrich(http:Request req) returns http:Request|http:ClientAuthError {
-        string|oauth2:Error token = self.authProvider.generateToken();
-        if (token is string) {
+        string|oauth2:Error token;
+        if (self.authProvider is oauth2:ClientOAuth2Provider){
+            token = (<oauth2:ClientOAuth2Provider> self.authProvider).generateToken();
+        }
+        else {
+            token = self.accessToken;
+        }
+
+        if (token is string && token != "") {
             //req.setHeader(AUTHORIZATION, BEARER + token);
             req.setHeader(X_SFDC_SESSION, token);
             return req;
         } else {
-            return prepareClientAuthError("Failed to enrich request with OAuth2 token.", token);
+            return prepareClientAuthError("Failed to enrich request with OAuth2 token.");
         }
     }
 }
