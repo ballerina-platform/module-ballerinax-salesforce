@@ -34,7 +34,7 @@ public function main(){
     };
     
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = checkpanic new(sfConfig);
     
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Software Engineer Level 1'";
 

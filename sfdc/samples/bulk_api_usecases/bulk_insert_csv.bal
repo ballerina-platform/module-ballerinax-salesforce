@@ -34,7 +34,7 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = checkpanic new(sfConfig);
 
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
         "Created_from_Ballerina_Sf_Bulk_API,Tony,Stark,Software Engineer Level 02,0332236677,tonys@gmail.com,862\n" +

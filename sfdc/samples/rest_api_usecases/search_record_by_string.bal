@@ -31,7 +31,7 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = checkpanic new(sfConfig);
 
     int totalRecords = 0;
     string searchString = "FIND {WSO2 Inc}";

@@ -30,7 +30,7 @@ sfdc:SalesforceConfiguration sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+sfdc:Client baseClient = checkpanic new(sfConfig);
 
 public function main(){
 

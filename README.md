@@ -135,7 +135,7 @@ sfdc:SalesforceConfiguration sfConfig = {
    }
 };
 
-sfdc:BaseClient baseClient = new (sfConfig);
+sfdc:Client baseClient = new (sfConfig);
 ```
 
 
@@ -161,7 +161,7 @@ sfdc:SalesforceConfiguration sfConfig = {
     }
 };
 
-sfdc:BaseClient baseClient = new (sfConfig);
+sfdc:Client baseClient = new (sfConfig);
 ```
 
 
@@ -427,27 +427,27 @@ Using the created job object, we can add a batch to it, get information about th
 
 ```ballerina
     //Add json content.
-    error|sfdc:BatchInfo batch = insertJob->addBatch(contacts);
+    error|sfdc:BatchInfo batch = baseClient->addBatch(insertJob, contacts);
 ```
 
 ```ballerina
     //Get batch info.
-    error|sfdc:BatchInfo batchInfo = insertJob->getBatchInfo(batch.id);
+    error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batch.id);
 ```
 
 ```ballerina
     //Get all batches.
-    error|sfdc:BatchInfo[] batchInfoList = insertJob->getAllBatches();
+    error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
 ```
 
 ```ballerina
     //Get the batch request.
-    var batchRequest = insertJob->getBatchRequest(batchId);
+    var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
 ```
 
 ```ballerina
     //Get the batch result.
-    error|sdfc:Result[] batchResult = insertJob->getBatchResult(batchId);
+    error|sdfc:Result[] batchResult = baseClient->getBatchResult(insertJob, batchId);
 ```
 
 
@@ -518,7 +518,7 @@ The above service is listening to the PushTopic `QuoteUpdate` defined in the Sal
 
 Please find the samples for above mentioned use cases through following links.
 
-## [Samples for Salesforce REST API use cases](sfdc/samples/rest_api_usecases)  
+## [Samples for Salesforce REST API use cases](samples/rest_api_usecases)  
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce REST API related operations. The samples can be further divided as following
 * Samples that can be used with any SObject's CRUD operations
@@ -527,11 +527,11 @@ These samples demonstrate the employment of Ballerina Salesforce Connector in Sa
 * Samples for retrieving Organization and SObject metadata
 
 
-## [Samples for Salesforce Bulk API use cases](sfdc/samples/bulk_api_usecases)
+## [Samples for Salesforce Bulk API use cases](samples/bulk_api_usecases)
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
 
-## [Samples for Event Listener](sfdc/samples/event_listener_usecases)
+## [Samples for Event Listener](samples/event_listener_usecases)
 
 This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
 

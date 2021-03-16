@@ -29,7 +29,7 @@ SalesforceConfiguration sfConfig = {
     }
 };
 
-BaseClient baseClient = check new (sfConfig);
+Client baseClient = check new (sfConfig);
 
 json accountRecord = {
     Name: "John Keells Holdings",
