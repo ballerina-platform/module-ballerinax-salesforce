@@ -24,8 +24,13 @@ public client class SalesforceAuthHandler {
 
     oauth2:ClientOAuth2Provider authProvider;
 
-    public isolated function init(http:OAuth2DirectTokenConfig auth2Congif) {
-        self.authProvider = new (auth2Congif);
+    public isolated function init(http:OAuth2DirectTokenConfig|http:BearerTokenConfig auth2Config) {
+        if auth2Config is http:OAuth2DirectTokenConfig {
+            self.authProvider = new (auth2Config);
+        }
+        else {
+
+        }
     }
 
     public isolated function enrich(http:Request req) returns http:Request|http:ClientAuthError {
