@@ -31,7 +31,7 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = checkpanic new(sfConfig);
 
     string opportunityId = "0062w000008E6moAAC";
 

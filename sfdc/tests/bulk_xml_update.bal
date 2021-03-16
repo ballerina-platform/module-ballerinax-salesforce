@@ -53,7 +53,7 @@ function updateXml() {
 
     if (updateJob is BulkJob) {
         //add xml content
-        error|BatchInfo batch = updateJob->addBatch(<@untainted>contacts);
+        error|BatchInfo batch = baseClient->addBatch(updateJob, <@untainted>contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using xml.");
             batchId = batch.id;
@@ -70,7 +70,7 @@ function updateXml() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = updateJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = baseClient->getBatchInfo(updateJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -78,7 +78,7 @@ function updateXml() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = updateJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = baseClient->getAllBatches(updateJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -86,7 +86,7 @@ function updateXml() {
         }
 
         //get batch request
-        var batchRequest = updateJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(updateJob, batchId);
         if (batchRequest is xml) {
             test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
         } else if (batchRequest is error) {
@@ -96,7 +96,7 @@ function updateXml() {
         }
 
         //get batch result
-        var batchResult = updateJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(updateJob, batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Update was not successful.");

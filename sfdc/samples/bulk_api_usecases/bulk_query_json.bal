@@ -32,16 +32,16 @@ public function main(){
             refreshUrl: "<REFRESH_URL>"
         }
     };
-
+    
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = checkpanic new(sfConfig);
     
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Software Engineer Level 1'";
 
     sfdc:BulkJob|error queryJob = baseClient->creatJob("query", "Contact", "JSON");
 
     if (queryJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = queryJob->addBatch(queryStr);
+        error|sfdc:BatchInfo batch = baseClient->addBatch(queryJob, queryStr);
         if (batch is sfdc:BatchInfo) {
            string message = batch.id.length() > 0 ? "Query Executed Successfully" :"Failed to Execute the Quesry";
            batchId = batch.id;
@@ -50,7 +50,7 @@ public function main(){
         }
 
          //get batch info
-        error|sfdc:BatchInfo batchInfo = queryJob->getBatchInfo(batchId);
+        error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(queryJob, batchId);
         if (batchInfo is sfdc:BatchInfo) {
             string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
             log:print(message);
@@ -59,7 +59,7 @@ public function main(){
         }
 
         //get all batches
-        error|sfdc:BatchInfo[] batchInfoList = queryJob->getAllBatches();
+        error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(queryJob);
         if (batchInfoList is sfdc:BatchInfo[]) {
             string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
             log:print(message);
@@ -68,7 +68,7 @@ public function main(){
         }
 
         //get batch request
-        var batchRequest = queryJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(queryJob, batchId);
         if (batchRequest is string) {
             string message = batchRequest.startsWith("SELECT") ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
             log:print(message);
@@ -81,10 +81,9 @@ public function main(){
 
 
         //get batch result
-        var batchResult = queryJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(queryJob, batchId);
         
         if (batchResult is json) {
-            log:print("1");
             json[]|error batchResultArr = <json[]>batchResult;
             if (batchResultArr is json[]) {
                 jsonQueryResult = <@untainted>batchResultArr;
@@ -95,11 +94,9 @@ public function main(){
                 log:printError(msg);
             }
         } else if (batchResult is error) {
-            log:print("2");
            string msg = batchResult.message();
            log:printError(msg);
         } else {
-            log:print("3");
             log:printError("Invalid Batch Result!");
         }
 

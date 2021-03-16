@@ -31,7 +31,7 @@ public function main() {
     };
 
     // Create Salesforce client.
-    sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = checkpanic new(sfConfig);
 
     json productRecord = {
         Name: "P2"

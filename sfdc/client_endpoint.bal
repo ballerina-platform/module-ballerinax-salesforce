@@ -16,12 +16,13 @@
 // under the License.
 //
 import ballerina/http;
+import ballerina/io;
 
 # The Salesforce Client object.
 # + salesforceClient - OAuth2 client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
 # + authHandler - SalesforceAuthHandler class object 
-public client class BaseClient {
+public client class Client {
 
     http:Client salesforceClient;
     SalesforceConfiguration salesforceConfiguration;
@@ -449,8 +450,7 @@ public client class BaseClient {
             if (jobResponse is json) {
                 json|error jobResponseId = jobResponse.id;
                 if (jobResponseId is json) {
-                    BulkJob bulkJob = new (jobResponseId.toString(), contentType, operation, self.salesforceClient, self.
-                    authHandler);
+                    BulkJob bulkJob = {jobId: jobResponseId.toString(), jobDataType: contentType, operation: operation};
                     return bulkJob;
                 } else {
                     return jobResponseId;
@@ -542,6 +542,236 @@ public client class BaseClient {
                 return jobInfo;
             } else {
                 return jobResponse;
+            }
+        } else {
+            return authorizedReq;
+        }
+    }
+
+    # Add batch to the job.
+    #
+    # + content - batch content 
+    # + return - batch info or error
+    remote function addBatch(BulkJob bulkJob, json|string|xml|io:ReadableByteChannel content) returns @tainted error|BatchInfo {
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
+        // https://github.com/ballerina-platform/ballerina-lang/issues/26798
+        http:Request req = new;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            if (bulkJob.jobDataType == JSON) {
+                if (content is json) {
+                    authorizedReq.setJsonPayload(content);
+                }
+                if (content is string) {
+                    authorizedReq.setTextPayload(content);
+                }
+                if (content is io:ReadableByteChannel) {
+                    if (QUERY == bulkJob.operation) {
+                        string payload = check convertToString(content);
+                        authorizedReq.setTextPayload(<@untainted>payload);
+                    } else {
+                        json payload = check convertToJson(content);
+                        authorizedReq.setJsonPayload(<@untainted>payload);
+                    }
+                }
+                authorizedReq.setHeader(CONTENT_TYPE, APP_JSON);
+                var response = self.salesforceClient->post(path, authorizedReq);
+                json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
+                if (batchResponse is json) {
+                    BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
+            } else if (bulkJob.jobDataType == XML) {
+                if (content is xml) {
+                    authorizedReq.setXmlPayload(content);
+                }
+                if (content is string) {
+                    authorizedReq.setTextPayload(content);
+                }
+                if (content is io:ReadableByteChannel) {
+                    if (QUERY == bulkJob.operation) {
+                        string payload = check convertToString(content);
+                        authorizedReq.setTextPayload(<@untainted>payload);
+                    } else {
+                        xml payload = check convertToXml(content);
+                        authorizedReq.setXmlPayload(<@untainted>payload);
+                    }
+                }
+                authorizedReq.setHeader(CONTENT_TYPE, APP_XML);
+                var response = self.salesforceClient->post(path, authorizedReq);
+                xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
+                if (batchResponse is xml) {
+                    BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
+            } else if (bulkJob.jobDataType == CSV) {
+                if (content is string) {
+                    authorizedReq.setTextPayload(content);
+                }
+                if (content is io:ReadableByteChannel) {
+                    string textcontent = check convertToString(content);
+                    authorizedReq.setTextPayload(<@untainted>textcontent);
+                }
+                authorizedReq.setHeader(CONTENT_TYPE, TEXT_CSV);
+                var response = self.salesforceClient->post(path, authorizedReq);
+                xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
+                if (batchResponse is xml) {
+                    BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
+            } else {
+                return error("Invalid Job Type!");
+            }
+        } else {
+            return authorizedReq;
+        }
+
+    }
+
+    # Get information about a batch.
+    #
+    # + batchId - ID of the batch of which info is required 
+    # + return - batch info or error
+    remote function getBatchInfo(BulkJob bulkJob, string batchId) returns @tainted error|BatchInfo {
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
+        http:Request req = new;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            var response = self.salesforceClient->get(path, authorizedReq);
+            if (JSON == bulkJob.jobDataType) {
+                json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
+                if (batchResponse is json) {
+                    BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
+            } else {
+                xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
+                if (batchResponse is xml) {
+                    BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
+            }
+        } else {
+            return authorizedReq;
+        }
+
+    }
+
+    # Get all batches of the job.
+    #
+    # + return - list of batch infos
+    remote function getAllBatches(BulkJob bulkJob) returns @tainted error|BatchInfo[] {
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
+        http:Request req = new;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            var response = self.salesforceClient->get(path, authorizedReq);
+            BatchInfo[] batchInfoList = [];
+            if (JSON == bulkJob.jobDataType) {
+                json batchResponse = check checkJsonPayloadAndSetErrors(response);
+                json batchInfoRes = check batchResponse.batchInfo;
+                json[] batchInfoArr = <json[]>batchInfoRes;
+                foreach json batchInfo in batchInfoArr {
+                    BatchInfo batch = check batchInfo.cloneWithType(BatchInfo);
+                    batchInfoList[batchInfoList.length()] = batch;
+                }
+            } else {
+                xml batchResponse = check checkXmlPayloadAndSetErrors(response);
+                foreach var batchInfo in batchResponse/<*> {
+                    BatchInfo batch = check createBatchRecordFromXml(batchInfo);
+                    batchInfoList[batchInfoList.length()] = batch;
+                }
+            }
+            return batchInfoList;
+        } else {
+            return authorizedReq;
+        }
+    }
+
+    # Get the request payload of a batch.
+    #
+    # + batchId - ID of the batch of which the request is required 
+    # + return - batch content
+    remote function getBatchRequest(BulkJob bulkJob, string batchId) returns @tainted error|json|xml|string {
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
+        http:Request req = new;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            var response = self.salesforceClient->get(path, authorizedReq);
+            if (QUERY == bulkJob.operation) {
+                return getQueryRequest(response, bulkJob.jobDataType);
+            } else {
+                match bulkJob.jobDataType {
+                    JSON => {
+                        return checkJsonPayloadAndSetErrors(response);
+                    }
+                    XML => {
+                        return checkXmlPayloadAndSetErrors(response);
+                    }
+                    CSV => {
+                        return checkTextPayloadAndSetErrors(response);
+                    }
+                    _ => {
+                        return error("Invalid Job Type!");
+                    }
+                }
+            }
+        } else {
+            return authorizedReq;
+        }
+
+    }
+
+    # Get result of the records processed in a batch.
+    #
+    # + batchId - batch ID
+    # + return - result list
+    remote function getBatchResult(BulkJob bulkJob, string batchId) returns @tainted error|json|xml|string|Result[] {
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, RESULT]);
+        Result[] results = [];
+        http:Request req = new;
+        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
+        if (authorizedReq is http:Request) {
+            var response = self.salesforceClient->get(path, authorizedReq);
+            match bulkJob.jobDataType {
+                JSON => {
+                    json resultResponse = check checkJsonPayloadAndSetErrors(response);
+                    if (QUERY == bulkJob.operation) {
+                        return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, <@untainted>
+                        self.authHandler);
+                    }
+                    return createBatchResultRecordFromJson(resultResponse);
+                }
+                XML => {
+                    xml resultResponse = check checkXmlPayloadAndSetErrors(response);
+                    if (QUERY == bulkJob.operation) {
+                        return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, <@untainted>
+                        self.authHandler);
+                    }
+                    return createBatchResultRecordFromXml(resultResponse);
+                }
+                CSV => {
+                    if (QUERY == bulkJob.operation) {
+                        xml resultResponse = check checkXmlPayloadAndSetErrors(response);
+                        return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, <@untainted>
+                        self.authHandler);
+                    }
+                    string resultResponse = check checkTextPayloadAndSetErrors(response);
+                    return createBatchResultRecordFromCsv(resultResponse);
+                }
+                _ => {
+                    return error("Invalid Job Type!");
+                }
             }
         } else {
             return authorizedReq;

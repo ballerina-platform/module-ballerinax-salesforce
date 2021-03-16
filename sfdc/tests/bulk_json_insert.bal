@@ -47,7 +47,7 @@ function insertJson() {
 
     if (insertJob is BulkJob) {
         //add json content
-        error|BatchInfo batch = insertJob->addBatch(contacts);
+        error|BatchInfo batch = baseClient->addBatch(insertJob, contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             batchId = batch.id;
@@ -64,7 +64,7 @@ function insertJson() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = insertJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -72,7 +72,7 @@ function insertJson() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = insertJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -80,7 +80,7 @@ function insertJson() {
         }
 
         //get batch request
-        var batchRequest = insertJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]>batchRequest;
             if (batchRequestArr is json[]) {
@@ -96,7 +96,7 @@ function insertJson() {
 
         //get batch result
         runtime:sleep(3.0);
-        var batchResult = insertJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(insertJob, batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");
@@ -132,7 +132,7 @@ function insertJsonFromFile() {
         //add json content
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
-            error|BatchInfo batchUsingJsonFile = insertJob->addBatch(<@untainted>rbc);
+            error|BatchInfo batchUsingJsonFile = baseClient->addBatch(insertJob, <@untainted>rbc);
             if (batchUsingJsonFile is BatchInfo) {
                 test:assertTrue(batchUsingJsonFile.id.length() > 0, 
                 msg = "Could not upload the contacts using json file.");
@@ -155,7 +155,7 @@ function insertJsonFromFile() {
         }
 
         //get batch info
-        error|BatchInfo batchInfo = insertJob->getBatchInfo(batchId);
+        error|BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
         } else {
@@ -163,7 +163,7 @@ function insertJsonFromFile() {
         }
 
         //get all batches
-        error|BatchInfo[] batchInfoList = insertJob->getAllBatches();
+        error|BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
@@ -171,7 +171,7 @@ function insertJsonFromFile() {
         }
 
         //get batch request
-        var batchRequest = insertJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]>batchRequest;
             if (batchRequestArr is json[]) {
@@ -187,7 +187,7 @@ function insertJsonFromFile() {
 
         //get batch result
         runtime:sleep(3.0);
-        var batchResult = insertJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(insertJob, batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");

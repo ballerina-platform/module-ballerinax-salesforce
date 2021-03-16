@@ -31,7 +31,7 @@ public client class SalesforceAuthHandler {
     public isolated function enrich(http:Request req) returns http:Request|http:ClientAuthError {
         string|oauth2:Error token = self.authProvider.generateToken();
         if (token is string) {
-            req.setHeader(AUTHORIZATION, BEARER + token);
+            //req.setHeader(AUTHORIZATION, BEARER + token);
             req.setHeader(X_SFDC_SESSION, token);
             return req;
         } else {

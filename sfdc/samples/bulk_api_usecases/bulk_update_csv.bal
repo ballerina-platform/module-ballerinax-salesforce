@@ -30,7 +30,7 @@ sfdc:SalesforceConfiguration sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:BaseClient baseClient = checkpanic new(sfConfig);
+sfdc:Client baseClient = checkpanic new(sfConfig);
 
 public function main(){
 
@@ -47,7 +47,7 @@ public function main(){
     sfdc:BulkJob|error updateJob = baseClient->creatJob("update", "Contact", "CSV");
 
     if (updateJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = updateJob->addBatch(<@untainted>contacts);
+        error|sfdc:BatchInfo batch = baseClient->addBatch(updateJob, <@untainted>contacts);
         if (batch is sfdc:BatchInfo) {
            string message = batch.id.length() > 0 ? "Batch Updated Successfully" :"Failed to Update the Batch";
            batchId = batch.id;
@@ -57,7 +57,7 @@ public function main(){
         }
 
         //get batch info
-        error|sfdc:BatchInfo batchInfo = updateJob->getBatchInfo(batchId);
+        error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(updateJob, batchId);
         if (batchInfo is sfdc:BatchInfo) {
             string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
             log:print(message);
@@ -66,7 +66,7 @@ public function main(){
         }
 
         //get all batches
-        error|sfdc:BatchInfo[] batchInfoList = updateJob->getAllBatches();
+        error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(updateJob);
         if (batchInfoList is sfdc:BatchInfo[]) {
             string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
             log:print(message);
@@ -75,7 +75,7 @@ public function main(){
         }
 
         //get batch request
-        var batchRequest = updateJob->getBatchRequest(batchId);
+        var batchRequest = baseClient->getBatchRequest(updateJob, batchId);
         if (batchRequest is string) {
             string message = (regex:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
             log:print(message);
@@ -87,7 +87,7 @@ public function main(){
         }
 
         //get batch result
-        var batchResult = updateJob->getBatchResult(batchId);
+        var batchResult = baseClient->getBatchResult(updateJob, batchId);
         if (batchResult is sfdc:Result[]) {
             foreach sfdc:Result res in batchResult {
                 if (!res.success) {
