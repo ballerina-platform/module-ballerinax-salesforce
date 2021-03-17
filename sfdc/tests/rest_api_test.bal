@@ -19,6 +19,16 @@ import ballerina/log;
 import ballerina/os;
 
 // Create Salesforce client configuration by reading from environemnt.
+
+// Using bearer-token config for client configuration
+// SalesforceConfiguration sfConfig = {
+//     baseUrl: os:getEnv("EP_URL"),
+//     clientConfig: {
+//         token: os:getEnv("ACCESS_TOKEN")
+//     }
+// };
+
+// Using direct-token config for client configuration
 SalesforceConfiguration sfConfig = {
     baseUrl: os:getEnv("EP_URL"),
     clientConfig: {
