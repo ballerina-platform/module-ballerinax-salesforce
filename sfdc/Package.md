@@ -81,9 +81,9 @@ Instantiate the connector by giving authentication details in the HTTP client co
 
 ## Step 3: Create the Salesforce client
 
-The Ballerina Salesforce connector has allowed users to create the client using the Direct Token Configuration and as well as Bearer Token Configuration. 
+The Ballerina Salesforce connector has allowed users to create the client using the [direct token configuration](https://ballerina.io/learn/by-example/secured-client-with-oauth2-direct-token-type.html) and as well as [bearer token configuration](https://ballerina.io/learn/by-example/secured-client-with-bearer-token-auth.html). 
 
-Users are recommended to use Direct-Token config when initializing the Salesforce client for continuous access.   
+Users are recommended to use direct-token config when initializing the Salesforce client for continuous access by providing the Salesfoce account's domain URL as the `baseURL` and the `client id`, `client secret`, `refresh token` obtained in the step two and `https://login.salesforce.com/services/oauth2/token` as `refreshUrl` in general scenarios. 
 
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
@@ -101,7 +101,7 @@ sfdc:SalesforceConfiguration sfConfig = {
 sfdc:Client baseClient = new (sfConfig);
 ```
 
-If the user already owns a valid access token he can initialize the client using Bearer-Token configuration as follows for quick API calls. 
+If the user already owns a valid access token he can initialize the client using bearer-token configuration providing the access token as a bearer token for quick API calls. 
 
 ```ballerina
 sfdc:SalesforceConfiguration sfConfig = {
