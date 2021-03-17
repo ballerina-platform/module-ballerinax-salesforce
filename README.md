@@ -119,9 +119,9 @@ Instantiate the connector by giving authentication details in the HTTP client co
 
 ## Step 3: Create the Salesforce client
 
-Ballerina Salesforce connector has allowed user to create the client using the Direct Token Configuration and as well as Bearer Token Configuration. 
+The Ballerina Salesforce connector has allowed users to create the client using the Direct Token Configuration and as well as Bearer Token Configuration. 
 
-Users are recommended to use Direct-Token config when initializing the Salesforce client for the continuous access.  
+Users are recommended to use Direct-Token config when initializing the Salesforce client for continuous access.   
 
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
@@ -139,7 +139,7 @@ sfdc:SalesforceConfiguration sfConfig = {
 sfdc:Client baseClient = new (sfConfig);
 ```
 
-If the user already owns a valid access token he initialize the client using Bearer-Token configuration as following for quick API calls. 
+If the user already owns a valid access token he can initialize the client using Bearer-Token configuration as follows for quick API calls. 
 
 ```ballerina
 sfdc:SalesforceConfiguration sfConfig = {
@@ -152,7 +152,7 @@ sfdc:SalesforceConfiguration sfConfig = {
 sfdc:Client baseClient = new (sfConfig);
 ```
 
-This access token will be expired in 7200 seconds in general scenarios and the expiration time of the access token can be diferent from organization to organization. In such cases user have to get the new access token and update the configuration. 
+This access token will expire in 7200 seconds in general scenarios and the expiration time of the access token can be different from organization to organization. In such cases users have to get the new access token and update the configuration. 
 
 
 If you want to add your own key store to define the `secureSocketConfig`, change the Salesforce configuration as mentioned below.
