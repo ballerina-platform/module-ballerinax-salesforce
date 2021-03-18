@@ -516,7 +516,7 @@ These samples demonstrate the employment of Ballerina Salesforce Connector in Sa
 * Samples that can be used with any SObject's CRUD operations
 	- [Create Record](samples/rest_api_usecases/sobject_create.bal) 
 	- [Get Record](samples/rest_api_usecases/sobject_get_record.bal)
-	- [Get Record By Id](samples/rest_api_usecases/sobject_get_by_Id.bal) 
+	- [Get Record By Id](samples/rest_api_usecases/sobject_get_by_id.bal) 
 	- [Update Record](samples/rest_api_usecases/sobject_update.bal) 
 	- [Delete Record](samples/rest_api_usecases/sobject_delete.bal) 
 * Samples for convenient access of following SObjects' CRUD operations
@@ -526,7 +526,7 @@ These samples demonstrate the employment of Ballerina Salesforce Connector in Sa
   - [Lead](samples/rest_api_usecases/lead-related-usecases)
   - [Product](samples/rest_api_usecases/product-related-usecases)
 * Samples for SOSL and SOQL related operations
-  - [Find Record by Query][samples/rest_api_usecases/find_record_by_query.bal]
+  - [Find Record by Query](samples/rest_api_usecases/find_record_by_query.bal)
   - [Search Record](samples/rest_api_usecases/search_record_by_string.bal)
 * Samples for retrieving Organization and SObject metadata
   - [Access Organizational Metadata](samples/rest_api_usecases/org-metadata-usecases)
