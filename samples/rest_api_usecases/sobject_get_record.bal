@@ -33,10 +33,14 @@ public function main(){
     // Create Salesforce client.
     sfdc:Client baseClient = checkpanic new(sfConfig);
 
-    json|sfdc:Error res = baseClient->getRecordByExtId("Contact", "My_External_Id__c", "102", "FirstName");
+    string accountId = "0015Y00002adeBWQAY";
+
+    string path = "/services/data/v48.0/sobjects/Account/" + accountId;
+
+    json|sfdc:Error res = baseClient->getRecord(path);
 
     if (res is json) {
-        json|error recName = res.FirstName;
+        json|error recName = res.Name;
         if (recName is json){
             log:print("Account data received successfully. Account Name : " + recName.toString());
         }

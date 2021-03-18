@@ -13,11 +13,10 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
 import ballerinax/sfdc;
 
-public function main(){
+public function main() {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:SalesforceConfiguration sfConfig = {
@@ -31,18 +30,16 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = checkpanic new (sfConfig);
 
     string accountId = "0015Y00002adeBWQAY";
 
-    string path = "/services/data/v48.0/sobjects/Account/" + accountId;
-
-    json|sfdc:Error res = baseClient->getRecord(path);
+    json|sfdc:Error res = baseClient->getRecordById("Account", accountId, "Name", "BillingCity");
 
     if (res is json) {
         json|error recName = res.Name;
-        if (recName is json){
-            log:print("Account data received successfully. Account Name : " + recName.toString());
+        if (recName is json) {
+            log:print("Record data received successfully. Record Name : " + recName.toString());
         }
     } else {
         log:printError(msg = res.message());
