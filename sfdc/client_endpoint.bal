@@ -22,7 +22,7 @@ import ballerina/io;
 # + salesforceClient - OAuth2 client endpoint
 # + salesforceConfiguration - Salesforce Connector configuration
 # + authHandler - SalesforceAuthHandler class object 
-@display {label: "Salesforce Client"}
+@display {label: "Salesforce Client", iconPath: "SalesforceLogo.png"}
 public client class Client {
 
     http:Client salesforceClient;
