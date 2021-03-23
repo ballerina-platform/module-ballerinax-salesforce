@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [insertCsv]}
 function upsertCsv() {
-    log:print("baseClient -> upsertCsv");
+    log:printInfo("baseClient -> upsertCsv");
     string batchId = "";
 
     string contacts = 

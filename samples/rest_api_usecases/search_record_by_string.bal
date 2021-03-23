@@ -38,7 +38,7 @@ public function main(){
     sfdc:SoslResult|sfdc:Error res = baseClient->searchSOSLString(searchString);
 
     if (res is sfdc:SoslResult){
-        log:print(res.searchRecords.length().toString() + " Record Received");
+        log:printInfo(res.searchRecords.length().toString() + " Record Received");
     }
     else{
         log:printError(res.message());

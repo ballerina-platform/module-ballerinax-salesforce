@@ -34,7 +34,7 @@ service /topic/AccountUpdate on eventListener {
         if (account is json) {
             json|error accountName = account.sobject.Name;
             if (accountName is json){
-                log:print(accountName.toString() + " Account Updated");
+                log:printInfo(accountName.toString() + " Account Updated");
             }
         }
     }

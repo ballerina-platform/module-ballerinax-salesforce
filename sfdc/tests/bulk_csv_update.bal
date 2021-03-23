@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [insertCsv, upsertCsv]}
 function updateCsv() {
-    log:print("baseClient -> updateCsv");
+    log:printInfo("baseClient -> updateCsv");
     string batchId = "";
 
     string binnsID = getContactIdByName("Cuthbert", "Binns", "Professor Level 02");

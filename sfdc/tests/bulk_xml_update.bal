@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [insertXml, upsertXml]}
 function updateXml() {
-    log:print("baseClient -> updateXml");
+    log:printInfo("baseClient -> updateXml");
     string batchId = "";
 
     string flitchID = getContactIdByName("Argus", "Filch", "Professor Level 01");

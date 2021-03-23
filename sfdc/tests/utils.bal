@@ -24,10 +24,10 @@ json[] jsonQueryResult = [];
 xml xmlQueryResult = xml `<test/>`;
 string csvQueryResult = "";
 
-function closeRb(io:ReadableByteChannel ch) {
+isolated function closeRb(io:ReadableByteChannel ch) {
     var cr = ch.close();
     if (cr is error) {
-        log:printError("Error occured while closing the channel: ", err = cr);
+        log:printError("Error occured while closing the channel: ", 'error = cr);
     }
 }
 

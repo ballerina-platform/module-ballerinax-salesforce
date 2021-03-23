@@ -38,7 +38,7 @@ public function main(){
 
    if res is boolean{
         string outputMessage = (res == true) ? "Lead Deleted Successfully!" : "Failed to Delete the Lead";
-        log:print(outputMessage);
+        log:printInfo(outputMessage);
     } else {
         log:printError(msg = res.message());
     }
@@ -57,10 +57,10 @@ function getLeadIdByName(string firstName, string lastName, string compnay) retu
             string id = records[0]["Id"].toString();
             leadId = id;
         } else {
-            log:print("Getting Lead ID by name failed. err=" + records.toString());            
+            log:printInfo("Getting Lead ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting Lead ID by name failed. err=" + res.toString());
+        log:printInfo("Getting Lead ID by name failed. err=" + res.toString());
     }
     return leadId;
 }

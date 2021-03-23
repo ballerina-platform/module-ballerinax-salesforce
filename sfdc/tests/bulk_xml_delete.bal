@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [queryXml]}
 function deleteXml() {
-    log:print("baseClient -> deleteXml");
+    log:printInfo("baseClient -> deleteXml");
     string batchId = "";
 
     xml contacts = getXmlContactsToDelete(xmlQueryResult);

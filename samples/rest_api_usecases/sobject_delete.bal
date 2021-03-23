@@ -39,7 +39,7 @@ public function main(){
 
     if res is boolean{
         string outputMessage = (res == true) ? "Record Deleted Successfully!" : "Failed to Delete the Record";
-        log:print(outputMessage);
+        log:printInfo(outputMessage);
     }
     else{
         log:printError(res.message());

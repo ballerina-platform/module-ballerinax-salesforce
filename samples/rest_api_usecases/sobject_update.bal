@@ -45,7 +45,7 @@ public function main(){
 
     if res is boolean{
         string outputMessage = (res == true) ? "Record Updated Successfully!" : "Failed to Update the Record";
-        log:print(outputMessage);
+        log:printInfo(outputMessage);
     }
     else{
         log:printError(res.message());

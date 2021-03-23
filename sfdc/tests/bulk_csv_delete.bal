@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [queryCsv]}
 function deleteCsv() {
-    log:print("baseClient -> deleteCsv");
+    log:printInfo("baseClient -> deleteCsv");
     string batchId = "";
 
     string contacts = getCsvContactsToDelete(csvQueryResult);

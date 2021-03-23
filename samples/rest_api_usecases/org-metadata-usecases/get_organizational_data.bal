@@ -36,7 +36,7 @@ public function main(){
     sfdc:Version[]|sfdc:Error apiVersions = baseClient->getAvailableApiVersions();
 
     if (apiVersions is sfdc:Version[]) {
-        log:print("Versions retrieved successfully : " + apiVersions.toString());
+        log:printInfo("Versions retrieved successfully : " + apiVersions.toString());
     } else {
         log:printError(msg = apiVersions.message());
     }
@@ -44,7 +44,7 @@ public function main(){
     map<string>|sfdc:Error apiVersionResources = baseClient->getResourcesByApiVersion("v48.0");
 
     if (apiVersionResources is map<string>) {
-        log:print("Versions retrieved successfully : " + apiVersionResources.toString());
+        log:printInfo("Versions retrieved successfully : " + apiVersionResources.toString());
     } else {
         log:printError(msg = apiVersionResources.message());
     }
@@ -52,7 +52,7 @@ public function main(){
     map<sfdc:Limit>|sfdc:Error apiLimits = baseClient->getOrganizationLimits();
 
     if (apiLimits is map<sfdc:Limit>) {
-        log:print("Versions retrieved successfully : " + apiLimits.toString());
+        log:printInfo("Versions retrieved successfully : " + apiLimits.toString());
     } else {
         log:printError(msg = apiLimits.message());
     }

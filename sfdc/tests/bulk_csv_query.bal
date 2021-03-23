@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [updateCsv, insertCsvFromFile, insertCsv]}
 function queryCsv() {
-    log:print("baseClient -> queryCsv");
+    log:printInfo("baseClient -> queryCsv");
     string batchId = "";
 
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";

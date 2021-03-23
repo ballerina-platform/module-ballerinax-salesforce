@@ -40,7 +40,7 @@ public function main(){
     if (product is json) {
         json|error productName = product.Name; 
         if (productName is json){
-            log:print("Product data retrieved successfully. Product's Name : " + productName.toString());
+            log:printInfo("Product data retrieved successfully. Product's Name : " + productName.toString());
         }
     } else {
         log:printError(msg = product.message());

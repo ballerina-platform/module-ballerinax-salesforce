@@ -39,7 +39,7 @@ public function main(){
 
     if res is boolean{
         string outputMessage = (res == true) ? "Account Deleted Successfully!" : "Failed to Delete the Account";
-        log:print(outputMessage);
+        log:printInfo(outputMessage);
     }
     else{
         log:printError(res.message());
@@ -58,10 +58,10 @@ function getAccountIdByName(string name) returns @tainted string {
             string id = records[0]["Id"].toString();
             contactId = id;
         } else {
-            log:print("Getting contact ID by name failed. err=" + records.toString());            
+            log:printInfo("Getting contact ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting contact ID by name failed. err=" + res.toString());
+        log:printInfo("Getting contact ID by name failed. err=" + res.toString());
     }
     return contactId;
 }

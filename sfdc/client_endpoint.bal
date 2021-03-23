@@ -20,23 +20,18 @@ import ballerina/io;
 
 # The Salesforce Client object.
 # + salesforceClient - OAuth2 client endpoint
-# + salesforceConfiguration - Salesforce Connector configuration
-# + authHandler - SalesforceAuthHandler class object 
+# + clientConfig - Salesforce Connector configuration
 @display {label: "Salesforce Client", iconPath: "SalesforceLogo.png"}
 public client class Client {
-
     http:Client salesforceClient;
-    SalesforceConfiguration salesforceConfiguration;
-    SalesforceAuthHandler authHandler;
+    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
 
     # Salesforce Connector endpoint initialization function.
     # + salesforceConfig - Salesforce Connector configuration
-    public function init(SalesforceConfiguration salesforceConfig) returns error? {
-
-        self.salesforceConfiguration = salesforceConfig;
-
+    public isolated function init(SalesforceConfiguration salesforceConfig) returns error? {
+        self.clientConfig = salesforceConfig.clientConfig;
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
-        self.authHandler = new (salesforceConfig.clientConfig);
+
         // Create an HTTP client.
         if (socketConfig is http:ClientSecureSocket) {
             self.salesforceClient = check new (salesforceConfig.baseUrl, {
@@ -44,9 +39,7 @@ public client class Client {
                 secureSocket: socketConfig
             });
         } else {
-            self.salesforceClient = check new (salesforceConfig.baseUrl, {
-                auth: salesforceConfig.clientConfig
-            });
+            self.salesforceClient = check new (salesforceConfig.baseUrl, {auth: salesforceConfig.clientConfig});
         }
     }
 
@@ -55,7 +48,7 @@ public client class Client {
     # Lists the available objects and their metadata for your organization and available to the logged-in user.
     # + return - `OrgMetadata` record if successful else Error occured
     @display {label: "Get available objects"}
-    remote function describeAvailableObjects() returns @tainted @display {label: "Organization metadata"} 
+    isolated remote function describeAvailableObjects() returns @tainted @display {label: "Organization metadata"} 
             OrgMetadata|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS]);
         json res = check self->getRecord(path);
@@ -66,7 +59,7 @@ public client class Client {
     # + sobjectName - sobject name
     # + return - `SObjectBasicInfo` record if successful else Error occured
     @display {label: "Get SObject basic information"}
-    remote function getSObjectBasicInfo(@display {label: "SObject name"} string sobjectName) returns @tainted 
+    isolated remote function getSObjectBasicInfo(@display {label: "SObject name"} string sobjectName) returns @tainted 
                                         @display {label: "SObject basic information"} SObjectBasicInfo|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
         json res = check self->getRecord(path);
@@ -78,7 +71,7 @@ public client class Client {
     # + sObjectName - SObject name value
     # + return - `SObjectMetaData` record if successful else Error occured
     @display {label: "Get All information about SObject"}
-    remote function describeSObject(@display {label: "SObject name"} string sObjectName) 
+    isolated remote function describeSObject(@display {label: "SObject name"} string sObjectName) 
                                     returns @tainted @display {label: "SObject metadata"} SObjectMetaData|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
         json res = check self->getRecord(path);
@@ -88,7 +81,7 @@ public client class Client {
     # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
     # + return - `SObjectBasicInfo` record if successful else Error occured
     @display {label: "Get SObject platform action"}
-    remote function sObjectPlatformAction() returns @tainted @display {label: "SObject basic information"} 
+    isolated remote function sObjectPlatformAction() returns @tainted @display {label: "SObject basic information"} 
             SObjectBasicInfo|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
         json res = check self->getRecord(path);
@@ -101,7 +94,7 @@ public client class Client {
     # + path - Resource path
     # + return - `json` result if successful else Error occured
     @display {label: "Get record"}
-    remote function getRecord(@display {label: "Resource path"} string path) 
+    isolated remote function getRecord(@display {label: "Resource path"} string path) 
                               returns @tainted @display {label: "Result"} json|Error {
         http:Response|http:PayloadType|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
@@ -112,7 +105,7 @@ public client class Client {
     # + recordPayload - JSON record to be inserted
     # + return - created entity ID if successful else Error occured
     @display {label: "Create record"}
-    remote function createRecord(@display {label: "SObject name"} string sObjectName, 
+    isolated  remote function createRecord(@display {label: "SObject name"} string sObjectName, 
                                  @display {label: "Record payload"} json recordPayload) 
                                  returns @tainted @display {label: "Created entity ID"} string|Error {
         http:Request req = new;
@@ -140,7 +133,7 @@ public client class Client {
     # + recordPayload - JSON record to be updated
     # + return - true if successful else false or Error occured
     @display {label: "Update record"}
-    remote function updateRecord(@display {label: "SObject name"} string sObjectName, 
+    isolated remote function updateRecord(@display {label: "SObject name"} string sObjectName, 
                                  @display {label: "SObject ID"} string id, 
                                  @display {label: "Record payload"} json recordPayload) 
                                  returns @tainted @display {label: "Result"} boolean|Error {
@@ -164,7 +157,7 @@ public client class Client {
     # + id - SObject id
     # + return - true if successful else false or Error occured
     @display {label: "Delete record"}
-    remote function deleteRecord(@display {label: "SObject name"} string sObjectName, 
+    isolated remote function deleteRecord(@display {label: "SObject name"} string sObjectName, 
                                  @display {label: "SObject ID"} string id) 
                                  returns @tainted @display {label: "Result"} boolean|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
@@ -186,7 +179,7 @@ public client class Client {
     # + fields - fields to retrieve 
     # + return - `json` result if successful else `Error` occured
     @display {label: "Get record by ID"}
-    remote function getRecordById(@display {label: "SObject name"} string sobject, 
+    isolated remote function getRecordById(@display {label: "SObject name"} string sobject, 
                                   @display {label: "SObject ID"} string id, 
                                   @display {label: "Fields to retrieve"} string... fields) 
                                   returns @tainted @display {label: "Result"} json|Error {
@@ -206,7 +199,7 @@ public client class Client {
     # + fields - fields to retrieve 
     # + return - `json` result if successful else `Error` occured
     @display {label: "Get record by external ID"}
-    remote function getRecordByExtId(@display {label: "SObject name"} string sobject, 
+    isolated remote function getRecordByExtId(@display {label: "SObject name"} string sobject, 
                                      @display {label: "External ID field name"} string extIdField, 
                                      @display {label: "External ID"} string extId, 
                                      @display {label: "Fields to retrieve"} string... fields) 
@@ -226,7 +219,7 @@ public client class Client {
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
     @display {label: "Get account by ID"}
-    remote function getAccountById(@display {label: "Account ID"} string accountId, 
+    isolated remote function getAccountById(@display {label: "Account ID"} string accountId, 
                                    @display {label: "Fields to retrieve"} string... fields) 
                                    returns @tainted @display {label: "Result"} json|Error {
         json res = check self->getRecordById(ACCOUNT, accountId, ...fields);
@@ -237,7 +230,7 @@ public client class Client {
     # + accountRecord - Account JSON record to be inserted
     # + return - Account ID if successful or else an sfdc:Error
     @display {label: "Create account"}
-    remote function createAccount(@display {label: "Account record"} json accountRecord) 
+    isolated remote function createAccount(@display {label: "Account record"} json accountRecord) 
                                   returns @tainted @display {label: "Account ID"} string|Error {
         return self->createRecord(ACCOUNT, accountRecord);
     }
@@ -246,7 +239,7 @@ public client class Client {
     # + accountId - Account ID
     # + return - `true` if successful `false` otherwise, or an sfdc:Error in case of an error
     @display {label: "Delete account"}
-    remote function deleteAccount(@display {label: "Account ID"} string accountId) 
+    isolated remote function deleteAccount(@display {label: "Account ID"} string accountId) 
                                   returns @tainted @display {label: "Result"} boolean|Error {
         return self->deleteRecord(ACCOUNT, accountId);
     }
@@ -256,7 +249,7 @@ public client class Client {
     # + accountRecord - account record json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Update account"}
-    remote function updateAccount(@display {label: "Account ID"} string accountId, 
+    isolated remote function updateAccount(@display {label: "Account ID"} string accountId, 
                                   @display {label: "Account record"} json accountRecord) 
                                   returns @tainted @display {label: "Result"} boolean|Error {
         return self->updateRecord(ACCOUNT, accountId, accountRecord);
@@ -269,7 +262,7 @@ public client class Client {
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
     @display {label: "Get lead by ID"}
-    remote function getLeadById(@display {label: "Lead ID"} string leadId, 
+    isolated remote function getLeadById(@display {label: "Lead ID"} string leadId, 
                                 @display {label: "Fields to retrieve"} string... fields) 
                                 returns @tainted @display {label: "Result"} json|Error {
         json res = check self->getRecordById(LEAD, leadId, ...fields);
@@ -280,7 +273,7 @@ public client class Client {
     # + leadRecord - Lead JSON record to be inserted
     # + return - Lead ID if successful or else an sfdc:Error
     @display {label: "Create lead"}
-    remote function createLead(@display {label: "Lead record"} json leadRecord) 
+    isolated remote function createLead(@display {label: "Lead record"} json leadRecord) 
                                returns @tainted @display {label: "Lead ID"} string|Error {
         return self->createRecord(LEAD, leadRecord);
     }
@@ -289,7 +282,7 @@ public client class Client {
     # + leadId - Lead ID
     # + return - `true`  if successful, `false` otherwise or an sfdc:Error incase of an error
     @display {label: "Delete lead"}
-    remote function deleteLead(@display {label: "Lead ID"} string leadId) 
+    isolated remote function deleteLead(@display {label: "Lead ID"} string leadId) 
                                returns @tainted @display {label: "Result"} boolean|Error {
         return self->deleteRecord(LEAD, leadId);
     }
@@ -299,7 +292,7 @@ public client class Client {
     # + leadRecord - Lead JSON record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Update lead"}
-    remote function updateLead(@display {label: "Lead ID"} string leadId, 
+    isolated remote function updateLead(@display {label: "Lead ID"} string leadId, 
                                @display {label: "Lead record"} json leadRecord) 
                                returns @tainted @display {label: "Result"} boolean|Error {
         return self->updateRecord(LEAD, leadId, leadRecord);
@@ -312,7 +305,7 @@ public client class Client {
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
     @display {label: "Get contact by ID"}
-    remote function getContactById(@display {label: "Contact ID"} string contactId, 
+    isolated remote function getContactById(@display {label: "Contact ID"} string contactId, 
                                    @display {label: "Fields to retrieve"} string... fields) 
                                    returns @tainted @display {label: "Result"} json|Error {
         json res = check self->getRecordById(CONTACT, contactId, ...fields);
@@ -323,7 +316,7 @@ public client class Client {
     # + contactRecord - JSON contact record
     # + return - Contact ID if successful or else an sfdc:Error
     @display {label: "Create contact"}
-    remote function createContact(@display {label: "Contact record"} json contactRecord) 
+    isolated remote function createContact(@display {label: "Contact record"} json contactRecord) 
                                   returns @tainted @display {label: "Contact ID"} string|Error {
         return self->createRecord(CONTACT, contactRecord);
     }
@@ -332,7 +325,7 @@ public client class Client {
     # + contactId - Contact ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Delete contact"}
-    remote function deleteContact(@display {label: "Contact ID"} string contactId) 
+    isolated remote function deleteContact(@display {label: "Contact ID"} string contactId) 
                                   returns @tainted @display {label: "Result"} boolean|Error {
         return self->deleteRecord(CONTACT, contactId);
     }
@@ -342,7 +335,7 @@ public client class Client {
     # + contactRecord - JSON contact record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Update contact"}
-    remote function updateContact(@display {label: "Contact ID"} string contactId, 
+    isolated remote function updateContact(@display {label: "Contact ID"} string contactId, 
                                   @display {label: "Contact record"} json contactRecord) 
                                   returns @tainted @display {label: "Result"} boolean|Error {
         return self->updateRecord(CONTACT, contactId, contactRecord);
@@ -355,7 +348,7 @@ public client class Client {
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
     @display {label: "Get opportunity by ID"}
-    remote function getOpportunityById(@display {label: "Opportunity ID"} string opportunityId, 
+    isolated remote function getOpportunityById(@display {label: "Opportunity ID"} string opportunityId, 
                                        @display {label: "Fields to retrieve"} string... fields) 
                                        returns @tainted @display {label: "Result"} json|Error {
         json res = check self->getRecordById(OPPORTUNITY, opportunityId, ...fields);
@@ -366,7 +359,7 @@ public client class Client {
     # + opportunityRecord - JSON opportunity record
     # + return - Opportunity ID if successful or else an sfdc:Error
     @display {label: "Create opportunity"}
-    remote function createOpportunity(@display {label: "Opportunity record"} json opportunityRecord) 
+    isolated remote function createOpportunity(@display {label: "Opportunity record"} json opportunityRecord) 
                                       returns @tainted @display {label: "Opportunity ID"} string|Error {
         return self->createRecord(OPPORTUNITY, opportunityRecord);
     }
@@ -375,7 +368,7 @@ public client class Client {
     # + opportunityId - Opportunity ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Delete opportunity"}
-    remote function deleteOpportunity(@display {label: "Opportunity ID"} string opportunityId) 
+    isolated remote function deleteOpportunity(@display {label: "Opportunity ID"} string opportunityId) 
                                       returns @tainted @display {label: "Result"} boolean|Error {
         return self->deleteRecord(OPPORTUNITY, opportunityId);
     }
@@ -385,7 +378,7 @@ public client class Client {
     # + opportunityRecord - Opportunity json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Update opportunity"}
-    remote function updateOpportunity(@display {label: "Opportunity ID"} string opportunityId, 
+    isolated remote function updateOpportunity(@display {label: "Opportunity ID"} string opportunityId, 
                                       @display {label: "Opportunity Record"} json opportunityRecord) 
                                       returns @tainted @display {label: "Result"} boolean|Error {
         return self->updateRecord(OPPORTUNITY, opportunityId, opportunityRecord);
@@ -398,7 +391,7 @@ public client class Client {
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
     @display {label: "Get product by ID"}
-    remote function getProductById(@display {label: "Product ID"} string productId, 
+    isolated remote function getProductById(@display {label: "Product ID"} string productId, 
                                    @display {label: "Fields to retrieve"} string... fields) 
                                    returns @tainted @display {label: "Result"} json|Error {
         json res = check self->getRecordById(PRODUCT, productId, ...fields);
@@ -409,7 +402,7 @@ public client class Client {
     # + productRecord - JSON product record
     # + return - Product ID if successful or else an sfdc:Error
     @display {label: "Create product"}
-    remote function createProduct(@display {label: "Product record"} json productRecord) 
+    isolated remote function createProduct(@display {label: "Product record"} json productRecord) 
                                   returns @tainted @display {label: "Product ID"} string|Error {
         return self->createRecord(PRODUCT, productRecord);
     }
@@ -418,7 +411,7 @@ public client class Client {
     # + productId - Product ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Delete product"}
-    remote function deleteProduct(@display {label: "Product ID"} string productId) 
+    isolated remote function deleteProduct(@display {label: "Product ID"} string productId) 
                                   returns @tainted @display {label: "Result"} boolean|Error {
         return self->deleteRecord(PRODUCT, productId);
     }
@@ -428,7 +421,7 @@ public client class Client {
     # + productRecord - JSON product record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Update product"}
-    remote function updateProduct(@display {label: "Product ID"} string productId, 
+    isolated remote function updateProduct(@display {label: "Product ID"} string productId, 
                                   @display {label: "Product record"} json productRecord) 
                                   returns @tainted @display {label: "Result"} boolean|Error {
         return self->updateRecord(PRODUCT, productId, productRecord);
@@ -449,7 +442,7 @@ public client class Client {
     # + receivedQuery - Sent SOQL query
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
     @display {label: "Get query result"}
-    remote function getQueryResult(@display {label: "SOQL query"} string receivedQuery) 
+    isolated remote function getQueryResult(@display {label: "SOQL query"} string receivedQuery) 
                                    returns @tainted @display {label: "SOQL Result"} SoqlResult|Error {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         json res = check self->getRecord(path);
@@ -460,7 +453,7 @@ public client class Client {
     # + nextRecordsUrl - URL to get the next query results
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
     @display {label: "Get next query result"}
-    remote function getNextQueryResult(@display {label: "Next records URL"} string nextRecordsUrl) 
+    isolated remote function getNextQueryResult(@display {label: "Next records URL"} string nextRecordsUrl) 
                                        returns @tainted @display {label: "SOQL result"} SoqlResult|Error {
         json res = check self->getRecord(nextRecordsUrl);
         return toSoqlResult(res);
@@ -472,7 +465,7 @@ public client class Client {
     # + searchString - Sent SOSL search query
     # + return - `SoslResult` record if successful. Else, the occurred `Error`.
     @display {label: "SOSL Search"}
-    remote function searchSOSLString(@display {label: "SOSL search query"} string searchString) 
+    isolated remote function searchSOSLString(@display {label: "SOSL search query"} string searchString) 
                                      returns @tainted @display {label: "SOSL result"} SoslResult|Error {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
         json res = check self->getRecord(path);
@@ -482,7 +475,7 @@ public client class Client {
     # Lists summary details about each REST API version available.
     # + return - List of `Version` if successful. Else, the occured Error.
     @display {label: "Get available API versions"}
-    remote function getAvailableApiVersions() returns @tainted @display {label: "Versions"} Version[]|Error {
+    isolated remote function getAvailableApiVersions() returns @tainted @display {label: "Versions"} Version[]|Error {
         string path = prepareUrl([BASE_PATH]);
         json res = check self->getRecord(path);
         return toVersions(res);
@@ -492,7 +485,7 @@ public client class Client {
     # + apiVersion - API version (v37)
     # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
     @display {label: "Get resources by API version"}
-    remote function getResourcesByApiVersion(@display {label: "API version"} string apiVersion) 
+    isolated remote function getResourcesByApiVersion(@display {label: "API version"} string apiVersion) 
                                              returns @tainted @display {label: "Resources"} map<string>|Error {
         string path = prepareUrl([BASE_PATH, apiVersion]);
         json res = check self->getRecord(path);
@@ -502,7 +495,7 @@ public client class Client {
     # Lists the Limits information for your organization.
     # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
     @display {label: "Get organization limits"}
-    remote function getOrganizationLimits() returns @tainted @display {label: "Organization limits"} map<Limit>|Error {
+    isolated remote function getOrganizationLimits() returns @tainted @display {label: "Organization limits"} map<Limit>|Error {
         string path = prepareUrl([API_BASE_PATH, LIMITS]);
         json res = check self->getRecord(path);
         return toMapOfLimits(res);
@@ -516,7 +509,7 @@ public client class Client {
     # + extIdFieldName - field name of the external ID incase of an Upsert operation
     # + return - returns job object or error
     @display {label: "Create job"}
-    remote function creatJob(@display {label: "Operation"} OPERATION operation, 
+    isolated remote function creatJob(@display {label: "Operation"} OPERATION operation, 
                              @display {label: "SObject"} string sobj, 
                              @display {label: "Content type"} JOBTYPE contentType, 
                              @display {label: "External ID field name"} string extIdFieldName = "") 
@@ -534,17 +527,19 @@ public client class Client {
                 return error("External ID Field Name Required for UPSERT Operation!");
             }
         }
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            authorizedReq.setJsonPayload(jobPayload);
-            string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
-            var response = self.salesforceClient->post(path, authorizedReq);
+        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
+        var headerMap = getBulkAPIHeaders(self.clientConfig);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->post(path, jobPayload, headers = headerMap);
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json) {
                 json|error jobResponseId = jobResponse.id;
                 if (jobResponseId is json) {
-                    BulkJob bulkJob = {jobId: jobResponseId.toString(), jobDataType: contentType, operation: operation};
+                    BulkJob bulkJob = {
+                        jobId: jobResponseId.toString(),
+                        jobDataType: contentType,
+                        operation: operation
+                    };
                     return bulkJob;
                 } else {
                     return jobResponseId;
@@ -553,7 +548,7 @@ public client class Client {
                 return jobResponse;
             }
         } else {
-            return authorizedReq;
+            return headerMap;
         }
 
     }
@@ -563,15 +558,14 @@ public client class Client {
     # + bulkJob - job object of which the info is required 
     # + return - job information record or error
     @display {label: "Get job information"}
-    remote function getJobInfo(@display {label: "Bulk job"} BulkJob bulkJob) 
+    isolated remote function getJobInfo(@display {label: "Bulk job"} BulkJob bulkJob) 
                                returns @tainted @display {label: "Job information"} error|JobInfo {
         string jobId = bulkJob.jobId;
         JOBTYPE jobDataType = bulkJob.jobDataType;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            var response = self.salesforceClient->get(path, authorizedReq);
+        var headerMap = getBulkAPIHeaders(self.clientConfig);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->get(path, headerMap);
             if (JSON == jobDataType) {
                 json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
                 if (jobResponse is json) {
@@ -590,9 +584,8 @@ public client class Client {
                 }
             }
         } else {
-            return authorizedReq;
+            return headerMap;
         }
-
     }
 
     # Close a job.
@@ -604,11 +597,9 @@ public client class Client {
                              returns @tainted @display {label: "Job information"} error|JobInfo {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            authorizedReq.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
-            var response = self.salesforceClient->post(path, authorizedReq);
+        var headerMap = getBulkAPIHeaders(self.clientConfig);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json) {
                 JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
@@ -617,7 +608,7 @@ public client class Client {
                 return jobResponse;
             }
         } else {
-            return authorizedReq;
+            return headerMap;
         }
 
     }
@@ -631,11 +622,9 @@ public client class Client {
                              returns @tainted @display {label: "Job information"} error|JobInfo {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            req.setJsonPayload(JSON_STATE_CLOSED_PAYLOAD);
-            var response = self.salesforceClient->post(path, req);
+        var headerMap = getBulkAPIHeaders(self.clientConfig);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json) {
                 JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
@@ -644,7 +633,7 @@ public client class Client {
                 return jobResponse;
             }
         } else {
-            return authorizedReq;
+            return headerMap;
         }
     }
 
@@ -653,32 +642,25 @@ public client class Client {
     # + content - batch content 
     # + return - batch info or error
     @display {label: "Add batch to job"}
-    remote function addBatch(@display {label: "Bulk job"} BulkJob bulkJob, 
+    isolated remote function addBatch(@display {label: "Bulk job"} BulkJob bulkJob, 
                              @display {label: "Batch content"} json|string|xml|io:ReadableByteChannel content) 
                              returns @tainted @display {label: "Batch information"} error|BatchInfo {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         // https://github.com/ballerina-platform/ballerina-lang/issues/26798
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            if (bulkJob.jobDataType == JSON) {
-                if (content is json) {
-                    authorizedReq.setJsonPayload(content);
+        string|json|xml payload;
+        if (bulkJob.jobDataType == JSON) {
+            if (content is io:ReadableByteChannel) {
+                if (QUERY == bulkJob.operation) {
+                    payload = check convertToString(content);
+                } else {
+                    payload = check convertToJson(content);
                 }
-                if (content is string) {
-                    authorizedReq.setTextPayload(content);
-                }
-                if (content is io:ReadableByteChannel) {
-                    if (QUERY == bulkJob.operation) {
-                        string payload = check convertToString(content);
-                        authorizedReq.setTextPayload(<@untainted>payload);
-                    } else {
-                        json payload = check convertToJson(content);
-                        authorizedReq.setJsonPayload(<@untainted>payload);
-                    }
-                }
-                authorizedReq.setHeader(CONTENT_TYPE, APP_JSON);
-                var response = self.salesforceClient->post(path, authorizedReq);
+            } else {
+                payload = content;
+            }
+            var headerMap = getBulkAPIHeaders(self.clientConfig, APP_JSON);
+            if (headerMap is map<string>) {
+                var response = self.salesforceClient->post(path, payload, headers = headerMap);
                 json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
                 if (batchResponse is json) {
                     BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
@@ -686,41 +668,23 @@ public client class Client {
                 } else {
                     return batchResponse;
                 }
-            } else if (bulkJob.jobDataType == XML) {
-                if (content is xml) {
-                    authorizedReq.setXmlPayload(content);
-                }
-                if (content is string) {
-                    authorizedReq.setTextPayload(content);
-                }
-                if (content is io:ReadableByteChannel) {
-                    if (QUERY == bulkJob.operation) {
-                        string payload = check convertToString(content);
-                        authorizedReq.setTextPayload(<@untainted>payload);
-                    } else {
-                        xml payload = check convertToXml(content);
-                        authorizedReq.setXmlPayload(<@untainted>payload);
-                    }
-                }
-                authorizedReq.setHeader(CONTENT_TYPE, APP_XML);
-                var response = self.salesforceClient->post(path, authorizedReq);
-                xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
-                if (batchResponse is xml) {
-                    BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
-                    return binfo;
+            } else {
+                return headerMap;
+            }
+
+        } else if (bulkJob.jobDataType == XML) {
+            if (content is io:ReadableByteChannel) {
+                if (QUERY == bulkJob.operation) {
+                    payload = check convertToString(content);
                 } else {
-                    return batchResponse;
+                    payload = check convertToXml(content);
                 }
-            } else if (bulkJob.jobDataType == CSV) {
-                if (content is string) {
-                    authorizedReq.setTextPayload(content);
-                }
-                if (content is io:ReadableByteChannel) {
-                    string textcontent = check convertToString(content);
-                    authorizedReq.setTextPayload(<@untainted>textcontent);
-                }
-                authorizedReq.setHeader(CONTENT_TYPE, TEXT_CSV);
-                var response = self.salesforceClient->post(path, authorizedReq);
+            } else {
+                payload = content;
+            }
+            var headerMap = getBulkAPIHeaders(self.clientConfig, APP_XML);
+            if (headerMap is map<string>) {
+                var response = self.salesforceClient->post(path, payload, headers = headerMap);
                 xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
                 if (batchResponse is xml) {
                     BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
@@ -729,10 +693,32 @@ public client class Client {
                     return batchResponse;
                 }
             } else {
-                return error("Invalid Job Type!");
+                return headerMap;
             }
+
+        } else if (bulkJob.jobDataType == CSV) {
+
+            if (content is io:ReadableByteChannel) {
+                payload = check convertToString(content);
+            } else {
+                payload = content;
+            }
+            var headerMap = getBulkAPIHeaders(self.clientConfig, TEXT_CSV);
+            if (headerMap is map<string>) {
+                var response = self.salesforceClient->post(path, payload, headers = headerMap);
+                xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
+                if (batchResponse is xml) {
+                    BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
+                    return binfo;
+                } else {
+                    return batchResponse;
+                }
+            } else {
+                return headerMap;
+            }
+
         } else {
-            return authorizedReq;
+            return error("Invalid Job Type!");
         }
 
     }
@@ -742,14 +728,13 @@ public client class Client {
     # + batchId - ID of the batch of which info is required 
     # + return - batch info or error
     @display {label: "Get batch information"}
-    remote function getBatchInfo(@display {label: "Bulk job"} BulkJob bulkJob, 
+    isolated remote function getBatchInfo(@display {label: "Bulk job"} BulkJob bulkJob, 
                                  @display {label: "Batch ID"} string batchId) 
                                  returns @tainted @display {label: "Batch Information"} error|BatchInfo {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            var response = self.salesforceClient->get(path, authorizedReq);
+        var headerMap = getBulkAPIHeaders(self.clientConfig);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->get(path, headerMap);
             if (JSON == bulkJob.jobDataType) {
                 json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
                 if (batchResponse is json) {
@@ -768,7 +753,7 @@ public client class Client {
                 }
             }
         } else {
-            return authorizedReq;
+            return headerMap;
         }
 
     }
@@ -777,13 +762,12 @@ public client class Client {
     #
     # + return - list of batch infos
     @display {label: "Get all batches"}
-    remote function getAllBatches(@display {label: "Bulkjob"} BulkJob bulkJob) 
+    isolated remote function getAllBatches(@display {label: "Bulkjob"} BulkJob bulkJob) 
                                   returns @tainted @display {label: "List of batch information"} error|BatchInfo[] {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            var response = self.salesforceClient->get(path, authorizedReq);
+        var headerMap = getBulkAPIHeaders(self.clientConfig, TEXT_CSV);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->get(path, headerMap);
             BatchInfo[] batchInfoList = [];
             if (JSON == bulkJob.jobDataType) {
                 json batchResponse = check checkJsonPayloadAndSetErrors(response);
@@ -802,7 +786,7 @@ public client class Client {
             }
             return batchInfoList;
         } else {
-            return authorizedReq;
+            return headerMap;
         }
     }
 
@@ -811,14 +795,13 @@ public client class Client {
     # + batchId - ID of the batch of which the request is required 
     # + return - batch content
     @display {label: "Get batch request payload"}
-    remote function getBatchRequest(@display {label: "Bulk job"} BulkJob bulkJob, 
+    isolated remote function getBatchRequest(@display {label: "Bulk job"} BulkJob bulkJob, 
                                     @display {label: "Batch ID"} string batchId) 
                                     returns @tainted @display {label: "Batch content"} error|json|xml|string {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            var response = self.salesforceClient->get(path, authorizedReq);
+        var headerMap = getBulkAPIHeaders(self.clientConfig, TEXT_CSV);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->get(path, headerMap);
             if (QUERY == bulkJob.operation) {
                 return getQueryRequest(response, bulkJob.jobDataType);
             } else {
@@ -838,7 +821,7 @@ public client class Client {
                 }
             }
         } else {
-            return authorizedReq;
+            return headerMap;
         }
 
     }
@@ -848,21 +831,20 @@ public client class Client {
     # + batchId - batch ID
     # + return - result list
     @display {label: "Get batch result"}
-    remote function getBatchResult(@display {label: "Bulk job"} BulkJob bulkJob, 
+    isolated remote function getBatchResult(@display {label: "Bulk job"} BulkJob bulkJob, 
                                    @display {label: "Batch ID"} string batchId) 
                                    returns @tainted @display {label: "Result"} error|json|xml|string|Result[] {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, RESULT]);
         Result[] results = [];
-        http:Request req = new;
-        http:ClientAuthError|http:Request authorizedReq = self.authHandler.enrich(req);
-        if (authorizedReq is http:Request) {
-            var response = self.salesforceClient->get(path, authorizedReq);
+        var headerMap = getBulkAPIHeaders(self.clientConfig, TEXT_CSV);
+        if (headerMap is map<string>) {
+            var response = self.salesforceClient->get(path, headerMap);
             match bulkJob.jobDataType {
                 JSON => {
                     json resultResponse = check checkJsonPayloadAndSetErrors(response);
                     if (QUERY == bulkJob.operation) {
                         return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, <@untainted>
-                        self.authHandler);
+                        self.clientConfig);
                     }
                     return createBatchResultRecordFromJson(resultResponse);
                 }
@@ -870,7 +852,7 @@ public client class Client {
                     xml resultResponse = check checkXmlPayloadAndSetErrors(response);
                     if (QUERY == bulkJob.operation) {
                         return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, <@untainted>
-                        self.authHandler);
+                        self.clientConfig);
                     }
                     return createBatchResultRecordFromXml(resultResponse);
                 }
@@ -878,7 +860,7 @@ public client class Client {
                     if (QUERY == bulkJob.operation) {
                         xml resultResponse = check checkXmlPayloadAndSetErrors(response);
                         return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, <@untainted>
-                        self.authHandler);
+                        self.clientConfig);
                     }
                     string resultResponse = check checkTextPayloadAndSetErrors(response);
                     return createBatchResultRecordFromCsv(resultResponse);
@@ -888,7 +870,7 @@ public client class Client {
                 }
             }
         } else {
-            return authorizedReq;
+            return headerMap;
         }
     }
 }
@@ -899,6 +881,6 @@ public client class Client {
 # + secureSocketConfig - HTTPS secure socket configuration
 public type SalesforceConfiguration record {|
     string baseUrl;
-    http:OAuth2DirectTokenConfig|http:BearerTokenConfig clientConfig;
+    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
     http:ClientSecureSocket secureSocketConfig?;
 |};

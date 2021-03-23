@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [updateJson, insertJsonFromFile]}
 function queryJson() {
-    log:print("baseClient -> queryJson");
+    log:printInfo("baseClient -> queryJson");
     string batchId = "";
 
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 03'";

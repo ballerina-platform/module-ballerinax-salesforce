@@ -21,7 +21,7 @@ import ballerina/lang.runtime;
 
 @test:Config {}
 function insertCsv() {
-    log:print("baseClient -> insertCsv");
+   log:printInfo("baseClient -> insertCsv");
     string batchId = "";
 
     string contacts = 
@@ -100,7 +100,7 @@ function insertCsv() {
 
 @test:Config {}
 function insertCsvFromFile() {
-    log:print("baseClient -> insertCsvFromFile");
+    log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";
 
     string csvContactsFilePath = "sfdc/tests/resources/contacts.csv";

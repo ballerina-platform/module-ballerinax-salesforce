@@ -21,7 +21,7 @@ import ballerina/lang.runtime;
 
 @test:Config {}
 function insertJson() {
-    log:print("baseClient -> insertJson");
+    log:printInfo("baseClient -> insertJson");
     string batchId = "";
 
     json contacts = [{
@@ -120,7 +120,7 @@ function insertJson() {
 
 @test:Config {}
 function insertJsonFromFile() {
-    log:print("baseClient -> insertJsonFromFile");
+    log:printInfo("baseClient -> insertJsonFromFile");
     string batchId = "";
 
     string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";

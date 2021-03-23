@@ -42,7 +42,7 @@ public function main() {
     string|sfdc:Error res = baseClient->createOpportunity(opportunityRecord);
 
     if (res is string) {
-        log:print("opportunity Created Successfully. opportunity ID : " + res);
+        log:printInfo("opportunity Created Successfully. opportunity ID : " + res);
     } else {
         log:printError(msg = res.message());
     }

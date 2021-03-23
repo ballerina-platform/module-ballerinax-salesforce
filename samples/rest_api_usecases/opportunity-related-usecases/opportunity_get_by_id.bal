@@ -40,7 +40,7 @@ public function main(){
     if (opportunity is json) {
         json|error opportunityName = opportunity.Name; 
         if (opportunityName is json){
-            log:print("Opportunity data retrieved successfully. Opportunity's Name : " + opportunityName.toString());
+            log:printInfo("Opportunity data retrieved successfully. Opportunity's Name : " + opportunityName.toString());
         }
     } else {
         log:printError(msg = opportunity.message());

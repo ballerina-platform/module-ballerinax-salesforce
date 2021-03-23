@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [queryJson]}
 function deleteJson() {
-    log:print("baseClient -> deleteJson");
+    log:printInfo("baseClient -> deleteJson");
     string batchId = "";
 
     json contacts = getJsonContactsToDelete(jsonQueryResult);

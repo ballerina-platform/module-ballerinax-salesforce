@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [insertJson]}
 function upsertJson() {
-    log:print("baseClient -> upsertJson");
+    log:printInfo("baseClient -> upsertJson");
     string batchId = "";
 
     json contacts = [{

@@ -19,7 +19,7 @@ import ballerina/test;
 
 @test:Config {dependsOn: [insertXml]}
 function upsertXml() {
-    log:print("baseClient -> upsertXml");
+    log:printInfo("baseClient -> upsertXml");
     string batchId = "";
 
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">

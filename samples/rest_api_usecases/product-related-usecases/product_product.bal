@@ -39,7 +39,7 @@ public function main(){
 
    if res is boolean{
         string outputMessage = (res == true) ? "Product Deleted Successfully!" : "Product to Delete the Lead";
-        log:print(outputMessage);
+        log:printInfo(outputMessage);
     } else {
         log:printError(msg = res.message());
     }
@@ -57,10 +57,10 @@ function getProductIdByName(string name) returns @tainted string {
             string id = records[0]["Id"].toString();
             productId = id;
         } else {
-            log:print("Getting Product ID by name failed. err=" + records.toString());            
+            log:printInfo("Getting Product ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting Product ID by name failed. err=" + res.toString());
+        log:printInfo("Getting Product ID by name failed. err=" + res.toString());
     }
     return productId;
 }

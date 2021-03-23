@@ -21,7 +21,7 @@ import ballerina/lang.runtime;
 
 @test:Config {}
 function insertXml() {
-    log:print("baseClient -> insertXml");
+    log:printInfo("baseClient -> insertXml");
     string batchId = "";
 
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
@@ -119,7 +119,7 @@ function insertXml() {
 
 @test:Config {}
 function insertXmlFromFile() {
-    log:print("baseClient -> insertXmlFromFile");
+    log:printInfo("baseClient -> insertXmlFromFile");
     string batchId = "";
 
     string xmlContactsFilePath = "sfdc/tests/resources/contacts.xml";

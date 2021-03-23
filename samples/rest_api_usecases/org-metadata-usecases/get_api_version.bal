@@ -36,7 +36,7 @@ public function main(){
     sfdc:Version[]|sfdc:Error apiVersions = baseClient->getAvailableApiVersions();
 
     if (apiVersions is sfdc:Version[]) {
-        log:print("Versions retrieved successfully : " + apiVersions.toString());
+        log:printInfo("Versions retrieved successfully : " + apiVersions.toString());
     } else {
         log:printError(msg = apiVersions.message());
     }

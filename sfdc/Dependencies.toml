@@ -1,0 +1,36 @@
+[[dependency]]
+org = "ballerina"
+name = "observe"
+version = "0.9.0"
+
+[[dependency]]
+org = "ballerina"
+name = "log"
+version = "1.1.0-alpha5"
+
+[[dependency]]
+org = "ballerina"
+name = "io"
+version = "0.6.0-alpha5"
+
+[[dependency]]
+org = "ballerina"
+name = "oauth2"
+version = "1.1.0-alpha5"
+
+[[dependency]]
+org = "ballerina"
+name = "url"
+version = "1.1.0-alpha5"
+
+[[dependency]]
+org = "ballerina"
+name = "http"
+version = "1.1.0-alpha5"
+
+[[dependency]]
+org = "ballerina"
+name = "regex"
+version = "0.7.0-alpha5"
+
+
