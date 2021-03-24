@@ -538,25 +538,40 @@ Please find the samples for above mentioned use cases through following links.
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce REST API related operations. The samples can be further divided as following
 * Samples that can be used with any SObject's CRUD operations
-* Samples for convenient access of Account, Contact, Product, Opportunity and Target SObjects's CRUD operations
+	- [Create Record](samples/rest_api_usecases/sobject_create.bal) 
+	- [Get Record](samples/rest_api_usecases/sobject_get_record.bal)
+	- [Get Record By Id](samples/rest_api_usecases/sobject_get_by_id.bal) 
+	- [Update Record](samples/rest_api_usecases/sobject_update.bal) 
+	- [Delete Record](samples/rest_api_usecases/sobject_delete.bal) 
+* Samples for convenient access of following SObjects' CRUD operations
+  	- [Account](samples/rest_api_usecases/account-related-usecases)
+  	- [Contact](samples/rest_api_usecases/contact-related-usecases)
+  	- [Opportunity](samples/rest_api_usecases/opportunity-related-usecases)
+  	- [Lead](samples/rest_api_usecases/lead-related-usecases)
+  	- [Product](samples/rest_api_usecases/product-related-usecases)
 * Samples for SOSL and SOQL related operations
+  	- [Find Record by Query](samples/rest_api_usecases/find_record_by_query.bal)
+  	- [Search Record](samples/rest_api_usecases/search_record_by_string.bal)
 * Samples for retrieving Organization and SObject metadata
-
+  	- [Access Organizational Metadata](samples/rest_api_usecases/org-metadata-usecases)
+  	- [Access SObject Metadata](samples/rest_api_usecases/sobject-metadata-usecases)
 
 ## [Samples for Salesforce Bulk API use cases](sfdc/samples/bulk_api_usecases)
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
+  - [Bulk Operation on CSV data](samples/bulk_api_usecases/bulk-operations-csv)
+  - [Bulk Operation on Json data](samples/bulk_api_usecases/bulk-operations-json)
+  - [Bulk Operation on XML data](samples/bulk_api_usecases/bulk-operations-xml)
 
 ## [Samples for Event Listener](sfdc/samples/event_listener_usecases)
 
 This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
+  - [Trigger Account Updates](samples/event_listener_usecases/listener_account_update.bal)
 
 
 # Building from the Source
 
-
 ## Setting up the prerequisites
-
 
 *   Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
 	[Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html),
@@ -572,20 +587,17 @@ This sample demonstrates on capturing events using the Event Listener of Balleri
 
 Execute the commands below to build from the source after installing the Ballerina SL Alpha2 version.
 
-
 ### To install the emp-wrapper :
 
 ```ballerina
    mvn clean install -pl emp-wrapper
 ```
 
-
 ### To build the library:
 
 ```ballerina
    bal build ./sfdc
 ```
-
 
 ### To build the module without the tests:
 
