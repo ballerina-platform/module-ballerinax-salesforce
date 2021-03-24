@@ -19,6 +19,8 @@ import ballerina/log;
 import ballerina/os;
 
 // Create Salesforce client configuration by reading from environemnt.
+
+// Using direct-token config for client configuration
 SalesforceConfiguration sfConfig = {
     baseUrl: os:getEnv("EP_URL"),
     clientConfig: {
@@ -166,10 +168,12 @@ function testGetResourcesByApiVersion() {
 
     if (resources is map<string>) {
         test:assertTrue(resources.length() > 0, msg = "Found empty resource map");
+
         test:assertTrue((resources["sobjects"].toString().trim()).length() > 0, msg = "Found null for resource sobjects");
         test:assertTrue((resources["search"].toString().trim()).length() > 0, msg = "Found null for resource search");
         test:assertTrue((resources["query"].toString().trim()).length() > 0, msg = "Found null for resource query");
-        test:assertTrue((resources["licensing"].toString().trim()).length() > 0, msg = "Found null for resource licensing");
+        test:assertTrue((resources["licensing"].toString().trim()).length() > 0, 
+        msg = "Found null for resource licensing");
         test:assertTrue((resources["connect"].toString().trim()).length() > 0, msg = "Found null for resource connect");
         test:assertTrue((resources["tooling"].toString().trim()).length() > 0, msg = "Found null for resource tooling");
         test:assertTrue((resources["chatter"].toString().trim()).length() > 0, msg = "Found null for resource chatter");

@@ -119,8 +119,9 @@ Instantiate the connector by giving authentication details in the HTTP client co
 
 ## Step 3: Create the Salesforce client
 
-You can define the Salesforce configuration and create Salesforce base client as mentioned below.
+The Ballerina Salesforce connector has allowed users to create the client using the [direct token configuration](https://ballerina.io/learn/by-example/secured-client-with-oauth2-direct-token-type.html) and as well as [bearer token configuration](https://ballerina.io/learn/by-example/secured-client-with-bearer-token-auth.html). 
 
+Users are recommended to use direct-token config when initializing the Salesforce client for continuous access by providing the Salesfoce account's domain URL as the `baseURL` and the `client id`, `client secret`, `refresh token` obtained in the step two and `https://login.salesforce.com/services/oauth2/token` as `refreshUrl` in general scenarios. 
 
 ```ballerina
 // Create Salesforce client configuration by reading from config file.
@@ -137,6 +138,21 @@ sfdc:SalesforceConfiguration sfConfig = {
 
 sfdc:Client baseClient = new (sfConfig);
 ```
+
+If the user already owns a valid access token he can initialize the client using bearer-token configuration providing the access token as a bearer token for quick API calls. 
+
+```ballerina
+sfdc:SalesforceConfiguration sfConfig = {
+   baseUrl: <"EP_URL">,
+   clientConfig: {
+     token: <"ACCESS_TOKEN">
+   }
+};
+
+sfdc:Client baseClient = new (sfConfig);
+```
+
+This access token will expire in 7200 seconds in general scenarios and the expiration time of the access token can be different from organization to organization. In such cases users have to get the new access token and update the configuration. 
 
 
 If you want to add your own key store to define the `secureSocketConfig`, change the Salesforce configuration as mentioned below.
@@ -518,7 +534,7 @@ The above service is listening to the PushTopic `QuoteUpdate` defined in the Sal
 
 Please find the samples for above mentioned use cases through following links.
 
-## [Samples for Salesforce REST API use cases](samples/rest_api_usecases)  
+## [Samples for Salesforce REST API use cases](sfdc/samples/rest_api_usecases)  
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce REST API related operations. The samples can be further divided as following
 * Samples that can be used with any SObject's CRUD operations
@@ -527,11 +543,11 @@ These samples demonstrate the employment of Ballerina Salesforce Connector in Sa
 * Samples for retrieving Organization and SObject metadata
 
 
-## [Samples for Salesforce Bulk API use cases](samples/bulk_api_usecases)
+## [Samples for Salesforce Bulk API use cases](sfdc/samples/bulk_api_usecases)
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
 
-## [Samples for Event Listener](samples/event_listener_usecases)
+## [Samples for Event Listener](sfdc/samples/event_listener_usecases)
 
 This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
 

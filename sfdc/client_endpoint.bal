@@ -783,8 +783,8 @@ public client class Client {
 # + baseUrl - The Salesforce endpoint URL
 # + clientConfig - OAuth2 direct token configuration
 # + secureSocketConfig - HTTPS secure socket configuration
-public type SalesforceConfiguration record {
+public type SalesforceConfiguration record {|
     string baseUrl;
-    http:OAuth2DirectTokenConfig clientConfig;
+    http:OAuth2DirectTokenConfig|http:BearerTokenConfig clientConfig;
     http:ClientSecureSocket secureSocketConfig?;
-};
+|};
