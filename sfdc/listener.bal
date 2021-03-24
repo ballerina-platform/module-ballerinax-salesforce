@@ -19,6 +19,7 @@ import ballerina/jballerina.java;
 
 handle JAVA_NULL = java:createNull();
 
+@display {label: "Salesforce Listener"}
 public class Listener {
 
     private handle username = JAVA_NULL;
