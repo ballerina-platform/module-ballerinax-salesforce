@@ -62,7 +62,7 @@
     <properties>
         <project-home>${project.basedir}</project-home>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <ballerina.version>2.0.0-alpha3</ballerina.version>
+        <ballerina.version>2.0.0-alpha4</ballerina.version>
         <exec.maven.plugin.version>1.6.0</exec.maven.plugin.version>
         <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
         <maven.dependency.plugin.version>3.0.2</maven.dependency.plugin.version>

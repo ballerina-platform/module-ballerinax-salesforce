@@ -67,7 +67,7 @@ jobs:
                 SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
                 SF_USERNAME: ${{ secrets.SF_USERNAME }}
           - name: Ballerina Push
-            uses: ballerina-platform/ballerina-action/@swan-lake-connector-release
+            uses: ballerina-platform/ballerina-action/@master
             with:
               args:
                 push 
