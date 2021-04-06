@@ -1,6 +1,6 @@
 [[dependency]]
 org = "ballerina"
-name = "oauth2"
+name = "http"
 version = "1.1.0-alpha7"
 
 [[dependency]]
@@ -10,17 +10,12 @@ version = "0.7.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
-name = "io"
-version = "0.6.0-alpha7"
-
-[[dependency]]
-org = "ballerina"
 name = "url"
 version = "1.1.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
-name = "http"
+name = "oauth2"
 version = "1.1.0-alpha7"
 
 [[dependency]]
@@ -30,7 +25,17 @@ version = "1.1.0-alpha7"
 
 [[dependency]]
 org = "ballerina"
+name = "io"
+version = "0.6.0-alpha7"
+
+[[dependency]]
+org = "ballerina"
 name = "test"
 version = "0.0.0"
+
+[[dependency]]
+org = "ballerina"
+name = "os"
+version = "0.8.0-alpha7"
 
 

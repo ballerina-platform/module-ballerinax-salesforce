@@ -22,7 +22,7 @@ import ballerina/lang.'int as ints;
 import ballerina/lang.'float as floats;
 import ballerina/lang.'string as strings;
 import ballerina/lang.'xml as xmllib;
-import ballerina/oauth2;
+import ballerina/regex;
 
 # Check HTTP response and return XML payload if succesful, else set errors and return Error.
 # + httpResponse - HTTP response or error occurred
@@ -320,7 +320,6 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted s
 # + return - converted json
 isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|Error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
-
     if (rch is io:Error) {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, 'error = rch);
@@ -344,7 +343,6 @@ isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted jso
 # + return - converted xml
 isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|Error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
-
     if (rch is io:Error) {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, 'error = rch);
@@ -362,12 +360,12 @@ isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|
     }
 }
 
-isolated function getJsonQueryResult(json resultlist, string path, http:Client httpClient, 
-                                     http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig) returns @tainted json|
-Error {
+isolated function getJsonQueryResult(json resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
+                                     http:ClientBearerTokenAuthHandler clientHandler) returns @tainted json|Error {
     json[] finalResults = [];
-    var headerMap = getBulkAPIHeaders(clientConfig, TEXT_CSV);
-    if (headerMap is map<string>) {
+
+    http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
+    if (headerMap is map<string|string[]>) {
         //result list is always a json[]
         if (resultlist is json[]) {
             foreach var item in resultlist {
@@ -385,15 +383,13 @@ Error {
     } else {
         return error Error(headerMap.message(), err = headerMap);
     }
-
 }
 
-isolated function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, 
-                                    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig) returns @tainted xml|
-Error {
+isolated function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
+                                    http:ClientBearerTokenAuthHandler clientHandler) returns @tainted xml|Error {
     xml finalResults = xml `<queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
-    var headerMap = getBulkAPIHeaders(clientConfig, TEXT_CSV);
-    if (headerMap is map<string>) {
+    http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
+    if (headerMap is map<string|string[]>) {
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
             var response = httpClient->get(path + "/" + resultId, headerMap);
@@ -406,12 +402,11 @@ Error {
     }
 }
 
-isolated function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, 
-                                    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig) returns @tainted string|
-Error {
+isolated function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
+                                    http:ClientBearerTokenAuthHandler clientHandler) returns @tainted string|Error {
     string finalResults = "";
-    var headerMap = getBulkAPIHeaders(clientConfig, TEXT_CSV);
-    if (headerMap is map<string>) {
+    http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
+    if (headerMap is map<string|string[]>) {
         int i = 0;
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
@@ -428,7 +423,6 @@ Error {
     } else {
         return error Error(headerMap.message(), err = headerMap);
     }
-
 }
 
 isolated function mergeJson(json[] list1, json[] list2) returns json[] {
@@ -455,27 +449,20 @@ isolated function mergeCsv(string list1, string list2) returns string {
     return finalList;
 }
 
-isolated function getBulkAPIHeaders(http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig, 
+isolated function getBulkApiHeaders(http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler, 
                                     string? contentType = ()) returns map<string>|http:ClientAuthError {
-    string|oauth2:Error token;
-    map<string> headerMap;
-    if (clientConfig is http:OAuth2RefreshTokenGrantConfig) {
-        oauth2:ClientOAuth2Provider authProvider = new (clientConfig);
-        token = authProvider.generateToken();
+    string token;
+    map<string> finalHeaderMap = {};
+    map<string|string[]> authorizationHeaderMap;
+    if (clientHandler is http:ClientOAuth2Handler) {
+        authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     } else {
-        token = clientConfig.token;
+        authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     }
-    if (token is string) {
-        if (contentType != ()) {
-            headerMap = {
-                [X_SFDC_SESSION] : token,
-                [CONTENT_TYPE] : <string>contentType
-            };
-        } else {
-            headerMap = {[X_SFDC_SESSION] : token};
-        }
-        return headerMap;
-    } else {
-        return prepareClientAuthError("Failed to enrich request with OAuth2 token.", token);
+    token = (regex:split(<string>authorizationHeaderMap["Authorization"], " "))[1];
+    finalHeaderMap[X_SFDC_SESSION] = token;
+    if (contentType != ()) {
+        finalHeaderMap[CONTENT_TYPE] = <string>contentType;
     }
+    return finalHeaderMap;
 }

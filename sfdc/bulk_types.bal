@@ -115,7 +115,7 @@ public type OPERATION INSERT|UPDATE|DELETE|UPSERT|QUERY;
 # Data type of the bulk job.
 public type JOBTYPE JSON|XML|CSV;
 
-public type BulkJob record{|
+public type BulkJob record {|
     string jobId;
     JOBTYPE jobDataType;
     OPERATION operation;
