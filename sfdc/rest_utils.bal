@@ -17,7 +17,7 @@
 //
 import ballerina/log;
 import ballerina/http;
-import ballerina/encoding;
+import ballerina/url;
 
 # Returns the prepared URL.
 # + paths - An array of paths prefixes
@@ -51,7 +51,7 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
     foreach var name in queryParamNames {
         string value = queryParamValues[i];
 
-        var encoded = encoding:encodeUriComponent(value, ENCODING_CHARSET);
+        var encoded = url:encode(value, ENCODING_CHARSET);
 
         if (encoded is string) {
             if (first) {
@@ -61,7 +61,7 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
                 url = url + AMPERSAND + name + EQUAL_SIGN + encoded;
             }
         } else {
-            log:printError("Unable to encode value: " + value, err = encoded);
+            log:printError("Unable to encode value: " + value, 'error = encoded);
             break;
         }
         i = i + 1;
@@ -86,7 +86,7 @@ Error {
                 if (jsonResponse is json) {
                     return jsonResponse;
                 } else {
-                    log:printError(JSON_ACCESSING_ERROR_MSG, err = jsonResponse);
+                    log:printError(JSON_ACCESSING_ERROR_MSG, 'error = jsonResponse);
                     return error Error(JSON_ACCESSING_ERROR_MSG, jsonResponse);
                 }
 
@@ -121,14 +121,14 @@ Error {
 
                 return error Error(errMssgs, errorCodes = errCodes);
             } else {
-                log:printError(ERR_EXTRACTING_ERROR_MSG, err = jsonResponse);
+                log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = jsonResponse);
                 return error Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
             }
         }
     } else if (httpResponse is http:PayloadType) {
         return error Error(UNREACHABLE_STATE);
     } else {
-        log:printError(HTTP_ERROR_MSG, err = httpResponse);
+        log:printError(HTTP_ERROR_MSG, 'error = httpResponse);
         return error Error(HTTP_ERROR_MSG, httpResponse);
     }
 }

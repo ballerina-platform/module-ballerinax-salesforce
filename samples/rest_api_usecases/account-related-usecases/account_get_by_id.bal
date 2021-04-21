@@ -40,7 +40,7 @@ public function main(){
     if (account is json) {
         json|error accountName = account.Name;
         if(accountName is json){
-            log:print("Account data retrieved successfully. Account Name : " + accountName.toString());
+            log:printInfo("Account data retrieved successfully. Account Name : " + accountName.toString());
         }
     } else {
         log:printError(msg = account.message());

@@ -39,7 +39,7 @@ public function main(){
     if (lead is json) {
         json|error leadName = lead.FirstName; 
         if (leadName is json){
-            log:print("Lead data retrieved successfully. Lead's Name : " + leadName.toString());
+            log:printInfo("Lead data retrieved successfully. Lead's Name : " + leadName.toString());
         }
     } else {
         log:printError(msg = lead.message());

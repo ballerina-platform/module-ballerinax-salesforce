@@ -53,7 +53,7 @@ public function main(){
         error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(queryJob, batchId);
         if (batchInfo is sfdc:BatchInfo) {
             string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
-            log:print(message);
+            log:printInfo(message);
         } else {
             log:printError(batchInfo.message());
         }
@@ -62,7 +62,7 @@ public function main(){
         error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(queryJob);
         if (batchInfoList is sfdc:BatchInfo[]) {
             string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
-            log:print(message);
+            log:printInfo(message);
         } else {
             log:printError(batchInfoList.message());
         }
@@ -71,7 +71,7 @@ public function main(){
         var batchRequest = baseClient->getBatchRequest(queryJob, batchId);
         if (batchRequest is string) {
             string message = batchRequest.startsWith("SELECT") ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
-            log:print(message);
+            log:printInfo(message);
             
         } else if (batchRequest is error) {
             log:printError(batchRequest.message());
@@ -88,7 +88,7 @@ public function main(){
             if (batchResultArr is json[]) {
                 jsonQueryResult = <@untainted>batchResultArr;
                 //io:println("count : " + batchResultArr.length().toString());
-                log:print("Number of Records Received :" + batchResultArr.length().toString());
+                log:printInfo("Number of Records Received :" + batchResultArr.length().toString());
             } else {
                 string msg = batchResultArr.toString();
                 log:printError(msg);
@@ -104,7 +104,7 @@ public function main(){
         error|sfdc:JobInfo closedJob = baseClient->closeJob(queryJob);
         if (closedJob is sfdc:JobInfo) {
             string message = closedJob.state == "Closed" ? "Job Closed Successfully" :"Failed to Close the Job";
-            log:print(message);
+            log:printInfo(message);
         } else {
             log:printError(closedJob.message());
         }

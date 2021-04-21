@@ -45,7 +45,7 @@ public function main(){
     string|sfdc:Error res = baseClient->createContact(contactRecord);
 
     if (res is string) {
-        log:print("Contact Created Successfully. Contact ID : " + res);
+        log:printInfo("Contact Created Successfully. Contact ID : " + res);
     } else {
         log:printError(msg = res.message());
     }

@@ -34,14 +34,14 @@ public function main() {
     sfdc:Client baseClient = checkpanic new(sfConfig);
 
     json accountRecord = {
-        Name: "University of Kelaniya",
-        BillingCity: "Kelaniya"
+        Name: "University of All",
+        BillingCity: "Colombo"
     };
 
     string|sfdc:Error res = baseClient->createAccount(accountRecord);
 
     if (res is string) {
-        log:print("Account Created Successfully. Account ID : " + res);
+        log:printInfo("Account Created Successfully. Account ID : " + res);
     } else {
         log:printError(msg = res.message());
     }

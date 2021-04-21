@@ -39,7 +39,7 @@ public function main() {
     if (res is json) {
         json|error recName = res.Name;
         if (recName is json) {
-            log:print("Record data received successfully. Record Name : " + recName.toString());
+            log:printInfo("Record data received successfully. Record Name : " + recName.toString());
         }
     } else {
         log:printError(msg = res.message());

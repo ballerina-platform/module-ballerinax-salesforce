@@ -52,7 +52,7 @@ jobs:
                       </settings>' > ~/.m2/settings.xml
           - run: mvn clean install -pl emp-wrapper
           - name: Ballerina Build
-            uses: ballerina-platform/ballerina-action/@swan-lake-connector-release
+            uses: ballerina-platform/ballerina-action/@master
             with:
               args:
                 build -c --skip-tests ./sfdc
@@ -67,7 +67,7 @@ jobs:
                 SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
                 SF_USERNAME: ${{ secrets.SF_USERNAME }}
           - name: Ballerina Push
-            uses: ballerina-platform/ballerina-action/@swan-lake-connector-release
+            uses: ballerina-platform/ballerina-action/@master
             with:
               args:
                 push 

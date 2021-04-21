@@ -8,7 +8,7 @@ The Salesforce connector allows users to perform CRUD operations for SObjects, q
 ## Compatibility
 |                     |    Version                  |
 |:-------------------:|:---------------------------:|
-| Ballerina Language  | swan-lake-Alpha2            |
+| Ballerina Language  | swan-lake-Alpha4            |
 | Salesforce API      | v48.0                       |
 | Salesforce Bulk API | v1                          |
 

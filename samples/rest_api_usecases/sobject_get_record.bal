@@ -42,7 +42,7 @@ public function main(){
     if (res is json) {
         json|error recName = res.Name;
         if (recName is json){
-            log:print("Account data received successfully. Account Name : " + recName.toString());
+            log:printInfo("Account data received successfully. Account Name : " + recName.toString());
         }
     } else {
         log:printError(msg = res.message());

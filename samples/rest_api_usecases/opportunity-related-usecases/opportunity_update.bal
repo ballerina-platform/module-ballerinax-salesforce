@@ -45,7 +45,7 @@ public function main(){
 
    if res is boolean{
         string outputMessage = (res == true) ? "Opportunity Updated Successfully!" : "Failed to Update the Opportunity";
-        log:print(outputMessage);
+        log:printInfo(outputMessage);
     } else {
         log:printError(msg = res.message());
     }
@@ -63,10 +63,10 @@ function getOpportunityIdByName(string name, string stageName) returns @tainted 
             string id = records[0]["Id"].toString();
             opportunityId = id;
         } else {
-            log:print("Getting Opportunity ID by name failed. err=" + records.toString());            
+            log:printInfo("Getting Opportunity ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting Opportunity ID by name failed. err=" + res.toString());
+        log:printInfo("Getting Opportunity ID by name failed. err=" + res.toString());
     }
     return opportunityId;
 }

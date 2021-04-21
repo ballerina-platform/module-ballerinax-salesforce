@@ -34,10 +34,13 @@ service /topic/AccountUpdate on eventListener {
         io:StringReader sr = new (op.toJsonString());
         json|error account = sr.readJson();
         if (account is json) {
-            if (account.sobject.Name == "WSO2 Inc") {
-                isUpdated = true;
-            } else {
-                io:println(account.toString());
+            json|error accountName = account.sobject.Name;
+            if (accountName is json) {
+                if (accountName.toString() == "WSO2 Inc") {
+                    isUpdated = true;
+                } else {
+                    io:println(account.toString());
+                }
             }
         }
     }

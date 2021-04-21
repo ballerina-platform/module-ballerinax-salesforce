@@ -38,7 +38,7 @@ public function main(){
     if (availableObjsDes is sfdc:OrgMetadata) {
         int|error countSobjects = availableObjsDes.sobjects.length();
         if (countSobjects is int){
-            log:print("Number of SObjects Received = " + countSobjects.toString());
+            log:printInfo("Number of SObjects Received = " + countSobjects.toString());
         }
         else{
             log:printError("No SObjects Found");

@@ -63,7 +63,7 @@ The `ballerinax/sfdc` module includes a Listener that would capture events on Pu
   <tr>
    <td>Ballerina Language Version
    </td>
-   <td>Swan Lake Alpha2
+   <td>Swan Lake Alpha4
    </td>
   </tr>
   <tr>

@@ -71,7 +71,7 @@ public function main(){
         if (batch is sfdc:BatchInfo) {
             batchId = batch.id;
             string message = batch.id.length() > 0 ? "Batch added to upsert Successfully" :"Failed to add the batch";
-            log:print(message);
+            log:printInfo(message);
         } else {
            log:printError(batch.message());
         }
@@ -80,7 +80,7 @@ public function main(){
         error|sfdc:JobInfo jobInfo = baseClient->getJobInfo(updateJob);
         if (jobInfo is sfdc:JobInfo) {
             string message = jobInfo.id.length() > 0 ? "Jon Info Received Successfully" :"Failed Retrieve Job Info";
-            log:print(message);
+            log:printInfo(message);
         } else {
             log:printError(jobInfo.message());
         }
@@ -89,7 +89,7 @@ public function main(){
         error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(updateJob, batchId);
         if (batchInfo is sfdc:BatchInfo) {
             string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
-            log:print(message);
+            log:printInfo(message);
         } else {
             log:printError(batchInfo.message());
         }
@@ -98,7 +98,7 @@ public function main(){
         error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(updateJob);
         if (batchInfoList is sfdc:BatchInfo[]) {
             string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
-            log:print(message);
+            log:printInfo(message);
         } else {
             log:printError(batchInfoList.message());
         }
@@ -107,7 +107,7 @@ public function main(){
         var batchRequest = baseClient->getBatchRequest(updateJob, batchId);
         if (batchRequest is xml) {
             string message = (batchRequest/<*>).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
-            log:print(message);
+            log:printInfo(message);
             
         } else if (batchRequest is error) {
             log:printError(batchRequest.message());
@@ -133,7 +133,7 @@ public function main(){
         error|sfdc:JobInfo closedJob = baseClient->closeJob(updateJob);
         if (closedJob is sfdc:JobInfo) {
             string message = closedJob.state == "Closed" ? "Job Closed Successfully" :"Failed to Close the Job";
-            log:print(message);
+            log:printInfo(message);
         } else {
             log:printError(closedJob.message());
         }
@@ -153,10 +153,10 @@ function getContactIdByName(string firstName, string lastName, string title) ret
             string id = records[0]["Id"].toString();
             contactId = id;
         } else {
-            log:print("Getting contact ID by name failed. err=" + records.toString());            
+            log:printInfo("Getting contact ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:print("Getting contact ID by name failed. err=" + res.toString());
+        log:printInfo("Getting contact ID by name failed. err=" + res.toString());
     }
     return contactId;
 }
