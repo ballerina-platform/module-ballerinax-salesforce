@@ -55,7 +55,7 @@ The `ballerinax/sfdc` module includes a Listener that would capture events on Pu
   <tr>
    <td>Ballerina Language Version
    </td>
-   <td>Swan Lake Alpha2
+   <td>Swan Lake Alpha5
    </td>
   </tr>
   <tr>
@@ -570,12 +570,12 @@ This sample demonstrates on capturing events using the Event Listener of Balleri
 
     **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
-*   Download and install[ Ballerina SL Alpha2](https://ballerina.io/).
+*   Download and install[ Ballerina SL Alpha5](https://ballerina.io/).
 *   Install Apache Maven  
 
 ## Building the Source
 
-Execute the commands below to build from the source after installing the Ballerina SL Alpha2 version.
+Execute the commands below to build from the source after installing the Ballerina SL Alpha5 version.
 
 ### To install the emp-wrapper :
 

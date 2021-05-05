@@ -18,7 +18,7 @@ import ballerinax/sfdc;
 import ballerina/io;
 import ballerina/log;
 
-string pushTopic = "<push_topic_name>"
+string pushTopic = "<push_topic_name>";
 sfdc:ListenerConfiguration listenerConfig = {
     username: "<user_name>",
     password: "<password>"

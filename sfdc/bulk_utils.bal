@@ -107,7 +107,8 @@ Error {
 
 # Check query request and return query string
 #
-# + httpResponse - HTTP response or error occurred
+# + httpResponse - HTTP response or error occurred  
+# + jobtype - Job type
 # + return - Query string response if successful or else an sfdc:Error
 isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns @tainted string|
 Error {
@@ -170,6 +171,8 @@ isolated function handleJsonErrorResponse(http:Response httpResponse) returns @t
 }
 
 # Handle HTTP error and return Error.
+#
+# + httpResponse - Http response
 # + return - Constructed error
 isolated function handleHttpError(error httpResponse) returns Error {
     log:printError(HTTP_ERROR_MSG, 'error = httpResponse);
