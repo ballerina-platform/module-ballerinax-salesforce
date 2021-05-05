@@ -632,6 +632,7 @@ public client class Client {
 
     # Add batch to the job.
     #
+    # + bulkJob - Bulk job  
     # + content - batch content 
     # + return - batch info or error
     @display {label: "Add batch to job"}
@@ -703,12 +704,13 @@ public client class Client {
 
     # Get information about a batch.
     #
+    # + bulkJob - Bulk job 
     # + batchId - ID of the batch of which info is required 
     # + return - batch info or error
     @display {label: "Get batch information"}
-    isolated remote function getBatchInfo(@display {label: "Bulk job"} BulkJob bulkJob, 
-                                          @display {label: "Batch ID"} string batchId) returns @tainted@display 
-    {label: "Batch Information"} error|BatchInfo {
+    isolated remote function getBatchInfo(@display {label: "Bulk job"} @tainted BulkJob bulkJob, 
+                                          @display {label: "Batch ID"} string batchId) 
+                                          returns @tainted @display {label: "Batch Information"} error|BatchInfo {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         var response = self.salesforceClient->get(path, headerMap);
@@ -733,10 +735,11 @@ public client class Client {
 
     # Get all batches of the job.
     #
+    # + bulkJob - Bulkjob
     # + return - list of batch infos
     @display {label: "Get all batches"}
-    isolated remote function getAllBatches(@display {label: "Bulkjob"} BulkJob bulkJob) returns @tainted@display 
-    {label: "List of batch information"} error|BatchInfo[] {
+    isolated remote function getAllBatches(@display {label: "Bulkjob"} @tainted BulkJob bulkJob) returns @tainted 
+                                           @display {label: "List of batch information"} error|BatchInfo[] {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         http:Request req = new;
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
@@ -762,12 +765,13 @@ public client class Client {
 
     # Get the request payload of a batch.
     #
+    # + bulkJob - Bulk job
     # + batchId - ID of the batch of which the request is required 
     # + return - batch content
     @display {label: "Get batch request payload"}
-    isolated remote function getBatchRequest(@display {label: "Bulk job"} BulkJob bulkJob, 
-                                             @display {label: "Batch ID"} string batchId) returns @tainted@display 
-    {label: "Batch content"} error|json|xml|string {
+    isolated remote function getBatchRequest(@display {label: "Bulk job"} @tainted BulkJob bulkJob, 
+                                             @display {label: "Batch ID"} string batchId) returns @tainted 
+                                             @display {label: "Batch content"} error|json|xml|string {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         var response = self.salesforceClient->get(path, headerMap);
@@ -793,10 +797,11 @@ public client class Client {
 
     # Get result of the records processed in a batch.
     #
+    # + bulkJob - Bulk job  
     # + batchId - batch ID
     # + return - result list
     @display {label: "Get batch result"}
-    isolated remote function getBatchResult(@display {label: "Bulk job"} BulkJob bulkJob, 
+    isolated remote function getBatchResult(@display {label: "Bulk job"} @tainted BulkJob bulkJob, 
                                             @display {label: "Batch ID"} string batchId) returns @tainted@display 
     {label: "Result"} error|json|xml|string|Result[] {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, RESULT]);

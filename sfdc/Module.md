@@ -8,7 +8,7 @@ The Salesforce connector allows users to perform CRUD operations for SObjects, q
 ## Compatibility
 |                     |    Version                  |
 |:-------------------:|:---------------------------:|
-| Ballerina Language  | swan-lake-Alpha4            |
+| Ballerina Language  | swan-lake-Alpha5            |
 | Salesforce API      | v48.0                       |
 | Salesforce Bulk API | v1                          |
 
@@ -524,13 +524,13 @@ This sample demonstrates on capturing events using the Event Listener of Balleri
 
     **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
-*   Download and install[ Ballerina SL Alpha2](https://ballerina.io/).
+*   Download and install[ Ballerina SL Alpha5](https://ballerina.io/).
 *   Install Apache Maven  
 
 
 ## Building the Source
 
-Execute the commands below to build from the source after installing the Ballerina SL Alpha2 version.
+Execute the commands below to build from the source after installing the Ballerina SL Alpha5 version.
 
 
 ### To install the emp-wrapper :
