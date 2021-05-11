@@ -22,7 +22,6 @@ import ballerina/lang.runtime;
 function deleteJson() {
     log:printInfo("baseClient -> deleteJson");
     string batchId = "";
-
     json contacts = getJsonContactsToDelete(jsonQueryResult);
 
     //create job

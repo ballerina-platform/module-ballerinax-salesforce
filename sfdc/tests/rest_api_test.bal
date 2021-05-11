@@ -14,20 +14,26 @@
 // specific language governing permissions and limitations
 // under the License.
 //
-import ballerina/test;
+
 import ballerina/log;
 import ballerina/os;
+import ballerina/test;
 
 // Create Salesforce client configuration by reading from environemnt.
+configurable string & readonly clientId = os:getEnv("CLIENT_ID");
+configurable string & readonly clientSecret = os:getEnv("CLIENT_SECRET");
+configurable string & readonly refreshToken = os:getEnv("REFRESH_TOKEN");
+configurable string & readonly refreshUrl = os:getEnv("REFRESH_URL");
+configurable string & readonly baseUrl = os:getEnv("EP_URL");
 
 // Using direct-token config for client configuration
 SalesforceConfiguration sfConfig = {
-    baseUrl: os:getEnv("EP_URL"),
+    baseUrl: baseUrl,
     clientConfig: {
-        clientId: os:getEnv("CLIENT_ID"),
-        clientSecret: os:getEnv("CLIENT_SECRET"),
-        refreshToken: os:getEnv("REFRESH_TOKEN"),
-        refreshUrl: os:getEnv("REFRESH_URL")
+        clientId: clientId,
+        clientSecret: clientSecret,
+        refreshToken: refreshToken,
+        refreshUrl: refreshUrl
     }
 };
 

@@ -24,7 +24,6 @@ function updateJson() {
     string batchId = "";
     string mornsId = getContactIdByName("Remus", "Lupin", "Professor Level 03");
     string andisId = getContactIdByName("Minerva", "McGonagall", "Professor Level 03");
-
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
         Id: mornsId,
@@ -133,7 +132,6 @@ function updateJson() {
                 break;
             }
         }
-
 
         //get batch result
         foreach var i in 1 ..< maxIterations {

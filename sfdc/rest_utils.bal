@@ -42,7 +42,6 @@ isolated function prepareUrl(string[] paths) returns string {
 # + queryParamValues - An array of query param values
 # + return - The prepared URL with encoded query
 isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
-
     string url = prepareUrl(paths);
 
     url = url + QUESTION_MARK;
@@ -50,7 +49,6 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
     int i = 0;
     foreach var name in queryParamNames {
         string value = queryParamValues[i];
-
         var encoded = url:encode(value, ENCODING_CHARSET);
 
         if (encoded is string) {
@@ -66,7 +64,6 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
         }
         i = i + 1;
     }
-
     return url;
 }
 
@@ -74,8 +71,8 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-isolated function checkAndSetErrors(http:Response|http:PayloadType|error httpResponse, boolean expectPayload = true) returns @tainted json|
-Error {
+isolated function checkAndSetErrors(http:Response|http:PayloadType|error httpResponse, boolean expectPayload = true) 
+                                    returns @tainted json|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
@@ -100,7 +97,6 @@ Error {
 
             if (jsonResponse is json) {
                 json[] errArr = <json[]>jsonResponse;
-
                 string errCodes = "";
                 string errMssgs = "";
                 int counter = 1;
@@ -118,7 +114,6 @@ Error {
                         counter = counter + 1;
                     }
                 }
-
                 return error Error(errMssgs, errorCodes = errCodes);
             } else {
                 log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = jsonResponse);

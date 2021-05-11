@@ -19,13 +19,14 @@ import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/os;
 
+configurable string & readonly username = os:getEnv("SF_USERNAME");
+configurable string & readonly password = os:getEnv("SF_PASSWORD");
+
 ListenerConfiguration listenerConfig = {
-    username: os:getEnv("SF_USERNAME"),
-    password: os:getEnv("SF_PASSWORD")
+    username: username,
+    password: password
 };
-
 listener Listener eventListener = new (listenerConfig);
-
 boolean isUpdated = false;
 
 @ServiceConfig {topic: "/topic/AccountUpdate"}

@@ -22,10 +22,8 @@ import ballerina/lang.runtime;
 function updateXml() {
     log:printInfo("baseClient -> updateXml");
     string batchId = "";
-
     string flitchID = getContactIdByName("Argus", "Filch", "Professor Level 01");
     string poppyID = getContactIdByName("Poppy", "Pomfrey", "Professor Level 01");
-
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>
@@ -48,7 +46,6 @@ function updateXml() {
             <My_External_Id__c>852</My_External_Id__c>
         </sObject>
     </sObjects>`;
-
     //create job
     error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "XML");
 
@@ -132,7 +129,6 @@ function updateXml() {
                 break;
             }
         }
-
 
         //get batch result
         foreach var i in 1 ..< maxIterations {

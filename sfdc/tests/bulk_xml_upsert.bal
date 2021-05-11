@@ -22,7 +22,6 @@ import ballerina/lang.runtime;
 function upsertXml() {
     log:printInfo("baseClient -> upsertXml");
     string batchId = "";
-
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>
@@ -43,7 +42,6 @@ function upsertXml() {
             <My_External_Id__c>852</My_External_Id__c>
         </sObject>
     </sObjects>`;
-
     //create job
     error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "XML", "My_External_Id__c");
 

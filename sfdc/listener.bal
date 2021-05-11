@@ -21,7 +21,6 @@ handle JAVA_NULL = java:createNull();
 
 @display {label: "Salesforce Listener"}
 public class Listener {
-
     private handle username = JAVA_NULL;
     private handle password = JAVA_NULL;
 

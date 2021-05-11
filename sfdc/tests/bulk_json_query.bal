@@ -22,9 +22,7 @@ import ballerina/lang.runtime;
 function queryJson() {
     log:printInfo("baseClient -> queryJson");
     string batchId = "";
-
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 03'";
-
     //create job
     error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "JSON");
 
@@ -46,7 +44,6 @@ function queryJson() {
                 }
             }
         }
-
 
         //get job info
         error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
@@ -135,7 +132,6 @@ function queryJson() {
                 test:assertFail("Invalid Batch Result!");
             }
         }
-
 
         //close job
         error|JobInfo closedJob = baseClient->closeJob(queryJob);

@@ -23,7 +23,6 @@ import ballerina/lang.runtime;
 function insertJson() {
     log:printInfo("baseClient -> insertJson");
     string batchId = "";
-
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
         FirstName: "Remus",
@@ -184,7 +183,6 @@ function insertJson() {
 function insertJsonFromFile() {
     log:printInfo("baseClient -> insertJsonFromFile");
     string batchId = "";
-
     string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";
 
     //create job
@@ -289,7 +287,6 @@ function insertJsonFromFile() {
             }
         }
 
-
         foreach var i in 1 ..< maxIterations {
             var batchResult = baseClient->getBatchResult(insertJob, batchId);
             if (batchResult is Result[]) {
@@ -316,7 +313,6 @@ function insertJsonFromFile() {
         } else {
             test:assertFail(msg = closedJob.message());
         }
-
     } else {
         test:assertFail(msg = insertJob.message());
     }

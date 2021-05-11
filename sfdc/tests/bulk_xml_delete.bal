@@ -22,9 +22,7 @@ import ballerina/lang.runtime;
 function deleteXml() {
     log:printInfo("baseClient -> deleteXml");
     string batchId = "";
-
     xml contacts = getXmlContactsToDelete(xmlQueryResult);
-
     //create job
     error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "XML");
 
@@ -108,7 +106,6 @@ function deleteXml() {
                 break;
             }
         }
-
 
         //get batch result
         foreach var i in 1 ..< maxIterations {

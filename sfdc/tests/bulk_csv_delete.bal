@@ -22,7 +22,6 @@ import ballerina/lang.runtime;
 function deleteCsv() {
     log:printInfo("baseClient -> deleteCsv");
     string batchId = "";
-
     string contacts = getCsvContactsToDelete(csvQueryResult);
 
     //create job
@@ -46,7 +45,6 @@ function deleteCsv() {
                 }
             }
         }
-
 
         //get job info
         error|JobInfo jobInfo = baseClient->getJobInfo(deleteJob);
@@ -128,7 +126,6 @@ function deleteCsv() {
                 test:assertFail("Invalid Batch Result!");
             }
         }
-
 
         //close job
         error|JobInfo closedJob = baseClient->closeJob(deleteJob);

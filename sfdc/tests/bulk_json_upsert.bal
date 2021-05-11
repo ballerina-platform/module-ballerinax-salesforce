@@ -22,7 +22,6 @@ import ballerina/lang.runtime;
 function upsertJson() {
     log:printInfo("baseClient -> upsertJson");
     string batchId = "";
-
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
         FirstName: "Remus",
@@ -148,7 +147,6 @@ function upsertJson() {
                 test:assertFail("Invalid Batch Result!");
             }
         }
-
 
         //close job
         error|JobInfo closedJob = baseClient->closeJob(upsertJob);

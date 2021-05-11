@@ -23,7 +23,6 @@ import ballerina/lang.runtime;
 function insertXml() {
     log:printInfo("baseClient -> insertXml");
     string batchId = "";
-
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>
@@ -44,7 +43,6 @@ function insertXml() {
             <My_External_Id__c>852</My_External_Id__c>
         </sObject>
     </sObjects>`;
-
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
@@ -127,7 +125,6 @@ function insertXml() {
                 break;
             }
         }
-
 
         //get batch result
         foreach var i in 1 ..< maxIterations {

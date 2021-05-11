@@ -30,7 +30,6 @@ import ballerina/regex;
 isolated function checkXmlPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted xml|
 Error {
     if (httpResponse is http:Response) {
-
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
             xml|error xmlResponse = httpResponse.getXmlPayload();
@@ -41,7 +40,6 @@ Error {
                 log:printError(XML_ACCESSING_ERROR_MSG, 'error = xmlResponse);
                 return error Error(XML_ACCESSING_ERROR_MSG, xmlResponse);
             }
-
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
@@ -58,7 +56,6 @@ Error {
 isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted string|
 Error {
     if (httpResponse is http:Response) {
-
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
             string|error textResponse = httpResponse.getTextPayload();
@@ -69,7 +66,6 @@ Error {
                 log:printError(TEXT_ACCESSING_ERROR_MSG, 'error = textResponse);
                 return error Error(TEXT_ACCESSING_ERROR_MSG, textResponse);
             }
-
         } else {
             return handleXmlErrorResponse(httpResponse);
         }
@@ -141,7 +137,6 @@ Error {
 isolated function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Error {
     xml|error xmlResponse = httpResponse.getXmlPayload();
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
-
     if (xmlResponse is xml) {
         Error httpResponseHandlingError = error Error((xmlResponse/<ns:exceptionCode>/*).toString());
         return httpResponseHandlingError;
@@ -239,7 +234,6 @@ isolated function prepareClientAuthError(string message, error? err = ()) return
 # + return - Returns the map of the response headers.
 isolated function createResponseHeaderMap(http:Response resp) returns @tainted map<anydata> {
     map<anydata> headerMap = {};
-
     // If session ID is invalid, set staus code as 401.
     if (resp.statusCode == http:STATUS_BAD_REQUEST) {
         string|http:HeaderNotFoundError contentType = resp.getHeader(CONTENT_TYPE);
@@ -366,7 +360,6 @@ isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|
 isolated function getJsonQueryResult(json resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
                                      http:ClientBearerTokenAuthHandler clientHandler) returns @tainted json|Error {
     json[] finalResults = [];
-
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if (headerMap is map<string|string[]>) {
         //result list is always a json[]

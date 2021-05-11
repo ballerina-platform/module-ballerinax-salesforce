@@ -22,7 +22,6 @@ import ballerina/lang.runtime;
 function queryCsv() {
     log:printInfo("baseClient -> queryCsv");
     string batchId = "";
-
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
 
     //create job

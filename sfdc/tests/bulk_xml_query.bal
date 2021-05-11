@@ -22,9 +22,7 @@ import ballerina/lang.runtime;
 function queryXml() {
     log:printInfo("baseClient -> queryXml");
     string batchId = "";
-
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 01'";
-
     //create job
     error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "XML");
 
