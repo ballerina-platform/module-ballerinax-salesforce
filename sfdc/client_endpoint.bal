@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,11 +13,12 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/http;
 import ballerina/io;
 
 # The Salesforce Client object.
+# 
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
 # + clientConfig - http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig record to initialize the Salesforce client
@@ -32,29 +32,46 @@ public client class Client {
     http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
     # Salesforce Connector endpoint initialization function.
+    # 
     # + salesforceConfig - Salesforce Connector configuration
-    public isolated function init(SalesforceConfiguration salesforceConfig) returns error? {
+    public isolated function init(SalesforceConfiguration salesforceConfig) returns Error? {
         self.clientConfig = salesforceConfig.clientConfig;
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
+        http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
         if self.clientConfig is http:OAuth2RefreshTokenGrantConfig {
-            self.clientHandler = new (<http:OAuth2RefreshTokenGrantConfig>self.clientConfig);
+            httpHandlerResult =  trap new(<http:OAuth2RefreshTokenGrantConfig>self.clientConfig);
         } else {
-            self.clientHandler = new (<http:BearerTokenConfig>self.clientConfig);
+            httpHandlerResult =  trap new(<http:BearerTokenConfig>self.clientConfig);
         }
+
+        if (httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler) {
+            self.clientHandler = httpHandlerResult;
+        } else {
+            return prepareError(INVALID_CLIENT_CONFIG);
+        }
+
         // Create an HTTP client.
+        http:Client|http:ClientError|error httpClientResult;
         if (socketConfig is http:ClientSecureSocket) {
-            self.salesforceClient = check new (salesforceConfig.baseUrl, {
+            httpClientResult = trap new (salesforceConfig.baseUrl, {
                 auth: salesforceConfig.clientConfig,
                 secureSocket: socketConfig
             });
         } else {
-            self.salesforceClient = check new (salesforceConfig.baseUrl, {auth: salesforceConfig.clientConfig});
+            httpClientResult = trap new (salesforceConfig.baseUrl, {auth: salesforceConfig.clientConfig});
+        }
+
+        if (httpClientResult is http:Client) {
+            self.salesforceClient = httpClientResult;
+        } else {
+            return prepareError(INVALID_CLIENT_CONFIG);
         }
     }
 
     //Describe SObjects
     # Lists the available objects and their metadata for your organization and available to the logged-in user.
+    # 
     # + return - `OrgMetadata` record if successful else Error occured
     @display {label: "Get available objects"}
     isolated remote function describeAvailableObjects() returns @tainted @display {label: "Organization metadata"} 
@@ -65,6 +82,7 @@ public client class Client {
     }
 
     # Describes the individual metadata for the specified object.
+    # 
     # + sobjectName - sobject name
     # + return - `SObjectBasicInfo` record if successful else Error occured
     @display {label: "Get SObject basic information"}
@@ -78,6 +96,7 @@ public client class Client {
 
     # Completely describes the individual metadata at all levels for the specified object. Can be used to retrieve
     # the fields, URLs, and child relationships.
+    # 
     # + sObjectName - SObject name value
     # + return - `SObjectMetaData` record if successful else Error occured
     @display {label: "Get All information about SObject"}
@@ -89,6 +108,7 @@ public client class Client {
     }
 
     # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
+    # 
     # + return - `SObjectBasicInfo` record if successful else Error occured
     @display {label: "Get SObject platform action"}
     isolated remote function sObjectPlatformAction() returns @tainted @display {label: "SObject basic information"}
@@ -100,6 +120,7 @@ public client class Client {
 
     //Basic CRUD
     # Accesses records based on the specified object ID, can be used with external objects.
+    # 
     # + path - Resource path
     # + return - `json` result if successful else Error occured
     @display {label: "Get record"}
@@ -110,6 +131,7 @@ public client class Client {
     }
 
     # Create records based on relevant object type sent with json record.
+    # 
     # + sObjectName - SObject name value
     # + recordPayload - JSON record to be inserted
     # + return - created entity ID if successful else Error occured
@@ -122,7 +144,6 @@ public client class Client {
         req.setJsonPayload(recordPayload);
 
         var response = self.salesforceClient->post(path, req);
-
         json|Error result = checkAndSetErrors(response);
         if (result is json) {
             json|error resultId = result.id;
@@ -137,6 +158,7 @@ public client class Client {
     }
 
     # Update records based on relevant object id.
+    # 
     # + sObjectName - SObject name value
     # + id - SObject id
     # + recordPayload - JSON record to be updated
@@ -151,9 +173,7 @@ public client class Client {
         req.setJsonPayload(recordPayload);
 
         var response = self.salesforceClient->patch(path, req);
-
         json|Error result = checkAndSetErrors(response, false);
-
         if (result is json) {
             return true;
         } else {
@@ -162,6 +182,7 @@ public client class Client {
     }
 
     # Delete existing records based on relevant object id.
+    # 
     # + sObjectName - SObject name value
     # + id - SObject id
     # + return - true if successful else false or Error occured
@@ -173,7 +194,6 @@ public client class Client {
         var response = self.salesforceClient->delete(path, ());
 
         json|Error result = checkAndSetErrors(response, false);
-
         if (result is json) {
             return true;
         } else {
@@ -223,6 +243,7 @@ public client class Client {
 
     //Account
     # Accesses Account SObject records based on the Account object ID.
+    # 
     # + accountId - Account ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
@@ -235,6 +256,7 @@ public client class Client {
     }
 
     # Creates new Account object record.
+    # 
     # + accountRecord - Account JSON record to be inserted
     # + return - Account ID if successful or else an sfdc:Error
     @display {label: "Create account"}
@@ -244,6 +266,7 @@ public client class Client {
     }
 
     # Deletes existing Account's records.
+    # 
     # + accountId - Account ID
     # + return - `true` if successful `false` otherwise, or an sfdc:Error in case of an error
     @display {label: "Delete account"}
@@ -253,6 +276,7 @@ public client class Client {
     }
 
     # Updates existing Account object record.
+    # 
     # + accountId - Account ID
     # + accountRecord - account record json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
@@ -265,6 +289,7 @@ public client class Client {
 
     //Lead
     # Accesses Lead SObject records based on the Lead object ID.
+    # 
     # + leadId - Lead ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
@@ -277,6 +302,7 @@ public client class Client {
     }
 
     # Creates new Lead object record.
+    # 
     # + leadRecord - Lead JSON record to be inserted
     # + return - Lead ID if successful or else an sfdc:Error
     @display {label: "Create lead"}
@@ -286,6 +312,7 @@ public client class Client {
     }
 
     # Deletes existing Lead's records.
+    # 
     # + leadId - Lead ID
     # + return - `true`  if successful, `false` otherwise or an sfdc:Error incase of an error
     @display {label: "Delete lead"}
@@ -295,6 +322,7 @@ public client class Client {
     }
 
     # Updates existing Lead object record.
+    # 
     # + leadId - Lead ID
     # + leadRecord - Lead JSON record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
@@ -307,6 +335,7 @@ public client class Client {
 
     //Contact
     # Accesses Contacts SObject records based on the Contact object ID.
+    # 
     # + contactId - Contact ID
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
@@ -319,6 +348,7 @@ public client class Client {
     }
 
     # Creates new Contact object record.
+    # 
     # + contactRecord - JSON contact record
     # + return - Contact ID if successful or else an sfdc:Error
     @display {label: "Create contact"}
@@ -328,6 +358,7 @@ public client class Client {
     }
 
     # Deletes existing Contact's records.
+    # 
     # + contactId - Contact ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Delete contact"}
@@ -337,6 +368,7 @@ public client class Client {
     }
 
     # Updates existing Contact object record.
+    # 
     # + contactId - Contact ID
     # + contactRecord - JSON contact record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
@@ -349,6 +381,7 @@ public client class Client {
 
     //Opportunity
     # Accesses Opportunities SObject records based on the Opportunity object ID.
+    # 
     # + opportunityId - Opportunity ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
@@ -361,6 +394,7 @@ public client class Client {
     }
 
     # Creates new Opportunity object record.
+    # 
     # + opportunityRecord - JSON opportunity record
     # + return - Opportunity ID if successful or else an sfdc:Error
     @display {label: "Create opportunity"}
@@ -370,6 +404,7 @@ public client class Client {
     }
 
     # Deletes existing Opportunity's records.
+    # 
     # + opportunityId - Opportunity ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Delete opportunity"}
@@ -379,6 +414,7 @@ public client class Client {
     }
 
     # Updates existing Opportunity object record.
+    # 
     # + opportunityId - Opportunity ID
     # + opportunityRecord - Opportunity json payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
@@ -391,6 +427,7 @@ public client class Client {
 
     //Product
     # Accesses Products SObject records based on the Product object ID.
+    # 
     # + productId - Product ID
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
@@ -403,6 +440,7 @@ public client class Client {
     }
 
     # Creates new Product object record.
+    # 
     # + productRecord - JSON product record
     # + return - Product ID if successful or else an sfdc:Error
     @display {label: "Create product"}
@@ -412,6 +450,7 @@ public client class Client {
     }
 
     # Deletes existing product's records.
+    # 
     # + productId - Product ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Delete product"}
@@ -421,6 +460,7 @@ public client class Client {
     }
 
     # Updates existing Product object record.
+    # 
     # + productId - Product ID
     # + productRecord - JSON product record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
@@ -442,6 +482,7 @@ public client class Client {
 
     //Query
     # Executes the specified SOQL query.
+    # 
     # + receivedQuery - Sent SOQL query
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
     @display {label: "Get query result"}
@@ -453,6 +494,7 @@ public client class Client {
     }
 
     # If the query results are too large, retrieve the next batch of results using the nextRecordUrl.
+    # 
     # + nextRecordsUrl - URL to get the next query results
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
     @display {label: "Get next query result"}
@@ -464,6 +506,7 @@ public client class Client {
 
     //Search
     # Executes the specified SOSL search.
+    # 
     # + searchString - Sent SOSL search query
     # + return - `SoslResult` record if successful. Else, the occurred `Error`.
     @display {label: "SOSL Search"}
@@ -475,6 +518,7 @@ public client class Client {
     }
 
     # Lists summary details about each REST API version available.
+    # 
     # + return - List of `Version` if successful. Else, the occured Error.
     @display {label: "Get available API versions"}
     isolated remote function getAvailableApiVersions() returns @tainted @display {label: "Versions"} Version[]|Error {
@@ -484,6 +528,7 @@ public client class Client {
     }
 
     # Lists the resources available for the specified API version.
+    # 
     # + apiVersion - API version (v37)
     # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
     @display {label: "Get resources by API version"}
@@ -495,6 +540,7 @@ public client class Client {
     }
 
     # Lists the Limits information for your organization.
+    # 
     # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
     @display {label: "Get organization limits"}
     isolated remote function getOrganizationLimits() returns @tainted @display {label: "Organization limits"}
@@ -504,6 +550,8 @@ public client class Client {
         return toMapOfLimits(res);
     }
 
+
+    // ******************************************* Bulk Operations *****************************************************
     # Create a bulk job.
     #
     # + operation - type of operation like insert, delete, etc.
@@ -833,6 +881,7 @@ public client class Client {
 }
 
 # Salesforce client configuration.
+# 
 # + baseUrl - The Salesforce endpoint URL
 # + clientConfig - OAuth2 direct token configuration
 # + secureSocketConfig - HTTPS secure socket configuration

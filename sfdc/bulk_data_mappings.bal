@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/regex;
 
@@ -143,7 +142,6 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
             json|error errors = ele.errors;
 
             if (errors is json) {
-
                 if (errors.toString().trim().length() > 2) {
                     log:printError("Failed batch result, errors=" + errors.toString(), err = ());
                     json[] errorsArr = <json[]>errors;
@@ -162,7 +160,6 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
                     }
                     batchRes.errors = errMsg;
                 }
-
             } else {
                 string errMsg = "Error occurred while accessing errors from batch result.";
                 log:printError(errMsg, 'error = errors);

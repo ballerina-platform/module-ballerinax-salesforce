@@ -13,12 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [updateJson, insertJsonFromFile]}
+@test:Config {
+    enable: true,
+    dependsOn: [updateJson, insertJsonFromFile]
+}
 function queryJson() {
     log:printInfo("baseClient -> queryJson");
     string batchId = "";

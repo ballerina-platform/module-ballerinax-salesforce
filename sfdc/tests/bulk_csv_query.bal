@@ -13,12 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [updateCsv, insertCsvFromFile, insertCsv]}
+@test:Config {
+    enable: true,
+    dependsOn: [updateCsv, insertCsvFromFile, insertCsv]
+}
 function queryCsv() {
     log:printInfo("baseClient -> queryCsv");
     string batchId = "";

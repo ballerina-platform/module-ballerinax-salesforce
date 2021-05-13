@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/test;
 import ballerina/io;
 import ballerina/lang.runtime;
@@ -47,7 +47,10 @@ service /topic/AccountUpdate on eventListener {
     }
 }
 
-@test:Config {dependsOn: [testUpdateRecord]}
+@test:Config {
+    enable: true,
+    dependsOn: [testUpdateRecord]
+}
 function testUpdated() {
     runtime:sleep(3.0);
     test:assertTrue(isUpdated, "Error in retrieving account update!");

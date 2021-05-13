@@ -13,16 +13,19 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertXml() {
     log:printInfo("baseClient -> insertXml");
     string batchId = "";
+
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>
@@ -160,7 +163,9 @@ function insertXml() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertXmlFromFile() {
     log:printInfo("baseClient -> insertXmlFromFile");
     string batchId = "";

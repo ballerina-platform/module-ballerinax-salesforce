@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
 
 import ballerina/log;
 import ballerina/os;
@@ -46,7 +45,9 @@ json accountRecord = {
 
 string testRecordId = "";
 
-@test:Config {}
+@test:Config { 
+    enable: true
+}
 function testCreateRecord() {
     log:printInfo("baseClient -> createRecord()");
     string|Error stringResponse = baseClient->createRecord(ACCOUNT, accountRecord);
@@ -59,7 +60,10 @@ function testCreateRecord() {
     }
 }
 
-@test:Config {dependsOn: [testCreateRecord]}
+@test:Config {
+    enable: true,
+    dependsOn: [testCreateRecord]
+}
 function testGetRecord() {
     json|Error response;
     log:printInfo("baseClient -> getRecord()");
@@ -75,7 +79,10 @@ function testGetRecord() {
     }
 }
 
-@test:Config {dependsOn: [testCreateRecord, testGetRecord]}
+@test:Config {
+    enable: true,
+    dependsOn: [testCreateRecord, testGetRecord]
+}
 function testUpdateRecord() {
     log:printInfo("baseClient -> updateRecord()");
     json account = {
@@ -92,7 +99,10 @@ function testUpdateRecord() {
     }
 }
 
-@test:Config {dependsOn: [testSearchSOSLString]}
+@test:Config {
+    enable: true,
+    dependsOn: [testSearchSOSLString]
+}
 function testDeleteRecord() {
     log:printInfo("baseClient -> deleteRecord()");
     boolean|Error response = baseClient->deleteRecord(ACCOUNT, testRecordId);
@@ -104,7 +114,9 @@ function testDeleteRecord() {
     }
 }
 
-@test:Config {}
+@test:Config { 
+    enable: true
+}
 function testGetQueryResult() {
     log:printInfo("baseClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
@@ -130,7 +142,10 @@ function testGetQueryResult() {
     }
 }
 
-@test:Config {dependsOn: [testUpdateRecord]}
+@test:Config {
+    enable: true,
+    dependsOn: [testUpdateRecord]
+}
 function testSearchSOSLString() {
     log:printInfo("baseClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
@@ -155,7 +170,9 @@ isolated function assertSoqlResult(SoqlResult|Error res) {
     }
 }
 
-@test:Config {}
+@test:Config { 
+    enable: true
+}
 function testGetAvailableApiVersions() {
     log:printInfo("baseClient -> getAvailableApiVersions()");
     Version[]|Error versions = baseClient->getAvailableApiVersions();
@@ -167,7 +184,9 @@ function testGetAvailableApiVersions() {
     }
 }
 
-@test:Config {}
+@test:Config { 
+    enable: true
+}
 function testGetResourcesByApiVersion() {
     log:printInfo("baseClient -> getResourcesByApiVersion()");
     map<string>|Error resources = baseClient->getResourcesByApiVersion(API_VERSION);
@@ -179,7 +198,7 @@ function testGetResourcesByApiVersion() {
         test:assertTrue((resources["search"].toString().trim()).length() > 0, msg = "Found null for resource search");
         test:assertTrue((resources["query"].toString().trim()).length() > 0, msg = "Found null for resource query");
         test:assertTrue((resources["licensing"].toString().trim()).length() > 0, 
-        msg = "Found null for resource licensing");
+            msg = "Found null for resource licensing");
         test:assertTrue((resources["connect"].toString().trim()).length() > 0, msg = "Found null for resource connect");
         test:assertTrue((resources["tooling"].toString().trim()).length() > 0, msg = "Found null for resource tooling");
         test:assertTrue((resources["chatter"].toString().trim()).length() > 0, msg = "Found null for resource chatter");
@@ -189,7 +208,9 @@ function testGetResourcesByApiVersion() {
     }
 }
 
-@test:Config {}
+@test:Config { 
+    enable: true
+}
 function testGetOrganizationLimits() {
     log:printInfo("baseClient -> getOrganizationLimits()");
     map<Limit>|Error limits = baseClient->getOrganizationLimits();
@@ -209,5 +230,19 @@ function testGetOrganizationLimits() {
         }
     } else {
         test:assertFail(msg = limits.message());
+    }
+}
+
+@test:Config { 
+    enable:true 
+}
+function testdescribeSobject() {
+    log:printInfo("baseClient -> describeAvailableObjects()");
+    OrgMetadata|Error description = baseClient->describeAvailableObjects();
+
+    if (description is OrgMetadata) {
+        test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
+    } else {
+        test:assertFail(msg = description.message());
     }
 }

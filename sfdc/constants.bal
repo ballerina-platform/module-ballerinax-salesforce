@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
 
 // Ballerina config keys
 # Constant field `ENDPOINT`. Holds the value for Salesforce endpoint.
@@ -130,7 +128,7 @@ final string FORWARD_SLASH = "/";
 // Error Codes
 const SALESFORCE_ERROR_CODE = "{wso2/salesforce}";
 
-// ================ Salesforce bulk client constants =======================================
+// ************************************ Salesforce bulk client constants ***********************************************
 
 # Constant field `BULK_API_VERSION`. Holds the value for the Salesforce Bulk API version.
 const BULK_API_VERSION = "48.0";

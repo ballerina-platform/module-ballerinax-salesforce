@@ -13,16 +13,19 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 //under the License.
-//
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertJson() {
     log:printInfo("baseClient -> insertJson");
     string batchId = "";
+
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
         FirstName: "Remus",
@@ -179,7 +182,9 @@ function insertJson() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertJsonFromFile() {
     log:printInfo("baseClient -> insertJsonFromFile");
     string batchId = "";

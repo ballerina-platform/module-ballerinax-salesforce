@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/http;
 import ballerina/io;
@@ -25,10 +24,11 @@ import ballerina/lang.'xml as xmllib;
 import ballerina/regex;
 
 # Check HTTP response and return XML payload if succesful, else set errors and return Error.
+# 
 # + httpResponse - HTTP response or error occurred
 # + return - XML response if successful else Error occured
-isolated function checkXmlPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted xml|
-Error {
+isolated function checkXmlPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns 
+                                              @tainted xml|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
@@ -51,10 +51,11 @@ Error {
 }
 
 # Check HTTP response and return Text payload if succesful, else set errors and return Error.
+# 
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
-isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted string|
-Error {
+isolated function checkTextPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns 
+                                               @tainted string|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
@@ -77,10 +78,11 @@ Error {
 }
 
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
+# 
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
-isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns @tainted json|
-Error {
+isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|error httpResponse) returns 
+                                               @tainted json|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
@@ -106,8 +108,8 @@ Error {
 # + httpResponse - HTTP response or error occurred  
 # + jobtype - Job type
 # + return - Query string response if successful or else an sfdc:Error
-isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns @tainted string|
-Error {
+isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns 
+                                  @tainted string|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK) {
             string|error textResponse = httpResponse.getTextPayload();
@@ -132,6 +134,7 @@ Error {
 }
 
 # Handle HTTP error response and return error.
+# 
 # + httpResponse - error response
 # + return - error
 isolated function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Error {
@@ -147,6 +150,7 @@ isolated function handleXmlErrorResponse(http:Response httpResponse) returns @ta
 }
 
 # Handle HTTP error response and return Error.
+# 
 # + httpResponse - error response
 # + return - error
 isolated function handleJsonErrorResponse(http:Response httpResponse) returns @tainted Error {
@@ -176,6 +180,7 @@ isolated function handleHttpError(error httpResponse) returns Error {
 }
 
 # Convert string to integer
+# 
 # + value - string value
 # + return - converted integer
 isolated function getIntValue(string value) returns int {
@@ -189,6 +194,7 @@ isolated function getIntValue(string value) returns int {
 }
 
 # Convert string to float
+# 
 # + value - string value
 # + return - converted float
 isolated function getFloatValue(string value) returns float {
@@ -202,6 +208,7 @@ isolated function getFloatValue(string value) returns float {
 }
 
 # Convert string to boolean
+# 
 # + value - string value
 # + return - converted boolean
 isolated function getBooleanValue(string value) returns boolean {
@@ -357,8 +364,9 @@ isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|
     }
 }
 
-isolated function getJsonQueryResult(json resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
-                                     http:ClientBearerTokenAuthHandler clientHandler) returns @tainted json|Error {
+isolated function getJsonQueryResult(json resultlist, string path, http:Client httpClient, 
+                                     http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler) returns 
+                                     @tainted json|Error {
     json[] finalResults = [];
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if (headerMap is map<string|string[]>) {
@@ -381,8 +389,9 @@ isolated function getJsonQueryResult(json resultlist, string path, http:Client h
     }
 }
 
-isolated function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
-                                    http:ClientBearerTokenAuthHandler clientHandler) returns @tainted xml|Error {
+isolated function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, 
+                                    http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler) returns 
+                                    @tainted xml|Error {
     xml finalResults = xml `<queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if (headerMap is map<string|string[]>) {
@@ -398,8 +407,9 @@ isolated function getXmlQueryResult(xml resultlist, string path, http:Client htt
     }
 }
 
-isolated function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
-                                    http:ClientBearerTokenAuthHandler clientHandler) returns @tainted string|Error {
+isolated function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, 
+                                    http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler) returns 
+                                    @tainted string|Error {
     string finalResults = "";
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if (headerMap is map<string|string[]>) {

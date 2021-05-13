@@ -13,12 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [insertXml, upsertXml]}
+@test:Config {
+    enable: true,
+    dependsOn: [insertXml, upsertXml]
+}
 function updateXml() {
     log:printInfo("baseClient -> updateXml");
     string batchId = "";

@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
@@ -22,7 +22,9 @@ import ballerina/lang.runtime;
 int maxIterations = 5;
 decimal delayInSecs = 5.0;
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertCsv() {
     log:printInfo("baseClient -> insertCsv");
     string batchId = "";
@@ -164,7 +166,9 @@ function insertCsv() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertCsvFromFile() {
     log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";
