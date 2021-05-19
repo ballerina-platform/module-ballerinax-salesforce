@@ -1,8 +1,9 @@
-name: CI
+name: Daily build
 
 # Controls when the action will run.
-# Triggers the workflow on push.
-on: [push]
+on:
+  schedule:
+    - cron: '30 2 * * *'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -34,7 +35,6 @@ jobs:
           JAVA_OPTS: -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true
         run: |
           ./gradlew build
-
       # Build Ballerina Project
       - name: Ballerina Build
         uses: ballerina-platform/ballerina-action/@nightly
@@ -51,3 +51,11 @@ jobs:
           REFRESH_URL: ${{ secrets.REFRESH_URL }}
           SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
           SF_USERNAME: ${{ secrets.SF_USERNAME }}
+      # Publish Github Package
+      - name: Publish Github Package
+        env:
+          publishUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
+          publishPAT: ${{ secrets.CONNECTOR_PUBLISH_PAT }}
+          JAVA_OPTS: -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true
+        run: |
+          ./gradlew publish

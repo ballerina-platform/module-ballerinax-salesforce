@@ -69,7 +69,6 @@ public client class Client {
         }
     }
 
-    //Describe SObjects
     # Lists the available objects and their metadata for your organization and available to the logged-in user.
     # 
     # + return - `OrgMetadata` record if successful else Error occured
