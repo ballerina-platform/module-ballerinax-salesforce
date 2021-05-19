@@ -13,13 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 //under the License.
-//
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertJson() {
     log:printInfo("baseClient -> insertJson");
     string batchId = "";
@@ -180,11 +182,12 @@ function insertJson() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertJsonFromFile() {
     log:printInfo("baseClient -> insertJsonFromFile");
     string batchId = "";
-
     string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";
 
     //create job
@@ -289,7 +292,6 @@ function insertJsonFromFile() {
             }
         }
 
-
         foreach var i in 1 ..< maxIterations {
             var batchResult = baseClient->getBatchResult(insertJob, batchId);
             if (batchResult is Result[]) {
@@ -316,7 +318,6 @@ function insertJsonFromFile() {
         } else {
             test:assertFail(msg = closedJob.message());
         }
-
     } else {
         test:assertFail(msg = insertJob.message());
     }

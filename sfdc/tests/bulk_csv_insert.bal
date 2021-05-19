@@ -13,7 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
@@ -22,13 +22,15 @@ import ballerina/lang.runtime;
 int maxIterations = 5;
 decimal delayInSecs = 5.0;
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertCsv() {
     log:printInfo("baseClient -> insertCsv");
     string batchId = "";
-
-    string contacts = 
-    "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" + "Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0332236677,john434@gmail.com,845\n" + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,peter77@gmail.com,846";
+    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n"
+        + "Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0332236677,john434@gmail.com,845\n"
+        + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,peter77@gmail.com,846";
 
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
@@ -164,7 +166,9 @@ function insertCsv() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertCsvFromFile() {
     log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";

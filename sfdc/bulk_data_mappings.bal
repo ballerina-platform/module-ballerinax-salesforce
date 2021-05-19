@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,13 +13,12 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/regex;
 
 isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
-
     JobInfo|error job = trap {
         id: (jobDetails/<ns:id>/*).toString(),
         operation: (jobDetails/<ns:operation>/*).toString(),
@@ -62,7 +60,6 @@ isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|Error {
 
 isolated function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|Error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
-
     BatchInfo|error batch = trap {
         id: (batchDetails/<ns:id>/*).toString(),
         jobId: (batchDetails/<ns:jobId>/*).toString(),
@@ -145,7 +142,6 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
             json|error errors = ele.errors;
 
             if (errors is json) {
-
                 if (errors.toString().trim().length() > 2) {
                     log:printError("Failed batch result, errors=" + errors.toString(), err = ());
                     json[] errorsArr = <json[]>errors;
@@ -164,7 +160,6 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
                     }
                     batchRes.errors = errMsg;
                 }
-
             } else {
                 string errMsg = "Error occurred while accessing errors from batch result.";
                 log:printError(errMsg, 'error = errors);
@@ -183,17 +178,13 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
 
 isolated function createBatchResultRecordFromCsv(string payload) returns Result[]|Error {
     Result[] batchResArr = [];
-
     string[] payloadArr = regex:split(payload, "\n");
     int arrLength = payloadArr.length();
-
     int counter = 1;
     while (counter < arrLength) {
         string? line = payloadArr[counter];
-
         if (line is string) {
             string[] lineArr = regex:split(line, ",");
-
             string? idStr = lineArr[0];
             string? successStr = lineArr[1];
             string? createdStr = lineArr[2];
@@ -206,7 +197,6 @@ isolated function createBatchResultRecordFromCsv(string payload) returns Result[
             }
 
             if (successStr is string && successStr.length() > 0 && createdStr is string && createdStr.length() > 0) {
-
                 Result|error batchRes = trap {
                     success: getBooleanValue(successStr),
                     created: getBooleanValue(createdStr)
@@ -226,15 +216,14 @@ isolated function createBatchResultRecordFromCsv(string payload) returns Result[
                     log:printError(errMsg, 'error = batchRes);
                     return error Error(errMsg, batchRes);
                 }
-
             } else {
-                log:printError("Error occurred while accessing success & created fields from batch result, success=" + 
-                successStr.toString() + " created=" + createdStr.toString(), err = ());
+                log:printError("Error occurred while accessing success & created fields from batch result, success="
+                    + successStr.toString() + " created=" + createdStr.toString(), err = ());
                 return error Error("Error occurred while creating BatchResult record using json payload.");
             }
         } else {
-            log:printError("Error occrred while retrieveing batch result line from batch results csv, line=" + line.
-            toString(), err = ());
+            log:printError("Error occrred while retrieveing batch result line from batch results csv, line="
+                + line.toString(), err = ());
             return error Error("Error occurred while accessing batch results from csv payload.");
         }
         counter = counter + 1;

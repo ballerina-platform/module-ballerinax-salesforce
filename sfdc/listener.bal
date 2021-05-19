@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,14 +13,13 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/jballerina.java;
 
 handle JAVA_NULL = java:createNull();
 
 @display {label: "Salesforce Listener"}
 public class Listener {
-
     private handle username = JAVA_NULL;
     private handle password = JAVA_NULL;
 

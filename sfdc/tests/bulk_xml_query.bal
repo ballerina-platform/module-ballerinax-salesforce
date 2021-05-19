@@ -13,18 +13,19 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [updateXml, insertXmlFromFile]}
+@test:Config {
+    enable: true,
+    dependsOn: [updateXml, insertXmlFromFile]
+}
 function queryXml() {
     log:printInfo("baseClient -> queryXml");
     string batchId = "";
-
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 01'";
-
     //create job
     error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "XML");
 

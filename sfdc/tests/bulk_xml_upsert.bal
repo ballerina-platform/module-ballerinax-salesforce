@@ -13,16 +13,18 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [insertXml]}
+@test:Config {
+    enable: true,
+    dependsOn: [insertXml]
+}
 function upsertXml() {
     log:printInfo("baseClient -> upsertXml");
     string batchId = "";
-
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>
@@ -43,7 +45,6 @@ function upsertXml() {
             <My_External_Id__c>852</My_External_Id__c>
         </sObject>
     </sObjects>`;
-
     //create job
     error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "XML", "My_External_Id__c");
 

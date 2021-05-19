@@ -13,19 +13,20 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/test;
 import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/os;
 
+configurable string & readonly username = os:getEnv("SF_USERNAME");
+configurable string & readonly password = os:getEnv("SF_PASSWORD");
+
 ListenerConfiguration listenerConfig = {
-    username: os:getEnv("SF_USERNAME"),
-    password: os:getEnv("SF_PASSWORD")
+    username: username,
+    password: password
 };
-
 listener Listener eventListener = new (listenerConfig);
-
 boolean isUpdated = false;
 
 @ServiceConfig {topic: "/topic/AccountUpdate"}
@@ -46,7 +47,10 @@ service /topic/AccountUpdate on eventListener {
     }
 }
 
-@test:Config {dependsOn: [testUpdateRecord]}
+@test:Config {
+    enable: true,
+    dependsOn: [testUpdateRecord]
+}
 function testUpdated() {
     runtime:sleep(3.0);
     test:assertTrue(isUpdated, "Error in retrieving account update!");

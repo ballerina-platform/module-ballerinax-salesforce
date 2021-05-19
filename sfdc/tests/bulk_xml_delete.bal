@@ -13,18 +13,16 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [queryXml]}
+@test:AfterSuite {}
 function deleteXml() {
     log:printInfo("baseClient -> deleteXml");
     string batchId = "";
-
     xml contacts = getXmlContactsToDelete(xmlQueryResult);
-
     //create job
     error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "XML");
 
@@ -108,7 +106,6 @@ function deleteXml() {
                 break;
             }
         }
-
 
         //get batch result
         foreach var i in 1 ..< maxIterations {

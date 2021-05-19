@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,10 +13,17 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
 
-// Salesforce connector error
+# Salesforce connector error
 public type Error distinct error;
+
+// Logs and prepares the `error` as an `sfdc:Error`.
+isolated function prepareError(string message, error? err = ()) returns Error {
+    if (err is error) {
+        return error Error(message, err);
+    }
+    return error Error(message);
+}
 
 // Error constants
 const string JSON_ACCESSING_ERROR_MSG = "Error occurred while accessing the JSON payload of the response.";
@@ -26,3 +32,4 @@ const string TEXT_ACCESSING_ERROR_MSG = "Error occurred while accessing the Text
 const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
 const string HTTP_ERROR_MSG = "Error occurred while getting the HTTP response.";
 const string UNREACHABLE_STATE = "Response type cannot be http payload";
+const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";

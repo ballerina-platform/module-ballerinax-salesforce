@@ -13,18 +13,20 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [insertJson, upsertJson]}
+@test:Config {
+    enable: true,
+    dependsOn: [insertJson, upsertJson]
+}
 function updateJson() {
     log:printInfo("baseClient -> updateJson");
     string batchId = "";
     string mornsId = getContactIdByName("Remus", "Lupin", "Professor Level 03");
     string andisId = getContactIdByName("Minerva", "McGonagall", "Professor Level 03");
-
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
         Id: mornsId,
@@ -133,7 +135,6 @@ function updateJson() {
                 break;
             }
         }
-
 
         //get batch result
         foreach var i in 1 ..< maxIterations {

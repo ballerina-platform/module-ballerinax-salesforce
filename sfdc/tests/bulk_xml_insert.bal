@@ -13,13 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertXml() {
     log:printInfo("baseClient -> insertXml");
     string batchId = "";
@@ -44,7 +46,6 @@ function insertXml() {
             <My_External_Id__c>852</My_External_Id__c>
         </sObject>
     </sObjects>`;
-
     //create job
     error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
 
@@ -128,7 +129,6 @@ function insertXml() {
             }
         }
 
-
         //get batch result
         foreach var i in 1 ..< maxIterations {
             var batchResult = baseClient->getBatchResult(insertJob, batchId);
@@ -163,7 +163,9 @@ function insertXml() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    enable: true
+}
 function insertXmlFromFile() {
     log:printInfo("baseClient -> insertXmlFromFile");
     string batchId = "";

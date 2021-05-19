@@ -13,16 +13,18 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [insertJson]}
+@test:Config {
+    enable: true,
+    dependsOn: [insertJson]
+}
 function upsertJson() {
     log:printInfo("baseClient -> upsertJson");
     string batchId = "";
-
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
         FirstName: "Remus",
@@ -148,7 +150,6 @@ function upsertJson() {
                 test:assertFail("Invalid Batch Result!");
             }
         }
-
 
         //close job
         error|JobInfo closedJob = baseClient->closeJob(upsertJob);

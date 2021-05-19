@@ -13,18 +13,21 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:Config {dependsOn: [insertCsv]}
+@test:Config {
+    enable: true,
+    dependsOn: [insertCsv]
+}
 function upsertCsv() {
     log:printInfo("baseClient -> upsertCsv");
     string batchId = "";
-
-    string contacts = 
-    "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" + "Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0332236677,bins98@gmail.com,845\n" + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,shane78@gmail.com,846";
+    string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n"
+        + "Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0332236677,bins98@gmail.com,845\n"
+        + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,shane78@gmail.com,846";
 
     //create job
     error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "CSV", "My_External_Id__c");

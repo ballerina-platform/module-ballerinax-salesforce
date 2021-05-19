@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,12 +13,13 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
+
 import ballerina/log;
 import ballerina/http;
 import ballerina/url;
 
 # Returns the prepared URL.
+# 
 # + paths - An array of paths prefixes
 # + return - The prepared URL
 isolated function prepareUrl(string[] paths) returns string {
@@ -37,12 +37,12 @@ isolated function prepareUrl(string[] paths) returns string {
 }
 
 # Returns the prepared URL with encoded query.
+# 
 # + paths - An array of paths prefixes
 # + queryParamNames - An array of query param names
 # + queryParamValues - An array of query param values
 # + return - The prepared URL with encoded query
 isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, string[] queryParamValues) returns string {
-
     string url = prepareUrl(paths);
 
     url = url + QUESTION_MARK;
@@ -50,7 +50,6 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
     int i = 0;
     foreach var name in queryParamNames {
         string value = queryParamValues[i];
-
         var encoded = url:encode(value, ENCODING_CHARSET);
 
         if (encoded is string) {
@@ -66,20 +65,19 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
         }
         i = i + 1;
     }
-
     return url;
 }
 
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
+# 
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-isolated function checkAndSetErrors(http:Response|http:PayloadType|error httpResponse, boolean expectPayload = true) returns @tainted json|
-Error {
+isolated function checkAndSetErrors(http:Response|http:PayloadType|error httpResponse, boolean expectPayload = true) 
+                                    returns @tainted json|Error {
     if (httpResponse is http:Response) {
-        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
-        statusCode == http:STATUS_NO_CONTENT) {
-
+        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || 
+            httpResponse.statusCode == http:STATUS_NO_CONTENT) {
             if (expectPayload) {
                 json|error jsonResponse = httpResponse.getJsonPayload();
 
@@ -100,7 +98,6 @@ Error {
 
             if (jsonResponse is json) {
                 json[] errArr = <json[]>jsonResponse;
-
                 string errCodes = "";
                 string errMssgs = "";
                 int counter = 1;
@@ -118,7 +115,6 @@ Error {
                         counter = counter + 1;
                     }
                 }
-
                 return error Error(errMssgs, errorCodes = errCodes);
             } else {
                 log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = jsonResponse);

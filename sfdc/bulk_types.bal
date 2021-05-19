@@ -1,4 +1,3 @@
-//
 // Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
@@ -14,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-//
 
 # Define the job type.
 #
@@ -38,8 +36,8 @@
 # + numberRecordsFailed - The number of records that were not processed successfully in this job
 # + totalProcessingTime - The number of milliseconds taken to process the job
 # + apiActiveProcessingTime - The number of milliseconds taken to actively process the job and includes
-# apexProcessingTime, but doesn't include the time the job waited in the queue to be processed or the time required for
-# serialization and deserialization
+#                             apexProcessingTime, but doesn't include the time the job waited in the queue to be 
+#                             processed or the time required for serialization and deserialization
 # + apexProcessingTime - The number of milliseconds taken to process triggers and other processes related to the job
 public type JobInfo record {|
     string id;
@@ -73,15 +71,15 @@ public type JobInfo record {|
 # + state - The current state of processing for the batch
 # + createdDate - The date and time in the UTC time zone when the batch was created
 # + systemModstamp - The date and time in the UTC time zone that processing ended. This is only valid when the state
-# is Completed.
+#                    is Completed.
 # + numberRecordsProcessed - The number of records processed in this batch at the time the request was sent
 # + numberRecordsFailed - The number of records that were not processed successfully in this batch
 # + totalProcessingTime - The number of milliseconds taken to process the batch, This excludes the time the batch
-# waited in the queue to be processed
+#                         waited in the queue to be processed
 # + apiActiveProcessingTime - The number of milliseconds taken to actively process the batch, and includes
-# apexProcessingTime
+#                             apexProcessingTime
 # + apexProcessingTime - The number of milliseconds taken to process triggers and other processes related to the
-# batch data
+#                        batch data
 public type BatchInfo record {|
     string id;
     string jobId;
