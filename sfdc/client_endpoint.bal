@@ -69,7 +69,6 @@ public client class Client {
         }
     }
 
-    //Describe SObjects
     # Lists the available objects and their metadata for your organization and available to the logged-in user.
     # 
     # + return - `OrgMetadata` record if successful else Error occured
@@ -126,7 +125,7 @@ public client class Client {
     @display {label: "Get record"}
     isolated remote function getRecord(@display {label: "Resource path"} string path) returns
                                        @tainted @display {label: "Result"} json|Error {
-        http:Response|http:PayloadType|error response = self.salesforceClient->get(path);
+        http:Response|error response = self.salesforceClient->get(path);
         return checkAndSetErrors(response);
     }
 
@@ -143,7 +142,7 @@ public client class Client {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(recordPayload);
 
-        var response = self.salesforceClient->post(path, req);
+        http:Response|error response = self.salesforceClient->post(path, req);
         json|Error result = checkAndSetErrors(response);
         if (result is json) {
             json|error resultId = result.id;
@@ -172,7 +171,7 @@ public client class Client {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
 
-        var response = self.salesforceClient->patch(path, req);
+        http:Response|error response = self.salesforceClient->patch(path, req);
         json|Error result = checkAndSetErrors(response, false);
         if (result is json) {
             return true;
@@ -191,7 +190,7 @@ public client class Client {
                                           @display {label: "SObject ID"} string id) returns
                                           @tainted @display {label: "Result"} boolean|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-        var response = self.salesforceClient->delete(path, ());
+        http:Response|error response = self.salesforceClient->delete(path, ());
 
         json|Error result = checkAndSetErrors(response, false);
         if (result is json) {
@@ -580,7 +579,7 @@ public client class Client {
         }
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
-        var response = self.salesforceClient->post(path, jobPayload, headers = headerMap);
+        http:Response|error response = self.salesforceClient->post(path, jobPayload, headers = headerMap);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
             json|error jobResponseId = jobResponse.id;
@@ -610,7 +609,7 @@ public client class Client {
         JOBTYPE jobDataType = bulkJob.jobDataType;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        var response = self.salesforceClient->get(path, headerMap);
+        http:Response|error response = self.salesforceClient->get(path, headerMap);
         if (JSON == jobDataType) {
             json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
             if (jobResponse is json) {
@@ -640,7 +639,7 @@ public client class Client {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        var response = self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
+        http:Response|error response = self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
             JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
@@ -660,7 +659,7 @@ public client class Client {
         string jobId = bulkJob.jobId;
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        var response = self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
+        http:Response|error response = self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
         json|Error jobResponse = checkJsonPayloadAndSetErrors(response);
         if (jobResponse is json) {
             JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
@@ -693,7 +692,7 @@ public client class Client {
                 payload = content;
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, APP_JSON);
-            var response = self.salesforceClient->post(path, payload, headers = headerMap);
+            http:Response|error response = self.salesforceClient->post(path, payload, headers = headerMap);
             json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
             if (batchResponse is json) {
                 BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
@@ -712,7 +711,7 @@ public client class Client {
                 payload = content;
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, APP_XML);
-            var response = self.salesforceClient->post(path, payload, headers = headerMap);
+            http:Response|error response = self.salesforceClient->post(path, payload, headers = headerMap);
             xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
             if (batchResponse is xml) {
                 BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
@@ -728,7 +727,7 @@ public client class Client {
                 payload = content;
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, TEXT_CSV);
-            var response = self.salesforceClient->post(path, payload, headers = headerMap);
+            http:Response|error response = self.salesforceClient->post(path, payload, headers = headerMap);
             xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
             if (batchResponse is xml) {
                 BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
@@ -752,7 +751,7 @@ public client class Client {
                                           returns @tainted @display {label: "Batch Information"} error|BatchInfo {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        var response = self.salesforceClient->get(path, headerMap);
+        http:Response|error response = self.salesforceClient->get(path, headerMap);
         if (JSON == bulkJob.jobDataType) {
             json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
             if (batchResponse is json) {
@@ -782,7 +781,7 @@ public client class Client {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         http:Request req = new;
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        var response = self.salesforceClient->get(path, headerMap);
+        http:Response|error response = self.salesforceClient->get(path, headerMap);
         BatchInfo[] batchInfoList = [];
         if (JSON == bulkJob.jobDataType) {
             json batchResponse = check checkJsonPayloadAndSetErrors(response);
@@ -813,7 +812,7 @@ public client class Client {
                                              @tainted @display {label: "Batch content"} error|json|xml|string {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        var response = self.salesforceClient->get(path, headerMap);
+        http:Response|error response = self.salesforceClient->get(path, headerMap);
         if (QUERY == bulkJob.operation) {
             return getQueryRequest(response, bulkJob.jobDataType);
         } else {
@@ -846,7 +845,7 @@ public client class Client {
         string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, RESULT]);
         Result[] results = [];
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        var response = self.salesforceClient->get(path, headerMap);
+        http:Response|error response = self.salesforceClient->get(path, headerMap);
         match bulkJob.jobDataType {
             JSON => {
                 json resultResponse = check checkJsonPayloadAndSetErrors(response);

@@ -322,7 +322,6 @@ public class EmpConnector {
                 future.complete(true);
             }
         });
-
         return future;
     }
 

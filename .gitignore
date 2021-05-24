@@ -17,7 +17,6 @@ Ballerina.lock
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.ear
 *.zip
@@ -48,3 +47,9 @@ target/
 
 #Ignore emp-wrapper java classes
 **/target
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
