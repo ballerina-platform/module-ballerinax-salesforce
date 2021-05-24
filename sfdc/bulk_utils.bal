@@ -374,7 +374,7 @@ isolated function getJsonQueryResult(json resultlist, string path, http:Client h
         if (resultlist is json[]) {
             foreach var item in resultlist {
                 string resultId = item.toString();
-                var response = httpClient->get(path + "/" + resultId, headerMap);
+                http:Response|error response = httpClient->get(path + "/" + resultId, headerMap);
                 json result = check checkJsonPayloadAndSetErrors(response);
                 //result is always a json[]
                 if (result is json[]) {
@@ -397,7 +397,7 @@ isolated function getXmlQueryResult(xml resultlist, string path, http:Client htt
     if (headerMap is map<string|string[]>) {
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
-            var response = httpClient->get(path + "/" + resultId, headerMap);
+            http:Response|error response = httpClient->get(path + "/" + resultId, headerMap);
             xml result = check checkXmlPayloadAndSetErrors(response);
             finalResults = mergeXml(finalResults, result);
         }
@@ -416,7 +416,7 @@ isolated function getCsvQueryResult(xml resultlist, string path, http:Client htt
         int i = 0;
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
-            var response = httpClient->get(path + "/" + resultId, headerMap);
+            http:Response|error response = httpClient->get(path + "/" + resultId, headerMap);
             string result = check checkTextPayloadAndSetErrors(response);
             if (i == 0) {
                 finalResults = result;
