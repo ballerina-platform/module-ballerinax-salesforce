@@ -15,6 +15,8 @@
 // under the License.
 
 import ballerina/jballerina.java;
+//import ballerina/log;
+//import ballerina/http;
 
 handle JAVA_NULL = java:createNull();
 
@@ -50,18 +52,30 @@ public class Listener {
     }
 }
 
-function initListener(Listener lis) = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
+function initListener(Listener lis) = 
+@java:Method {
+    'class: "org.ballerinalang.sf.ListenerUtil"
+} external;
 
-function attachService(Listener lis, service object {} s) returns error? = @java:Method 
-{'class: "org.ballerinalang.sf.ListenerUtil"} external;
+function attachService(Listener lis, service object {} s) returns error? =
+@java:Method {
+    'class: "org.ballerinalang.sf.ListenerUtil"
+} external;
 
-function startListener(handle username, handle password, Listener lis) returns error? = @java:Method 
-{'class: "org.ballerinalang.sf.ListenerUtil"} external;
+function startListener(handle username, handle password, Listener lis) returns error? = 
+@java:Method {
+    'class: "org.ballerinalang.sf.ListenerUtil"
+} external;
 
-function detachService(Listener lis, service object {} s) returns error? = @java:Method 
-{'class: "org.ballerinalang.sf.ListenerUtil"} external;
+function detachService(Listener lis, service object {} s) returns error? =
+@java:Method {
+    'class: "org.ballerinalang.sf.ListenerUtil"
+} external;
 
-function stopListener() returns error? = @java:Method {'class: "org.ballerinalang.sf.ListenerUtil"} external;
+function stopListener() returns error? = 
+@java:Method {
+    'class: "org.ballerinalang.sf.ListenerUtil"
+} external;
 
 public type ListenerConfiguration record {|
     string username;
@@ -79,3 +93,19 @@ public type SFDCTopicConfigData record {|
 |};
 
 public annotation SFDCTopicConfigData ServiceConfig on service;
+
+public type EventData record {
+    map<string> payload?;
+    ChangeEventMetadata ChangeEventHeader?;
+};
+
+public type ChangeEventMetadata record {
+    int commitTimestamp?;
+    string transactionKey?;
+    string changeOrigin?;
+    string changeType?;
+    string entityName?;
+    int sequenceNumber?;
+    string commitUser?;
+    int commitNumber?;
+};
