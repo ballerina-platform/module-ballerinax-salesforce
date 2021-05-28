@@ -37,7 +37,7 @@ public function main(){
     string batchId = "";
     string jsonContactsFilePath = "resources/contacts.json";
 
-    sfdc:BulkJob|error insertJob = baseClient->creatJob("insert", "Contact", "JSON");
+    sfdc:BulkJob|error insertJob = baseClient->createJob("insert", "Contact", "JSON");
 
     if (insertJob is sfdc:BulkJob){
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);

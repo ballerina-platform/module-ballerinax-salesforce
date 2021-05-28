@@ -25,7 +25,7 @@ function deleteJson() {
     json contacts = getJsonContactsToDelete(jsonQueryResult);
 
     //create job
-    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "JSON");
+    error|BulkJob deleteJob = baseClient->createJob("delete", "Contact", "JSON");
 
     if (deleteJob is BulkJob) {
         //add json content

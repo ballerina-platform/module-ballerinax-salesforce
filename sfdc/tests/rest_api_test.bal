@@ -90,13 +90,11 @@ function testUpdateRecord() {
         BillingCity: "Jaffna",
         Phone: "+94110000000"
     };
-    boolean|Error response = baseClient->updateRecord(ACCOUNT, testRecordId, account);
+    Error? response = baseClient->updateRecord(ACCOUNT, testRecordId, account);
 
-    if (response is boolean) {
-        test:assertTrue(response, msg = "Expects true on success");
-    } else {
+    if (response is Error) {
         test:assertFail(msg = response.message());
-    }
+    } 
 }
 
 @test:Config {
@@ -105,13 +103,11 @@ function testUpdateRecord() {
 }
 function testDeleteRecord() {
     log:printInfo("baseClient -> deleteRecord()");
-    boolean|Error response = baseClient->deleteRecord(ACCOUNT, testRecordId);
+    Error? response = baseClient->deleteRecord(ACCOUNT, testRecordId);
 
-    if (response is boolean) {
-        test:assertTrue(response, msg = "Expects true on success");
-    } else {
+    if (response is Error) {
         test:assertFail(msg = response.message());
-    }
+    } 
 }
 
 @test:Config { 

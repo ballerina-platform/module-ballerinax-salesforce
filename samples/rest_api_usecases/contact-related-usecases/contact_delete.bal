@@ -35,14 +35,12 @@ public function main(){
 
     string contactId = getContactIdByName("Peter", "Potts");
 
-    boolean|sfdc:Error res = baseClient->deleteContact(contactId);
+    sfdc:Error? res = baseClient->deleteContact(contactId);
 
-    if res is boolean{
-        string outputMessage = (res == true) ? "Contact Deleted Successfully!" : "Failed to Delete the Contact";
-        log:printInfo(outputMessage);
-    }
-    else{
+    if res is sfdc:Error{
         log:printError(res.message());
+    } else {
+        log:printInfo("Contact deleted successfully");
     }
 
 }
