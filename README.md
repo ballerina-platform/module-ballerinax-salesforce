@@ -45,13 +45,11 @@ Salesforce Bulk API is a specialized asynchronous RESTful API for loading and qu
 The `ballerinax/sfdc` module supports bulk data operations for CSV, JSON, and XML data types. 
 
 ### Event Listener
-The Salesforce Streaming API let users push a stream of notification from Salesforce to client apps based push topics. 
-Push topics are SObjects that contain criterias for the events that users want to listen to such as data changes for a 
-particular SObject.  
+The Salesforce Streaming API publishes change events, which represent changes to Salesforce records. Changes include 
+creation of a new record, updates to an existing record, deletion of a record, and undeletion of a record.
 
-The `ballerinax/sfdc` module includes a Listener that would capture events on PushTopics defined in a Salesforce 
-instance. PushTopic events provide a way to receive notifications for changes to Salesforce data that match an SOQL query.
-
+The `ballerinax/sfdc` module includes a Listener that would capture events on SObjects defined in a Salesforce 
+instance.
 
 # Prerequisites
 1. Salesforce Organization  
@@ -481,7 +479,7 @@ committed, they aren’t rolled back.
 ```
 
 ## Event Listener
-The Listener which can be used to capture events on PushTopics defined in a Salesforce instance is configured as below.
+The Listener which can be used to capture events defined in a Salesforce instance is configured as below.
 
 ```ballerina
 sfdc:ListenerConfiguration listenerConfig = {
@@ -495,34 +493,21 @@ In the above configuration, the password should be the concatenation of the user
 
 Now, a service has to be defined on the ‘eventListener’ like the following.
 
-
 ```ballerina
   @sfdc:ServiceConfig {
-      topic:"/topic/QuoteUpdate"
+      topic:"/data/ChangeEvents"
   }
   service quoteUpdate on eventListener {
-      resource function onEvent(json quoteUpdate) { 
-          //convert JSON string to JSON     
-          io:StringReader sr = new(quoteUpdate.toJsonString());
-          json|error quote = sr.readJson();
+      resource function onUpdate (map<json> quoteUpdate) { 
+          json quote = op.get("Status");
           if (quote is json) {
-              io:println("Quote Status : ", quote.sobject.Status);
+              io:println("Quote Status : ", quote);
           }
       }
   }
 ```
 
-The above service is listening to the PushTopic `QuoteUpdate` defined in the Salesforce like the following.
-
-```ballerina
-   PushTopic pushTopic = new PushTopic();
-   pushTopic.Name = 'QuoteUpdate';
-   pushTopic.Query = 'SELECT Id, Name, AccountId, OpportunityId, Status,GrandTotal  FROM Quote';
-   pushTopic.ApiVersion = 48.0;
-   pushTopic.NotifyForOperationUpdate = true;
-   pushTopic.NotifyForFields = 'Referenced';
-   insert pushTopic;
-```
+The above service is listening to events in the Salesforce and we can capture any data that comes with it.
 
 # Samples
 Please find the samples for above mentioned use cases through following links.
@@ -573,14 +558,14 @@ above to listen to a certin event users need to publish a pushtopic related to t
     **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
 *   Download and install[ Ballerina SL Alpha5](https://ballerina.io/).
-*   Install Apache Maven  
+*   Install Gradle 
 
 ## Building the Source
 Execute the commands below to build from the source after installing the Ballerina SL Alpha5 version.
 
-### To install the emp-wrapper :
+### Build the project:
 ```ballerina
-   mvn clean install -pl emp-wrapper
+   gradle build
 ```
 
 ### To build the library:

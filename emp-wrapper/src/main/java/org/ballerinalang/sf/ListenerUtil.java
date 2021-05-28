@@ -140,19 +140,19 @@ public class ListenerUtil {
                 final StrandMetadata ON_CREATE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_CREATE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_CREATE, null, ON_CREATE_METADATA, null,
-                        toBMap(event), true);
+                        toBMap(map), true);
                 break;
             case "DELETE":
                 final StrandMetadata ON_DELETE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_DELETE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_DELETE, null, ON_DELETE_METADATA, null,
-                        toBMap(event), true);
+                        toBMap(map), true);
                 break;
-            case "RESTORE":
+            case "UNDELETE":
                 final StrandMetadata ON_RESTORE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_RESTORE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_RESTORE, null, ON_RESTORE_METADATA, null,
-                        toBMap(event), true);
+                        toBMap(map), true);
                 break;
         }
     }
