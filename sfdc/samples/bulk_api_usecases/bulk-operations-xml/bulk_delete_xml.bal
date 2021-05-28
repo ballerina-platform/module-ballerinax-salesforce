@@ -47,7 +47,7 @@ public function main(){
         </sObject>
     </sObjects>`;
 
-    sfdc:BulkJob|error deleteJob = baseClient->creatJob("delete", "Contact", "XML");
+    sfdc:BulkJob|error deleteJob = baseClient->createJob("delete", "Contact", "XML");
 
     if (deleteJob is sfdc:BulkJob){
         error|sfdc:BatchInfo batch = baseClient->addBatch(deleteJob, contactsToDelete);

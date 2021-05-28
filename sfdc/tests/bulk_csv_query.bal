@@ -28,7 +28,7 @@ function queryCsv() {
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
 
     //create job
-    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "CSV");
+    error|BulkJob queryJob = baseClient->createJob("query", "Contact", "CSV");
 
     if (queryJob is BulkJob) {
         //add query string

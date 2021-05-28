@@ -38,7 +38,7 @@ public function main(){
 
     string xmlContactsFilePath = "resources/contacts.xml";
 
-    sfdc:BulkJob|error insertJob = baseClient->creatJob("insert", "Contact", "XML");
+    sfdc:BulkJob|error insertJob = baseClient->createJob("insert", "Contact", "XML");
 
     if (insertJob is sfdc:BulkJob){
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(xmlContactsFilePath);

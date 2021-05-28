@@ -50,7 +50,7 @@ function updateXml() {
         </sObject>
     </sObjects>`;
     //create job
-    error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "XML");
+    error|BulkJob updateJob = baseClient->createJob("update", "Contact", "XML");
 
     if (updateJob is BulkJob) {
         //add xml content

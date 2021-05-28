@@ -43,7 +43,7 @@ public function main(){
         {"Id":id2}
     ];
 
-    sfdc:BulkJob|error deleteJob = baseClient->creatJob("delete", "Contact", "JSON");
+    sfdc:BulkJob|error deleteJob = baseClient->createJob("delete", "Contact", "JSON");
 
     if (deleteJob is sfdc:BulkJob){
         error|sfdc:BatchInfo batch = baseClient->addBatch(deleteJob, contactsToDelete);

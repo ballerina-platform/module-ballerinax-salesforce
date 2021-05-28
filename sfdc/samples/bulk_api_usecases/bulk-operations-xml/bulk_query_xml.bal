@@ -37,7 +37,7 @@ public function main(){
     
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Software Engineer Level 3'";
 
-    sfdc:BulkJob|error queryJob = baseClient->creatJob("query", "Contact", "XML");
+    sfdc:BulkJob|error queryJob = baseClient->createJob("query", "Contact", "XML");
 
     if (queryJob is sfdc:BulkJob){
         error|sfdc:BatchInfo batch = baseClient->addBatch(queryJob, queryStr);

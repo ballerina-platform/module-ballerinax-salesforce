@@ -48,7 +48,7 @@ function updateJson() {
     }];
 
     //create job
-    error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "JSON");
+    error|BulkJob updateJob = baseClient->createJob("update", "Contact", "JSON");
 
     if (updateJob is BulkJob) {
         //add json content
