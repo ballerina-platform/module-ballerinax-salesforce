@@ -46,7 +46,7 @@ function upsertXml() {
         </sObject>
     </sObjects>`;
     //create job
-    error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "XML", "My_External_Id__c");
+    error|BulkJob upsertJob = baseClient->createJob("upsert", "Contact", "XML", "My_External_Id__c");
 
     if (upsertJob is BulkJob) {
         //add xml content

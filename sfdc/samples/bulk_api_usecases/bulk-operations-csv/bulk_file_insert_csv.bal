@@ -39,7 +39,7 @@ public function main(){
 
     string csvContactsFilePath = "resources/contacts.csv";
 
-    sfdc:BulkJob|error insertJob = baseClient->creatJob("insert", "Contact", "CSV");
+    sfdc:BulkJob|error insertJob = baseClient->createJob("insert", "Contact", "CSV");
 
     if (insertJob is sfdc:BulkJob){
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(csvContactsFilePath);

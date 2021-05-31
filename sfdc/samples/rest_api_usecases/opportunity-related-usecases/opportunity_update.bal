@@ -41,13 +41,12 @@ public function main(){
         StageName: "Prospecting"
     };
 
-    boolean|sfdc:Error res = baseClient->updateOpportunity(opportunityId,opportunityRecord);
+    sfdc:Error? res = baseClient->updateOpportunity(opportunityId,opportunityRecord);
 
-   if res is boolean{
-        string outputMessage = (res == true) ? "Opportunity Updated Successfully!" : "Failed to Update the Opportunity";
-        log:printInfo(outputMessage);
+    if res is sfdc:Error{
+        log:printError(res.message());
     } else {
-        log:printError(msg = res.message());
+        log:printInfo("Opportunity updated successfully");
     }
 
 }

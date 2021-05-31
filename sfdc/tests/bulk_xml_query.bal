@@ -27,7 +27,7 @@ function queryXml() {
     string batchId = "";
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 01'";
     //create job
-    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "XML");
+    error|BulkJob queryJob = baseClient->createJob("query", "Contact", "XML");
 
     if (queryJob is BulkJob) {
         //add xml content

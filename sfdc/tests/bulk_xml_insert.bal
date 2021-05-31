@@ -47,7 +47,7 @@ function insertXml() {
         </sObject>
     </sObjects>`;
     //create job
-    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
+    error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "XML");
 
     if (insertJob is BulkJob) {
         //add xml content
@@ -173,7 +173,7 @@ function insertXmlFromFile() {
     string xmlContactsFilePath = "sfdc/tests/resources/contacts.xml";
 
     //create job
-    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "XML");
+    error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "XML");
 
     if (insertJob is BulkJob) {
         //add xml content via file

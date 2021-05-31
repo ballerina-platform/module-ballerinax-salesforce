@@ -35,13 +35,12 @@ public function main(){
 
     string productId = getProductIdByName("Test Product");
 
-    boolean|sfdc:Error res = baseClient->deleteProduct(productId);
+    sfdc:Error? res = baseClient->deleteProduct(productId);
 
-   if res is boolean{
-        string outputMessage = (res == true) ? "Product Deleted Successfully!" : "Product to Delete the Lead";
-        log:printInfo(outputMessage);
+    if res is sfdc:Error{
+        log:printError(res.message());
     } else {
-        log:printError(msg = res.message());
+        log:printInfo("Product deleted successfully");
     }
 
 }
