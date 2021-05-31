@@ -44,13 +44,12 @@ public function main(){
         My_External_Id__c: "870"
     };
 
-    boolean|sfdc:Error res = baseClient->updateContact(contactId,contactRecord);
+    sfdc:Error? res = baseClient->updateContact(contactId,contactRecord);
 
-    if res is boolean{
-        string outputMessage = (res == true) ? "Contact Updated Successfully!" : "Failed to Update the Contact";
-        log:printInfo(outputMessage);
+    if res is sfdc:Error{
+        log:printError(res.message());
     } else {
-        log:printError(msg = res.message());
+        log:printInfo("Contact updated successfully");
     }
 }
 

@@ -108,7 +108,7 @@ isolated function checkJsonPayloadAndSetErrors(http:Response|http:PayloadType|er
 # + httpResponse - HTTP response or error occurred  
 # + jobtype - Job type
 # + return - Query string response if successful or else an sfdc:Error
-isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JOBTYPE jobtype) returns 
+isolated function getQueryRequest(http:Response|http:PayloadType|error httpResponse, JobType jobtype) returns 
                                   @tainted string|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK) {

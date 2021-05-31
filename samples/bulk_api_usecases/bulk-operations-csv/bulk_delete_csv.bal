@@ -41,7 +41,7 @@ public function main(){
 
     string contactsToDelete = "\n".'join("Id", id1, id2);
     
-    sfdc:BulkJob|error deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
+    sfdc:BulkJob|error deleteJob = baseClient->createJob("delete", "Contact", "CSV");
 
     if (deleteJob is sfdc:BulkJob){
         error|sfdc:BatchInfo batch = baseClient->addBatch(deleteJob, contactsToDelete);

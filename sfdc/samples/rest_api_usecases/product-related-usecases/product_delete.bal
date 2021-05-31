@@ -33,33 +33,34 @@ sfdc:Client baseClient = checkpanic new(sfConfig);
 
 public function main(){
 
-    string opportunityId = getOpportunityIdByName("Alan Kimberly", "New");
+    string productId = getProductIdByName("Test Product");
 
-    sfdc:Error? res = baseClient->deleteOpportunity(opportunityId);
+    sfdc:Error? res = baseClient->deleteProduct(productId);
 
     if res is sfdc:Error{
         log:printError(res.message());
     } else {
-        log:printInfo("Opportunity deleted successfully");
+        log:printInfo("Product deleted successfully");
     }
 
 }
 
-function getOpportunityIdByName(string name, string stageName) returns @tainted string {
-    string opportunityId = "";
-    string sampleQuery = "SELECT Id FROM Opportunity WHERE Name='" + name + "' AND StageName='" + stageName + "'";
+function getProductIdByName(string name) returns @tainted string {
+    string productId = "";
+    string sampleQuery = "SELECT Id FROM Product2 WHERE Name='" + name + "'";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
     if (res is sfdc:SoqlResult) {
         sfdc:SoqlRecord[]|error records = res.records;
         if (records is sfdc:SoqlRecord[]) {
             string id = records[0]["Id"].toString();
-            opportunityId = id;
+            productId = id;
         } else {
-            log:printInfo("Getting Opportunity ID by name failed. err=" + records.toString());            
+            log:printInfo("Getting Product ID by name failed. err=" + records.toString());            
         }
     } else {
-        log:printInfo("Getting Opportunity ID by name failed. err=" + res.toString());
+        log:printInfo("Getting Product ID by name failed. err=" + res.toString());
     }
-    return opportunityId;
+    return productId;
 }
+

@@ -63,9 +63,6 @@ final string UPDATED = "updated";
 # Constant field `DESCRIBE`. Holds the value describe for describe resource prefix.
 final string DESCRIBE = "describe";
 
-# Constant field `QUERY`. Holds the value query for SOQL query resource prefix and bulk API query operator.
-const QUERY = "query";
-
 # Constant field `search`. Holds the value search for SOSL search resource prefix.
 final string SEARCH = "search";
 
@@ -138,31 +135,6 @@ const SERVICES = "services";
 
 # Constant field `ASYNC`. Holds the value of "async".
 const ASYNC = "async";
-
-// Bulk API Operators
-
-# Constant field `INSERT`. Holds the value of "insert" for insert operator.
-const INSERT = "insert";
-
-# Constant field `UPSERT`. Holds the value of "upsert" for upsert operator.
-const UPSERT = "upsert";
-
-# Constant field `UPDATE`. Holds the value of "update" for update operator.
-const UPDATE = "update";
-
-# Constant field `DELETE`. Holds the value of "delete" for delete operator.
-const DELETE = "delete";
-
-// Content types allowed by Bulk API
-
-# Constant field `CSV`. Holds the value of "CSV".
-const CSV = "CSV";
-
-# Constant field `XML`. Holds the value of "XML".
-const XML = "XML";
-
-# Constant field `JSON`. Holds the value of "JSON".
-const JSON = "JSON";
 
 // Salesforce bulk API terms
 

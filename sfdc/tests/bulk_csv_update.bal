@@ -32,7 +32,7 @@ function updateCsv() {
         + shanesID + ",Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211788,shane78@gmail.com,846";
 
     //create job
-    error|BulkJob updateJob = baseClient->creatJob("update", "Contact", "CSV");
+    error|BulkJob updateJob = baseClient->createJob("update", "Contact", "CSV");
 
     if (updateJob is BulkJob) {
         //add csv content

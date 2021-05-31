@@ -40,15 +40,11 @@ public function main(){
         BillingCity: "Colombo 3"
     };
 
-    boolean|sfdc:Error res = baseClient->updateAccount(accountId,accountRecord);
+    sfdc:Error? res = baseClient->updateAccount(accountId,accountRecord);
 
-   if res is boolean{
-        string outputMessage = (res == true) ? "Account Updated Successfully!" : "Failed to Update the Account";
-        log:printInfo(outputMessage);
-    } else {
-        log:printError(msg = res.message());
+    if res is sfdc:Error{
+        log:printError(res.message());
     }
-
 }
 
 function getAccountIdByName(string name) returns @tainted string {

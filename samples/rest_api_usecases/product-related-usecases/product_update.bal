@@ -39,13 +39,12 @@ public function main(){
         Name: "Test Product"
     };
 
-    boolean|sfdc:Error res = baseClient->updateProduct(productId,productRecord);
+    sfdc:Error? res = baseClient->updateProduct(productId,productRecord);
 
-   if res is boolean{
-        string outputMessage = (res == true) ? "Product Updated Successfully!" : "Failed to Update the Product";
-        log:printInfo(outputMessage);
+    if res is sfdc:Error{
+        log:printError(res.message());
     } else {
-        log:printError(msg = res.message());
+        log:printInfo("Product updated successfully");
     }
 
 }
