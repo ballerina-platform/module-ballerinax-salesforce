@@ -494,17 +494,17 @@ In the above configuration, the password should be the concatenation of the user
 Now, a service has to be defined on the ‘eventListener’ like the following.
 
 ```ballerina
-  @sfdc:ServiceConfig {
-      topic:"/data/ChangeEvents"
-  }
-  service quoteUpdate on eventListener {
-      resource function onUpdate (map<json> quoteUpdate) { 
-          json quote = op.get("Status");
-          if (quote is json) {
-              io:println("Quote Status : ", quote);
-          }
-      }
-  }
+@sfdc:ServiceConfig {
+    topic:"/data/ChangeEvents"
+}
+service quoteUpdate on eventListener {
+    resource function onUpdate (sfdc:EventData quoteUpdate) { 
+        json quote = op.changedData.get("Status");
+        if (quote is json) {
+            io:println("Quote Status : ", quote);
+        }
+    }
+}
 ```
 
 The above service is listening to events in the Salesforce and we can capture any data that comes with it.

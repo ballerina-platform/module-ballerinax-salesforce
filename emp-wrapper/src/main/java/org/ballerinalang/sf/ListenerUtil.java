@@ -121,38 +121,36 @@ public class ListenerUtil {
 
     private static void injectEvent(Map<String, Object> event, ObjectValue serviceObject, Runtime runtime) {
         Gson gson = new Gson();
-        ObjectMapper oMapper = new ObjectMapper();
         String eventType = new JSONObject(gson.toJson(event
                           .get(EVENT_PAYLOAD)))
                           .getJSONObject(EVENT_HEADER)
                           .get(EVENT_CHANGE_TYPE).toString();
 
-        Object eventPayload = event.get(EVENT_PAYLOAD);
-        Map map = oMapper.convertValue(eventPayload, Map.class);
+        BMap<BString, Object> eventObject = getEventDataRecord(event);
         switch (eventType) {
             case "UPDATE":
                 final StrandMetadata ON_UPDATE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_UPDATE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_UPDATE, null, ON_UPDATE_METADATA, null,
-                        toBMap(map), true);
+                        eventObject,true);
                 break;
             case "CREATE":
                 final StrandMetadata ON_CREATE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_CREATE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_CREATE, null, ON_CREATE_METADATA, null,
-                        toBMap(map), true);
+                        eventObject, true);
                 break;
             case "DELETE":
                 final StrandMetadata ON_DELETE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_DELETE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_DELETE, null, ON_DELETE_METADATA, null,
-                        toBMap(map), true);
+                        eventObject, true);
                 break;
             case "UNDELETE":
                 final StrandMetadata ON_RESTORE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_RESTORE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_RESTORE, null, ON_RESTORE_METADATA, null,
-                        toBMap(map), true);
+                        eventObject, true);
                 break;
         }
     }
@@ -191,46 +189,50 @@ public class ListenerUtil {
         return returnMap;
     }
 
-//    /**
-//     * Convert Map to Ballerina record tpe
-//     *
-//     * @param event Input Map used to convert to BMap.
-//     * @return Converted BMap object.
-//     */
-//    private static BMap<BString, Object> getEventDataRecord(Map<String, Object> event)  {
-//        Gson gson = new Gson();
-//        Object[] eventData = new Object[2];
-//        BMap<BString, Object> eventDataRecord =
-//                ValueCreator.createRecordValue(PACKAGE_ID_SFDC, EVENT_DATA_RECORD);
-//        eventData[0] = toBMap(event);
-//        BMap<BString, Object> eventMetadataRecord =
-//                ValueCreator.createRecordValue(PACKAGE_ID_SFDC, EVENT_METADATA_RECORD);
-//        Object[] metadata = new Object[8];
-//        Integer commitTimestamp = (Integer) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("commitTimestamp");
-//        metadata[0] = commitTimestamp;
-//        String transactionKey = (String) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("transactionKey");
-//        metadata[1] = transactionKey;
-//        String changeOrigin = (String) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("changeOrigin");
-//        metadata[2] = changeOrigin;
-//        String changeType = (String) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("changeType");
-//        metadata[3] = changeType;
-//        String entityName = (String) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("entityName");
-//        metadata[4] = entityName;
-//        Integer sequenceNumber = (Integer) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("sequenceNumber");
-//        metadata[5] = sequenceNumber;
-//        String commitUser = (String) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("commitUser");
-//        metadata[6] = commitUser;
-//        Integer commitNumber = (Integer) new JSONObject(gson.toJson(event.get("payload")))
-//                .getJSONObject("ChangeEventHeader").get("commitNumber");
-//        metadata[7] = commitNumber;
-//        eventData[1] = ValueCreator.createRecordValue(eventMetadataRecord, metadata);
-//        return ValueCreator.createRecordValue(eventDataRecord, eventData);
-//    }
+    /**
+     * Convert Map to Ballerina record tpe
+     *
+     * @param event Input Map used to convert to BMap.
+     * @return Converted BMap object.
+     */
+    private static BMap<BString, Object> getEventDataRecord(Map<String, Object> event)  {
+        Gson gson = new Gson();
+        ObjectMapper oMapper = new ObjectMapper();
+        Object[] eventData = new Object[2];
+        Object[] metadata = new Object[8];
+
+        Object eventPayload = event.get(EVENT_PAYLOAD);
+        Map map = oMapper.convertValue(eventPayload, Map.class);
+        BMap<BString, Object> eventDataRecord =
+                ValueCreator.createRecordValue(PACKAGE_ID_SFDC, EVENT_DATA_RECORD);
+        eventData[0] = toBMap(map);
+        BMap<BString, Object> eventMetadataRecord =
+                ValueCreator.createRecordValue(PACKAGE_ID_SFDC, EVENT_METADATA_RECORD);
+        String commitTimestamp = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get("commitTimestamp").toString();
+        metadata[0] = commitTimestamp;
+        String transactionKey = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get("transactionKey").toString();
+        metadata[1] = transactionKey;
+        String changeOrigin = (String) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get("changeOrigin");
+        metadata[2] = changeOrigin;
+        String changeType = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get(EVENT_CHANGE_TYPE).toString();
+        metadata[3] = changeType;
+        String entityName = (String) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get("entityName");
+        metadata[4] = entityName;
+        Integer sequenceNumber = (Integer) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get("sequenceNumber");
+        metadata[5] = sequenceNumber;
+        String commitUser = (String) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get("commitUser");
+        metadata[6] = commitUser;
+        String commitNumber = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).get("commitNumber").toString();
+        metadata[7] = commitNumber;
+        eventData[1] = ValueCreator.createRecordValue(eventMetadataRecord, metadata);
+        return ValueCreator.createRecordValue(eventDataRecord, eventData);
+    }
 }
