@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerina/jballerina.java;
-//import ballerina/log;
-//import ballerina/http;
 
 handle JAVA_NULL = java:createNull();
 
@@ -94,11 +92,26 @@ public type SFDCTopicConfigData record {|
 
 public annotation SFDCTopicConfigData ServiceConfig on service;
 
+# A record type which contains data returned from a Change Data Event.
+#
+# + changedData - A JSON map which contains the changed data
+# + metadata - Header fields that contain information about the event
 public type EventData record {
-    map<string> payload?;
-    ChangeEventMetadata ChangeEventHeader?;
+    map<json> changedData;
+    ChangeEventMetadata metadata?;
 };
 
+# Header fields that contain information about the event.
+#
+# + commitTimestamp - The date and time when the change occurred, represented as the number of milliseconds 
+#                     since January 1, 1970 00:00:00 GMT
+# + transactionKey - Uniquely identifies the transaction that the change is part of
+# + changeOrigin - Origin of the change. Use this field to find out what caused the change.  
+# + changeType - The operation that caused the change  
+# + entityName - The name of the standard or custom object for this record change
+# + sequenceNumber - Identifies the sequence of the change within a transaction
+# + commitUser - The ID of the user that ran the change operation
+# + commitNumber - The system change number (SCN) of a committed transaction
 public type ChangeEventMetadata record {
     int commitTimestamp?;
     string transactionKey?;

@@ -31,8 +31,8 @@ boolean isUpdated = false;
 
 @ServiceConfig {topic: "/data/ChangeEvents"}
 service on eventListener {
-    remote function onUpdate(map<json> op) {
-        json accountName = op.get("Name");
+    remote function onUpdate(EventData op) {
+        json accountName = op.changedData.get("Name");
         if (accountName.toString() == "WSO2 Inc") {
             isUpdated = true;
         } else {
@@ -46,6 +46,6 @@ service on eventListener {
     dependsOn: [testUpdateRecord]
 }
 function testUpdated() {
-    runtime:sleep(3.0);
+    runtime:sleep(5.0);
     test:assertTrue(isUpdated, "Error in retrieving account update!");
 }

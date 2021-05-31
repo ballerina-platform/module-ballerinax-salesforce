@@ -23,6 +23,9 @@
                 <includes>
                   <include>org.cometd.java:*</include>
                   <include>org.eclipse.jetty:*</include>
+                  <include>com.fasterxml.jackson.core:*</include>
+                  <include>org.json:*</include>
+                  <include>com.google.code.gson:*</include>
                 </includes>
                 <excludes>
                   <exclude>META-INF/*.*</exclude>

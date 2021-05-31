@@ -18,31 +18,53 @@
   ~
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0">
+<project xmlns="http://maven.apache.org/POM/4.0.0"          
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.ballerinalang.sf</groupId>
         <artifactId>sfdc-parent-connector</artifactId>
         <version>2.1.8</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
+
     <artifactId>emp-wrapper</artifactId>
     <packaging>jar</packaging>
     <name>emp-wrapper</name>
+
     <dependencies>
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-runtime</artifactId>
+            <version>2.0.0-alpha5</version>
         </dependency>
         <dependency>
             <groupId>org.ballerinalang</groupId>
             <artifactId>ballerina-lang</artifactId>
+            <version>2.0.0-alpha5</version>
         </dependency>
         <dependency>
             <groupId>org.cometd.java</groupId>
             <artifactId>cometd-java-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.10.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180813</version>
+        </dependency>
     </dependencies>
+
      <build>
         <plugins>
             <plugin>
@@ -59,6 +81,9 @@
                                 <includes>
                                     <include>org.cometd.java:*</include>
                                     <include>org.eclipse.jetty:*</include>
+                                    <include>com.fasterxml.jackson.core:*</include>
+                                    <include>org.json:*</include>
+                                    <include>com.google.code.gson:*</include>
                                 </includes>
                                 <excludes>
                                     <exclude>META-INF/*.*</exclude>
@@ -70,4 +95,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
