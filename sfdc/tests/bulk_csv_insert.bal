@@ -129,7 +129,9 @@ function insertCsv() {
             var batchResult = baseClient->getBatchResult(insertJob, batchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");
+                foreach Result res in batchResult {
+                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
+                }
                 break;
             } else if (batchResult is error) {
                 if i != 5 {
@@ -277,7 +279,9 @@ function insertCsvFromFile() {
             var batchResult = baseClient->getBatchResult(insertJob, batchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");
+                foreach Result res in batchResult {
+                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
+                }                
                 break;
             } else if (batchResult is error) {
                 if i != 5 {

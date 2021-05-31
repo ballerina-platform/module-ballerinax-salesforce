@@ -124,7 +124,9 @@ function upsertXml() {
             var batchResult = baseClient->getBatchResult(upsertJob, batchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                test:assertTrue(checkBatchResults(batchResult), msg = "Upsert was not successful.");
+                foreach Result res in batchResult {
+                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
+                }                
                 break;
             } else if (batchResult is error) {
                 if i != 5 {
