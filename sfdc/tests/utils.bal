@@ -31,12 +31,9 @@ isolated function closeRb(io:ReadableByteChannel ch) {
     }
 }
 
-isolated function checkBatchResults(Result[] results) returns boolean {
-    foreach Result res in results {
-        if (!res.success) {
-            log:printError("Failed result, res=" + res.toString(), err = ());
-            return false;
-        }
+isolated function checkBatchResults(Result result) returns boolean {
+    if (!result.success) {
+        return false;
     }
     return true;
 }

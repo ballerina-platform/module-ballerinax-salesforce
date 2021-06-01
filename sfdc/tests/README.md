@@ -37,19 +37,12 @@ field in the salesforce.
 7. At the end click `Save` and see whether external field is added successfully by checking `Fields & Relationships`
    fields.
    
-**Create a PushTopic in Salesforce**
+**Select Objects for Change Notifications**
 
-To run the listener testcase, the following PushTopic needs to created in the Salesforce instance.
+To receive notifications for record changes, select the custom objects and supported standard objects that you are 
+interested in. From Setup, enter Change Data Capture in the Quick Find box, and click Change Data Capture. Select the 
+SObject which you want to listen for changes
 
-```
-PushTopic pushTopic = new PushTopic();
-pushTopic.Name = 'AccountUpdate';
-pushTopic.Query = 'SELECT Id, Name FROM Account';
-pushTopic.ApiVersion = 48.0;
-pushTopic.NotifyForOperationUpdate = true;
-pushTopic.NotifyForFields = 'Referenced';
-insert pushTopic;
-```
 
 **Running Tests**
 

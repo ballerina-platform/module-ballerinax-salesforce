@@ -29,20 +29,14 @@ ListenerConfiguration listenerConfig = {
 listener Listener eventListener = new (listenerConfig);
 boolean isUpdated = false;
 
-@ServiceConfig {topic: "/topic/AccountUpdate"}
-service /topic/AccountUpdate on eventListener {
-    remote function onEvent(json op) {
-        io:StringReader sr = new (op.toJsonString());
-        json|error account = sr.readJson();
-        if (account is json) {
-            json|error accountName = account.sobject.Name;
-            if (accountName is json) {
-                if (accountName.toString() == "WSO2 Inc") {
-                    isUpdated = true;
-                } else {
-                    io:println(account.toString());
-                }
-            }
+@ServiceConfig {topic: "/data/ChangeEvents"}
+service on eventListener {
+    remote function onUpdate(EventData op) {
+        json accountName = op.changedData.get("Name");
+        if (accountName.toString() == "WSO2 Inc") {
+            isUpdated = true;
+        } else {
+            io:println(op.toString());
         }
     }
 }

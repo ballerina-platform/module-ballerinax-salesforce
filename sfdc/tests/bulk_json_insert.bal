@@ -24,7 +24,7 @@ import ballerina/lang.runtime;
 }
 function insertJson() {
     log:printInfo("baseClient -> insertJson");
-    string batchId = "";
+    string jsonBatchId = "";
 
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
@@ -45,15 +45,15 @@ function insertJson() {
     }];
 
     //create job
-    error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "JSON");
+    error|BulkJob jsonInsertJob = baseClient->createJob("insert", "Contact", "JSON");
 
-    if (insertJob is BulkJob) {
+    if (jsonInsertJob is BulkJob) {
         //add json content
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batch = baseClient->addBatch(insertJob, contacts);
+            error|BatchInfo batch = baseClient->addBatch(jsonInsertJob, contacts);
             if (batch is BatchInfo) {
                 test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
-                batchId = batch.id;
+                jsonBatchId = batch.id;
                 break;
             } else {
                 if i != 5 {
@@ -68,7 +68,8 @@ function insertJson() {
 
         //get job info
         foreach var i in 1 ..< maxIterations {
-            error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
+            error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
+
             if (jobInfo is JobInfo) {
                 test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
                 break;
@@ -85,9 +86,9 @@ function insertJson() {
 
         //get batch info
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
+            error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
             if (batchInfo is BatchInfo) {
-                test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
+                test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
                 break;
             } else {
                 if i != 5 {
@@ -102,7 +103,7 @@ function insertJson() {
         
         //get all batches
         foreach var i in 1 ..< 3 {
-            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
+            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(jsonInsertJob);
             if (batchInfoList is BatchInfo[]) {
                 test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
                 break;
@@ -118,7 +119,7 @@ function insertJson() {
 
         //get batch request
         foreach var i in 1 ..< maxIterations {
-            var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
+            var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
             if (batchRequest is json) {
                 json[]|error batchRequestArr = <json[]>batchRequest;
                 if (batchRequestArr is json[]) {
@@ -142,10 +143,12 @@ function insertJson() {
         }
         
         foreach var i in 1 ..< maxIterations {
-            var batchResult = baseClient->getBatchResult(insertJob, batchId);
+            var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");
+                foreach Result res in batchResult {
+                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
+                }                
                 break;
             } else if (batchResult is error) {
                 if i != 5 {
@@ -163,7 +166,8 @@ function insertJson() {
         
         //close job
         foreach var i in 1 ..< maxIterations {
-            error|JobInfo closedJob = baseClient->closeJob(insertJob);
+
+            error|JobInfo closedJob = baseClient->closeJob(jsonInsertJob);
             if (closedJob is JobInfo) {
                 test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
                 break;
@@ -178,7 +182,7 @@ function insertJson() {
             }
         }
     } else {
-        test:assertFail(msg = insertJob.message());
+        test:assertFail(msg = jsonInsertJob.message());
     }
 }
 
@@ -187,21 +191,21 @@ function insertJson() {
 }
 function insertJsonFromFile() {
     log:printInfo("baseClient -> insertJsonFromFile");
-    string batchId = "";
+    string jsonBatchId = "";
     string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";
 
     //create job
-    error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "JSON");
+    error|BulkJob jsonInsertJob = baseClient->createJob("insert", "Contact", "JSON");
 
-    if (insertJob is BulkJob) {
+    if (jsonInsertJob is BulkJob) {
         //add json content
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
             foreach var i in 1 ..< maxIterations {
-                error|BatchInfo batchUsingJsonFile = baseClient->addBatch(insertJob, <@untainted>rbc);
+                error|BatchInfo batchUsingJsonFile = baseClient->addBatch(jsonInsertJob, <@untainted>rbc);
                 if (batchUsingJsonFile is BatchInfo) {
                     test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
-                    batchId = batchUsingJsonFile.id;
+                    jsonBatchId = batchUsingJsonFile.id;
                     break;
                 } else {
                     if i != 5 {
@@ -221,7 +225,7 @@ function insertJsonFromFile() {
 
         //get job info
         foreach var i in 1 ..< maxIterations {
-            error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
+            error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
             if (jobInfo is JobInfo) {
                 test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
             } else {
@@ -237,9 +241,9 @@ function insertJsonFromFile() {
 
         //get batch info
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
+            error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
             if (batchInfo is BatchInfo) {
-                test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
+                test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
             } else {
                 if i != 5 {
                     log:printWarn("getBatchInfo Operation Failed! Retrying...");
@@ -253,7 +257,7 @@ function insertJsonFromFile() {
         
         //get all batches
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
+            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(jsonInsertJob);
             if (batchInfoList is BatchInfo[]) {
                 test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             } else {
@@ -269,7 +273,7 @@ function insertJsonFromFile() {
 
         //get batch request
         foreach var i in 1 ..< maxIterations {
-            var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
+            var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
             if (batchRequest is json) {
                 json[]|error batchRequestArr = <json[]>batchRequest;
                 if (batchRequestArr is json[]) {
@@ -293,10 +297,12 @@ function insertJsonFromFile() {
         }
 
         foreach var i in 1 ..< maxIterations {
-            var batchResult = baseClient->getBatchResult(insertJob, batchId);
+            var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                test:assertTrue(checkBatchResults(batchResult), msg = "Insert was not successful.");
+                foreach Result res in batchResult {
+                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
+                }                
                 break;
             } else if (batchResult is error) {
                 if i != 5 {
@@ -312,13 +318,13 @@ function insertJsonFromFile() {
         }
 
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(insertJob);
+        error|JobInfo closedJob = baseClient->closeJob(jsonInsertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message());
         }
     } else {
-        test:assertFail(msg = insertJob.message());
+        test:assertFail(msg = jsonInsertJob.message());
     }
 }

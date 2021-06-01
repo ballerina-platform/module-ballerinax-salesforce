@@ -15,10 +15,8 @@
 // under the License.
 
 import ballerinax/sfdc;
-import ballerina/io;
 import ballerina/log;
 
-string pushTopic = "<push_topic_name>";
 sfdc:ListenerConfiguration listenerConfig = {
     username: "<user_name>",
     password: "<password>"
@@ -27,16 +25,12 @@ sfdc:ListenerConfiguration listenerConfig = {
 listener sfdc:Listener eventListener = new (listenerConfig);
 
 //service to catch event when an account is updated
-@sfdc:ServiceConfig {topic: "/topic/" + pushTopic}
+@sfdc:ServiceConfig {topic: "/data/ChangeEvents"}
 service on eventListener {
-    remote function onEvent(json op) {
-        io:StringReader sr = new (op.toJsonString());
-        json|error account = sr.readJson();
-        if (account is json) {
-            json|error accountName = account.sobject.Name;
-            if (accountName is json){
-                log:printInfo(accountName.toString() + " Account Updated");
-            }
+    remote function onUpdate(sfdc:EventData op) {
+        json accountName = op.changedData.get("Name");
+        if (accountName is json) {
+            log:printInfo(accountName.toString() + " Account Updated");
         }
     }
 }
