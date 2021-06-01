@@ -64,7 +64,7 @@ public function main(){
     </sObjects>`;
     
 
-    sfdc:BulkJob|error updateJob = baseClient->creatJob("upsert", "Contact", "XML","My_External_Id__c");
+    sfdc:BulkJob|error updateJob = baseClient->createJob("upsert", "Contact", "XML","My_External_Id__c");
 
     if (updateJob is sfdc:BulkJob){
         error|sfdc:BatchInfo batch = baseClient->addBatch(updateJob, <@untainted>contacts);

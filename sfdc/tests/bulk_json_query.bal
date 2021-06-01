@@ -27,7 +27,7 @@ function queryJson() {
     string batchId = "";
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 03'";
     //create job
-    error|BulkJob queryJob = baseClient->creatJob("query", "Contact", "JSON");
+    error|BulkJob queryJob = baseClient->createJob("query", "Contact", "JSON");
 
     if (queryJob is BulkJob) {
         //add query string

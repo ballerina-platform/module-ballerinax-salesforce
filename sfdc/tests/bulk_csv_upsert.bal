@@ -30,7 +30,7 @@ function upsertCsv() {
         + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,shane78@gmail.com,846";
 
     //create job
-    error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "CSV", "My_External_Id__c");
+    error|BulkJob upsertJob = baseClient->createJob("upsert", "Contact", "CSV", "My_External_Id__c");
 
     if (upsertJob is BulkJob) {
         //add csv content

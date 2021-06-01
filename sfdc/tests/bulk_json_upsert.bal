@@ -44,7 +44,7 @@ function upsertJson() {
     }];
 
     //create job
-    error|BulkJob upsertJob = baseClient->creatJob("upsert", "Contact", "JSON", "My_External_Id__c");
+    error|BulkJob upsertJob = baseClient->createJob("upsert", "Contact", "JSON", "My_External_Id__c");
 
     if (upsertJob is BulkJob) {
         //add json content

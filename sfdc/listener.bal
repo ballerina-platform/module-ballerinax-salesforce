@@ -75,8 +75,15 @@ function stopListener() returns error? =
     'class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
+# Salesforce listener configuration
+# 
+# + username - Salesforce login username
+# + password - Salesforce login password appended with the security token (<password><security token>)
+@display{label: "Listener Config"}
 public type ListenerConfiguration record {|
+    @display{label: "Username"}
     string username;
+    @display{label: "Password"}
     string password;
 |};
 

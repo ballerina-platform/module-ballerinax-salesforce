@@ -621,7 +621,7 @@
         
                     },
                     {
-                        "name": "creatJob",
+                        "name": "createJob",
                         "displayName": "Create Job",
                         "parameters" : [
                             {

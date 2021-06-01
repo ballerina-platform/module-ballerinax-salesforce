@@ -35,16 +35,11 @@ public function main(){
 
     string accountId = getAccountIdByName("University of Kelaniya");
 
-    boolean|sfdc:Error res = baseClient->deleteAccount(accountId);
+    sfdc:Error? res = baseClient->deleteAccount(accountId);
 
-    if res is boolean{
-        string outputMessage = (res == true) ? "Account Deleted Successfully!" : "Failed to Delete the Account";
-        log:printInfo(outputMessage);
-    }
-    else{
+    if res is sfdc:Error{
         log:printError(res.message());
     }
-
 }
 
 function getAccountIdByName(string name) returns @tainted string {

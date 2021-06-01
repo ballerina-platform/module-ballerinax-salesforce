@@ -25,7 +25,7 @@ function deleteCsv() {
     string contacts = getCsvContactsToDelete(csvQueryResult);
 
     //create job
-    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "CSV");
+    error|BulkJob deleteJob = baseClient->createJob("delete", "Contact", "CSV");
 
     if (deleteJob is BulkJob) {
         //add csv content
