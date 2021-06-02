@@ -45,7 +45,7 @@ function insertJson() {
     }];
 
     //create job
-    error|BulkJob jsonInsertJob = baseClient->creatJob("insert", "Contact", "JSON");
+    error|BulkJob jsonInsertJob = baseClient->createJob("insert", "Contact", "JSON");
 
     if (jsonInsertJob is BulkJob) {
         //add json content
@@ -195,7 +195,7 @@ function insertJsonFromFile() {
     string jsonContactsFilePath = "sfdc/tests/resources/contacts.json";
 
     //create job
-    error|BulkJob jsonInsertJob = baseClient->creatJob("insert", "Contact", "JSON");
+    error|BulkJob jsonInsertJob = baseClient->createJob("insert", "Contact", "JSON");
 
     if (jsonInsertJob is BulkJob) {
         //add json content

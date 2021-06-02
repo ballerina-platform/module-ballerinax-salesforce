@@ -42,13 +42,12 @@ public function main(){
         Company: "IT World"
     };
 
-    boolean|sfdc:Error res = baseClient->updateLead(leadId,leadRecord);
+    sfdc:Error? res = baseClient->updateLead(leadId,leadRecord);
 
-   if res is boolean{
-        string outputMessage = (res == true) ? "Lead Updated Successfully!" : "Failed to Update the Lead";
-        log:printInfo(outputMessage);
+    if res is sfdc:Error{
+        log:printError(res.message());
     } else {
-        log:printError(msg = res.message());
+        log:printInfo("Lead updated successfully");
     }
 
 }

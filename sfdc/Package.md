@@ -161,7 +161,7 @@ json accountRecord = {
    BillingCity: "Colombo 3"
  };
 
-string|sdfc:Error recordId = baseClient->createRecord(ACCOUNT, accountRecord);
+string|sfdc:Error recordId = baseClient->createRecord("Account", accountRecord);
 ```
 
 #### Get Record
@@ -187,7 +187,7 @@ json account = {
        BillingCity: "Jaffna",
        Phone: "+94110000000"
    };
-boolean|sfdc:Error isSuccess = baseClient->updateRecord(ACCOUNT, testRecordId, account);
+sfdc:Error? result = baseClient->updateRecord("Account", testRecordId, account);
 ```
 
 #### Delete Record
@@ -196,7 +196,7 @@ SObject Name and the SObject record id as parameters and the function will retur
 
 ```ballerina
 string testRecordId = "001xa000003DIlo";
-boolean|sfdc:Error isDeleted = baseClient->deleteRecord(ACCOUNT, testRecordId);
+sfdc:Error? result = baseClient->deleteRecord("Account", testRecordId);
 ```
 
 ### Convenient CRUD Operations for Common SObjects
@@ -218,7 +218,7 @@ json accountRecord = {
    BillingCity: "Colombo 3"
  };
 
-string|sdfc:Error accountId = baseClient->createAccount(accountRecord);
+string|sfdc:Error accountId = baseClient->createAccount(accountRecord);
 ```
 
 #### Get Account by Id
@@ -242,7 +242,7 @@ json account = {
        BillingCity: "Jaffna",
        Phone: "+94110000000"
    };
-boolean|sfdc:Error isSuccess = baseClient->updateRecord(accountId, account);
+sfdc:Error? result = baseClient->updateRecord(accountId, account);
 ```
 
 #### Delete Account
@@ -251,7 +251,7 @@ return true at success.
 
 ```ballerina
 string accountId = "001xa000003DIlo";
-boolean|sfdc:Error isDeleted = baseClient->deleteAccount(accountId);
+sfdc:Error? result = baseClient->deleteAccount(accountId);
 ```
 
 ## Query Operations
@@ -378,7 +378,7 @@ Step by step implementation of an `insert` bulk operation has described below. F
 operation types too. 
 
 ```ballerina
-error|sfdc:BulkJob insertJob = baseClient->creatJob("insert", "Contact", "JSON");
+error|sfdc:BulkJob insertJob = baseClient->createJob("insert", "Contact", "JSON");
 ```
 
 Using the created job object, we can add a batch to it, get information about the batch and get all the batches of the 
@@ -419,7 +419,7 @@ job.
 
 ```ballerina
     //Get the batch result.
-    error|sdfc:Result[] batchResult = baseClient->getBatchResult(insertJob, batchId);
+    error|sfdc:Result[] batchResult = baseClient->getBatchResult(insertJob, batchId);
 ```
 
 

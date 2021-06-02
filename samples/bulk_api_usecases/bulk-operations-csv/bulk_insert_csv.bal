@@ -41,7 +41,7 @@ public function main(){
         "Created_from_Ballerina_Sf_Bulk_API,Peter,Parker,Software Engineer Level 02,0332211777,peter77@gmail.com,863";
     
 
-    sfdc:BulkJob|error insertJob = baseClient->creatJob("insert", "Contact", "CSV");
+    sfdc:BulkJob|error insertJob = baseClient->createJob("insert", "Contact", "CSV");
 
     if (insertJob is sfdc:BulkJob){
         error|sfdc:BatchInfo batch = baseClient->addBatch(insertJob, contacts);

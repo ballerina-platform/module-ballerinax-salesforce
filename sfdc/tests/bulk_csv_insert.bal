@@ -33,7 +33,7 @@ function insertCsv() {
         + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,peter77@gmail.com,846";
 
     //create job
-    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
+    error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
 
     if (insertJob is BulkJob) {
         //add csv content
@@ -178,7 +178,7 @@ function insertCsvFromFile() {
     string csvContactsFilePath = "sfdc/tests/resources/contacts.csv";
 
     //create job
-    error|BulkJob insertJob = baseClient->creatJob("insert", "Contact", "CSV");
+    error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
 
     if (insertJob is BulkJob) {
         //add csv content via file

@@ -24,7 +24,7 @@ function deleteXml() {
     string batchId = "";
     xml contacts = getXmlContactsToDelete(xmlQueryResult);
     //create job
-    error|BulkJob deleteJob = baseClient->creatJob("delete", "Contact", "XML");
+    error|BulkJob deleteJob = baseClient->createJob("delete", "Contact", "XML");
 
     if (deleteJob is BulkJob) {
         //add xml content

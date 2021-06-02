@@ -35,13 +35,12 @@ public function main(){
 
     string opportunityId = getOpportunityIdByName("Alan Kimberly", "New");
 
-    boolean|sfdc:Error res = baseClient->deleteOpportunity(opportunityId);
+    sfdc:Error? res = baseClient->deleteOpportunity(opportunityId);
 
-   if res is boolean{
-        string outputMessage = (res == true) ? "Opportunity Deleted Successfully!" : "Opportunity to Delete the Lead";
-        log:printInfo(outputMessage);
+    if res is sfdc:Error{
+        log:printError(res.message());
     } else {
-        log:printError(msg = res.message());
+        log:printInfo("Opportunity deleted successfully");
     }
 
 }

@@ -34,15 +34,13 @@ public function main(){
 
     string leadId = getLeadIdByName("Mark", "Wahlberg", "IT World");
 
-    boolean|sfdc:Error res = baseClient->deleteLead(leadId);
+    sfdc:Error? res = baseClient->deleteLead(leadId);
 
-   if res is boolean{
-        string outputMessage = (res == true) ? "Lead Deleted Successfully!" : "Failed to Delete the Lead";
-        log:printInfo(outputMessage);
+    if res is sfdc:Error{
+        log:printError(res.message());
     } else {
-        log:printError(msg = res.message());
+        log:printInfo("Lead deleted successfully");
     }
-
 }
 
 function getLeadIdByName(string firstName, string lastName, string compnay) returns @tainted string {

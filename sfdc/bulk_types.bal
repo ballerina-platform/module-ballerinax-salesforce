@@ -39,27 +39,49 @@
 #                             apexProcessingTime, but doesn't include the time the job waited in the queue to be 
 #                             processed or the time required for serialization and deserialization
 # + apexProcessingTime - The number of milliseconds taken to process triggers and other processes related to the job
+@display{label: "Bulk Job Info"}
 public type JobInfo record {|
+    @display{label: "Job Id"}
     string id;
+    @display{label: "Operation"}
     string operation;
+    @display{label: "SObject"}
     string 'object;
+    @display{label: "Created by"}
     string createdById;
+    @display{label: "Created date"}
     string createdDate;
+    @display{label: "Last modified timestamp"}
     string systemModstamp;
+    @display{label: "State"}
     string state;
+    @display{label: "Concurrency mode"}
     string concurrencyMode;
+    @display{label: "Content type"}
     string contentType;
+    @display{label: "No of queued batches"}
     int numberBatchesQueued;
+    @display{label: "No of inprogress batches"}
     int numberBatchesInProgress;
+    @display{label: "No of completed batches"}
     int numberBatchesCompleted;
+    @display{label: "No of failed batches"}
     int numberBatchesFailed;
+    @display{label: "Total batches"}
     int numberBatchesTotal;
+    @display{label: "No of processed records"}
     int numberRecordsProcessed;
+    @display{label: "No of retries"}
     int numberRetries;
+    @display{label: "Api version"}
     float apiVersion;
+    @display{label: "No of failed records"}
     int numberRecordsFailed;
+    @display{label: "Total processing time"}
     int totalProcessingTime;
+    @display{label: "Api active processing time"}
     int apiActiveProcessingTime;
+    @display{label: "APEX processing time"}
     int apexProcessingTime;
     json...;
 |};
@@ -80,16 +102,27 @@ public type JobInfo record {|
 #                             apexProcessingTime
 # + apexProcessingTime - The number of milliseconds taken to process triggers and other processes related to the
 #                        batch data
+@display{label: "Batch Info"}
 public type BatchInfo record {|
+    @display{label: "Id"}
     string id;
+    @display{label: "Bulk job Id"}
     string jobId;
+    @display{label: "Current State"}
     string state;
+    @display{label: "Created date"}
     string createdDate;
+    @display{label: "Last modified timestamp"}
     string systemModstamp;
+    @display{label: "No of processed records"}
     int numberRecordsProcessed;
+    @display{label: "No of failed records"}
     int numberRecordsFailed;
+    @display{label: "Total processing time"}
     int totalProcessingTime;
+    @display{label: "Api active processing time"}
     int apiActiveProcessingTime;
+    @display{label: "APEX processing time"}
     int apexProcessingTime;
     json...;
 |};
@@ -100,21 +133,45 @@ public type BatchInfo record {|
 # + success - The result is a success or not
 # + created - New record created or not
 # + errors - Errors occurred
+@display{label: "Result"}
 public type Result record {|
+    @display{label: "Id"}
     string id?;
+    @display{label: "Success"}
     boolean success;
+    @display{label: "Created"}
     boolean created;
+    @display{label: "Errors"}
     string errors?;
 |};
 
-# Operation type of the bulk job.
-public type OPERATION INSERT|UPDATE|DELETE|UPSERT|QUERY;
-
 # Data type of the bulk job.
-public type JOBTYPE JSON|XML|CSV;
+public enum JobType {
+    JSON,
+    XML,
+    CSV
+}
 
+# Operation type of the bulk job.
+public enum Operation {
+    INSERT = "insert",
+    UPDATE = "update",
+    DELETE = "delete",
+    UPSERT = "upsert",
+    QUERY = "query"
+}
+
+# Define bulk job related information.
+# 
+# + jobId - Bulk job id
+# + jobDataType - Data type of the job, Can be JSON, XML or CSV
+# + operation - Bulk operation.Can be insert, update, delete, upsert, query   
+@display{label: "Bulk job"}
 public type BulkJob record {|
+    @display{label: "Job id"}
     string jobId;
-    JOBTYPE jobDataType;
-    OPERATION operation;
+    @display{label: "Data type"}
+    JobType jobDataType;
+    @display{label: "Operation"}
+    Operation operation;
 |};
