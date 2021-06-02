@@ -204,7 +204,7 @@ json accountRecord = {
    BillingCity: "Colombo 3"
  };
 
-string|sfdc:Error recordId = baseClient->createRecord(ACCOUNT, accountRecord);
+string|sfdc:Error recordId = baseClient->createRecord("Account", accountRecord);
 ```
 
 #### Get Record
@@ -230,7 +230,7 @@ json account = {
        BillingCity: "Jaffna",
        Phone: "+94110000000"
    };
-sfdc:Error? result = baseClient->updateRecord(ACCOUNT, testRecordId, account);
+sfdc:Error? result = baseClient->updateRecord("Account", testRecordId, account);
 ```
 
 #### Delete Record
@@ -239,7 +239,7 @@ SObject Name and the SObject record id as parameters and the function will retur
 
 ```ballerina
 string testRecordId = "001xa000003DIlo";
-sfdc:Error? result = baseClient->deleteRecord(ACCOUNT, testRecordId);
+sfdc:Error? result = baseClient->deleteRecord("Account", testRecordId);
 ```
 
 ### Convenient CRUD Operations for Common SObjects
