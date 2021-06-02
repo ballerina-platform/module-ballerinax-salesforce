@@ -128,7 +128,9 @@ function updateCsv() {
             var batchResult = baseClient->getBatchResult(updateJob, batchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                test:assertTrue(checkBatchResults(batchResult), msg = "Update was not successful.");
+                foreach Result res in batchResult {
+                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
+                }                
                 break;
             } else if (batchResult is error) {
                 if i != 5 {

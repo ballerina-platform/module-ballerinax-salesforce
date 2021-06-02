@@ -31,14 +31,40 @@ public class Constants {
 
     public static final String ORG = "ballerinax";
     public static final String MODULE = "sfdc";
-    public static final String VERSION = "2.1.8";
+    public static final String VERSION = "2.1.9";
     public static final String PACKAGE = ORG + ORG_NAME_SEPARATOR + MODULE + VERSION_SEPARATOR + VERSION;
     public static final Module PACKAGE_ID_SFDC = new Module(ORG, MODULE, VERSION);
 
-    public static final String SERVICE_CONFIG = "ServiceConfig";
-    public static final String ON_EVENT = "onEvent";
+    /* Event Record type names */
+    public static final String EVENT_DATA_RECORD = "EventData";
+    public static final String EVENT_METADATA_RECORD = "ChangeEventMetadata";
 
-    public static final BString TOPIC_NAME = StringUtils.fromString("topic");
+    /* EventData payload fields */
+    public static final String COMMIT_TIME_STAMP = "commitTimestamp";
+    public static final String TRANSACTION_KEY = "transactionKey";
+    public static final String CHANGE_ORIGIN = "changeOrigin";
+    public static final String ENTITY_NAME = "entityName";
+    public static final String SEQUENCE_NUMBER = "sequenceNumber";
+    public static final String COMMIT_USER = "commitUser";
+    public static final String COMMIT_NUMBER = "commitNumber";
+    public static final String RECORD_IDS = "recordIds";
+    public static final String EVENT_PAYLOAD = "payload";
+    public static final String EVENT_HEADER = "ChangeEventHeader";
+    public static final String EVENT_CHANGE_TYPE = "changeType";
+
+    /* Events */
+    public static final String ON_CREATE = "onCreate";
+    public static final String ON_UPDATE = "onUpdate";
+    public static final String ON_DELETE = "onDelete";
+    public static final String ON_RESTORE = "onRestore";
+    public static final String UPDATE = "UPDATE";
+    public static final String CREATE = "CREATE";
+    public static final String DELETE = "DELETE";
+    public static final String UNDELETE = "UNDELETE";
+
+    /* Annotation data*/
+    public static final String SERVICE_CONFIG = "ServiceConfig";
+    public static final BString CHANNEL_NAME = StringUtils.fromString("channelName");
     public static final BString REPLAY_FROM = StringUtils.fromString("replayFrom");
 
     public static final String SFDC_ERROR = "SFDC_Error";
