@@ -25,7 +25,7 @@ sfdc:ListenerConfiguration listenerConfig = {
 listener sfdc:Listener eventListener = new (listenerConfig);
 
 //service to catch event when an account is updated
-@sfdc:ServiceConfig {topic: "/data/ChangeEvents"}
+@sfdc:ServiceConfig {channelName: "/data/ChangeEvents"}
 service on eventListener {
     remote function onUpdate(sfdc:EventData op) {
         json accountName = op.changedData.get("Name");

@@ -10,11 +10,11 @@ These samples demonstrate the employment of Ballerina Salesforce Connector in Sa
 * Samples for SOSL and SOQL related operations
 * Samples for retrieving Organization and SObject metadata
 
-
 ## [Samples for Salesforce Bulk API use cases](bulk_api_usecases)
 
 These samples demonstrate the employment of Ballerina Salesforce Connector in Salesforce BULK API related operations. Examples for bulk insert, bulk insert through files, bulk update, bulk upsert and bulk delete using json, csv or xml data sets are given here.
 
 ## [Samples for Event Listener](event_listener_usecases)
 
-This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
+This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to select Objects for Change Notifications in the user interface in his/her Salesforce instance. 
+- [Select SObjects](https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_select_objects.htm)

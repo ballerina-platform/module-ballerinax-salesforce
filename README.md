@@ -204,7 +204,7 @@ json accountRecord = {
    BillingCity: "Colombo 3"
  };
 
-string|sfdc:Error recordId = baseClient->createRecord("Account", accountRecord);
+string|sfdc:Error recordId = baseClient->createRecord(ACCOUNT, accountRecord);
 ```
 
 #### Get Record
@@ -230,7 +230,7 @@ json account = {
        BillingCity: "Jaffna",
        Phone: "+94110000000"
    };
-sfdc:Error? result = baseClient->updateRecord("Account", testRecordId, account);
+sfdc:Error? result = baseClient->updateRecord(ACCOUNT, testRecordId, account);
 ```
 
 #### Delete Record
@@ -239,7 +239,7 @@ SObject Name and the SObject record id as parameters and the function will retur
 
 ```ballerina
 string testRecordId = "001xa000003DIlo";
-sfdc:Error? result = baseClient->deleteRecord("Account", testRecordId);
+sfdc:Error? result = baseClient->deleteRecord(ACCOUNT, testRecordId);
 ```
 
 ### Convenient CRUD Operations for Common SObjects
@@ -495,7 +495,7 @@ Now, a service has to be defined on the ‘eventListener’ like the following.
 
 ```ballerina
 @sfdc:ServiceConfig {
-    topic:"/data/ChangeEvents"
+    channelName:"/data/ChangeEvents"
 }
 service quoteUpdate on eventListener {
     resource function onUpdate (sfdc:EventData quoteUpdate) { 
@@ -544,9 +544,10 @@ data sets are given here.
 
 ## [Samples for Event Listener](sfdc/samples/event_listener_usecases)
 This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned 
-above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
+above to listen to a certin event users need to select Objects for Change Notifications in the user interface in his/her Salesforce instance. 
+  - [Select SObjects](https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_select_objects.htm) 
   - [Trigger Account Updates](sfdc/samples/event_listener_usecases/listener_account_update.bal)
-
+ 
 
 # Building from the Source
 ## Setting up the prerequisites
