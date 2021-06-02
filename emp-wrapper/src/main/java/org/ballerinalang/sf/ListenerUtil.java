@@ -128,25 +128,25 @@ public class ListenerUtil {
 
         BMap<BString, Object> eventObject = getEventDataRecord(event);
         switch (eventType) {
-            case "UPDATE":
+            case UPDATE:
                 final StrandMetadata ON_UPDATE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_UPDATE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_UPDATE, null, ON_UPDATE_METADATA, null,
                         eventObject,true);
                 break;
-            case "CREATE":
+            case CREATE:
                 final StrandMetadata ON_CREATE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_CREATE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_CREATE, null, ON_CREATE_METADATA, null,
                         eventObject, true);
                 break;
-            case "DELETE":
+            case DELETE:
                 final StrandMetadata ON_DELETE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_DELETE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_DELETE, null, ON_DELETE_METADATA, null,
                         eventObject, true);
                 break;
-            case "UNDELETE":
+            case UNDELETE:
                 final StrandMetadata ON_RESTORE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
                         Constants.VERSION,Constants.ON_RESTORE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_RESTORE, null, ON_RESTORE_METADATA, null,
@@ -156,15 +156,15 @@ public class ListenerUtil {
     }
 
     private static String getTopic(ObjectValue service) {
-        MapValue<BString, Object> topicConfig = (MapValue<BString, Object>) service.getType()
+        MapValue<BString, Object> channelConfig = (MapValue<BString, Object>) service.getType()
                 .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));       
-        return topicConfig.getStringValue(Constants.TOPIC_NAME).getValue();
+        return channelConfig.getStringValue(Constants.CHANNEL_NAME).getValue();
     }
 
     private static long getReplayFrom(ObjectValue service) {
-        MapValue<BString, Object> topicConfig = (MapValue<BString, Object>) service.getType()
+        MapValue<BString, Object> channelConfig = (MapValue<BString, Object>) service.getType()
                 .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));
-        return topicConfig.getIntValue(Constants.REPLAY_FROM);
+        return channelConfig.getIntValue(Constants.REPLAY_FROM);
     }
 
     private static BError sfdcError(String errorMessage) {
@@ -199,7 +199,7 @@ public class ListenerUtil {
         Gson gson = new Gson();
         ObjectMapper oMapper = new ObjectMapper();
         Object[] eventData = new Object[2];
-        Object[] metadata = new Object[8];
+        Object[] metadata = new Object[9];
 
         Object eventPayload = event.get(EVENT_PAYLOAD);
         Map map = oMapper.convertValue(eventPayload, Map.class);
@@ -209,29 +209,32 @@ public class ListenerUtil {
         BMap<BString, Object> eventMetadataRecord =
                 ValueCreator.createRecordValue(PACKAGE_ID_SFDC, EVENT_METADATA_RECORD);
         String commitTimestamp = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
-                .getJSONObject(EVENT_HEADER).get("commitTimestamp").toString();
+                .getJSONObject(EVENT_HEADER).get(COMMIT_TIME_STAMP).toString();
         metadata[0] = commitTimestamp;
         String transactionKey = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
-                .getJSONObject(EVENT_HEADER).get("transactionKey").toString();
+                .getJSONObject(EVENT_HEADER).get(TRANSACTION_KEY).toString();
         metadata[1] = transactionKey;
         String changeOrigin = (String) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
-                .getJSONObject(EVENT_HEADER).get("changeOrigin");
+                .getJSONObject(EVENT_HEADER).get(CHANGE_ORIGIN);
         metadata[2] = changeOrigin;
         String changeType = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
                 .getJSONObject(EVENT_HEADER).get(EVENT_CHANGE_TYPE).toString();
         metadata[3] = changeType;
         String entityName = (String) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
-                .getJSONObject(EVENT_HEADER).get("entityName");
+                .getJSONObject(EVENT_HEADER).get(ENTITY_NAME);
         metadata[4] = entityName;
         Integer sequenceNumber = (Integer) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
-                .getJSONObject(EVENT_HEADER).get("sequenceNumber");
+                .getJSONObject(EVENT_HEADER).get(SEQUENCE_NUMBER);
         metadata[5] = sequenceNumber;
         String commitUser = (String) new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
-                .getJSONObject(EVENT_HEADER).get("commitUser");
+                .getJSONObject(EVENT_HEADER).get(COMMIT_USER);
         metadata[6] = commitUser;
         String commitNumber = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
-                .getJSONObject(EVENT_HEADER).get("commitNumber").toString();
+                .getJSONObject(EVENT_HEADER).get(COMMIT_NUMBER).toString();
         metadata[7] = commitNumber;
+        String recordId = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER).getJSONArray(RECORD_IDS).get(0).toString();
+        metadata[8] = recordId;
         eventData[1] = ValueCreator.createRecordValue(eventMetadataRecord, metadata);
         return ValueCreator.createRecordValue(eventDataRecord, eventData);
     }
