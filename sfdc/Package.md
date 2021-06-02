@@ -457,7 +457,7 @@ Now, a service has to be defined on the ‘eventListener’ like the following.
 
 ```ballerina
 @sfdc:ServiceConfig {
-    topic:"/data/ChangeEvents"
+    channelName:"/data/ChangeEvents"
 }
 service quoteUpdate on eventListener {
     resource function onUpdate (sfdc:EventData quoteUpdate) { 
@@ -488,7 +488,8 @@ data sets are given here.
 
 ## [Samples for Event Listener](samples/event_listener_usecases)
 This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned 
-above to listen to a certin event users need to publish a pushtopic related to that event in his/her Salesforce instance. 
+above to listen to a certin event users need to select Objects for Change Notifications in the user interface in his/her Salesforce instance. 
+- [Select SObjects](https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_select_objects.htm) 
 
 # References
 Trailhead Salesforce Documentation -

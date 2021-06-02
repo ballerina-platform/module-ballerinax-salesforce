@@ -85,12 +85,12 @@ const REPLAY_FROM_EARLIEST = -2;
 
 public type ReplayFrom REPLAY_FROM_TIP|REPLAY_FROM_EARLIEST;
 
-public type SFDCTopicConfigData record {|
-    string topic;
+public type SFDCChannelConfigData record {|
+    string channelName;
     ReplayFrom replayFrom = REPLAY_FROM_TIP;
 |};
 
-public annotation SFDCTopicConfigData ServiceConfig on service;
+public annotation SFDCChannelConfigData ServiceConfig on service;
 
 # A record type which contains data returned from a Change Data Event.
 #
@@ -112,6 +112,7 @@ public type EventData record {
 # + sequenceNumber - Identifies the sequence of the change within a transaction
 # + commitUser - The ID of the user that ran the change operation
 # + commitNumber - The system change number (SCN) of a committed transaction
+# + recordId - The record ID for the changed record
 public type ChangeEventMetadata record {
     int commitTimestamp?;
     string transactionKey?;
@@ -121,4 +122,5 @@ public type ChangeEventMetadata record {
     int sequenceNumber?;
     string commitUser?;
     int commitNumber?;
+    string recordId?;
 };

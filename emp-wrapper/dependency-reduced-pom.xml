@@ -3,7 +3,7 @@
   <parent>
     <artifactId>sfdc-parent-connector</artifactId>
     <groupId>org.ballerinalang.sf</groupId>
-    <version>2.1.8</version>
+    <version>2.1.9</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>emp-wrapper</artifactId>
