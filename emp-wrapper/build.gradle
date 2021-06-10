@@ -42,7 +42,7 @@ repositories {
 dependencies {
     shadow group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.8'
     shadow group: 'org.cometd.java', name: 'cometd-java-client', version: '4.0.4'
-    shadow group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.6'
     shadow group: 'org.json', name: 'json', version: '20180813'
     provided group: 'org.ballerinalang', name: 'ballerina-lang', version: project.ballerinaLangVersion
     provided (group: 'org.ballerinalang', name: 'ballerina-runtime', version: project.ballerinaLangVersion) {
@@ -54,4 +54,7 @@ build.dependsOn(shadowJar)
 
 shadowJar {
     configurations = [project.configurations.shadow]
+    dependencies {
+        exclude(dependency('org.slf4j:.*:.*'))
+    }
 }
