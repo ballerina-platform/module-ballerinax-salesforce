@@ -48,3 +48,9 @@ target/
 
 #Ignore emp-wrapper java classes
 **/target
+
+# Gradle files
+.gradle
+
+# Build files
+**/build/*

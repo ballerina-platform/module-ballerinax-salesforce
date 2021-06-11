@@ -45,9 +45,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <executable>ballerina</executable>
+                    <executable>bal</executable>
                     <arguments>
                         <argument>build</argument>
+                        <argument>-c</argument>
                         <argument>--skip-tests</argument>
                     </arguments>
                 </configuration>
