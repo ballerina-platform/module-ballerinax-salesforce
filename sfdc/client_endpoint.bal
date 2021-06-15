@@ -83,7 +83,7 @@ public client class Client {
 
     # Describes the individual metadata for the specified object.
     # 
-    # + sobjectName - sobject name
+    # + sobjectName - SObject name
     # + return - `SObjectBasicInfo` record if successful else Error occured
     @display {label: "Get SObject Basic Information"}
     isolated remote function getSObjectBasicInfo(@display {label: "SObject Name"} string sobjectName) returns
@@ -122,7 +122,7 @@ public client class Client {
     # Accesses records based on the specified object ID, can be used with external objects.
     # 
     # + path - Resource path
-    # + return - `json` result if successful else Error occured
+    # + return - JSON result if successful else Error occured
     @display {label: "Get Record"}
     isolated remote function getRecord(@display {label: "Resource Path"} string path) returns
                                        @tainted @display {label: "Result"} json|Error {
@@ -134,7 +134,7 @@ public client class Client {
     # 
     # + sObjectName - SObject name value
     # + recordPayload - JSON record to be inserted
-    # + return - created entity ID if successful else Error occured
+    # + return - Created entity ID if successful else Error occured
     @display {label: "Create Record"}
     isolated remote function createRecord(@display {label: "SObject Name"} string sObjectName,
                                           @display {label: "Record Payload"} json recordPayload) returns
@@ -200,10 +200,10 @@ public client class Client {
 
     # Get an object record by ID.
     #
-    # + sobject - sobject name 
-    # + id - sobject id 
-    # + fields - fields to retrieve 
-    # + return - `json` result if successful else `Error` occured
+    # + sobject - SObject name 
+    # + id - SObject id 
+    # + fields - Fields to retrieve 
+    # + return - JSON result if successful else `Error` occured
     @display {label: "Get Record by ID"}
     isolated remote function getRecordById(@display {label: "SObject Name"} string sobject,
                                            @display {label: "SObject ID"} string id,
@@ -219,11 +219,11 @@ public client class Client {
 
     # Get an object record by external ID.
     #
-    # + sobject - sobject name 
-    # + extIdField - external ID field name 
-    # + extId - external ID value 
-    # + fields - fields to retrieve 
-    # + return - `json` result if successful else `Error` occured
+    # + sobject - SObject name 
+    # + extIdField - External ID field name 
+    # + extId - External ID value 
+    # + fields - Fields to retrieve 
+    # + return - JSON result if successful else `Error` occured
     @display {label: "Get Record by External ID"}
     isolated remote function getRecordByExtId(@display {label: "SObject name"} string sobject,
                                               @display {label: "External ID Field Name"} string extIdField, 
@@ -275,7 +275,7 @@ public client class Client {
     # Updates existing Account object record.
     # 
     # + accountId - Account ID
-    # + accountRecord - Account record json payload
+    # + accountRecord - Account record JSON payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Update Account"}
     isolated remote function updateAccount(@display {label: "Account ID"} string accountId,
@@ -413,7 +413,7 @@ public client class Client {
     # Updates existing Opportunity object record.
     # 
     # + opportunityId - Opportunity ID
-    # + opportunityRecord - Opportunity json payload
+    # + opportunityRecord - Opportunity JSON payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
     @display {label: "Update Opportunity"}
     isolated remote function updateOpportunity(@display {label: "Opportunity ID"} string opportunityId,
@@ -551,14 +551,14 @@ public client class Client {
     // ******************************************* Bulk Operations *****************************************************
     # Create a bulk job.
     #
-    # + operation - type of operation like insert, delete, etc.
-    # + sobj - kind of sobject 
-    # + contentType - content type of the job 
-    # + extIdFieldName - field name of the external ID incase of an Upsert operation
+    # + operation - Type of operation like insert, delete, etc.
+    # + sobj - Type of sobject 
+    # + contentType - Content type of the job 
+    # + extIdFieldName - Field name of the external ID incase of an Upsert operation
     # + return - returns job object or error
     @display {label: "Create Job"}
     isolated remote function createJob(@display {label: "Operation"} Operation operation, 
-                                      @display {label: "SObject"} string sobj, 
+                                      @display {label: "SObject Name"} string sobj, 
                                       @display {label: "Content Type"} JobType contentType,
                                       @display {label: "External ID Field Name"} string extIdFieldName = "") returns
                                       @tainted @display {label: "Bulk Job"} error|BulkJob {
@@ -598,8 +598,8 @@ public client class Client {
 
     # Get information about a job.
     #
-    # + bulkJob - job object of which the info is required 
-    # + return - job information record or error
+    # + bulkJob - Job object of which the info is required 
+    # + return - Job information record or error
     @display {label: "Get Job Information"}
     isolated remote function getJobInfo(@display {label: "Bulk Job"} BulkJob bulkJob) returns
                                         @tainted @display {label: "Job Information"} error|JobInfo {
@@ -629,8 +629,8 @@ public client class Client {
 
     # Close a job.
     #
-    # + bulkJob - job to be closed 
-    # + return - job info after the state change of the job
+    # + bulkJob - Job to be closed 
+    # + return - Job info after the state change of the job
     @display {label: "Close Job"}
     remote function closeJob(@display {label: "Bulk Job"} BulkJob bulkJob) returns
                              @tainted @display {label: "Job Information"} error|JobInfo {
@@ -649,8 +649,8 @@ public client class Client {
 
     # Abort a job.
     #
-    # + bulkJob - job to be aborted 
-    # + return - job info after the state change of the job
+    # + bulkJob - Job to be aborted 
+    # + return - Job info after the state change of the job
     @display {label: "Abort Job"}
     remote function abortJob(@display {label: "Bulk Job"} BulkJob bulkJob) returns
                              @tainted @display {label: "Job Information"} error|JobInfo {
@@ -670,8 +670,8 @@ public client class Client {
     # Add batch to the job.
     #
     # + bulkJob - Bulk job  
-    # + content - batch content 
-    # + return - batch info or error
+    # + content - Batch content 
+    # + return - Batch info or error
     @display {label: "Add Batch to Job"}
     isolated remote function addBatch(@display {label: "Bulk Job"} BulkJob bulkJob,
                                       @display {label: "Batch Content"} json|string|xml|io:ReadableByteChannel content)
@@ -742,7 +742,7 @@ public client class Client {
     #
     # + bulkJob - Bulk job 
     # + batchId - ID of the batch of which info is required 
-    # + return - batch info or error
+    # + return - Batch info or error
     @display {label: "Get Batch Information"}
     isolated remote function getBatchInfo(@display {label: "Bulk Job"} @tainted BulkJob bulkJob, 
                                           @display {label: "Batch ID"} string batchId) 
@@ -772,7 +772,7 @@ public client class Client {
     # Get all batches of the job.
     #
     # + bulkJob - Bulkjob
-    # + return - list of batch infos
+    # + return - List of batch infos
     @display {label: "Get All Batches"}
     isolated remote function getAllBatches(@display {label: "Bulkjob"} @tainted BulkJob bulkJob) returns @tainted 
                                            @display {label: "List of batch information"} error|BatchInfo[] {
@@ -803,7 +803,7 @@ public client class Client {
     #
     # + bulkJob - Bulk job
     # + batchId - ID of the batch of which the request is required 
-    # + return - batch content
+    # + return - Batch content
     @display {label: "Get Batch Request Payload"}
     isolated remote function getBatchRequest(@display {label: "Bulk Job"} @tainted BulkJob bulkJob, 
                                              @display {label: "Batch ID"} string batchId) returns
@@ -834,8 +834,8 @@ public client class Client {
     # Get result of the records processed in a batch.
     #
     # + bulkJob - Bulk job  
-    # + batchId - batch ID
-    # + return - result list
+    # + batchId - Batch ID
+    # + return - Result list
     @display {label: "Get Batch Result"}
     isolated remote function getBatchResult(@display {label: "Bulk Job"} @tainted BulkJob bulkJob, 
                                             @display {label: "Batch ID"} string batchId) returns
