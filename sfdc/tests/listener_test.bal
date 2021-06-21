@@ -46,6 +46,6 @@ service on eventListener {
     dependsOn: [testUpdateRecord]
 }
 function testUpdated() {
-    runtime:sleep(5.0);
+    runtime:sleep(3.0);
     test:assertTrue(isUpdated, "Error in retrieving account update!");
 }
