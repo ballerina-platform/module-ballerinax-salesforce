@@ -76,6 +76,8 @@ final string PLATFORM_ACTION = "PlatformAction";
 final string MULTIPLE_RECORDS = "composite/tree";
 
 // Query param names
+const string QUERY = "query";
+
 # Constant field `FIELDS`. Holds the value fields for resource prefix.
 final string FIELDS = "fields";
 
@@ -122,8 +124,6 @@ final string AMPERSAND = "&";
 # Constant field `FORWARD_SLASH`. Holds the value of "/".
 final string FORWARD_SLASH = "/";
 
-// Error Codes
-const SALESFORCE_ERROR_CODE = "{wso2/salesforce}";
 
 // ************************************ Salesforce bulk client constants ***********************************************
 
@@ -153,42 +153,13 @@ const RESULT = "result";
 # Constant field `STATUS_CODE`. Header name for bulk API response .
 const STATUS_CODE = "STATUS_CODE";
 
-// XML namespace used by salesforce responses
-
-# Constant field `XML_NAMESPACE`. Holds the value of XML namespace used by salesforce bulk API.
-const XML_NAMESPACE = "http://www.force.com/2009/06/asyncapi/dataload";
-
-// Content types
-
-# Constant field `APP_XML`. Holds the value of "application/xml".
-const APP_XML = "application/xml";
-
-# Constant field `APP_JSON`. Holds the value of "application/xml".
-const APP_JSON = "application/json";
-
-# Constant field `TEXT_CSV`. Holds the value of "text/csv".
-const TEXT_CSV = "text/csv";
-
-# Constant field `APP_OCT_STREAM`. Holds the value of "application/octet-stream".
-const APP_OCT_STREAM = "application/octet-stream";
-
 // characters and words
-
-# Constant field `OPEN_CURLY_BRACKET`. Holds the value of "{".
-const OPEN_CURLY_BRACKET = "{";
-
-# Constant field `CLOSE_CURLY_BRACKET`. Holds the value of "}".
-const CLOSE_CURLY_BRACKET = "}";
-
 # Constant field `TRUE`. Holds the value of "true".
 const TRUE = "true";
 
 # Constant field `CONTENT_TYPE`. Holds the value of "Content-Type".
 const CONTENT_TYPE = "Content-Type";
 
-# Constant field `X_SFDC_SESSION`. 
-# Holds the value of "X-SFDC-Session" which used as Authorization header name of bulk API.
-const X_SFDC_SESSION = "X-SFDC-Session";
 
 # Constant field `AUTHORIZATION`. 
 # Holds the value of "Authorization" which used as Authorization header name of REST API.
@@ -200,10 +171,6 @@ const BEARER = "Bearer ";
 # Constant field `ENABLE_PK_CHUNKING`. 
 # Holds the value of "Sforce-Enable-PKChunking" which used to handle large data set extracts.
 const ENABLE_PK_CHUNKING = "Sforce-Enable-PKChunking";
-
-# Constant field `INVALID_SESSION_ID`. 
-# Holds the value of "InvalidSessionId" which used to identify Unauthorized 401 response.
-const INVALID_SESSION_ID = "InvalidSessionId";
 
 // Payloads
 

@@ -6,6 +6,7 @@
 
 #conf file
 ballerina.conf
+Config.toml
 
 #lock file
 Ballerina.lock
@@ -54,3 +55,9 @@ target/
 
 # Build files
 **/build/*
+
+# Json files created inside resources folder. Refer exception below.
+**/resources/*
+
+# Allow files in the bulk test folder
+!**/tests/resources/*

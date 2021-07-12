@@ -92,7 +92,7 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|E
             success: getBooleanValue((result/<ns:success>/*).toString()),
             created: getBooleanValue((result/<ns:created>/*).toString())
         };
-        // // Check whether an error occured.
+        // Check whether an error occured.
         xml|error errors = result/<ns:errors>;
         if (errors is xml) {
             batchResult.errors = (errors/<ns:statusCode>/*).toString() + " : " + (errors/<ns:message>/*).toString();
