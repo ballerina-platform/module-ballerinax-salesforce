@@ -12,7 +12,7 @@
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
-// under the License.
+//under the License.
 
 import ballerina/io;
 import ballerina/log;
@@ -22,40 +22,38 @@ import ballerina/lang.runtime;
 @test:Config {
     enable: true
 }
-function insertXml() {
-    log:printInfo("baseClient -> insertXml");
-    string xmlBatchId = "";
+function insertJson() {
+    log:printInfo("baseClient -> insertJson");
+    string jsonBatchId = "";
 
-    xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
-        <sObject>
-            <description>Created_from_Ballerina_Sf_Bulk_API</description>
-            <FirstName>Argus</FirstName>
-            <LastName>Filch</LastName>
-            <Title>Professor Level 01</Title>
-            <Phone>099116123</Phone>
-            <Email>argus@yahoo.com</Email>
-            <My_External_Id__c>851</My_External_Id__c>
-        </sObject>
-        <sObject>
-            <description>Created_from_Ballerina_Sf_Bulk_API</description>
-            <FirstName>Poppy</FirstName>
-            <LastName>Pomfrey</LastName>
-            <Title>Professor Level 01</Title>
-            <Phone>086755643</Phone>
-            <Email>madampomfrey@gmail.com</Email>
-            <My_External_Id__c>852</My_External_Id__c>
-        </sObject>
-    </sObjects>`;
+    json contacts = [{
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        FirstName: "Remus",
+        LastName: "Lupin",
+        Title: "Professor Level 03",
+        Phone: "0442226670",
+        Email: "lupinWolf@gmail.com",
+        My_External_Id__c: "848"
+    }, {
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        FirstName: "Minerva",
+        LastName: "McGonagall",
+        Title: "Professor Level 03",
+        Phone: "0442216170",
+        Email: "minerva@gmail.com",
+        My_External_Id__c: "849"
+    }];
+
     //create job
-    error|BulkJob xmlInsertJob = baseClient->createJob("insert", "Contact", "XML");
+    error|BulkJob jsonInsertJob = baseClient->createJob("insert", "Contact", "JSON");
 
-    if (xmlInsertJob is BulkJob) {
-        //add xml content
+    if (jsonInsertJob is BulkJob) {
+        //add json content
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batch = baseClient->addBatch(xmlInsertJob, contacts);
+            error|BatchInfo batch = baseClient->addBatch(jsonInsertJob, contacts);
             if (batch is BatchInfo) {
-                test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using xml.");
-                xmlBatchId = batch.id;
+                test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
+                jsonBatchId = batch.id;
                 break;
             } else {
                 if i != 5 {
@@ -69,18 +67,28 @@ function insertXml() {
         }
 
         //get job info
-        error|JobInfo jobInfo = baseClient->getJobInfo(xmlInsertJob);
-        if (jobInfo is JobInfo) {
-            test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
-        } else {
-            test:assertFail(msg = jobInfo.message());
+        foreach var i in 1 ..< maxIterations {
+            error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
+
+            if (jobInfo is JobInfo) {
+                test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
+                break;
+            } else {
+                if i != 5 {
+                    log:printWarn("getJobInfo Operation Failed! Retrying...");
+                    runtime:sleep(delayInSecs);
+                } else {
+                    log:printWarn("getJobInfo Operation Failed! Giving up...");
+                    test:assertFail(msg = jobInfo.message());
+                }
+            }
         }
 
         //get batch info
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batchInfo = baseClient->getBatchInfo(xmlInsertJob, xmlBatchId);
+            error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
             if (batchInfo is BatchInfo) {
-                test:assertTrue(batchInfo.id == xmlBatchId, msg = "Getting batch info failed.");
+                test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
                 break;
             } else {
                 if i != 5 {
@@ -92,10 +100,10 @@ function insertXml() {
                 }
             }
         }
-
+        
         //get all batches
         foreach var i in 1 ..< 3 {
-            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(xmlInsertJob);
+            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(jsonInsertJob);
             if (batchInfoList is BatchInfo[]) {
                 test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
                 break;
@@ -111,9 +119,14 @@ function insertXml() {
 
         //get batch request
         foreach var i in 1 ..< maxIterations {
-            var batchRequest = baseClient->getBatchRequest(xmlInsertJob, xmlBatchId);
-            if (batchRequest is xml) {
-                test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
+            var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
+            if (batchRequest is json) {
+                json[]|error batchRequestArr = <json[]>batchRequest;
+                if (batchRequestArr is json[]) {
+                    test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
+                } else {
+                    test:assertFail(msg = batchRequestArr.toString());
+                }
                 break;
             } else if (batchRequest is error) {
                 if i != 5 {
@@ -124,14 +137,13 @@ function insertXml() {
                     test:assertFail(msg = batchRequest.message());
                 }
             } else {
-                test:assertFail("Invalid batch request!");
+                test:assertFail(msg = "Invalid Batch Request!");
                 break;
             }
         }
-
-        //get batch result
+        
         foreach var i in 1 ..< maxIterations {
-            var batchResult = baseClient->getBatchResult(xmlInsertJob, xmlBatchId);
+            var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
                 foreach Result res in batchResult {
@@ -151,41 +163,49 @@ function insertXml() {
                 break;
             }
         }
-
+        
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(xmlInsertJob);
-        if (closedJob is JobInfo) {
-            test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
-        } else {
-            test:assertFail(msg = closedJob.message());
-        }
+        foreach var i in 1 ..< maxIterations {
 
+            error|JobInfo closedJob = baseClient->closeJob(jsonInsertJob);
+            if (closedJob is JobInfo) {
+                test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
+                break;
+            } else {
+                if i != 5 {
+                    log:printWarn("closeJob Operation Failed! Retrying...");
+                    runtime:sleep(delayInSecs);
+                } else {
+                    log:printWarn("closeJob Operation Failed! Giving up...");
+                    test:assertFail(msg = closedJob.message());
+                }
+            }
+        }
     } else {
-        test:assertFail(msg = xmlInsertJob.message());
+        test:assertFail(msg = jsonInsertJob.message());
     }
 }
 
 @test:Config {
     enable: true
 }
-function insertXmlFromFile() {
-    log:printInfo("baseClient -> insertXmlFromFile");
-    string xmlBatchId = "";
-
-    string xmlContactsFilePath = "sfdc/tests/resources/contacts.xml";
+function insertJsonFromFile() {
+    log:printInfo("baseClient -> insertJsonFromFile");
+    string jsonBatchId = "";
+    string jsonContactsFilePath = "modules/bulk/tests/resources/contacts.json";
 
     //create job
-    error|BulkJob xmlInsertJob = baseClient->createJob("insert", "Contact", "XML");
+    error|BulkJob jsonInsertJob = baseClient->createJob("insert", "Contact", "JSON");
 
-    if (xmlInsertJob is BulkJob) {
-        //add xml content via file
-        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(xmlContactsFilePath);
+    if (jsonInsertJob is BulkJob) {
+        //add json content
+        io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
             foreach var i in 1 ..< maxIterations {
-                error|BatchInfo batchUsingXmlFile = baseClient->addBatch(xmlInsertJob, <@untainted>rbc);
-                if (batchUsingXmlFile is BatchInfo) {
-                    test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using xml file.");
-                    xmlBatchId = batchUsingXmlFile.id;
+                error|BatchInfo batchUsingJsonFile = baseClient->addBatch(jsonInsertJob, <@untainted>rbc);
+                if (batchUsingJsonFile is BatchInfo) {
+                    test:assertTrue(batchUsingJsonFile.id.length() > 0, msg = "Could not upload the contacts using json file.");
+                    jsonBatchId = batchUsingJsonFile.id;
                     break;
                 } else {
                     if i != 5 {
@@ -193,7 +213,7 @@ function insertXmlFromFile() {
                         runtime:sleep(delayInSecs);
                     } else {
                         log:printWarn("addBatch Operation Failed! Giving up...");
-                        test:assertFail(msg = batchUsingXmlFile.message());
+                        test:assertFail(msg = batchUsingJsonFile.message());
                     }
                 }
             }
@@ -205,7 +225,7 @@ function insertXmlFromFile() {
 
         //get job info
         foreach var i in 1 ..< maxIterations {
-            error|JobInfo jobInfo = baseClient->getJobInfo(xmlInsertJob);
+            error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
             if (jobInfo is JobInfo) {
                 test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
             } else {
@@ -221,9 +241,9 @@ function insertXmlFromFile() {
 
         //get batch info
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batchInfo = baseClient->getBatchInfo(xmlInsertJob, xmlBatchId);
+            error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
             if (batchInfo is BatchInfo) {
-                test:assertTrue(batchInfo.id == xmlBatchId, msg = "Getting batch info failed.");
+                test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
             } else {
                 if i != 5 {
                     log:printWarn("getBatchInfo Operation Failed! Retrying...");
@@ -234,10 +254,10 @@ function insertXmlFromFile() {
                 }
             }
         }
-
+        
         //get all batches
         foreach var i in 1 ..< maxIterations {
-            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(xmlInsertJob);
+            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(jsonInsertJob);
             if (batchInfoList is BatchInfo[]) {
                 test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             } else {
@@ -253,9 +273,14 @@ function insertXmlFromFile() {
 
         //get batch request
         foreach var i in 1 ..< maxIterations {
-            var batchRequest = baseClient->getBatchRequest(xmlInsertJob, xmlBatchId);
-            if (batchRequest is xml) {
-                test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
+            var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
+            if (batchRequest is json) {
+                json[]|error batchRequestArr = <json[]>batchRequest;
+                if (batchRequestArr is json[]) {
+                    test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
+                } else {
+                    test:assertFail(msg = batchRequestArr.toString());
+                }
                 break;
             } else if (batchRequest is error) {
                 if i != 5 {
@@ -266,14 +291,13 @@ function insertXmlFromFile() {
                     test:assertFail(msg = batchRequest.message());
                 }
             } else {
-                test:assertFail("Invalid batch request!");
+                test:assertFail(msg = "Invalid Batch Request!");
                 break;
             }
         }
 
-        //get batch result
         foreach var i in 1 ..< maxIterations {
-            var batchResult = baseClient->getBatchResult(xmlInsertJob, xmlBatchId);
+            var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
             if (batchResult is Result[]) {
                 test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
                 foreach Result res in batchResult {
@@ -294,14 +318,13 @@ function insertXmlFromFile() {
         }
 
         //close job
-        error|JobInfo closedJob = baseClient->closeJob(xmlInsertJob);
+        error|JobInfo closedJob = baseClient->closeJob(jsonInsertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJob.message());
         }
-
     } else {
-        test:assertFail(msg = xmlInsertJob.message());
+        test:assertFail(msg = jsonInsertJob.message());
     }
 }

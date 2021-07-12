@@ -6,6 +6,7 @@
 
 #conf file
 ballerina.conf
+Config.toml
 
 #lock file
 Ballerina.lock
@@ -51,5 +52,11 @@ target/
 # Ignore Gradle project-specific cache directory
 .gradle
 
-# Ignore Gradle build output directory
-build
+# Build files
+**/build/*
+
+# Json files created inside resources folder. Refer exception below.
+**/resources/*
+
+# Allow files in the bulk test folder
+!**/tests/resources/*

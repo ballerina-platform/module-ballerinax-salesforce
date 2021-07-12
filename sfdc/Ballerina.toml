@@ -2,6 +2,7 @@
 org = "ballerinax"
 name = "sfdc"
 version = "2.1.9-SNAPSHOT"
+export = ["sfdc", "sfdc.bulk"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["sfdc", "salesforce"]

@@ -19,10 +19,37 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/lang.'xml as xmllib;
 import ballerina/regex;
+import ballerina/os;
+import ballerinax/sfdc;
 
 json[] jsonQueryResult = [];
 xml xmlQueryResult = xml `<test/>`;
 string csvQueryResult = "";
+
+
+// import ballerina/log;
+// import ballerina/test;
+
+// Create Salesforce client configuration by reading from environemnt.
+configurable string & readonly clientId = os:getEnv("CLIENT_ID");
+configurable string & readonly clientSecret = os:getEnv("CLIENT_SECRET");
+configurable string & readonly refreshToken = os:getEnv("REFRESH_TOKEN");
+configurable string & readonly refreshUrl = os:getEnv("REFRESH_URL");
+configurable string & readonly baseUrl = os:getEnv("EP_URL");
+
+// Using direct-token config for client configuration
+SalesforceConfiguration sfConfig = {
+    baseUrl: baseUrl,
+    clientConfig: {
+        clientId: clientId,
+        clientSecret: clientSecret,
+        refreshToken: refreshToken,
+        refreshUrl: refreshUrl
+    }
+};
+
+Client baseClient = check new (sfConfig);
+sfdc:Client restClient = check new (sfConfig);
 
 isolated function closeRb(io:ReadableByteChannel ch) {
     var cr = ch.close();
@@ -48,11 +75,11 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string contactId = "";
     string sampleQuery = 
     "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName + "' AND Title='" + title + "'";
-    SoqlResult|Error res = baseClient->getQueryResult(sampleQuery);
+    sfdc:SoqlResult|sfdc:Error res = restClient->getQueryResult(sampleQuery);
 
-    if (res is SoqlResult) {
-        SoqlRecord[]|error records = res.records;
-        if (records is SoqlRecord[]) {
+    if (res is sfdc:SoqlResult) {
+        sfdc:SoqlRecord[]|error records = res.records;
+        if (records is sfdc:SoqlRecord[]) {
             string id = records[0]["Id"].toString();
             contactId = id;
         } else {
