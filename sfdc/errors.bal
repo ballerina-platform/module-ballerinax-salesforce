@@ -31,4 +31,4 @@ const string XML_ACCESSING_ERROR_MSG = "Error occurred while accessing the XML p
 const string TEXT_ACCESSING_ERROR_MSG = "Error occurred while accessing the Text payload of the response.";
 const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
 const string HTTP_ERROR_MSG = "Error occurred while getting the HTTP response.";
-const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";
+public const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";

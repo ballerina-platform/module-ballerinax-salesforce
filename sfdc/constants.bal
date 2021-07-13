@@ -35,7 +35,7 @@ final string REFRESH_TOKEN_ENDPOINT = "REFRESH_URL";
 
 //Latest API Version
 # Constant field `API_VERSION`. Holds the value for the Salesforce API version.
-final string API_VERSION = "v48.0";
+public const string API_VERSION = "v48.0";
 
 // For URL encoding
 # Constant field `ENCODING_CHARSET`. Holds the value for the encoding charset.
@@ -116,7 +116,7 @@ final string QUESTION_MARK = "?";
 final string EQUAL_SIGN = "=";
 
 # Constant field `EMPTY_STRING`. Holds the value of "".
-final string EMPTY_STRING = "";
+public const string EMPTY_STRING = "";
 
 # Constant field `AMPERSAND`. Holds the value of "&".
 final string AMPERSAND = "&";
@@ -131,7 +131,7 @@ final string FORWARD_SLASH = "/";
 const BULK_API_VERSION = "48.0";
 
 # Constant field `SERVICES`. Holds the value of "services".
-const SERVICES = "services";
+public const string SERVICES = "services";
 
 # Constant field `ASYNC`. Holds the value of "async".
 const ASYNC = "async";
