@@ -21,7 +21,7 @@ import ballerina/url;
 #
 # + paths - An array of paths prefixes
 # + return - The prepared URL
-isolated function prepareUrl(string[] paths) returns string {
+public isolated function prepareUrl(string[] paths) returns string {
     string url = EMPTY_STRING;
 
     if (paths.length() > 0) {
