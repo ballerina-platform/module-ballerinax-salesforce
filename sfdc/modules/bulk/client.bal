@@ -13,16 +13,18 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/http;
 import ballerina/io;
+import ballerinax/sfdc;
 
-# The Salesforce Client object.
+# The Salesforce Bulk API Client object.
 #
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
-# + clientConfig - http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig record to initialize the Salesforce client
+# + clientConfig - Configurations required to initialize the `Client`
 @display {
-    label: "Salesforce Client",
+    label: "Salesforce Bulk API Client",
     iconPath: "SalesforceLogo.png"
 }
 public client class Client {
@@ -30,10 +32,10 @@ public client class Client {
     http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
     http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
-    # Salesforce Connector endpoint initialization function.
+    # Initializes Salesforce Bulk API Client.
     #
     # + salesforceConfig - Salesforce Connector configuration
-    public isolated function init(SalesforceConfiguration salesforceConfig) returns Error? {
+    public isolated function init(SalesforceConfiguration salesforceConfig) returns error? {
         self.clientConfig = salesforceConfig.clientConfig;
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
@@ -47,7 +49,7 @@ public client class Client {
         if (httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler) {
             self.clientHandler = httpHandlerResult;
         } else {
-            return prepareError(INVALID_CLIENT_CONFIG);
+            return error(sfdc:INVALID_CLIENT_CONFIG);
         }
 
         http:Client|http:ClientError|error httpClientResult;
@@ -56,7 +58,7 @@ public client class Client {
         if (httpClientResult is http:Client) {
             self.salesforceClient = httpClientResult;
         } else {
-            return prepareError(INVALID_CLIENT_CONFIG);
+            return error(sfdc:INVALID_CLIENT_CONFIG);
         }
     }
 
@@ -88,7 +90,7 @@ public client class Client {
             }
         }
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB]);
         http:Response response = check self.salesforceClient->post(path, jobPayload, headers = headerMap);
         json jobResponse = check checkJsonPayloadAndSetErrors(response);
         json jobResponseId = check jobResponse.id;
@@ -109,7 +111,7 @@ public client class Client {
     {label: "Job Information"} error|JobInfo {
         string jobId = bulkJob.jobId;
         JobType jobDataType = bulkJob.jobDataType;
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
         if (JSON == jobDataType) {
@@ -131,7 +133,7 @@ public client class Client {
     remote function closeJob(@display {label: "Bulk Job"} BulkJob bulkJob) returns @tainted@display 
     {label: "Job Information"} error|JobInfo {
         string jobId = bulkJob.jobId;
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
         json jobResponse = check checkJsonPayloadAndSetErrors(response);
@@ -147,7 +149,7 @@ public client class Client {
     remote function abortJob(@display {label: "Bulk Job"} BulkJob bulkJob) returns @tainted@display 
     {label: "Job Information"} error|JobInfo {
         string jobId = bulkJob.jobId;
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->post(path, JSON_STATE_CLOSED_PAYLOAD, headers = headerMap);
         json jobResponse = check checkJsonPayloadAndSetErrors(response);
@@ -164,7 +166,7 @@ public client class Client {
     isolated remote function addBatch(@display {label: "Bulk Job"} BulkJob bulkJob, @display {label: "Batch Content"} json|string|xml|
                                       io:ReadableByteChannel content) returns @tainted@display 
     {label: "Batch Information"} error|BatchInfo {
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         // https://github.com/ballerina-platform/ballerina-lang/issues/26798
         string|json|xml payload;
         if (bulkJob.jobDataType == JSON) {
@@ -179,13 +181,9 @@ public client class Client {
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, APP_JSON);
             http:Response response = check self.salesforceClient->post(path, payload, headers = headerMap);
-            json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
-            if (batchResponse is json) {
-                BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
-                return binfo;
-            } else {
-                return batchResponse;
-            }
+            json batchResponse = check checkJsonPayloadAndSetErrors(response);
+            BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
+            return binfo;
         } else if (bulkJob.jobDataType == XML) {
             if (content is io:ReadableByteChannel) {
                 if (QUERY == bulkJob.operation) {
@@ -202,7 +200,6 @@ public client class Client {
             BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
             return binfo;
         } else if (bulkJob.jobDataType == CSV) {
-
             if (content is io:ReadableByteChannel) {
                 payload = check convertToString(content);
             } else {
@@ -227,25 +224,17 @@ public client class Client {
     isolated remote function getBatchInfo(@display {label: "Bulk Job"} @tainted BulkJob bulkJob, @display 
                                           {label: "Batch ID"} string batchId) returns @tainted@display 
     {label: "Batch Information"} error|BatchInfo {
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
         if (JSON == bulkJob.jobDataType) {
-            json|Error batchResponse = checkJsonPayloadAndSetErrors(response);
-            if (batchResponse is json) {
-                BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
-                return binfo;
-            } else {
-                return batchResponse;
-            }
+            json batchResponse = check checkJsonPayloadAndSetErrors(response);
+            BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
+            return binfo;
         } else {
-            xml|Error batchResponse = checkXmlPayloadAndSetErrors(response);
-            if (batchResponse is xml) {
-                BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
-                return binfo;
-            } else {
-                return batchResponse;
-            }
+            xml batchResponse = check checkXmlPayloadAndSetErrors(response);
+            BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
+            return binfo;
         }
     }
 
@@ -256,7 +245,7 @@ public client class Client {
     @display {label: "Get All Batches"}
     isolated remote function getAllBatches(@display {label: "Bulkjob"} @tainted BulkJob bulkJob) returns @tainted@display 
     {label: "List of batch information"} error|BatchInfo[] {
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         http:Request req = new;
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
@@ -288,7 +277,7 @@ public client class Client {
     isolated remote function getBatchRequest(@display {label: "Bulk Job"} @tainted BulkJob bulkJob, @display 
                                              {label: "Batch ID"} string batchId) returns @tainted@display 
     {label: "Batch Content"} error|json|xml|string {
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
         if (QUERY == bulkJob.operation) {
@@ -320,7 +309,7 @@ public client class Client {
     isolated remote function getBatchResult(@display {label: "Bulk Job"} @tainted BulkJob bulkJob, @display 
                                             {label: "Batch ID"} string batchId) returns @tainted@display 
     {label: "Result"} error|json|xml|string|Result[] {
-        string path = prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, RESULT]);
+        string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, RESULT]);
         Result[] results = [];
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);

@@ -15,6 +15,7 @@
 // under the License.
 
 // Path constants
+const string SERVICES = "services";
 const string SOAP = "Soap";
 const string SOAP_ACTION = "SOAPAction";
 const string C = "c";
@@ -22,6 +23,7 @@ const string C = "c";
 // Header constants
 const string ADD = "add";
 const string TEXT_XML = "text/xml";
+const string AUTHORIZATION = "Authorization";
 
 // XML constants
 const string SOAP_ENV = "soapenv:";
