@@ -77,7 +77,7 @@ isolated function createRecord(xml payload) returns ConvertedLead {
         leadId: (payload/<leadId>/*).toString()
     };
     string opportunityId = (payload/<opportunityId>/*).toString();
-    if (opportunityId != "") {
+    if (opportunityId != sfdc:EMPTY_STRING) {
         lead.opportunityId = opportunityId;
     }
     return lead;
@@ -91,5 +91,5 @@ isolated function getSessionId(http:ClientOAuth2Handler|http:ClientBearerTokenAu
     } else {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     }
-    return (regex:split(<string>authorizationHeaderMap["Authorization"], " "))[1];
+    return (regex:split(<string>authorizationHeaderMap[AUTHORIZATION], " "))[1];
 }

@@ -13,17 +13,16 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/http;
 import ballerinax/sfdc;
 
-# The Salesforce Client object.
+# The Salesforce SOAP API Client object.
 #
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
-# + clientConfig - http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig record to initialize the Salesforce client
+# + clientConfig - Configurations required to initialize the `Client`
 @display {
-    label: "Salesforce SOAP Client",
+    label: "Salesforce SOAP API Client",
     iconPath: "SalesforceLogo.png"
 }
 public client class Client {
@@ -31,7 +30,7 @@ public client class Client {
     http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
     http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
-    # Initializes Salesforce SOAP Client.
+    # Initializes Salesforce SOAP API Client.
     #
     # + salesforceConfig - Salesforce Connector configuration
     public isolated function init(sfdc:SalesforceConfiguration salesforceConfig) returns error? {
@@ -74,7 +73,7 @@ public client class Client {
         http:Request request = new;
         request.setHeader(SOAP_ACTION, ADD);
         request.setTextPayload(payload, contentType = TEXT_XML);
-        string path = sfdc:prepareUrl([sfdc:SERVICES, SOAP, C, sfdc:API_VERSION]);
+        string path = sfdc:prepareUrl([SERVICES, SOAP, C, sfdc:API_VERSION]);
         http:Response response = check self.salesforceClient->post(path, request);
         return createResponse(response);
     }

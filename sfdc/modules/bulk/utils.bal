@@ -22,22 +22,16 @@ import ballerina/lang.'float as floats;
 import ballerina/lang.'string as strings;
 import ballerina/lang.'xml as xmllib;
 import ballerina/regex;
+import ballerinax/sfdc;
 
 # Check HTTP response and return XML payload if succesful, else set errors and return Error.
 #
 # + httpResponse - HTTP response or error occurred
 # + return - XML response if successful else Error occured
-isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) returns @tainted xml|Error {
+isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) returns @tainted xml|error {
     if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
     statusCode == http:STATUS_NO_CONTENT) {
-        xml|error xmlResponse = httpResponse.getXmlPayload();
-
-        if (xmlResponse is xml) {
-            return xmlResponse;
-        } else {
-            log:printError(XML_ACCESSING_ERROR_MSG, 'error = xmlResponse);
-            return error Error(XML_ACCESSING_ERROR_MSG, xmlResponse);
-        }
+        return check httpResponse.getXmlPayload();
     } else {
         return handleXmlErrorResponse(httpResponse);
     }
@@ -47,17 +41,10 @@ isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) return
 #
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
-isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) returns @tainted string|Error {
+isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) returns @tainted string|error {
     if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
     statusCode == http:STATUS_NO_CONTENT) {
-        string|error textResponse = httpResponse.getTextPayload();
-
-        if (textResponse is string) {
-            return textResponse;
-        } else {
-            log:printError(TEXT_ACCESSING_ERROR_MSG, 'error = textResponse);
-            return error Error(TEXT_ACCESSING_ERROR_MSG, textResponse);
-        }
+        return check httpResponse.getTextPayload();
     } else {
         return handleXmlErrorResponse(httpResponse);
     }
@@ -67,36 +54,23 @@ isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) retur
 #
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
-isolated function checkJsonPayloadAndSetErrors(http:Response httpResponse) returns @tainted json|Error {
+isolated function checkJsonPayloadAndSetErrors(http:Response httpResponse) returns @tainted json|error {
     if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
     statusCode == http:STATUS_NO_CONTENT) {
-        json|error response = httpResponse.getJsonPayload();
-        if (response is json) {
-            return response;
-        } else {
-            log:printError(JSON_ACCESSING_ERROR_MSG, 'error = response);
-            return error Error(JSON_ACCESSING_ERROR_MSG, response);
-        }
+        return check httpResponse.getJsonPayload();
     } else {
         return handleJsonErrorResponse(httpResponse);
     }
 }
-
 
 # Check query request and return query string
 #
 # + httpResponse - HTTP response or error occurred  
 # + jobtype - Job type
 # + return - Query string response if successful or else an sfdc:Error
-isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) returns @tainted string|Error {
+isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) returns @tainted string|error {
     if (httpResponse.statusCode == http:STATUS_OK) {
-        string|error textResponse = httpResponse.getTextPayload();
-        if (textResponse is string) {
-            return textResponse;
-        } else {
-            log:printError(TEXT_ACCESSING_ERROR_MSG, 'error = textResponse);
-            return error Error(TEXT_ACCESSING_ERROR_MSG, textResponse);
-        }
+        return check httpResponse.getTextPayload();
     } else {
         if (JSON == jobtype) {
             return handleJsonErrorResponse(httpResponse);
@@ -110,15 +84,14 @@ isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) r
 #
 # + httpResponse - error response
 # + return - error
-isolated function handleXmlErrorResponse(http:Response httpResponse) returns @tainted Error {
+isolated function handleXmlErrorResponse(http:Response httpResponse) returns @tainted error {
     xml|error xmlResponse = httpResponse.getXmlPayload();
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
     if (xmlResponse is xml) {
-        Error httpResponseHandlingError = error Error((xmlResponse/<ns:exceptionCode>/*).toString());
-        return httpResponseHandlingError;
+        return error((xmlResponse/<ns:exceptionCode>/*).toString());
     } else {
-        log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = xmlResponse);
-        return error Error(ERR_EXTRACTING_ERROR_MSG, xmlResponse);
+        log:printError(sfdc:ERR_EXTRACTING_ERROR_MSG, 'error = xmlResponse);
+        return error(sfdc:ERR_EXTRACTING_ERROR_MSG, xmlResponse);
     }
 }
 
@@ -126,30 +99,19 @@ isolated function handleXmlErrorResponse(http:Response httpResponse) returns @ta
 #
 # + httpResponse - error response
 # + return - error
-isolated function handleJsonErrorResponse(http:Response httpResponse) returns @tainted Error {
+isolated function handleJsonErrorResponse(http:Response httpResponse) returns @tainted error {
     json|error response = httpResponse.getJsonPayload();
     if (response is json) {
         json|error resExceptionCode = response.exceptionCode;
         if (resExceptionCode is json) {
-            Error httpResponseHandlingError = error Error(resExceptionCode.toString());
-            return httpResponseHandlingError;
+            return error(resExceptionCode.toString());
         } else {
-            return error Error(resExceptionCode.message());
+            return error(resExceptionCode.message());
         }
     } else {
-        log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = response);
-        return error Error(ERR_EXTRACTING_ERROR_MSG, response);
+        log:printError(sfdc:ERR_EXTRACTING_ERROR_MSG, 'error = response);
+        return error(sfdc:ERR_EXTRACTING_ERROR_MSG, response);
     }
-}
-
-# Handle HTTP error and return Error.
-#
-# + httpResponse - Http response
-# + return - Constructed error
-isolated function handleHttpError(error httpResponse) returns Error {
-    log:printError(HTTP_ERROR_MSG, 'error = httpResponse);
-    Error httpError = error Error(HTTP_ERROR_MSG, httpResponse);
-    return httpError;
 }
 
 # Convert string to integer
@@ -195,77 +157,11 @@ isolated function getBooleanValue(string value) returns boolean {
     }
 }
 
-# Logs, prepares, and returns the `ClientAuthError`.
-#
-# + message - The error message.
-# + err - The `error` instance.
-# + return - Returns the prepared `ClientAuthError` instance.
-isolated function prepareClientAuthError(string message, error? err = ()) returns http:ClientAuthError {
-    log:printError(message, 'error = err);
-    if (err is error) {
-        return error http:ClientAuthError(message, err);
-    }
-    return error http:ClientAuthError(message);
-}
-
-# Creates a map out of the headers of the HTTP response.
-#
-# + resp - The `Response` instance.
-# + return - Returns the map of the response headers.
-isolated function createResponseHeaderMap(http:Response resp) returns @tainted map<anydata> {
-    map<anydata> headerMap = {};
-    // If session ID is invalid, set staus code as 401.
-    if (resp.statusCode == http:STATUS_BAD_REQUEST) {
-        string|http:HeaderNotFoundError contentType = resp.getHeader(CONTENT_TYPE);
-        if (contentType is string) {
-            if (contentType == APP_JSON) {
-                json|error payload = resp.getJsonPayload();
-                if (payload is json) {
-                    json|error receivedExceptionCode = payload.exceptionCode;
-                    if (receivedExceptionCode is json) {
-                        if (receivedExceptionCode.toString() == INVALID_SESSION_ID) {
-                            headerMap[STATUS_CODE] = http:STATUS_UNAUTHORIZED;
-                        }
-                    } else {
-                        log:printError("Invalid Exception Code", 'error = receivedExceptionCode);
-                    }
-                } else {
-                    log:printError("Invalid payload", 'error = payload);
-                }
-            } else if (contentType == APP_XML) {
-                xml|error payload = resp.getXmlPayload();
-                if (payload is xml) {
-                    if ((payload/<exceptionCode>/*).toString() == INVALID_SESSION_ID) {
-                        headerMap[STATUS_CODE] = http:STATUS_UNAUTHORIZED;
-                    }
-                } else {
-                    log:printError("Invalid payload", 'error = payload);
-                }
-            } else {
-                log:printError("Invalid contentType, contentType='" + contentType + "' ", 'error = ());
-            }
-        } else {
-            log:printError("CONTENT_TYPE Header not found ", 'error = contentType);
-        }
-    } else {
-        headerMap[STATUS_CODE] = resp.statusCode;
-    }
-
-    string[] headerNames = resp.getHeaderNames();
-    foreach string header in headerNames {
-        string[]|http:HeaderNotFoundError headerValues = resp.getHeaders(<@untainted>header);
-        if (headerValues is string[]) {
-            headerMap[header] = headerValues;
-        }
-    }
-    return headerMap;
-}
-
 # Convert ReadableByteChannel to string.
 #
 # + rbc - ReadableByteChannel
 # + return - converted string
-isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted string|Error {
+isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted string|error {
     byte[] readContent;
     string textContent = "";
     while (true) {
@@ -275,7 +171,7 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted s
         } else if (result is io:Error) {
             string errMsg = "Error occurred while reading from Readable Byte Channel.";
             log:printError(errMsg, 'error = result);
-            return error Error(errMsg, result);
+            return error(errMsg, result);
         } else {
             readContent = result;
             string|error readContentStr = strings:fromBytes(readContent);
@@ -284,7 +180,7 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted s
             } else {
                 string errMsg = "Error occurred while converting readContent byte array to string.";
                 log:printError(errMsg, 'error = readContentStr);
-                return error Error(errMsg, readContentStr);
+                return error(errMsg, readContentStr);
             }
         }
     }
@@ -295,12 +191,12 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted s
 #
 # + rbc - ReadableByteChannel
 # + return - converted json
-isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|Error {
+isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
     if (rch is io:Error) {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, 'error = rch);
-        return error Error(errMsg, rch);
+        return error(errMsg, rch);
     } else {
         json|error jsonContent = rch.readJson();
 
@@ -309,7 +205,7 @@ isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted jso
         } else {
             string errMsg = "Error occurred while reading ReadableCharacterChannel as json.";
             log:printError(errMsg, 'error = jsonContent);
-            return error Error(errMsg, jsonContent);
+            return error(errMsg, jsonContent);
         }
     }
 }
@@ -318,12 +214,12 @@ isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted jso
 #
 # + rbc - ReadableByteChannel
 # + return - converted xml
-isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|Error {
+isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
     if (rch is io:Error) {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, 'error = rch);
-        return error Error(errMsg, rch);
+        return error(errMsg, rch);
     } else {
         xml|error xmlContent = rch.readXml();
 
@@ -332,7 +228,7 @@ isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|
         } else {
             string errMsg = "Error occurred while reading ReadableCharacterChannel as xml.";
             log:printError(errMsg, 'error = xmlContent);
-            return error Error(errMsg, xmlContent);
+            return error(errMsg, xmlContent);
         }
     }
 }
@@ -441,15 +337,4 @@ isolated function getBulkApiHeaders(http:ClientOAuth2Handler|http:ClientBearerTo
         finalHeaderMap[CONTENT_TYPE] = <string>contentType;
     }
     return finalHeaderMap;
-}
-
-# Salesforce connector error
-public type Error distinct error;
-
-// Logs and prepares the `error` as an `sfdc:Error`.
-isolated function prepareError(string message, error? err = ()) returns Error {
-    if (err is error) {
-        return error Error(message, err);
-    }
-    return error Error(message);
 }
