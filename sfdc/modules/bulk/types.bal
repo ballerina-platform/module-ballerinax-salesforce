@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Define the job type.
+# Defines the job type.
 #
 # + id - Unique ID for this job
 # + operation - The processing operation for all the batches in the job
@@ -86,7 +86,7 @@ public type JobInfo record {|
     json...;
 |};
 
-# Define the batch type.
+# Defines the batch type.
 #
 # + id - The ID of the batch, May be globally unique, but does not have to be
 # + jobId - The unique, 18–character ID for the job associated with this batch
@@ -127,7 +127,7 @@ public type BatchInfo record {|
     json...;
 |};
 
-# Define the result type.
+# Defines the result type.
 #
 # + id - The ID of the result, May be globally unique, but does not have to be
 # + success - The result is a success or not
@@ -161,7 +161,7 @@ public enum Operation {
     QUERY = "query"
 }
 
-# Define bulk job related information.
+# Defines bulk job related information.
 # 
 # + jobId - Bulk job id
 # + jobDataType - Data type of the job, Can be JSON, XML or CSV

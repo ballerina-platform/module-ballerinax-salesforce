@@ -16,5 +16,5 @@ These samples demonstrate the employment of Ballerina Salesforce Connector in Sa
 
 ## [Samples for Event Listener](event_listener_usecases)
 
-This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certin event users need to select Objects for Change Notifications in the user interface in his/her Salesforce instance. 
+This sample demonstrates on capturing events using the Event Listener of Ballerina Salesforce Connector. As mentioned above to listen to a certain event users need to select Objects for Change Notifications in the user interface in his/her Salesforce instance. 
 - [Select SObjects](https://developer.salesforce.com/docs/atlas.en-us.change_data_capture.meta/change_data_capture/cdc_select_objects.htm)
