@@ -172,7 +172,7 @@ function insertXmlFromFile() {
     log:printInfo("baseClient -> insertXmlFromFile");
     string xmlBatchId = "";
 
-    string xmlContactsFilePath = "modules/bulk/tests/resources/contacts.xml";
+    string xmlContactsFilePath = "sfdc/modules/bulk/tests/resources/contacts.xml";
 
     //create job
     error|BulkJob xmlInsertJob = baseClient->createJob("insert", "Contact", "XML");
