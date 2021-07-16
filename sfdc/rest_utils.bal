@@ -13,16 +13,15 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
 import ballerina/http;
 import ballerina/url;
 
 # Returns the prepared URL.
-# 
+#
 # + paths - An array of paths prefixes
 # + return - The prepared URL
-isolated function prepareUrl(string[] paths) returns string {
+public isolated function prepareUrl(string[] paths) returns string {
     string url = EMPTY_STRING;
 
     if (paths.length() > 0) {
@@ -37,7 +36,7 @@ isolated function prepareUrl(string[] paths) returns string {
 }
 
 # Returns the prepared URL with encoded query.
-# 
+#
 # + paths - An array of paths prefixes
 # + queryParamNames - An array of query param names
 # + queryParamValues - An array of query param values
@@ -69,15 +68,15 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
 }
 
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
-# 
+#
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-isolated function checkAndSetErrors(http:Response|http:PayloadType|error httpResponse, boolean expectPayload = true) 
-                                    returns @tainted json|Error {
+isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) returns @tainted json|
+Error {
     if (httpResponse is http:Response) {
-        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || 
-            httpResponse.statusCode == http:STATUS_NO_CONTENT) {
+        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
+        statusCode == http:STATUS_NO_CONTENT) {
             if (expectPayload) {
                 json|error jsonResponse = httpResponse.getJsonPayload();
 
@@ -121,10 +120,7 @@ isolated function checkAndSetErrors(http:Response|http:PayloadType|error httpRes
                 return error Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
             }
         }
-    } else if (httpResponse is http:PayloadType) {
-        return error Error(UNREACHABLE_STATE);
     } else {
-        log:printError(HTTP_ERROR_MSG, 'error = httpResponse);
         return error Error(HTTP_ERROR_MSG, httpResponse);
     }
 }
