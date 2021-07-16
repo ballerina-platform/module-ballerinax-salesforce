@@ -192,7 +192,7 @@ function insertJson() {
 function insertJsonFromFile() {
     log:printInfo("baseClient -> insertJsonFromFile");
     string jsonBatchId = "";
-    string jsonContactsFilePath = "modules/bulk/tests/resources/contacts.json";
+    string jsonContactsFilePath = "sfdc/modules/bulk/tests/resources/contacts.json";
 
     //create job
     error|BulkJob jsonInsertJob = baseClient->createJob("insert", "Contact", "JSON");
