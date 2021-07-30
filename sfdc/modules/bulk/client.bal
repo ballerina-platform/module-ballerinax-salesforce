@@ -28,10 +28,10 @@ import ballerinax/sfdc;
     label: "Salesforce Bulk API Client",
     iconPath: "SalesforceLogo.png"
 }
-public client class Client {
-    http:Client salesforceClient;
-    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
-    http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
+public isolated client class Client {
+    private final http:Client salesforceClient;
+    private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
+    private final http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
     # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
@@ -41,7 +41,7 @@ public client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
     public isolated function init(SalesforceConfiguration salesforceConfig) returns error? {
-        self.clientConfig = salesforceConfig.clientConfig;
+        self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;

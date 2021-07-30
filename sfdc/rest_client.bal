@@ -23,9 +23,9 @@ import ballerina/http;
     label: "Salesforce Client",
     iconPath: "SalesforceLogo.png"
 }
-public client class Client {
-    http:Client salesforceClient;
-    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
+public isolated client class Client {
+    private final http:Client salesforceClient;
+    private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
 
     # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
@@ -35,7 +35,7 @@ public client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - `sfdc:Error` on failure of initialization or else `()`
     public isolated function init(SalesforceConfiguration salesforceConfig) returns Error? {
-        self.clientConfig = salesforceConfig.clientConfig;
+        self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
         http:Client|http:ClientError|error httpClientResult;
