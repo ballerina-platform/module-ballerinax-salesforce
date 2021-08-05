@@ -12,7 +12,7 @@ The `ballerinax/sfdc` is a [Ballerina](https://ballerina.io/) connector for Sale
 ### Compatibility
 |                     | Version         |
 |---------------------|-----------------|
-| Ballerina Language  | Swan Lake Beta2 |
+| Ballerina Language  | Swan Lake Beta3 |
 | Salesforce REST API | v48.0           |
 | Salesforce Bulk API | v1              |
 | Salesforce SOAP API | Enterprise WSDL |
