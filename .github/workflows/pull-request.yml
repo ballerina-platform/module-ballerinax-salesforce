@@ -37,7 +37,7 @@ jobs:
         
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action@slbeta2
         with:
           args:
             build -c ./sfdc
