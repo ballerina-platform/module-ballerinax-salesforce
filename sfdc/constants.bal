@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+const string REFRESH_URL = "https://login.salesforce.com/services/oauth2/token";
+
 // Ballerina config keys
 # Constant field `ENDPOINT`. Holds the value for Salesforce endpoint.
 const string ENDPOINT = "ENDPOINT";

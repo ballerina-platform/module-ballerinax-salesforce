@@ -18,11 +18,16 @@ import ballerina/jballerina.java;
 
 handle JAVA_NULL = java:createNull();
 
+# Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.  
 @display {label: "Salesforce Listener"}
 public class Listener {
     private handle username = JAVA_NULL;
     private handle password = JAVA_NULL;
 
+    # Initializes the connector. During initialization you have to pass Salesforce username and concatenation of 
+    # password and security token.
+    # 
+    # + ListenerConfiguration - Salesforce Listener configuration
     public function init(ListenerConfiguration config) {
         self.username = java:fromString(config.username);
         self.password = java:fromString(config.password);
