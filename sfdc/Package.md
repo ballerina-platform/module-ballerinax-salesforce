@@ -1,9 +1,13 @@
 Connects to Salesforce from Ballerina
 
 ## Package overview
-The `ballerinax/sfdc` is a [Ballerina](https://ballerina.io/) connector for Google Drive.
 
-This package performs CRUD operations for SObjects, query using SOQL, search using SOSL and, describe SObjects, and organizational data through the Salesforce REST API. Also, it supports adding bulk data jobs and soap api operations.
+The `ballerinax/sfdc` is a [Ballerina](https://ballerina.io/) connector for Salesforce. It is comprised of the following capabilities.
+
+* Perform Salesforce operations programmatically through the Salesforce REST API. Users can perform CRUD operations for SObjects, query using SOQL, search using SOSL and, describe SObjects and organizational data. The `ballerinax/sfdc` module provides this capability.
+* Perform Salesforce bulk operations programmatically through the Salesforce Bulk API. Users can perform CRUD operations in bulk for Salesforce. The `ballerinax/sfdc.bulk` module provides this capability.
+* Perform Salesforce operations programmatically through the Salesforce SOAP API which is not supported by the Salesforce REST API. The connector is comprised of limited operations on SOAP API. The `ballerinax/sfdc.soap` module provides this capability.
+* Listen for Salesforce events and process them. Internally Bayeux protocol is used for polling for events. The `ballerinax/sfdc` module provides this capability.
 
 ### Compatibility
 |                     | Version         |

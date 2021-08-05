@@ -1,18 +1,19 @@
 ## Overview
-Ballerina Salesforce [SOAP](https://developer.salesforce.com/docs/atlas.en-us.224.0.api.meta/api/sforce_api_quickstart_intro.html) connector is connecting Salesforce SOAP API and performs operations like create, retrieve, update or delete records, such as accounts, leads, and custom objects with more than 20 different calls, SOAP API also allows you to maintain passwords, perform searches, and much more.`
-This module supports Salesforce 48.0 version Enterprise WDSL.
+Salesforce SOAP API provides CRUD operations for SObjects and allows you to maintain passwords, perform searches, and much more.
+
+This module supports [Salesforce v48.0 SOAP API Enterprise WDSL](https://developer.salesforce.com/docs/atlas.en-us.224.0.api.meta/api/sforce_api_quickstart_intro.htm).
  
 ## Prerequisites
 
 Before using this connector in your Ballerina application, complete the following:
-- Create [Salesforce account](https://developer.salesforce.com/signup)
-- Obtain tokens - Follow [this link](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm)
+1. Create [Salesforce account](https://developer.salesforce.com/signup)
+2. Obtain tokens - Follow the steps listed under [OAuth 2.0 Web Server Flow for Web App Integration](https://help.salesforce.com/articleView?id=sf.remoteaccess_oauth_web_server_flow.htm&type=5).
 
 ## Quickstart
 To use the Salesforce connector in your Ballerina application, update the .bal file as follows:
 
 ### Step 1: Import connector
-First, import the `ballerinax/sfdc` and `ballerinax/sfdc.soap` modules into the Ballerina project.
+Import the `ballerinax/sfdc` and `ballerinax/sfdc.soap` modules into the Ballerina project.
 
 ```ballerina
 import ballerinax/sfdc;
