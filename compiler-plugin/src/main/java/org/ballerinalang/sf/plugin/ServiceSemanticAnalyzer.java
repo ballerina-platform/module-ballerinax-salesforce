@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,8 +19,17 @@
 
 package org.ballerinalang.sf.plugin;
 
-import io.ballerina.compiler.api.symbols.*;
-import io.ballerina.compiler.syntax.tree.*;
+import io.ballerina.compiler.api.symbols.ModuleSymbol;
+import io.ballerina.compiler.api.symbols.ServiceDeclarationSymbol;
+import io.ballerina.compiler.api.symbols.Symbol;
+import io.ballerina.compiler.api.symbols.TypeDescKind;
+import io.ballerina.compiler.api.symbols.TypeReferenceTypeSymbol;
+import io.ballerina.compiler.api.symbols.TypeSymbol;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
 import io.ballerina.projects.plugins.AnalysisTask;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
@@ -29,7 +38,9 @@ import io.ballerina.tools.diagnostics.DiagnosticInfo;
 import java.util.List;
 import java.util.Optional;
 
-import static org.ballerinalang.sf.plugin.Constants.*;
+import static org.ballerinalang.sf.plugin.Constants.BALLERINAX;
+import static org.ballerinalang.sf.plugin.Constants.REMOTE_KEYWORD;
+import static org.ballerinalang.sf.plugin.Constants.SFDC;
 
 public class ServiceSemanticAnalyzer implements AnalysisTask<SyntaxNodeAnalysisContext> {
     @Override
@@ -51,14 +62,18 @@ public class ServiceSemanticAnalyzer implements AnalysisTask<SyntaxNodeAnalysisC
             if (member.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
                 FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) member;
                 SfdcResourceValidator.validateResource(syntaxNodeAnalysisContext, functionDefinitionNode);
-                if (functionDefinitionNode.qualifierList().stream().anyMatch(token -> token.text().equals(REMOTE_KEYWORD))) {
+                if (functionDefinitionNode.qualifierList().stream().anyMatch(token ->
+                        token.text().equals(REMOTE_KEYWORD))) {
                     continue;
                 }
             }
             if (member.kind() == SyntaxKind.RESOURCE_ACCESSOR_DEFINITION) {
                 FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) member;
-                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(SfdcDiagnosticCodes.SFDC_107.getCode(), SfdcDiagnosticCodes.SFDC_107.getMessage(), SfdcDiagnosticCodes.SFDC_107.getSeverity());
-                syntaxNodeAnalysisContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo, functionDefinitionNode.location()));
+                DiagnosticInfo diagnosticInfo = new DiagnosticInfo(SfdcDiagnosticCodes.SFDC_107.getCode(),
+                        SfdcDiagnosticCodes.SFDC_107.getMessage(),
+                        SfdcDiagnosticCodes.SFDC_107.getSeverity());
+                syntaxNodeAnalysisContext.reportDiagnostic(DiagnosticFactory.createDiagnostic(diagnosticInfo,
+                        functionDefinitionNode.location()));
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -19,14 +19,31 @@
 
 package org.ballerinalang.sf.plugin;
 
-import io.ballerina.compiler.syntax.tree.*;
+import io.ballerina.compiler.syntax.tree.AnnotationNode;
+import io.ballerina.compiler.syntax.tree.FunctionDefinitionNode;
+import io.ballerina.compiler.syntax.tree.FunctionSignatureNode;
+import io.ballerina.compiler.syntax.tree.IdentifierToken;
+import io.ballerina.compiler.syntax.tree.MetadataNode;
+import io.ballerina.compiler.syntax.tree.Node;
+import io.ballerina.compiler.syntax.tree.NodeList;
+import io.ballerina.compiler.syntax.tree.ParameterNode;
+import io.ballerina.compiler.syntax.tree.RequiredParameterNode;
+import io.ballerina.compiler.syntax.tree.SeparatedNodeList;
+import io.ballerina.compiler.syntax.tree.ServiceDeclarationNode;
+import io.ballerina.compiler.syntax.tree.SyntaxKind;
+import io.ballerina.compiler.syntax.tree.Token;
 import io.ballerina.projects.plugins.SyntaxNodeAnalysisContext;
 import io.ballerina.tools.diagnostics.DiagnosticFactory;
 import io.ballerina.tools.diagnostics.DiagnosticInfo;
 
 import java.util.Optional;
 
-import static org.ballerinalang.sf.plugin.Constants.*;
+import static org.ballerinalang.sf.plugin.Constants.EVENT_DATA_TYPE;
+import static org.ballerinalang.sf.plugin.Constants.ON_CREATE;
+import static org.ballerinalang.sf.plugin.Constants.ON_DELETE;
+import static org.ballerinalang.sf.plugin.Constants.ON_RESTORE;
+import static org.ballerinalang.sf.plugin.Constants.ON_UPDATE;
+import static org.ballerinalang.sf.plugin.Constants.SERVICE_CONFIG_ANNOTATION;
 
 public class SfdcResourceValidator {
     static void validateResource(SyntaxNodeAnalysisContext ctx, FunctionDefinitionNode member) {
@@ -63,15 +80,18 @@ public class SfdcResourceValidator {
         }
     }
 
-    private static void extractRemoteMethodNameAndValidate(SyntaxNodeAnalysisContext ctx, FunctionDefinitionNode member) {
+    private static void extractRemoteMethodNameAndValidate(SyntaxNodeAnalysisContext ctx,
+                                                           FunctionDefinitionNode member) {
         IdentifierToken functionNameToken = member.functionName();
         String functionName = functionNameToken.toString().trim();
-        if (!(functionName.equals(ON_UPDATE) || functionName.equals(ON_CREATE) || functionName.equals(ON_DELETE) || functionName.equals(ON_RESTORE))) { // include other method names
+        if (!(functionName.equals(ON_UPDATE) || functionName.equals(ON_CREATE) || functionName.equals(ON_DELETE) ||
+                functionName.equals(ON_RESTORE))) { // include other method names
             updateDiagnostic(ctx, functionNameToken, functionName, SfdcDiagnosticCodes.SFDC_102);
         }
     }
 
-    private static void extractResourceParametersAndValidate(SyntaxNodeAnalysisContext ctx, FunctionDefinitionNode member) {
+    private static void extractResourceParametersAndValidate(SyntaxNodeAnalysisContext ctx,
+                                                             FunctionDefinitionNode member) {
         FunctionSignatureNode signatureNode = member.functionSignature();
         SeparatedNodeList<ParameterNode> parameterList = signatureNode.parameters();
         if (parameterList.isEmpty()) {

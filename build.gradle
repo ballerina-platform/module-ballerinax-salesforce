@@ -52,6 +52,7 @@ subprojects {
     dependencies {}
 }
 
+def ballerinaDistributionPath = "/usr/lib/ballerina"
 def artifactCacheParent = file("${project.projectDir}/build/cache_parent/")
 def packageName = "sfdc"
 def packageOrg = "ballerinax"

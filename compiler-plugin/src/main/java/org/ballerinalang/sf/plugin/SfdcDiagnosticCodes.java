@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -25,7 +25,8 @@ import static io.ballerina.tools.diagnostics.DiagnosticSeverity.ERROR;
 
 public enum SfdcDiagnosticCodes {
     SFDC_101("SFDC_101", "invalid annotation type '%s'", ERROR),
-    SFDC_102("SFDC_102", "invalid method name '%s': expected one of the following types: " + "'onCreate', 'onUpdate', 'onDelete', 'onRestore'", ERROR),
+    SFDC_102("SFDC_102", "invalid method name '%s': expected one of the following types: "
+            + "'onCreate', 'onUpdate', 'onDelete', 'onRestore'", ERROR),
     SFDC_103("SFDC_103", "%s parameter list", ERROR),
     SFDC_104("SFDC_104", "%s parameters in the parameter list", ERROR),
     SFDC_105("SFDC_105", "invalid parameter type '%s'", ERROR),

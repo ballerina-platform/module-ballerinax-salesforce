@@ -18,8 +18,9 @@ import ballerina/http;
 import ballerina/io;
 import ballerinax/sfdc;
 
-# The Salesforce Bulk API Client object.
-#
+# Ballerina Salesforce connector provides the capability to access Salesforce Bulk API.
+# This connector lets you to perform bulk data operations for CSV, JSON, and XML data types.
+# 
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
 # + clientConfig - Configurations required to initialize the `Client`
@@ -27,16 +28,20 @@ import ballerinax/sfdc;
     label: "Salesforce Bulk API Client",
     iconPath: "SalesforceLogo.png"
 }
-public client class Client {
-    http:Client salesforceClient;
-    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
-    http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
+public isolated client class Client {
+    private final http:Client salesforceClient;
+    private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
+    private final http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
-    # Initializes Salesforce Bulk API Client.
+    # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
+    # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
+    # Create a Salesforce account and obtain tokens following 
+    # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm). 
     #
     # + salesforceConfig - Salesforce Connector configuration
+    # + return - An error on failure of initialization or else `()`
     public isolated function init(SalesforceConfiguration salesforceConfig) returns error? {
-        self.clientConfig = salesforceConfig.clientConfig;
+        self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
@@ -63,7 +68,7 @@ public client class Client {
     }
 
     // ******************************************* Bulk Operations *****************************************************
-    # Create a bulk job.
+    # Creates a bulk job.
     #
     # + operation - Type of operation like insert, delete, etc.
     # + sobj - Type of sobject 
@@ -102,7 +107,7 @@ public client class Client {
         return bulkJob;
     }
 
-    # Get information about a job.
+    # Gets information about a job.
     #
     # + bulkJob - Job object of which the info is required 
     # + return - Job information record or error
@@ -125,7 +130,7 @@ public client class Client {
         }
     }
 
-    # Close a job.
+    # Closes a job.
     #
     # + bulkJob - Job to be closed 
     # + return - Job info after the state change of the job
@@ -141,7 +146,7 @@ public client class Client {
         return jobInfo;
     }
 
-    # Abort a job.
+    # Aborts a job.
     #
     # + bulkJob - Job to be aborted 
     # + return - Job info after the state change of the job
@@ -157,7 +162,7 @@ public client class Client {
         return jobInfo;
     }
 
-    # Add batch to the job.
+    # Adds batch to the job.
     #
     # + bulkJob - Bulk job  
     # + content - Batch content 
@@ -215,7 +220,7 @@ public client class Client {
         }
     }
 
-    # Get information about a batch.
+    # Gets information about a batch.
     #
     # + bulkJob - Bulk job 
     # + batchId - ID of the batch of which info is required 
@@ -238,7 +243,7 @@ public client class Client {
         }
     }
 
-    # Get all batches of the job.
+    # Gets all batches of the job.
     #
     # + bulkJob - Bulkjob
     # + return - List of batch infos
@@ -268,7 +273,7 @@ public client class Client {
         return batchInfoList;
     }
 
-    # Get the request payload of a batch.
+    # Gets the request payload of a batch.
     #
     # + bulkJob - Bulk job
     # + batchId - ID of the batch of which the request is required 
@@ -300,7 +305,7 @@ public client class Client {
         }
     }
 
-    # Get result of the records processed in a batch.
+    # Gets result of the records processed in a batch.
     #
     # + bulkJob - Bulk job  
     # + batchId - Batch ID

@@ -14,11 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Define the Salesforce version type.
+# Defines the Salesforce version type.
 #
-# + label - label of the salesforce version
-# + url - url of the salesforce version
-# + version - salesforce version number
+# + label - Label of the Salesforce version
+# + url - URL of the Salesforce version
+# + version - Salesforce version number
 @display{label: "Version"}
 public type Version record {|
     @display{label: "Label"}
@@ -29,10 +29,10 @@ public type Version record {|
     string 'version;
 |};
 
-# Define the Limit type to list limits information for your org.
+# Defines the Limit type to list limits information for your org.
 #
-# + Max - the limit total for the org
-# + Remaining - the total number of calls or events left for the org
+# + Max - The limit total for the org
+# + Remaining - The total number of calls or events left for the org
 public type Limit record {|
     int Max;
     int Remaining;
@@ -41,9 +41,9 @@ public type Limit record {|
 
 # Define the SOQL result type.
 #
-# + done - query is completed or not
-# + totalSize - the total number result records
-# + records - result records
+# + done - Query is completed or not
+# + totalSize - The total number result records
+# + records - Result records
 @display{label: "SOQL Result"}
 public type SoqlResult record {|
     @display{label: "Completed"}
@@ -55,7 +55,7 @@ public type SoqlResult record {|
     json...;
 |};
 
-# Define the SOQL query result record type. 
+# Defines the SOQL query result record type. 
 #
 # + attributes - Attribute record
 @display{label: "SOQL record"}
@@ -65,9 +65,9 @@ public type SoqlRecord record {|
     json...;
 |};
 
-# SOSL query result.
+# Defines SOSL query result.
 #
-# + searchRecords - matching records for the given search string
+# + searchRecords - Matching records for the given search string
 @display{label: "SOSL Result"}
 public type SoslResult record {|
     @display{label: "Records retrieved"}
@@ -75,10 +75,10 @@ public type SoslResult record {|
     json...;
 |};
 
-# SOSL query result record.
+# Defines SOSL query result.
 #
 # + attributes - Attribute record
-# + Id - ID od the matching object
+# + Id - ID of the matching object
 @display{label: "SOSL record"}
 public type SoslRecord record {|
     @display{label: "Attributes"}
@@ -88,12 +88,11 @@ public type SoslRecord record {|
     json...;
 |};
 
-# Define the Attribute type.
-# 
+# Defines the Attribute type.
 # Contains the attribute information of the resultant record.
 #
-# + type - type of the resultant record
-# + url - url of the resultant record
+# + type - Type of the resultant record
+# + url - URL of the resultant record
 @display{label: "Attribute"}
 public type Attribute record {|
     @display{label: "Type"}
@@ -104,9 +103,9 @@ public type Attribute record {|
 
 # Metadata for your organization and available to the logged-in user.
 #
-# + encoding - encoding
-# + maxBatchSize - maximum batch size
-# + sobjects - available SObjects
+# + encoding - Encoding
+# + maxBatchSize - Maximum batch size
+# + sobjects - Available SObjects
 @display{label: "Organizational meta data"}
 public type OrgMetadata record {|
     @display{label: "Encoding"}
@@ -121,12 +120,12 @@ public type OrgMetadata record {|
 # Metadata for an SObject, including information about each field, URLs, and child relationships.
 #
 # + name - SObject name
-# + createable - is createable
-# + deletable - is deletable
-# + updateable - is updateable
-# + queryable - is queryable
+# + createable - Is createable
+# + deletable - Is deletable
+# + updateable - Is updateable
+# + queryable - Is queryable
 # + label - SObject label
-# + urls - SObject urls
+# + urls - SObject URLs
 @display{label: "SObject meta data"}
 public type SObjectMetaData record {|
     @display{label: "Name"}

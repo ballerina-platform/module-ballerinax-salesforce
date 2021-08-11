@@ -16,8 +16,10 @@
 import ballerina/http;
 import ballerinax/sfdc;
 
-# The Salesforce SOAP API Client object.
-#
+# Ballerina Salesforce SOAP connector provides the capability to access Salesforce SOAP API. 
+# This connector lets you to perform operations like create, retrieve, update or delete sobjects, such as accounts,
+# leads, custom objects, and etc..
+# 
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
 # + clientConfig - Configurations required to initialize the `Client`
@@ -25,16 +27,20 @@ import ballerinax/sfdc;
     label: "Salesforce SOAP API Client",
     iconPath: "SalesforceLogo.png"
 }
-public client class Client {
-    http:Client salesforceClient;
-    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
-    http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
+public isolated client class Client {
+    private final http:Client salesforceClient;
+    private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
+    private final http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
-    # Initializes Salesforce SOAP API Client.
-    #
+    # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
+    # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
+    # Create a Salesforce account and obtain tokens following 
+    # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm). 
+    # 
     # + salesforceConfig - Salesforce Connector configuration
+    # + return - An error on failure of initialization or else `()`
     public isolated function init(sfdc:SalesforceConfiguration salesforceConfig) returns error? {
-        self.clientConfig = salesforceConfig.clientConfig;
+        self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
@@ -66,7 +72,7 @@ public client class Client {
     # `True` value
     # + return - `ConvertedLead` or error
     isolated remote function convertLead(@display {label: "Lead ID"} string leadId, @display 
-                                         {label: "Not to create Opportunity?"} boolean? opportunityNotRequired = ()) returns 
+                                         {label: "Not to Create Opportunity?"} boolean? opportunityNotRequired = ()) returns 
     ConvertedLead|error {
         string sessionId = check getSessionId(self.clientHandler);
         string payload = check buildXMLPayload(sessionId, leadId, opportunityNotRequired);

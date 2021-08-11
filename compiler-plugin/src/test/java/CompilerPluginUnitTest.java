@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -36,8 +36,8 @@ import java.nio.file.Paths;
 public class CompilerPluginUnitTest {
 
     private static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources").toAbsolutePath();
-    private static final Path DISTRIBUTION_PATH = Paths.get("build", "copy", "target", "ballerina-distribution").toAbsolutePath();
-            //Paths.get().toAbsolutePath();
+    private static final Path DISTRIBUTION_PATH = Paths.get("build", "copy", "target",
+            "ballerina-distribution").toAbsolutePath();
 
     private static final String SFDC_101 = "SFDC_101";
     private static final String SFDC_102 = "SFDC_102";
@@ -71,7 +71,8 @@ public class CompilerPluginUnitTest {
         Package currentPackage = loadPackage("sample_1_empty_qualifier");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        long availableErrors = diagnosticResult.diagnostics().stream().filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
+        long availableErrors = diagnosticResult.diagnostics().stream().filter(r ->
+                r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
 
         Assertions.assertEquals(availableErrors, 1);
         diagnosticResult.diagnostics().forEach(result -> {
@@ -96,7 +97,8 @@ public class CompilerPluginUnitTest {
         Package currentPackage = loadPackage("sample_3_invalid_method_name");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        long availableErrors = diagnosticResult.diagnostics().stream().filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
+        long availableErrors = diagnosticResult.diagnostics().stream().filter(r ->
+                r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
 
         Assertions.assertEquals(availableErrors, 1);
         diagnosticResult.diagnostics().forEach(result -> {
@@ -111,7 +113,8 @@ public class CompilerPluginUnitTest {
         Package currentPackage = loadPackage("sample_4_empty_parameter_list");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        long availableErrors = diagnosticResult.diagnostics().stream().filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
+        long availableErrors = diagnosticResult.diagnostics().stream().filter(r ->
+                r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
 
         Assertions.assertEquals(availableErrors, 1);
         diagnosticResult.diagnostics().forEach(result -> {
@@ -126,7 +129,8 @@ public class CompilerPluginUnitTest {
         Package currentPackage = loadPackage("sample_5_more_than_one_parameter");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        long availableErrors = diagnosticResult.diagnostics().stream().filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
+        long availableErrors = diagnosticResult.diagnostics().stream().filter(r ->
+                r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
 
         Assertions.assertEquals(availableErrors, 1);
         diagnosticResult.diagnostics().forEach(result -> {
@@ -141,7 +145,8 @@ public class CompilerPluginUnitTest {
         Package currentPackage = loadPackage("sample_6_invalid_parameter_type");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        long availableErrors = diagnosticResult.diagnostics().stream().filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
+        long availableErrors = diagnosticResult.diagnostics().stream().filter(r ->
+                r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
 
         Assertions.assertEquals(availableErrors, 1);
         diagnosticResult.diagnostics().forEach(result -> {
@@ -156,7 +161,8 @@ public class CompilerPluginUnitTest {
         Package currentPackage = loadPackage("sample_7_empty_annotation");
         PackageCompilation compilation = currentPackage.getCompilation();
         DiagnosticResult diagnosticResult = compilation.diagnosticResult();
-        long availableErrors = diagnosticResult.diagnostics().stream().filter(r -> r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
+        long availableErrors = diagnosticResult.diagnostics().stream().filter(r ->
+                r.diagnosticInfo().severity().equals(DiagnosticSeverity.ERROR)).count();
 
         Assertions.assertEquals(availableErrors, 1);
         diagnosticResult.diagnostics().forEach(result -> {
