@@ -60,3 +60,6 @@ target/
 
 # Allow files in the bulk test folder
 !**/tests/resources/*
+
+# Allow files in the compiler plugin test folder
+!**/test/resources/*
