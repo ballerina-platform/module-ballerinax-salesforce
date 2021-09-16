@@ -21,7 +21,7 @@ import ballerina/http;
 # and organizational data.
 @display {
     label: "Salesforce Client",
-    iconPath: "SalesforceLogo.png"
+    iconPath: "resources/sfdc.svg"
 }
 public isolated client class Client {
     private final http:Client salesforceClient;
