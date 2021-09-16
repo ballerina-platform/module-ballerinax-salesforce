@@ -26,7 +26,7 @@ import ballerinax/sfdc;
 # + clientConfig - Configurations required to initialize the `Client`
 @display {
     label: "Salesforce Bulk API Client",
-    iconPath: "SalesforceLogo.png"
+    iconPath: "resources/sfdc.svg"
 }
 public isolated client class Client {
     private final http:Client salesforceClient;
