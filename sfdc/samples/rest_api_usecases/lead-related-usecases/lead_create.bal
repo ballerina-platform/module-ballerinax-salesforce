@@ -19,7 +19,7 @@ import ballerinax/sfdc;
 
 public function main() {
 
-    sfdc:SalesforceConfiguration sfConfig = {
+    sfdc:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",

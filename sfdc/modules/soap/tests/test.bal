@@ -25,7 +25,7 @@ configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
 configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
 
-sfdc:SalesforceConfiguration sfConfig = {
+sfdc:ConnectionConfig sfConfig = {
     baseUrl: baseUrl,
     clientConfig: {
         clientId: clientId,

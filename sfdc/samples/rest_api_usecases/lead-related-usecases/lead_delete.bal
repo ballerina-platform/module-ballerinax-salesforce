@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/sfdc;
 
-sfdc:SalesforceConfiguration sfConfig = {
+sfdc:ConnectionConfig sfConfig = {
     baseUrl: "<BASE_URL>",
     clientConfig: {
         clientId: "<CLIENT_ID>",

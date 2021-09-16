@@ -39,7 +39,7 @@ public isolated client class Client {
     # 
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
-    public isolated function init(sfdc:SalesforceConfiguration salesforceConfig) returns error? {
+    public isolated function init(sfdc:ConnectionConfig salesforceConfig) returns error? {
         self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
@@ -56,7 +56,22 @@ public isolated client class Client {
             return error(sfdc:INVALID_CLIENT_CONFIG);
         }
 
-        http:Client|error httpClientResult = trap new (salesforceConfig.baseUrl, {secureSocket: socketConfig});
+        http:Client|error httpClientResult = trap new (salesforceConfig.baseUrl, {
+            secureSocket: socketConfig,
+            httpVersion: salesforceConfig.httpVersion,
+            http1Settings: salesforceConfig.http1Settings,
+            http2Settings: salesforceConfig.http2Settings,
+            timeout: salesforceConfig.timeout,
+            forwarded: salesforceConfig.forwarded,
+            followRedirects: salesforceConfig.followRedirects,
+            poolConfig: salesforceConfig.poolConfig,
+            cache: salesforceConfig.cache,
+            compression: salesforceConfig.compression,
+            circuitBreaker: salesforceConfig.circuitBreaker,
+            retryConfig: salesforceConfig.retryConfig,
+            cookieConfig: salesforceConfig.cookieConfig,
+            responseLimits: salesforceConfig.responseLimits
+        });
 
         if (httpClientResult is http:Client) {
             self.salesforceClient = httpClientResult;
