@@ -20,10 +20,10 @@ import ballerinax/sfdc.bulk;
 ```
 
 ### Step 2: Create a new connector instance
-Create a `sfdc:SalesforceConfiguration` with the OAuth2 tokens obtained, and initialize the connector with it.
+Create a `sfdc:ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 ```ballerina
 
-sfdc:SalesforceConfiguration sfConfig = {
+sfdc:ConnectionConfig sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
      clientId: <"CLIENT_ID">,

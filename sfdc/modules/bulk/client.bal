@@ -40,7 +40,7 @@ public isolated client class Client {
     #
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
-    public isolated function init(SalesforceConfiguration salesforceConfig) returns error? {
+    public isolated function init(ConnectionConfig salesforceConfig) returns error? {
         self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
@@ -58,7 +58,22 @@ public isolated client class Client {
         }
 
         http:Client|http:ClientError|error httpClientResult;
-        httpClientResult = trap new (salesforceConfig.baseUrl, {secureSocket: socketConfig});
+        httpClientResult = trap new (salesforceConfig.baseUrl, {
+            secureSocket: socketConfig,
+            httpVersion: salesforceConfig.httpVersion,
+            http1Settings: salesforceConfig.http1Settings,
+            http2Settings: salesforceConfig.http2Settings,
+            timeout: salesforceConfig.timeout,
+            forwarded: salesforceConfig.forwarded,
+            followRedirects: salesforceConfig.followRedirects,
+            poolConfig: salesforceConfig.poolConfig,
+            cache: salesforceConfig.cache,
+            compression: salesforceConfig.compression,
+            circuitBreaker: salesforceConfig.circuitBreaker,
+            retryConfig: salesforceConfig.retryConfig,
+            cookieConfig: salesforceConfig.cookieConfig,
+            responseLimits: salesforceConfig.responseLimits
+        });
 
         if (httpClientResult is http:Client) {
             self.salesforceClient = httpClientResult;
@@ -356,12 +371,38 @@ public isolated client class Client {
 # + baseUrl - The Salesforce endpoint URL
 # + clientConfig - OAuth2 direct token configuration
 # + secureSocketConfig - HTTPS secure socket configuration
+# + httpVersion - The HTTP version understood by the client
+# + http1Settings - Configurations related to HTTP/1.x protocol
+# + http2Settings - Configurations related to HTTP/2 protocol
+# + timeout - The maximum time to wait (in seconds) for a response before closing the connection
+# + forwarded - The choice of setting `forwarded`/`x-forwarded` header
+# + followRedirects - Configurations associated with Redirection
+# + poolConfig - Configurations associated with request pooling
+# + cache - HTTP caching related configurations
+# + compression - Specifies the way of handling compression (`accept-encoding`) header
+# + circuitBreaker - Configurations associated with the behaviour of the Circuit Breaker
+# + retryConfig - Configurations associated with retrying
+# + cookieConfig - Configurations associated with cookies
+# + responseLimits - Configurations associated with inbound response size limits
 @display {label: "Connection Config"}
-public type SalesforceConfiguration record {|
+public type ConnectionConfig record {|
     @display {label: "Salesforce Domain URL"}
     string baseUrl;
     @display {label: "Auth Config"}
     http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
     @display {label: "SSL Config"}
     http:ClientSecureSocket secureSocketConfig?;
+    string httpVersion = "1.1";
+    http:ClientHttp1Settings http1Settings = {};
+    http:ClientHttp2Settings http2Settings = {};
+    decimal timeout = 60;
+    string forwarded = "disable";
+    http:FollowRedirects? followRedirects = ();
+    http:PoolConfiguration? poolConfig = ();
+    http:CacheConfig cache = {};
+    http:Compression compression = http:COMPRESSION_AUTO;
+    http:CircuitBreakerConfig? circuitBreaker = ();
+    http:RetryConfig? retryConfig = ();
+    http:CookieConfig? cookieConfig = ();
+    http:ResponseLimitConfigs responseLimits = {};
 |};

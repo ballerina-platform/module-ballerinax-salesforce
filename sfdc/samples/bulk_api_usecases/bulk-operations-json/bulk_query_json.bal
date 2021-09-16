@@ -23,7 +23,7 @@ public function main(){
     json[] jsonQueryResult = [];
 
     // Create Salesforce client configuration by reading from config file.
-    sfdc:SalesforceConfiguration sfConfig = {
+    sfdc:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",
