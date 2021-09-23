@@ -89,6 +89,7 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|e
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
     foreach var result in payload/<*> {
         Result batchResult = {
+            id: (result/<ns:id>/*).toString(),
             success: getBooleanValue((result/<ns:success>/*).toString()),
             created: getBooleanValue((result/<ns:created>/*).toString())
         };

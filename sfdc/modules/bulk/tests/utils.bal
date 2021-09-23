@@ -17,18 +17,13 @@
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
-import ballerina/lang.'xml as xmllib;
 import ballerina/regex;
 import ballerina/os;
 import ballerinax/sfdc;
 
-json[] jsonQueryResult = [];
-xml xmlQueryResult = xml `<test/>`;
-string csvQueryResult = "";
-
-
-// import ballerina/log;
-// import ballerina/test;
+json[] jsonInsertResult = [];
+xml xmlInsertResult = xml ``;
+string csvInputResult = "Id";
 
 // Create Salesforce client configuration by reading from environemnt.
 configurable string & readonly clientId = os:getEnv("CLIENT_ID");
@@ -94,44 +89,11 @@ function getContactIdByName(string firstName, string lastName, string title) ret
 isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
     json[] contacts = [];
     foreach var item in resultList {
-        json|error itemId = item.Id;
+        json|error itemId = item.id;
         if (itemId is json) {
             string id = itemId.toString();
             contacts[contacts.length()] = {"Id": id};
         }
-    }
-    return contacts;
-}
-
-isolated function getXmlContactsToDelete(xml resultList) returns xml {
-    xmllib:Element contacts = <xmllib:Element>xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
-
-    xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
-
-    xmllib:Element ele = <xmllib:Element>resultList;
-    foreach var item in ele.getChildren().elements() {
-        string id = (item/<ns:Id>[0]/*).toString();
-        xml child = xml `<sObject><Id>${id}</Id></sObject>`;
-        contacts.setChildren(contacts.getChildren() + child);
-    }
-    return contacts;
-}
-
-isolated function getCsvContactsToDelete(string resultString) returns string {
-    string contacts = "Id";
-    string[] lineArray = regex:split(resultString, "\n");
-    int arrLength = lineArray.length();
-    int counter = 1;
-    while (counter < arrLength) {
-        string? line = lineArray[counter];
-        if (line is string) {
-            int? inof = line.indexOf(",");
-            if (inof is int) {
-                string id = line.substring(0, inof);
-                contacts = contacts.concat("\n", id);
-            }
-        }
-        counter = counter + 1;
     }
     return contacts;
 }
