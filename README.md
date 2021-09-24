@@ -68,7 +68,7 @@ instance.
   <tr>
    <td>Ballerina Language Version
    </td>
-   <td>Swan Lake Alpha5
+   <td>Swan Lake Beta3
    </td>
   </tr>
   <tr>
@@ -558,11 +558,11 @@ above to listen to a certin event users need to select Objects for Change Notifi
 
     **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
 
-*   Download and install[ Ballerina SL Alpha5](https://ballerina.io/).
+*   Download and install[ Ballerina SL Beta3](https://ballerina.io/).
 *   Install Gradle 
 
 ## Building the Source
-Execute the commands below to build from the source after installing the Ballerina SL Alpha5 version.
+Execute the commands below to build from the source after installing the Ballerina SL Beta3 version.
 
 ### Build the project:
 ```ballerina
