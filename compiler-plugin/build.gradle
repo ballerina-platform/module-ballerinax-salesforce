@@ -19,34 +19,7 @@ plugins {
     id 'java'
 }
 
-ext.ballerinaLangVersion = project.ballerinaLangVersion
-ext.stdlibMimeVersion = project.stdlibMimeVersion
-ext.stdlibIoVersion = project.stdlibIoVersion
-ext.stdlibLogVersion = project.stdlibLogVersion
-ext.stdlibRegexVersion = project.stdlibRegexVersion
-ext.stdlibAuthVersion = project.stdlibAuthVersion
-ext.stdlibJwtVersion = project.stdlibJwtVersion
-ext.stdlibOAuth2Version = project.stdlibOAuth2Version
-ext.stdlibCacheVersion = project.stdlibCacheVersion
-ext.stdlibTimeVersion = project.stdlibTimeVersion
-ext.stdlibUrlVersion = project.stdlibUrlVersion
-ext.stdlibCryptoVersion = project.stdlibCryptoVersion
-ext.stdlibFileVersion = project.stdlibFileVersion
-ext.stdlibOsVersion = project.stdlibOsVersion
-ext.stdlibTaskVersion = project.stdlibTaskVersion
-ext.stdlibUuidVersion = project.stdlibUuidVersion
-
-group project.group
-version project.version
-
-def ballerinaModulePath = "../"
-def ballerinaDistPath = "${buildDir}/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}"
-def ballerinaDist = "${buildDir}/copy/target/ballerina-distribution"
-
-configurations {
-    jbalTools
-    ballerinaStdLibs
-}
+description = 'Ballerina - SFDC Compiler Plugin'
 
 repositories {
     mavenCentral()
@@ -60,103 +33,9 @@ repositories {
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-tools-api', version: "${ballerinaLangVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-parser', version: "${ballerinaLangVersion}"
-
-    /* JBallerina Tools */
-    jbalTools ("org.ballerinalang:jballerina-tools:${ballerinaLangVersion}") {
-        transitive = false
-    }
-    /* Standard libraries */
-    ballerinaStdLibs "org.ballerinalang:http-ballerina:${stdlibHttpVersion}"
-    ballerinaStdLibs "org.ballerinalang:io-ballerina:${stdlibIoVersion}"
-    ballerinaStdLibs "org.ballerinalang:log-ballerina:${stdlibLogVersion}"
-    ballerinaStdLibs "org.ballerinalang:os-ballerina:${stdlibOsVersion}"
-    ballerinaStdLibs "org.ballerinalang:regex-ballerina:${stdlibRegexVersion}"
-    ballerinaStdLibs "org.ballerinalang:url-ballerina:${stdlibUrlVersion}"
-    /* Transitive dependencies */
-    ballerinaStdLibs "org.ballerinalang:auth-ballerina:${stdlibAuthVersion}"
-    ballerinaStdLibs "org.ballerinalang:cache-ballerina:${stdlibCacheVersion}"
-    ballerinaStdLibs "org.ballerinalang:crypto-ballerina:${stdlibCryptoVersion}"
-    ballerinaStdLibs "org.ballerinalang:file-ballerina:${stdlibFileVersion}"
-    ballerinaStdLibs "org.ballerinalang:jwt-ballerina:${stdlibJwtVersion}"
-    ballerinaStdLibs "org.ballerinalang:mime-ballerina:${stdlibMimeVersion}"
-    ballerinaStdLibs "org.ballerinalang:oauth2-ballerina:${stdlibOAuth2Version}"
-    ballerinaStdLibs "org.ballerinalang:task-ballerina:${stdlibTaskVersion}"
-    ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
-    ballerinaStdLibs "org.ballerinalang:uuid-ballerina:${stdlibUuidVersion}"
 }
 
-task unpackJballerinaTools(type: Copy) {
-    configurations.jbalTools.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        from zipTree(artifact.getFile())
-        into new File("${buildDir}/target/extracted-distributions", "jballerina-tools-zip")
-    }
-}
-
-task copyDistributionForTest(type: Copy) {
-    from ballerinaDistPath
-    into ballerinaDist
-}
-
-task unpackStdLibs() {
-    doLast {
-        configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-            copy {
-                from project.zipTree(artifact.getFile())
-                into new File("${buildDir}/target/extracted-distributions", artifact.name + "-zip")
-            }
-        }
-    }
-}
-
-task copyStdlibsForTest(type: Copy) {
-    dependsOn(unpackJballerinaTools)
-    dependsOn(unpackStdLibs)
-
-    into ballerinaDist
-
-    /* Standard Libraries */
-    configurations.ballerinaStdLibs.resolvedConfiguration.resolvedArtifacts.each { artifact ->
-        def artifactExtractedPath = "${buildDir}/target/extracted-distributions/" + artifact.name + "-zip"
-        into("repo/bala") {
-            from "${artifactExtractedPath}/bala/"
-        }
-        into("repo/cache") {
-            from "${artifactExtractedPath}/cache"
-        }
-    }
-}
-
-task copySfdcPackageBalaForTest {
-    doLast {
-        copy {
-            from "${ballerinaModulePath}/build/cache_parent"
-            into "${ballerinaDist}/repo"
-            copy {
-                into("bala/ballerinax") {
-                    from "bala/ballerinax"
-                }
-            }
-            copy {
-                into("cache/ballerinax/") {
-                    from "cache/ballerinax"
-                }
-            }
-        }
-    }
-}
-
-test {
-    systemProperty "ballerina.offline.flag", "true"
-    useJUnitPlatform()
-}
-
-copyDistributionForTest.dependsOn unpackJballerinaTools
-unpackStdLibs.dependsOn copyDistributionForTest
-copyStdlibsForTest.dependsOn unpackStdLibs
-copySfdcPackageBalaForTest.dependsOn copyStdlibsForTest
-test.dependsOn copySfdcPackageBalaForTest
+build.dependsOn ":emp-wrapper:build"

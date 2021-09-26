@@ -12,13 +12,13 @@ The `ballerinax/sfdc` is a [Ballerina](https://ballerina.io/) connector for Sale
 ### Compatibility
 |                     | Version         |
 |---------------------|-----------------|
-| Ballerina Language  | Swan Lake Beta2 |
+| Ballerina Language  | Swan Lake Beta3 |
 | Salesforce REST API | v48.0           |
 | Salesforce Bulk API | v1              |
 | Salesforce SOAP API | Enterprise WSDL |
 
 ## Report issues
-To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina Salesforce repository](https://github.com/ballerina-platform/module-ballerinax-sfdc)
+To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina Extended Library repository](https://github.com/ballerina-platform/ballerina-extended-library)
 
 ## Useful links
 - Discuss code changes of the Ballerina project in [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).

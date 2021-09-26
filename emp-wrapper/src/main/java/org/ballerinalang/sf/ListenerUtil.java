@@ -39,7 +39,10 @@ import java.util.function.Consumer;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.internal.values.MapValue;
 import io.ballerina.runtime.internal.values.ObjectValue;
+import org.ballerinalang.sf.ModuleUtils;
 
+import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
+import static io.ballerina.runtime.api.constants.RuntimeConstants.VERSION_SEPARATOR;
 import static org.ballerinalang.sf.Constants.*;
 
 public class ListenerUtil {
@@ -129,26 +132,26 @@ public class ListenerUtil {
         BMap<BString, Object> eventObject = getEventDataRecord(event);
         switch (eventType) {
             case UPDATE:
-                final StrandMetadata ON_UPDATE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
-                        Constants.VERSION,Constants.ON_UPDATE);
+                final StrandMetadata ON_UPDATE_METADATA = new StrandMetadata(ModuleUtils.getModule().getOrg() ,
+                        ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), Constants.ON_UPDATE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_UPDATE, null, ON_UPDATE_METADATA, null,
                         eventObject,true);
                 break;
             case CREATE:
-                final StrandMetadata ON_CREATE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
-                        Constants.VERSION,Constants.ON_CREATE);
+                final StrandMetadata ON_CREATE_METADATA = new StrandMetadata(ModuleUtils.getModule().getOrg() ,
+                        ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), Constants.ON_CREATE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_CREATE, null, ON_CREATE_METADATA, null,
                         eventObject, true);
                 break;
             case DELETE:
-                final StrandMetadata ON_DELETE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
-                        Constants.VERSION,Constants.ON_DELETE);
+                final StrandMetadata ON_DELETE_METADATA = new StrandMetadata(ModuleUtils.getModule().getOrg() ,
+                        ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), Constants.ON_DELETE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_DELETE, null, ON_DELETE_METADATA, null,
                         eventObject, true);
                 break;
             case UNDELETE:
-                final StrandMetadata ON_RESTORE_METADATA = new StrandMetadata(Constants.ORG, Constants.MODULE,
-                        Constants.VERSION,Constants.ON_RESTORE);
+                final StrandMetadata ON_RESTORE_METADATA = new StrandMetadata(ModuleUtils.getModule().getOrg() ,
+                        ModuleUtils.getModule().getName(), ModuleUtils.getModule().getMajorVersion(), Constants.ON_RESTORE);
                 runtime.invokeMethodAsync(serviceObject, Constants.ON_RESTORE, null, ON_RESTORE_METADATA, null,
                         eventObject, true);
                 break;
@@ -156,19 +159,23 @@ public class ListenerUtil {
     }
 
     private static String getTopic(ObjectValue service) {
+        String sfdcPackage = ModuleUtils.getModule().getOrg() + ORG_NAME_SEPARATOR + ModuleUtils.getModule().getName()
+                + VERSION_SEPARATOR + ModuleUtils.getModule().getMajorVersion();
         MapValue<BString, Object> channelConfig = (MapValue<BString, Object>) service.getType()
-                .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));       
+                .getAnnotation(StringUtils.fromString(sfdcPackage + ":" + Constants.SERVICE_CONFIG));
         return channelConfig.getStringValue(Constants.CHANNEL_NAME).getValue();
     }
 
     private static long getReplayFrom(ObjectValue service) {
+        String sfdcPackage = ModuleUtils.getModule().getOrg() + ORG_NAME_SEPARATOR + ModuleUtils.getModule().getName()
+                + VERSION_SEPARATOR + ModuleUtils.getModule().getMajorVersion();
         MapValue<BString, Object> channelConfig = (MapValue<BString, Object>) service.getType()
-                .getAnnotation(StringUtils.fromString(Constants.PACKAGE + ":" + Constants.SERVICE_CONFIG));
+                .getAnnotation(StringUtils.fromString(sfdcPackage + ":" + Constants.SERVICE_CONFIG));
         return channelConfig.getIntValue(Constants.REPLAY_FROM);
     }
 
     private static BError sfdcError(String errorMessage) {
-        return ErrorCreator.createDistinctError(Constants.SFDC_ERROR, PACKAGE_ID_SFDC,
+        return ErrorCreator.createDistinctError(Constants.SFDC_ERROR, ModuleUtils.getModule(),
                 StringUtils.fromString(errorMessage));
     }
 
@@ -204,10 +211,10 @@ public class ListenerUtil {
         Object eventPayload = event.get(EVENT_PAYLOAD);
         Map map = oMapper.convertValue(eventPayload, Map.class);
         BMap<BString, Object> eventDataRecord =
-                ValueCreator.createRecordValue(PACKAGE_ID_SFDC, EVENT_DATA_RECORD);
+                ValueCreator.createRecordValue(ModuleUtils.getModule(), EVENT_DATA_RECORD);
         eventData[0] = toBMap(map);
         BMap<BString, Object> eventMetadataRecord =
-                ValueCreator.createRecordValue(PACKAGE_ID_SFDC, EVENT_METADATA_RECORD);
+                ValueCreator.createRecordValue(ModuleUtils.getModule(), EVENT_METADATA_RECORD);
         String commitTimestamp = new JSONObject(gson.toJson(event.get(EVENT_PAYLOAD)))
                 .getJSONObject(EVENT_HEADER).get(COMMIT_TIME_STAMP).toString();
         metadata[0] = commitTimestamp;

@@ -26,7 +26,7 @@ configurable string & readonly refreshUrl = os:getEnv("REFRESH_URL");
 configurable string & readonly baseUrl = os:getEnv("EP_URL");
 
 // Using direct-token config for client configuration
-SalesforceConfiguration sfConfig = {
+ConnectionConfig sfConfig = {
     baseUrl: baseUrl,
     clientConfig: {
         clientId: clientId,

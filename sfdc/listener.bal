@@ -19,7 +19,7 @@ import ballerina/jballerina.java;
 handle JAVA_NULL = java:createNull();
 
 # Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.  
-@display {label: "Salesforce Listener"}
+@display {label: "Salesforce Listener", iconPath: "resources/sfdc.svg"}
 public class Listener {
     private handle username = JAVA_NULL;
     private handle password = JAVA_NULL;
