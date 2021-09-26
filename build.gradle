@@ -59,6 +59,14 @@ def packageOrg = "ballerinax"
 def pathToBala = file("${project.projectDir}/sfdc/target/bala")
 def platform = "java11"
 
+project('compiler-plugin') {
+    test {
+        onlyIf {
+            project.hasProperty("compilerPluginTests")
+        }
+    }
+}
+
 task createBalaDirectory {
     mkdir "${project.projectDir}/sfdc/target/bala"
 }

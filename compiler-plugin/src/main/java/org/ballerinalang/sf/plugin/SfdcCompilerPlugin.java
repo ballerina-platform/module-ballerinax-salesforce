@@ -22,6 +22,9 @@ package org.ballerinalang.sf.plugin;
 import io.ballerina.projects.plugins.CompilerPlugin;
 import io.ballerina.projects.plugins.CompilerPluginContext;
 
+/**
+ * The compiler plugin implementation for Ballerina sfdc listener.
+ */
 public class SfdcCompilerPlugin extends CompilerPlugin {
     @Override
     public void init(CompilerPluginContext compilerPluginContext) {

@@ -45,6 +45,9 @@ import static org.ballerinalang.sf.plugin.Constants.ON_RESTORE;
 import static org.ballerinalang.sf.plugin.Constants.ON_UPDATE;
 import static org.ballerinalang.sf.plugin.Constants.SERVICE_CONFIG_ANNOTATION;
 
+/**
+ * Validates a ballerina sfdc resource.
+ */
 public class SfdcResourceValidator {
     static void validateResource(SyntaxNodeAnalysisContext ctx, FunctionDefinitionNode member) {
         extractRemoteMethodNameAndValidate(ctx, member);
@@ -85,7 +88,7 @@ public class SfdcResourceValidator {
         IdentifierToken functionNameToken = member.functionName();
         String functionName = functionNameToken.toString().trim();
         if (!(functionName.equals(ON_UPDATE) || functionName.equals(ON_CREATE) || functionName.equals(ON_DELETE) ||
-                functionName.equals(ON_RESTORE))) { // include other method names
+                functionName.equals(ON_RESTORE))) {
             updateDiagnostic(ctx, functionNameToken, functionName, SfdcDiagnosticCodes.SFDC_102);
         }
     }

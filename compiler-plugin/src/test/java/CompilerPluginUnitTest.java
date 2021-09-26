@@ -33,8 +33,10 @@ import io.ballerina.projects.Package;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * A unit test class for sfdc listener compiler plugin
+ */
 public class CompilerPluginUnitTest {
-
     private static final Path RESOURCE_DIRECTORY = Paths.get("src", "test", "resources").toAbsolutePath();
     private static final Path DISTRIBUTION_PATH = Paths.get("build", "copy", "target",
             "ballerina-distribution").toAbsolutePath();

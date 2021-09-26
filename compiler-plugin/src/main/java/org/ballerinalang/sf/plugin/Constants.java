@@ -19,6 +19,9 @@
 
 package org.ballerinalang.sf.plugin;
 
+/**
+ * Constants for sfdc compiler plugin.
+ */
 public class Constants {
     public static final String BALLERINAX = "ballerinax";
     public static final String SFDC = "sfdc";

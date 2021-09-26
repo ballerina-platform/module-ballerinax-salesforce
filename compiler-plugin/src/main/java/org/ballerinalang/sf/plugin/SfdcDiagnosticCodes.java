@@ -23,6 +23,9 @@ import io.ballerina.tools.diagnostics.DiagnosticSeverity;
 
 import static io.ballerina.tools.diagnostics.DiagnosticSeverity.ERROR;
 
+/**
+ * {@code SfdcDiagnosticCodes} is used to hold diagnostic codes.
+ */
 public enum SfdcDiagnosticCodes {
     SFDC_101("SFDC_101", "invalid annotation type '%s'", ERROR),
     SFDC_102("SFDC_102", "invalid method name '%s': expected one of the following types: "

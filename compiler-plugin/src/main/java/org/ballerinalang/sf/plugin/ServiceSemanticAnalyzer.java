@@ -42,12 +42,15 @@ import static org.ballerinalang.sf.plugin.Constants.BALLERINAX;
 import static org.ballerinalang.sf.plugin.Constants.REMOTE_KEYWORD;
 import static org.ballerinalang.sf.plugin.Constants.SFDC;
 
+
+/**
+ * Validates a Ballerina sfdc listener.
+ */
 public class ServiceSemanticAnalyzer implements AnalysisTask<SyntaxNodeAnalysisContext> {
     @Override
     public void perform(SyntaxNodeAnalysisContext syntaxNodeAnalysisContext) {
         ServiceDeclarationNode serviceDeclarationNode = (ServiceDeclarationNode) syntaxNodeAnalysisContext.node();
         NodeList<Node> members = serviceDeclarationNode.members();
-        /* Validate listener */
         Optional<Symbol> serviceSymOptional = syntaxNodeAnalysisContext.semanticModel().symbol(serviceDeclarationNode);
         if (serviceSymOptional.isPresent()) {
             List<TypeSymbol> listenerTypes = ((ServiceDeclarationSymbol) serviceSymOptional.get()).listenerTypes();
@@ -55,9 +58,7 @@ public class ServiceSemanticAnalyzer implements AnalysisTask<SyntaxNodeAnalysisC
                 return;
             }
         }
-        /* Validate Annotation */
         SfdcResourceValidator.extractFunctionAnnotationAndValidate(syntaxNodeAnalysisContext, serviceDeclarationNode);
-        /* Validate the members of the remote function */
         for (Node member : members) {
             if (member.kind() == SyntaxKind.OBJECT_METHOD_DEFINITION) {
                 FunctionDefinitionNode functionDefinitionNode = (FunctionDefinitionNode) member;
