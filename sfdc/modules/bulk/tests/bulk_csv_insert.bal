@@ -19,13 +19,13 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-int maxIterations = 5;
-decimal delayInSecs = 5.0;
+const int maxIterations = 5;
+const decimal delayInSecs = 5.0;
 
 @test:Config {
     enable: true
 }
-function insertCsv() {
+function insertCsv() returns error? {
     log:printInfo("baseClient -> insertCsv");
     string batchId = "";
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n"
@@ -33,138 +33,139 @@ function insertCsv() {
         + "Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211777,peter77@gmail.com,846";
 
     //create job
-    error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
+    BulkJob insertJob = check baseClient->createJob("insert", "Contact", "CSV");
 
-    if (insertJob is BulkJob) {
-        //add csv content
-        foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batch = baseClient->addBatch(insertJob, contacts);
-            if (batch is BatchInfo) {
-                test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
-                batchId = batch.id;
-                break;
+    //add csv content
+    foreach var i in 1 ..< maxIterations + 1 {
+        error|BatchInfo batch = baseClient->addBatch(insertJob, contacts);
+        if (batch is BatchInfo) {
+            test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
+            batchId = batch.id;
+            break;
+        } else {
+            if i != 5 {
+                log:printWarn("addBatch Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
             } else {
-                if i != 5 {
-                    log:printWarn("addBatch Operation Failed! Retrying...");
-                    runtime:sleep(delayInSecs);
-                } else {
-                    log:printWarn("addBatch Operation Failed! Giving up...");
-                    test:assertFail(msg = batch.message());
-                }
+                log:printWarn("addBatch Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = batch.message());
             }
         }
+    }
 
-        //get job info
-        foreach var i in 1 ..< maxIterations {
-            error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
-            if (jobInfo is JobInfo) {
-                test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
-                break;
+    //get job info
+    foreach var i in 1 ..< maxIterations + 1 {
+        error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
+        if (jobInfo is JobInfo) {
+            test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
+            break;
+        } else {
+            if i != 5 {
+                log:printWarn("getJobInfo Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
             } else {
-                if i != 5 {
-                    log:printWarn("getJobInfo Operation Failed! Retrying...");
-                    runtime:sleep(delayInSecs);
-                } else {
-                    log:printWarn("getJobInfo Operation Failed! Giving up...");
-                    test:assertFail(msg = jobInfo.message());
-                }
+                log:printWarn("getJobInfo Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = jobInfo.message());
             }
         }
+    }
 
-        //get batch info
-        foreach var i in 1 ..< maxIterations {
-            error|BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
-            if (batchInfo is BatchInfo) {
-                test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
-                break;
+    //get batch info
+    foreach var i in 1 ..< maxIterations + 1 {
+        error|BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
+        if (batchInfo is BatchInfo) {
+            test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
+            break;
+        } else {
+            if i != 5 {
+                log:printWarn("getBatchInfo Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
             } else {
-                if i != 5 {
-                    log:printWarn("getBatchInfo Operation Failed! Retrying...");
-                    runtime:sleep(delayInSecs);
-                } else {
-                    log:printWarn("getBatchInfo Operation Failed! Giving up...");
-                    test:assertFail(msg = batchInfo.message());
-                }
+                log:printWarn("getBatchInfo Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = batchInfo.message());
             }
         }
-        
-        //get all batches
-        foreach var i in 1 ..< maxIterations {
-            error|BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
-            if (batchInfoList is BatchInfo[]) {
-                test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
-                break;
-            } else {
-                if i != 5 {
-                    log:printWarn("getAllBatches Operation Failed! Retrying...");
-                    runtime:sleep(delayInSecs);
-                } else {
-                    log:printWarn("getAllBatches Operation Failed! Giving up...");
-                    test:assertFail(msg = batchInfoList.message());
-                }
-            }
-        }
+    }
 
-        //get batch request
-        foreach var i in 1 ..< maxIterations {
-            var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
-            if (batchRequest is string) {
-                test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
-                break;
-            } else if (batchRequest is error) {
-                if i != 5 {
-                    log:printWarn("getBatchRequest Operation Failed! Retrying...");
-                    runtime:sleep(delayInSecs);
-                } else {
-                    log:printWarn("getBatchRequest Operation Failed! Giving up...");
-                    test:assertFail(msg = batchRequest.message());
-                }
+    //get all batches
+    foreach var i in 1 ..< maxIterations + 1 {
+        error|BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
+        if (batchInfoList is BatchInfo[]) {
+            test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
+            break;
+        } else {
+            if i != 5 {
+                log:printWarn("getAllBatches Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
             } else {
-                test:assertFail(msg = "Invalid Batch Request!");
-                break;
+                log:printWarn("getAllBatches Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = batchInfoList.message());
             }
         }
-        
-        foreach var i in 1 ..< maxIterations {
-            var batchResult = baseClient->getBatchResult(insertJob, batchId);
-            if (batchResult is Result[]) {
-                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                foreach Result res in batchResult {
-                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
-                }
-                break;
-            } else if (batchResult is error) {
-                if i != 5 {
-                    log:printWarn("getBatchResult Operation Failed! Retrying...");
-                    runtime:sleep(delayInSecs);
-                } else {
-                    log:printWarn("getBatchResult Operation Failed! Giving up...");
-                    test:assertFail(msg = batchResult.message());
-                }
-            } else {
-                test:assertFail("Invalid Batch Result!");
-                break;
-            }
-        }
+    }
 
-        //close job
-        foreach var i in 1 ..< maxIterations {
-            error|JobInfo closedJob = baseClient->closeJob(insertJob);
-            if (closedJob is JobInfo) {
-                test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
-                break;
+    //get batch request
+    foreach var i in 1 ..< maxIterations + 1 {
+        var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
+        if (batchRequest is string) {
+            test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
+            break;
+        } else if (batchRequest is error) {
+            if i != 5 {
+                log:printWarn("getBatchRequest Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
             } else {
-                if i != 5 {
-                    log:printWarn("closeJob Operation Failed! Retrying...");
-                    runtime:sleep(delayInSecs);
-                } else {
-                    log:printWarn("closeJob Operation Failed! Giving up...");
-                    test:assertFail(msg = closedJob.message());
+                log:printWarn("getBatchRequest Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = batchRequest.message());
+            }
+        } else {
+            test:assertFail(msg = "Invalid Batch Request!");
+            break;
+        }
+    }
+
+    foreach var i in 1 ..< maxIterations + 1 {
+        var batchResult = baseClient->getBatchResult(insertJob, batchId);
+        if (batchResult is Result[]) {
+            test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
+            foreach var item in batchResult {
+                json|error itemId = item?.id;
+                if (itemId is json) {
+                    string id = itemId.toString();
+                    csvInputResult = csvInputResult + "\n" + id;
                 }
+                test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
+            }
+            break;
+        } else if (batchResult is error) {
+            if i != 5 {
+                log:printWarn("getBatchResult Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
+            } else {
+                log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = batchResult.message());
+            }
+        } else {
+            test:assertFail("Invalid Batch Result!");
+            break;
+        }
+    }
+
+    //close job
+    foreach var i in 1 ..< maxIterations + 1 {
+        error|JobInfo closedJob = baseClient->closeJob(insertJob);
+        if (closedJob is JobInfo) {
+            test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
+            break;
+        } else {
+            if i != 5 {
+                log:printWarn("closeJob Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
+            } else {
+                log:printWarn("closeJob Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = closedJob.message());
             }
         }
-    } else {
-        test:assertFail(msg = insertJob.message());
     }
 }
 
@@ -184,10 +185,11 @@ function insertCsvFromFile() {
         //add csv content via file
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(csvContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
-            foreach var i in 1 ..< maxIterations {
+            foreach var i in 1 ..< maxIterations + 1 {
                 error|BatchInfo batchUsingCsvFile = baseClient->addBatch(insertJob, <@untainted>rbc);
                 if (batchUsingCsvFile is BatchInfo) {
-                    test:assertTrue(batchUsingCsvFile.id.length() > 0, msg = "Could not upload the contacts using CSV file.");
+                    test:assertTrue(batchUsingCsvFile.id.length() > 0, 
+                    msg = "Could not upload the contacts using CSV file.");
                     batchId = batchUsingCsvFile.id;
                     break;
                 } else {
@@ -195,7 +197,7 @@ function insertCsvFromFile() {
                         log:printWarn("addBatch Operation Failed! Retrying...");
                         runtime:sleep(delayInSecs);
                     } else {
-                        log:printWarn("addBatch Operation Failed! Giving up...");
+                        log:printWarn("addBatch Operation Failed! Giving up after 5 tries.");
                         test:assertFail(msg = batchUsingCsvFile.message());
                     }
                 }
@@ -207,7 +209,7 @@ function insertCsvFromFile() {
         }
 
         //get job info
-        foreach var i in 1 ..< maxIterations {
+        foreach var i in 1 ..< maxIterations + 1 {
             error|JobInfo jobInfo = baseClient->getJobInfo(insertJob);
             if (jobInfo is JobInfo) {
                 test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
@@ -216,14 +218,14 @@ function insertCsvFromFile() {
                     log:printWarn("getJobInfo Operation Failed! Retrying...");
                     runtime:sleep(delayInSecs);
                 } else {
-                    log:printWarn("getJobInfo Operation Failed! Giving up...");
+                    log:printWarn("getJobInfo Operation Failed! Giving up after 5 tries.");
                     test:assertFail(msg = jobInfo.message());
                 }
             }
         }
 
         //get batch info
-        foreach var i in 1 ..< maxIterations {
+        foreach var i in 1 ..< maxIterations + 1 {
             error|BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
             if (batchInfo is BatchInfo) {
                 test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
@@ -232,14 +234,14 @@ function insertCsvFromFile() {
                     log:printWarn("getBatchInfo Operation Failed! Retrying...");
                     runtime:sleep(delayInSecs);
                 } else {
-                    log:printWarn("getBatchInfo Operation Failed! Giving up...");
+                    log:printWarn("getBatchInfo Operation Failed! Giving up after 5 tries.");
                     test:assertFail(msg = batchInfo.message());
                 }
             }
         }
-        
+
         //get all batches
-        foreach var i in 1 ..< maxIterations {
+        foreach var i in 1 ..< maxIterations + 1 {
             error|BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
             if (batchInfoList is BatchInfo[]) {
                 test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
@@ -248,14 +250,14 @@ function insertCsvFromFile() {
                     log:printWarn("getAllBatches Operation Failed! Retrying...");
                     runtime:sleep(delayInSecs);
                 } else {
-                    log:printWarn("getAllBatches Operation Failed! Giving up...");
+                    log:printWarn("getAllBatches Operation Failed! Giving up after 5 tries.");
                     test:assertFail(msg = batchInfoList.message());
                 }
             }
         }
 
         //get batch request
-        foreach var i in 1 ..< maxIterations {
+        foreach var i in 1 ..< maxIterations + 1 {
             var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
             if (batchRequest is string) {
                 test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
@@ -265,7 +267,7 @@ function insertCsvFromFile() {
                     log:printWarn("getBatchRequest Operation Failed! Retrying...");
                     runtime:sleep(delayInSecs);
                 } else {
-                    log:printWarn("getBatchRequest Operation Failed! Giving up...");
+                    log:printWarn("getBatchRequest Operation Failed! Giving up after 5 tries.");
                     test:assertFail(msg = batchRequest.message());
                 }
             } else {
@@ -275,20 +277,25 @@ function insertCsvFromFile() {
         }
 
 
-        foreach var i in 1 ..< maxIterations {
+        foreach var i in 1 ..< maxIterations + 1 {
             var batchResult = baseClient->getBatchResult(insertJob, batchId);
             if (batchResult is Result[]) {
-                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
-                foreach Result res in batchResult {
-                    test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
-                }                
+                foreach var item in batchResult {
+                    json|error itemId = item?.id;
+                    if (itemId is json) {
+                        string id = itemId.toString();
+                        csvInputResult = csvInputResult + "\n" + id;
+                    }
+                    test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
+                }
+                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");              
                 break;
             } else if (batchResult is error) {
                 if i != 5 {
                     log:printWarn("getBatchResult Operation Failed! Retrying...");
                     runtime:sleep(delayInSecs);
                 } else {
-                    log:printWarn("getBatchResult Operation Failed! Giving up...");
+                    log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
                     test:assertFail(msg = batchResult.message());
                 }
             } else {
