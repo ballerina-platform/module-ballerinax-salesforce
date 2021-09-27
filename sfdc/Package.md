@@ -10,7 +10,7 @@ secure access.
 ## Compatibility
 |                     |    Version                  |
 |:-------------------:|:---------------------------:|
-| Ballerina Language  | swan-lake-Alpha5            |
+| Ballerina Language  | swan-lake-Beta3            |
 | Salesforce API      | v48.0                       |
 | Salesforce Bulk API | v1                          |
 
