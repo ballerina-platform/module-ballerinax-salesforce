@@ -1,7 +1,7 @@
 [package]
 org = "ballerinax"
 name = "sfdc"
-version = "2.1.14"
+version = "2.1.13"
 export = ["sfdc", "sfdc.bulk", "sfdc.soap"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
@@ -12,8 +12,8 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
 observabilityIncluded = true
 
 [[platform.java11.dependency]]
-path = "../emp-wrapper/target/emp-wrapper-2.1.12.jar"
+path = "../emp-wrapper/target/emp-wrapper-2.1.13.jar"
 groupId = "org.ballerinalang.sf"
 artifactId = "emp-wrapper"
 module = "emp-wrapper" 
-version = "2.1.12"
+version = "2.1.13"
