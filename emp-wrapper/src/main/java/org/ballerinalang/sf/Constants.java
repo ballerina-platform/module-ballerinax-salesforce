@@ -23,17 +23,8 @@ import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.Module;
 
-import static io.ballerina.runtime.api.constants.RuntimeConstants.ORG_NAME_SEPARATOR;
-import static io.ballerina.runtime.api.constants.RuntimeConstants.VERSION_SEPARATOR;
-
 public class Constants {
     public static final String CONSUMER_SERVICES = "consumer_services";
-
-    public static final String ORG = "ballerinax";
-    public static final String MODULE = "sfdc";
-    public static final String VERSION = "2.1.12";
-    public static final String PACKAGE = ORG + ORG_NAME_SEPARATOR + MODULE + VERSION_SEPARATOR + VERSION;
-    public static final Module PACKAGE_ID_SFDC = new Module(ORG, MODULE, VERSION);
 
     /* Event Record type names */
     public static final String EVENT_DATA_RECORD = "EventData";
