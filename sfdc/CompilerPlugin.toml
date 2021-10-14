@@ -3,4 +3,4 @@ id = "compiler-plugin"
 class = "org.ballerinalang.sf.plugin.SfdcCompilerPlugin"
 
 [[dependency]]
-path = "../compiler-plugin/build/libs/compiler-plugin-2.1.9-SNAPSHOT.jar"
+path = "../compiler-plugin/build/libs/compiler-plugin-3.0.0.jar"
