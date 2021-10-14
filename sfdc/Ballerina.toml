@@ -12,8 +12,8 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
 observabilityIncluded = true
 
 [[platform.java11.dependency]]
-path = "../emp-wrapper/build/libs/emp-wrapper-2.1.9-SNAPSHOT-all.jar"
+path = "../emp-wrapper/build/libs/emp-wrapper-3.0.0-all.jar"
 groupId = "org.ballerinalang.sf"
 artifactId = "emp-wrapper"
 module = "emp-wrapper" 
-version = "2.1.9-SNAPSHOT"
+version = "3.0.0"
