@@ -124,8 +124,18 @@ function queryCsv() returns error? {
     foreach var i in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(queryJob, batchId);
         if (batchResult is string) {
-            test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed.");
-            break;
+            if (checkCsvResult(batchResult) == 4) {
+                test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed.");
+                break;
+            } else {
+                if i != 5 {
+                    log:printWarn("getBatchResult Operation Failed! Retrying...");
+                    runtime:sleep(delayInSecs);
+                } else {
+                    log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
+                    test:assertFail(msg = batchResult);
+                }
+            }
         } else if (batchResult is error) {
             if i != 5 {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");

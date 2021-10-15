@@ -117,7 +117,18 @@ function queryJson() returns error? {
         if (batchResult is json) {
             json[]|error batchResultArr = <json[]>batchResult;
             if (batchResultArr is json[]) {
-                test:assertTrue(batchResultArr.length() == 4, msg = "Retrieving batch result failed.");
+                if (batchResultArr.length() == 4) {
+                    test:assertTrue(batchResultArr.length() == 4, msg = "Retrieving batch result failed.");
+                    break;
+                } else {
+                    if i != 5 {
+                        log:printWarn("getBatchResult Operation Failed! Retrying...");
+                        runtime:sleep(delayInSecs);
+                    } else {
+                        log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
+                        test:assertFail(msg = batchResultArr.toString());
+                    }
+                }
             } else {
                 test:assertFail(msg = batchResultArr.toString());
             }
