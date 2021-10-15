@@ -28,14 +28,14 @@ function deleteJson() returns error? {
     BulkJob deleteJob = check baseClient->createJob("delete", "Contact", "JSON");
 
     //add json content
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(deleteJob, contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using json.");
             batchId = batch.id;
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("addBatch Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -54,13 +54,13 @@ function deleteJson() returns error? {
     }
 
     //get batch info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(deleteJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -71,13 +71,13 @@ function deleteJson() returns error? {
     }
 
     //get all batches
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(deleteJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getAllBatches Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -88,7 +88,7 @@ function deleteJson() returns error? {
     }
 
     //get batch request
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(deleteJob, batchId);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]>batchRequest;
@@ -99,7 +99,7 @@ function deleteJson() returns error? {
             }
             break;
         } else if (batchRequest is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -113,7 +113,7 @@ function deleteJson() returns error? {
     }
 
     //get batch result
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(deleteJob, batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -122,7 +122,7 @@ function deleteJson() returns error? {
             }
             break;
         } else if (batchResult is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
