@@ -49,14 +49,14 @@ function upsertXml() returns error? {
     BulkJob upsertJob = check baseClient->createJob("upsert", "Contact", "XML", "My_External_Id__c");
 
     //add xml content
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(upsertJob, contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using xml.");
             batchId = batch.id;
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("addBatch Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -75,13 +75,13 @@ function upsertXml() returns error? {
     }
 
     //get batch info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(upsertJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -92,13 +92,13 @@ function upsertXml() returns error? {
     }
 
     //get all batches
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(upsertJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getAllBatches Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -119,7 +119,7 @@ function upsertXml() returns error? {
     }
 
     //get batch result
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(upsertJob, batchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -128,7 +128,7 @@ function upsertXml() returns error? {
             }
             break;
         } else if (batchResult is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {

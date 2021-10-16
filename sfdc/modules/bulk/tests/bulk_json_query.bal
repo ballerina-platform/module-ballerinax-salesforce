@@ -32,14 +32,14 @@ function queryJson() returns error? {
     BulkJob queryJob = check baseClient->createJob("query", "Contact", "JSON");
 
     //add query string
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(queryJob, queryStr);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
             batchId = batch.id;
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("addBatch Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -58,13 +58,13 @@ function queryJson() returns error? {
     }
 
     //get batch info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(queryJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -75,13 +75,13 @@ function queryJson() returns error? {
     }
 
     //get all batches
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(queryJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getAllBatches Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -92,13 +92,13 @@ function queryJson() returns error? {
     }
 
     //get batch request
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(queryJob, batchId);
         if (batchRequest is string) {
             test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
             break;
         } else if (batchRequest is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -112,18 +112,29 @@ function queryJson() returns error? {
     }
 
     //get batch result
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(queryJob, batchId);
         if (batchResult is json) {
             json[]|error batchResultArr = <json[]>batchResult;
             if (batchResultArr is json[]) {
-                test:assertTrue(batchResultArr.length() == 4, msg = "Retrieving batch result failed.");
+                if (batchResultArr.length() == 4) {
+                    test:assertTrue(batchResultArr.length() == 4, msg = "Retrieving batch result failed.");
+                    break;
+                } else {
+                    if currentRetry != maxIterations {
+                        log:printWarn("getBatchResult Operation Failed! Retrying...");
+                        runtime:sleep(delayInSecs);
+                    } else {
+                        log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
+                        test:assertFail(msg = batchResultArr.toString());
+                    }
+                }
             } else {
                 test:assertFail(msg = batchResultArr.toString());
             }
             break;
         } else if (batchResult is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {

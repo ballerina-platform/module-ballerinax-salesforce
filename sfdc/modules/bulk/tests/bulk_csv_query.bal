@@ -32,14 +32,14 @@ function queryCsv() returns error? {
     BulkJob queryJob = check baseClient->createJob("query", "Contact", "CSV");
 
     //add query string
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(queryJob, queryStr);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
             batchId = batch.id;
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("addBatch Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -50,13 +50,13 @@ function queryCsv() returns error? {
     }
 
     //get job info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getJobInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -67,13 +67,13 @@ function queryCsv() returns error? {
     }
 
     //get batch info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(queryJob, batchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -84,13 +84,13 @@ function queryCsv() returns error? {
     }
 
     //get all batches
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(queryJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getAllBatches Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -101,13 +101,13 @@ function queryCsv() returns error? {
     }
 
     //get batch request
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(queryJob, batchId);
         if (batchRequest is string) {
             test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
             break;
         } else if (batchRequest is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -121,13 +121,23 @@ function queryCsv() returns error? {
     }
 
     //get batch result
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(queryJob, batchId);
         if (batchResult is string) {
-            test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed.");
-            break;
+            if (checkCsvResult(batchResult) == 4) {
+                test:assertTrue(checkCsvResult(batchResult) == 4, msg = "Retrieving batch result failed.");
+                break;
+            } else {
+                if currentRetry != maxIterations {
+                    log:printWarn("getBatchResult Operation Failed! Retrying...");
+                    runtime:sleep(delayInSecs);
+                } else {
+                    log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
+                    test:assertFail(msg = batchResult);
+                }
+            }
         } else if (batchResult is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
