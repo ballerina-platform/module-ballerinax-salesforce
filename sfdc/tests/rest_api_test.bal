@@ -113,28 +113,23 @@ function testDeleteRecord() {
 @test:Config { 
     enable: true
 }
-function testGetQueryResult() {
+function testGetQueryResult() returns error? {
     log:printInfo("baseClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
-    SoqlResult|Error res = baseClient->getQueryResult(sampleQuery);
+    SoqlResult res = check baseClient->getQueryResult(sampleQuery);
+    assertSoqlResult(res);
+    string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
 
-    if (res is SoqlResult) {
-        assertSoqlResult(res);
-        string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
+    while (nextRecordsUrl is string && nextRecordsUrl.trim() != EMPTY_STRING) {
+        log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
+        SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
 
-        while (nextRecordsUrl is string && nextRecordsUrl.trim() != EMPTY_STRING) {
-            log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-            SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
-
-            if (resp is SoqlResult) {
-                assertSoqlResult(resp);
-                res = resp;
-            } else {
-                test:assertFail(msg = resp.message());
-            }
+        if (resp is SoqlResult) {
+            assertSoqlResult(resp);
+            res = resp;
+        } else {
+            test:assertFail(msg = resp.message());
         }
-    } else {
-        test:assertFail(msg = res.message());
     }
 }
 
