@@ -43,7 +43,7 @@ jobs:
         uses: ballerina-platform/ballerina-action/@master
         with:
           args:
-            build -c --skip-tests ./sfdc
+            pack ./sfdc
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}

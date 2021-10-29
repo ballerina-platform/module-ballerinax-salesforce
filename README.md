@@ -34,11 +34,11 @@ Execute the commands below to build from the source.
    ```
 2. * To build the package:
       ```   
-      bal build -c ./sfdc
+      bal pack --with-tests ./sfdc
       ```
    * To build the package without tests:
       ```
-      bal build -c --skip-tests ./sfdc
+      bal pack ./sfdc
       ```
 ## Contributing to Ballerina
  

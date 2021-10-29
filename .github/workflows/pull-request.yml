@@ -40,6 +40,6 @@ jobs:
         uses: ballerina-platform/ballerina-action/@nightly
         with:
           args:
-            build -c --skip-tests ./sfdc
+            pack ./sfdc
         env:
             JAVA_HOME: /usr/lib/jvm/default-jvm
