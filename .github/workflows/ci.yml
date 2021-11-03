@@ -44,7 +44,16 @@ jobs:
         uses: ballerina-platform/ballerina-action/@nightly
         with:
           args:
-            pack --with-tests ./sfdc
+            pack ./sfdc
+        env:
+          JAVA_HOME: /usr/lib/jvm/default-jvm
+
+      # Test Ballerina Project
+      - name: Ballerina Test
+        uses: ballerina-platform/ballerina-action/@nightly
+        with:
+          args:
+            test ./sfdc
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
