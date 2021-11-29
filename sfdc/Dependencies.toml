@@ -184,9 +184,7 @@ org = "ballerina"
 name = "lang.runtime"
 version = "0.0.0"
 dependencies = [
-	{org = "ballerina", name = "jballerina.java"},
-	{org = "ballerina", name = "lang.array"},
-	{org = "ballerina", name = "lang.value"}
+	{org = "ballerina", name = "jballerina.java"}
 ]
 modules = [
 	{org = "ballerina", packageName = "lang.runtime", moduleName = "lang.runtime"}
@@ -343,7 +341,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "sfdc"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
