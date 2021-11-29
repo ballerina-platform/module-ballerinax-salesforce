@@ -41,7 +41,7 @@ jobs:
 
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action/@slbeta4
         with:
           args:
             pack ./sfdc
@@ -50,7 +50,7 @@ jobs:
 
       # Test Ballerina Project
       - name: Ballerina Test
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action/@slbeta4
         with:
           args:
             test ./sfdc
