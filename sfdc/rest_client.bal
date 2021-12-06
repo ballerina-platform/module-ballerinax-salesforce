@@ -162,7 +162,7 @@ public isolated client class Client {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
         http:Response|error response = self.salesforceClient->patch(path, req);
-        json result = check checkAndSetErrors(response, false);
+        _ = check checkAndSetErrors(response, false);
     }
 
     # Delete existing records based on relevant object ID.

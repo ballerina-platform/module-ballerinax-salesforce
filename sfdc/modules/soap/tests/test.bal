@@ -74,8 +74,8 @@ function testconvertLead() {
 }
 
 @test:AfterSuite {}
-function testDeleteRecord() {
-    sfdc:Error? accResponse = restClient->deleteAccount(accountId);
-    sfdc:Error? conResponse = restClient->deleteContact(contactId);
-    sfdc:Error? oppResponse = restClient->deleteOpportunity(opportunityId);
+function testDeleteRecord() returns error? {
+    check restClient->deleteAccount(accountId);
+    check restClient->deleteContact(contactId);
+    check restClient->deleteOpportunity(opportunityId);
 }

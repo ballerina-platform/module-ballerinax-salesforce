@@ -27,14 +27,16 @@ ListenerConfiguration listenerConfig = {
     password: password
 };
 listener Listener eventListener = new (listenerConfig);
-boolean isUpdated = false;
+isolated boolean isUpdated = false;
 
 @ServiceConfig {channelName: "/data/ChangeEvents"}
 service on eventListener {
-    remote function onUpdate(EventData event) {
+    remote isolated  function onUpdate(EventData event) {
         json accountName = event.changedData.get("Name");
         if (accountName.toString() == "WSO2 Inc") {
-            isUpdated = true;
+            lock {
+                isUpdated = true;
+            }
         } else {
             io:println(event.toString());
         }
@@ -47,5 +49,7 @@ service on eventListener {
 }
 function testUpdated() {
     runtime:sleep(3.0);
-    test:assertTrue(isUpdated, "Error in retrieving account update!");
+    lock {
+        test:assertTrue(isUpdated, "Error in retrieving account update!");
+    }
 }

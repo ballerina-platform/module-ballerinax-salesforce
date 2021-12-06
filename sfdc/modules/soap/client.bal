@@ -19,7 +19,7 @@ import ballerinax/sfdc;
 # Ballerina Salesforce SOAP connector provides the capability to access Salesforce SOAP API. 
 # This connector lets you to perform operations like create, retrieve, update or delete sobjects, such as accounts,
 # leads, custom objects, and etc..
-# 
+#
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
 # + clientConfig - Configurations required to initialize the `Client`
@@ -36,7 +36,7 @@ public isolated client class Client {
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
     # Create a Salesforce account and obtain tokens following 
     # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm). 
-    # 
+    #
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
     public isolated function init(sfdc:ConnectionConfig salesforceConfig) returns error? {
@@ -86,8 +86,8 @@ public isolated client class Client {
     # + opportunityNotRequired - By default an opportunity is also created in the conversion. Can be omited by providing
     # `True` value
     # + return - `ConvertedLead` or error
-    isolated remote function convertLead(@display {label: "Lead ID"} string leadId, @display 
-                                         {label: "Not to Create Opportunity?"} boolean? opportunityNotRequired = ()) returns 
+    isolated remote function convertLead(@display {label: "Lead ID"} string leadId, @display
+                                        {label: "Not to Create Opportunity?"} boolean? opportunityNotRequired = ()) returns
     ConvertedLead|error {
         string sessionId = check getSessionId(self.clientHandler);
         string payload = check buildXMLPayload(sessionId, leadId, opportunityNotRequired);
