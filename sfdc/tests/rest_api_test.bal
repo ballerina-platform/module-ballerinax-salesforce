@@ -45,7 +45,7 @@ json accountRecord = {
 
 string testRecordId = "";
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testCreateRecord() {
@@ -94,7 +94,7 @@ function testUpdateRecord() {
 
     if (response is Error) {
         test:assertFail(msg = response.message());
-    } 
+    }
 }
 
 @test:Config {
@@ -107,10 +107,10 @@ function testDeleteRecord() {
 
     if (response is Error) {
         test:assertFail(msg = response.message());
-    } 
+    }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testGetQueryResult() returns error? {
@@ -144,7 +144,7 @@ function testSearchSOSLString() {
 
     if (res is SoslResult) {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, 
+        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT,
         msg = "Matched search record is not an Account type!");
     } else {
         test:assertFail(msg = res.message());
@@ -161,7 +161,7 @@ isolated function assertSoqlResult(SoqlResult|Error res) {
     }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testGetAvailableApiVersions() {
@@ -175,7 +175,7 @@ function testGetAvailableApiVersions() {
     }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testGetResourcesByApiVersion() {
@@ -188,7 +188,7 @@ function testGetResourcesByApiVersion() {
         test:assertTrue((resources["sobjects"].toString().trim()).length() > 0, msg = "Found null for resource sobjects");
         test:assertTrue((resources["search"].toString().trim()).length() > 0, msg = "Found null for resource search");
         test:assertTrue((resources["query"].toString().trim()).length() > 0, msg = "Found null for resource query");
-        test:assertTrue((resources["licensing"].toString().trim()).length() > 0, 
+        test:assertTrue((resources["licensing"].toString().trim()).length() > 0,
             msg = "Found null for resource licensing");
         test:assertTrue((resources["connect"].toString().trim()).length() > 0, msg = "Found null for resource connect");
         test:assertTrue((resources["tooling"].toString().trim()).length() > 0, msg = "Found null for resource tooling");
@@ -199,7 +199,7 @@ function testGetResourcesByApiVersion() {
     }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testGetOrganizationLimits() {
@@ -224,8 +224,8 @@ function testGetOrganizationLimits() {
     }
 }
 
-@test:Config { 
-    enable:true 
+@test:Config {
+    enable: true
 }
 function testdescribeSobject() {
     log:printInfo("baseClient -> describeAvailableObjects()");
