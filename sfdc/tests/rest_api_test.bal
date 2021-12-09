@@ -45,7 +45,7 @@ json accountRecord = {
 
 string testRecordId = "";
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testCreateRecord() {
@@ -54,7 +54,7 @@ function testCreateRecord() {
 
     if (stringResponse is string) {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
-        testRecordId = <@untainted>stringResponse;
+        testRecordId = stringResponse;
     } else {
         test:assertFail(msg = stringResponse.message());
     }
@@ -94,7 +94,7 @@ function testUpdateRecord() {
 
     if (response is Error) {
         test:assertFail(msg = response.message());
-    } 
+    }
 }
 
 @test:Config {
@@ -107,34 +107,24 @@ function testDeleteRecord() {
 
     if (response is Error) {
         test:assertFail(msg = response.message());
-    } 
+    }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
-function testGetQueryResult() {
+function testGetQueryResult() returns error? {
     log:printInfo("baseClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
-    SoqlResult|Error res = baseClient->getQueryResult(sampleQuery);
+    SoqlResult res = check baseClient->getQueryResult(sampleQuery);
+    assertSoqlResult(res);
+    string nextRecordsUrl = res["nextRecordsUrl"].toString();
 
-    if (res is SoqlResult) {
-        assertSoqlResult(res);
-        string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
-
-        while (nextRecordsUrl is string && nextRecordsUrl.trim() != EMPTY_STRING) {
-            log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-            SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
-
-            if (resp is SoqlResult) {
-                assertSoqlResult(resp);
-                res = resp;
-            } else {
-                test:assertFail(msg = resp.message());
-            }
-        }
-    } else {
-        test:assertFail(msg = res.message());
+    while (nextRecordsUrl.trim() != EMPTY_STRING) {
+        log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
+        SoqlResult resp = check baseClient->getNextQueryResult(nextRecordsUrl);
+        assertSoqlResult(resp);
+        res = resp;
     }
 }
 
@@ -149,7 +139,7 @@ function testSearchSOSLString() {
 
     if (res is SoslResult) {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT, 
+        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT,
         msg = "Matched search record is not an Account type!");
     } else {
         test:assertFail(msg = res.message());
@@ -166,7 +156,7 @@ isolated function assertSoqlResult(SoqlResult|Error res) {
     }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testGetAvailableApiVersions() {
@@ -180,7 +170,7 @@ function testGetAvailableApiVersions() {
     }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testGetResourcesByApiVersion() {
@@ -193,7 +183,7 @@ function testGetResourcesByApiVersion() {
         test:assertTrue((resources["sobjects"].toString().trim()).length() > 0, msg = "Found null for resource sobjects");
         test:assertTrue((resources["search"].toString().trim()).length() > 0, msg = "Found null for resource search");
         test:assertTrue((resources["query"].toString().trim()).length() > 0, msg = "Found null for resource query");
-        test:assertTrue((resources["licensing"].toString().trim()).length() > 0, 
+        test:assertTrue((resources["licensing"].toString().trim()).length() > 0,
             msg = "Found null for resource licensing");
         test:assertTrue((resources["connect"].toString().trim()).length() > 0, msg = "Found null for resource connect");
         test:assertTrue((resources["tooling"].toString().trim()).length() > 0, msg = "Found null for resource tooling");
@@ -204,7 +194,7 @@ function testGetResourcesByApiVersion() {
     }
 }
 
-@test:Config { 
+@test:Config {
     enable: true
 }
 function testGetOrganizationLimits() {
@@ -229,8 +219,8 @@ function testGetOrganizationLimits() {
     }
 }
 
-@test:Config { 
-    enable:true 
+@test:Config {
+    enable: true
 }
 function testdescribeSobject() {
     log:printInfo("baseClient -> describeAvailableObjects()");

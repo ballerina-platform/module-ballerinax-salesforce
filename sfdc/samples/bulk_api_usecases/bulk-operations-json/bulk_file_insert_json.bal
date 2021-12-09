@@ -42,7 +42,7 @@ public function main(){
     if (insertJob is sfdc:BulkJob){
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
         if (rbc is io:ReadableByteChannel){
-            error|sfdc:BatchInfo batch = baseClient->addBatch(insertJob, <@untainted>rbc);
+            error|sfdc:BatchInfo batch = baseClient->addBatch(insertJob, rbc);
             if (batch is sfdc:BatchInfo) {
                 string message = batch.id.length() > 0 ? "Batch Added Successfully" :"Failed to add the Batch";
                 batchId = batch.id;

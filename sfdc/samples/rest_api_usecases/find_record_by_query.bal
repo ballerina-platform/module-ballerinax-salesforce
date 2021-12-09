@@ -43,7 +43,7 @@ public function main(){
             string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
             while (nextRecordsUrl is string && nextRecordsUrl.trim() != "") {
                 log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-                sfdc:SoqlResult|sfdc:Error nextRes = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
+                sfdc:SoqlResult|sfdc:Error nextRes = baseClient->getNextQueryResult(nextRecordsUrl);
                 
                 if (nextRes is sfdc:SoqlResult) {
                     totalRecords = totalRecords + nextRes.records.length();

@@ -32,7 +32,7 @@ public isolated function prepareUrl(string[] paths) returns string {
             url = url + path;
         }
     }
-    return <@untainted>url;
+    return url;
 }
 
 # Returns the prepared URL with encoded query.
@@ -72,8 +72,8 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) returns @tainted json|
-Error {
+isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
+                                    returns @tainted json|Error {
     if (httpResponse is http:Response) {
         if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT) {
@@ -114,7 +114,7 @@ Error {
                         counter = counter + 1;
                     }
                 }
-                return error Error(errMssgs, errorCodes = errCodes);
+                return error Error(errMssgs);
             } else {
                 log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = jsonResponse);
                 return error Error(ERR_EXTRACTING_ERROR_MSG, jsonResponse);
@@ -122,5 +122,19 @@ Error {
         }
     } else {
         return error Error(HTTP_ERROR_MSG, httpResponse);
+    }
+}
+
+# Convert http:Response to an error of type Error
+#
+# + response - HTTP error respone
+# + return - Error
+isolated function checkAndSetErrorDetail(error response) returns Error {
+    ErrorDetails|error detail = response.detail().cloneReadOnly().ensureType(ErrorDetails);
+    if (detail is ErrorDetails){
+        return error Error(detail?.body.toString(), response, statusCode = detail?.statusCode, 
+            headers = detail?.headers, body = detail?.body);
+    } else {
+        return error Error("Error converting HTTP error response to ErrorDetails", response);
     }
 }
