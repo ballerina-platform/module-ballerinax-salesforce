@@ -76,6 +76,4 @@ function testconvertLead() {
 @test:AfterSuite {}
 function testDeleteRecord() returns error? {
     check restClient->deleteAccount(accountId);
-    check restClient->deleteContact(contactId);
-    check restClient->deleteOpportunity(opportunityId);
 }

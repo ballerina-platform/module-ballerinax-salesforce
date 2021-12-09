@@ -90,7 +90,7 @@ function deleteCsv() returns error? {
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(deleteJob, batchId);
         if (batchRequest is string) {
-            test:assertTrue(checkCsvResult(batchRequest) == 4, msg = "Retrieving batch request failed.");
+            test:assertTrue(checkCsvResult(batchRequest) == 8, msg = "Retrieving batch request failed.");
             break;
         } else if (batchRequest is error) {
             if currentRetry != maxIterations {

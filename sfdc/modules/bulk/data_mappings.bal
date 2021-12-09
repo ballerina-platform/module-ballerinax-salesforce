@@ -109,7 +109,7 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
     json[] payloadArr = <json[]>payload;
     foreach json element in payloadArr {
         Result batchResult =  {
-            id: let var id = element.id in id is json ? id.toString() : "",
+            id: let var id = element.id in id is json ? id.toString() : EMPTY_STRING,
             success: let var success = element.success in success is boolean ? success : false,
             created: let var created = element.created in created is boolean ? created : false
         }; 
@@ -118,7 +118,7 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
 
         if (errors is json) {
             json[] errorsArr = <json[]>errors;
-            string errMsg = "";
+            string errMsg = EMPTY_STRING;
             foreach json err in errorsArr {
                 json|error errStatusCode = err.statusCode;
                 json|error errMessage = err.message;
@@ -139,13 +139,13 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
 
 isolated function createBatchResultRecordFromCsv(string payload) returns Result[]|error {
     Result[] batchResArr = [];
-    string[] payloadArr = regex:split(payload, "\n");
+    string[] payloadArr = regex:split(payload, NEW_LINE);
     int arrLength = payloadArr.length();
     int counter = 1;
     while (counter < arrLength) {
         string? line = payloadArr[counter];
         if (line is string) {
-            string[] lineArr = regex:split(line, ",");
+            string[] lineArr = regex:split(line, COMMA);
             string? idStr = lineArr[0];
             string? successStr = lineArr[1];
             string? createdStr = lineArr[2];
@@ -153,8 +153,8 @@ isolated function createBatchResultRecordFromCsv(string payload) returns Result[
 
             // Remove quotes of "true" or "false".
             if (successStr is string && createdStr is string) {
-                successStr = regex:replaceAll(successStr, "\"", "");
-                createdStr = regex:replaceAll(createdStr, "\"", "");
+                successStr = regex:replaceAll(successStr, "\"", EMPTY_STRING);
+                createdStr = regex:replaceAll(createdStr, "\"", EMPTY_STRING);
             }
 
             if (successStr is string && successStr.length() > 0 && createdStr is string && createdStr.length() > 0) {

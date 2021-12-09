@@ -24,6 +24,8 @@ import ballerina/lang.'xml as xmllib;
 import ballerina/regex;
 import ballerinax/sfdc;
 
+isolated string csvContent = EMPTY_STRING;
+
 # Check HTTP response and return XML payload if succesful, else set errors and return Error.
 #
 # + httpResponse - HTTP response or error occurred
@@ -163,7 +165,7 @@ isolated function getBooleanValue(string value) returns boolean {
 # + return - converted string
 isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted string|error {
     byte[] readContent;
-    string textContent = "";
+    string textContent = EMPTY_STRING;
     while (true) {
         byte[]|io:Error result = rbc.read(1000);
         if (result is io:EofError) {
@@ -233,6 +235,37 @@ isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|
     }
 }
 
+# Convert string[][] or stream<string[], error?> to string.
+#
+# + stringCsvInput - Multi dimentional array of strings or a stream of strings
+# + return - converted string
+isolated function convertStringListToString(string[][]|stream<string[], error?> stringCsvInput) returns @tainted string|error {
+    lock {
+        csvContent = EMPTY_STRING;
+    }
+    if (stringCsvInput is string[][]) {
+        foreach var row in stringCsvInput {
+            lock {
+                csvContent += row.reduce(isolated function (string s, string t) returns string { 
+                    return s.concat(COMMA, t);
+                }, EMPTY_STRING).substring(1) + NEW_LINE;
+            }
+        }
+    } else {
+        check stringCsvInput.forEach(isolated function(string[] row) {
+            lock {
+                csvContent += row.reduce(isolated function (string s, string t) returns string { 
+                    return s.concat(COMMA, t);
+                }, EMPTY_STRING).substring(1) + NEW_LINE;
+
+            }
+        });
+    }
+    lock {
+        return csvContent;
+    }
+}
+
 isolated function getJsonQueryResult(json resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
                                      http:ClientBearerTokenAuthHandler clientHandler) returns @tainted json|error {
     json[] finalResults = [];
@@ -242,7 +275,7 @@ isolated function getJsonQueryResult(json resultlist, string path, http:Client h
         if (resultlist is json[]) {
             foreach var item in resultlist {
                 string resultId = item.toString();
-                http:Response response = check httpClient->get(path + "/" + resultId, headerMap);
+                http:Response response = check httpClient->get(path + FORWARD_SLASH + resultId, headerMap);
                 json result = check checkJsonPayloadAndSetErrors(response);
                 //result is always a json[]
                 if (result is json[]) {
@@ -264,7 +297,7 @@ isolated function getXmlQueryResult(xml resultlist, string path, http:Client htt
     if (headerMap is map<string|string[]>) {
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
-            http:Response response = check httpClient->get(path + "/" + resultId, headerMap);
+            http:Response response = check httpClient->get(path + FORWARD_SLASH + resultId, headerMap);
             xml result = check checkXmlPayloadAndSetErrors(response);
             finalResults = mergeXml(finalResults, result);
         }
@@ -276,13 +309,13 @@ isolated function getXmlQueryResult(xml resultlist, string path, http:Client htt
 
 isolated function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
                                     http:ClientBearerTokenAuthHandler clientHandler) returns @tainted string|error {
-    string finalResults = "";
+    string finalResults = EMPTY_STRING;
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if (headerMap is map<string|string[]>) {
         int i = 0;
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
-            http:Response response = check httpClient->get(path + "/" + resultId, headerMap);
+            http:Response response = check httpClient->get(path + FORWARD_SLASH + resultId, headerMap);
             string result = check checkTextPayloadAndSetErrors(response);
             if (i == 0) {
                 finalResults = result;
@@ -312,7 +345,7 @@ isolated function mergeXml(xml list1, xml list2) returns xml {
 }
 
 isolated function mergeCsv(string list1, string list2) returns string {
-    int? inof = list2.indexOf("\n");
+    int? inof = list2.indexOf(NEW_LINE);
     string finalList = list1;
     if (inof is int) {
         string list2new = list2.substring(inof);

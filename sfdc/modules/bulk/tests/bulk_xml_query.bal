@@ -114,8 +114,8 @@ function queryXml() returns error? {
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(queryJob, batchId);
         if (batchResult is xml) {
-            if ((batchResult/<*>).length() == 4) {
-                test:assertTrue((batchResult/<*>).length() == 4, msg = "Retrieving batch result failed.");
+            if ((batchResult/<*>).length() == 6) {
+                test:assertTrue((batchResult/<*>).length() == 6, msg = "Retrieving batch result failed.");
                 break;
             } else {
                 if currentRetry != maxIterations {
