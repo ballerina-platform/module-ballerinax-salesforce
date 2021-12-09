@@ -86,9 +86,10 @@ public isolated client class Client {
     # + opportunityNotRequired - By default an opportunity is also created in the conversion. Can be omited by providing
     # `True` value
     # + return - `ConvertedLead` or error
-    isolated remote function convertLead(@display {label: "Lead ID"} string leadId, @display
-                                        {label: "Not to Create Opportunity?"} boolean? opportunityNotRequired = ()) returns
-    ConvertedLead|error {
+    isolated remote function convertLead(@display {label: "Lead ID"} string leadId,
+                                         @display {label: "Not to Create Opportunity?"} 
+                                         boolean? opportunityNotRequired = ()) 
+                                         returns ConvertedLead|error {
         string sessionId = check getSessionId(self.clientHandler);
         string payload = check buildXMLPayload(sessionId, leadId, opportunityNotRequired);
         http:Request request = new;

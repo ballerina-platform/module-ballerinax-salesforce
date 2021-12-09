@@ -51,6 +51,12 @@ const string EMPTY_STRING = "";
 # Constant field `AMPERSAND`. Holds the value of "&".
 const string AMPERSAND = "&";
 
+# Constant field `COMMA`. Holds the value of ",".
+const string COMMA = ",";
+
+# Constant field `NEW_LINE`. Holds the value of "\n".
+const string NEW_LINE = "\n";
+
 # Constant field `FORWARD_SLASH`. Holds the value of "/".
 const string FORWARD_SLASH = "/";
 
