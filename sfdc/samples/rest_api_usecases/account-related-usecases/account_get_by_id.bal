@@ -39,7 +39,7 @@ public function main(){
 
     if (account is json) {
         json|error accountName = account.Name;
-        if(accountName is json){
+        if (accountName is json){
             log:printInfo("Account data retrieved successfully. Account Name : " + accountName.toString());
         }
     } else {

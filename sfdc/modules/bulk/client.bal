@@ -342,24 +342,24 @@ public isolated client class Client {
             JSON => {
                 json resultResponse = check checkJsonPayloadAndSetErrors(response);
                 if (QUERY == bulkJob.operation) {
-                    return getJsonQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, 
-                        <@untainted> self.clientHandler);
+                    return getJsonQueryResult(resultResponse, path, self.salesforceClient, 
+                         self.clientHandler);
                 }
                 return createBatchResultRecordFromJson(resultResponse);
             }
             XML => {
                 xml resultResponse = check checkXmlPayloadAndSetErrors(response);
                 if (QUERY == bulkJob.operation) {
-                    return getXmlQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, 
-                        <@untainted> self.clientHandler);
+                    return getXmlQueryResult(resultResponse, path, self.salesforceClient, 
+                         self.clientHandler);
                 }
                 return createBatchResultRecordFromXml(resultResponse);
             }
             CSV => {
                 if (QUERY == bulkJob.operation) {
                     xml resultResponse = check checkXmlPayloadAndSetErrors(response);
-                    return getCsvQueryResult(<@untainted>resultResponse, path, <@untainted>self.salesforceClient, 
-                        <@untainted> self.clientHandler);
+                    return getCsvQueryResult(resultResponse, path, self.salesforceClient, 
+                         self.clientHandler);
                 }
                 string resultResponse = check checkTextPayloadAndSetErrors(response);
                 return createBatchResultRecordFromCsv(resultResponse);

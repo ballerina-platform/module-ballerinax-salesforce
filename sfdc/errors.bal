@@ -14,16 +14,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Salesforce connector error
-public type Error distinct error;
+# Salesforce connector error.
+public type Error error<ErrorDetails>;
 
-// Logs and prepares the `error` as an `sfdc:Error`.
-isolated function prepareError(string message, error? err = ()) returns Error {
-    if (err is error) {
-        return error Error(message, err);
-    }
-    return error Error(message);
-}
+# Additional details extracted from the Http error.
+#
+# + statusCode - Http status code of the error
+# + headers - Http headers in the error response
+# + body - Response body with extra information
+public type ErrorDetails record {
+    int? statusCode?;
+    map<string[]>? headers?;
+    anydata[]? body?;
+};
 
 // Error constants
 const string JSON_ACCESSING_ERROR_MSG = "Error occurred while accessing the JSON payload of the response.";

@@ -186,7 +186,7 @@ function insertCsvFromFile() {
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(csvContactsFilePath);
         if (rbc is io:ReadableByteChannel) {
             foreach int currentRetry in 1 ..< maxIterations + 1 {
-                error|BatchInfo batchUsingCsvFile = baseClient->addBatch(insertJob, <@untainted>rbc);
+                error|BatchInfo batchUsingCsvFile = baseClient->addBatch(insertJob, rbc);
                 if (batchUsingCsvFile is BatchInfo) {
                     test:assertTrue(batchUsingCsvFile.id.length() > 0, 
                     msg = "Could not upload the contacts using CSV file.");

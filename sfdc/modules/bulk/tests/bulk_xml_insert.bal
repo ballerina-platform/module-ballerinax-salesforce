@@ -176,7 +176,7 @@ function insertXmlFromFile() returns error? {
     io:ReadableByteChannel|io:Error rbc = io:openReadableFile(xmlContactsFilePath);
     if (rbc is io:ReadableByteChannel) {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
-            error|BatchInfo batchUsingXmlFile = baseClient->addBatch(xmlInsertJob, <@untainted>rbc);
+            error|BatchInfo batchUsingXmlFile = baseClient->addBatch(xmlInsertJob, rbc);
             if (batchUsingXmlFile is BatchInfo) {
                 test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using xml file.");
                 xmlBatchId = batchUsingXmlFile.id;

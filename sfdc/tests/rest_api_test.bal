@@ -54,7 +54,7 @@ function testCreateRecord() {
 
     if (stringResponse is string) {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
-        testRecordId = <@untainted>stringResponse;
+        testRecordId = stringResponse;
     } else {
         test:assertFail(msg = stringResponse.message());
     }
@@ -118,18 +118,13 @@ function testGetQueryResult() returns error? {
     string sampleQuery = "SELECT name FROM Account";
     SoqlResult res = check baseClient->getQueryResult(sampleQuery);
     assertSoqlResult(res);
-    string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
+    string nextRecordsUrl = res["nextRecordsUrl"].toString();
 
-    while (nextRecordsUrl is string && nextRecordsUrl.trim() != EMPTY_STRING) {
+    while (nextRecordsUrl.trim() != EMPTY_STRING) {
         log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-        SoqlResult|Error resp = baseClient->getNextQueryResult(<@untainted>nextRecordsUrl);
-
-        if (resp is SoqlResult) {
-            assertSoqlResult(resp);
-            res = resp;
-        } else {
-            test:assertFail(msg = resp.message());
-        }
+        SoqlResult resp = check baseClient->getNextQueryResult(nextRecordsUrl);
+        assertSoqlResult(resp);
+        res = resp;
     }
 }
 

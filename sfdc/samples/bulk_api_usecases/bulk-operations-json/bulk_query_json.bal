@@ -86,7 +86,7 @@ public function main(){
         if (batchResult is json) {
             json[]|error batchResultArr = <json[]>batchResult;
             if (batchResultArr is json[]) {
-                jsonQueryResult = <@untainted>batchResultArr;
+                jsonQueryResult = batchResultArr;
                 //io:println("count : " + batchResultArr.length().toString());
                 log:printInfo("Number of Records Received :" + batchResultArr.length().toString());
             } else {
