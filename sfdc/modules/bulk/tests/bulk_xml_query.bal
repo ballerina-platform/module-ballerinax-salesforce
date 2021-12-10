@@ -106,7 +106,6 @@ function queryXml() returns error? {
             }
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
-            break;
         }
     }
 
@@ -136,7 +135,6 @@ function queryXml() returns error? {
             }
         } else {
             test:assertFail("Invalid Batch Result!");
-            break;
         }
     }
 

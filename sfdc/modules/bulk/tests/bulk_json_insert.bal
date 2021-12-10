@@ -137,7 +137,6 @@ function insertJson() returns error? {
             }
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
-            break;
         }
     }
 
@@ -160,7 +159,6 @@ function insertJson() returns error? {
             }
         } else {
             test:assertFail("Invalid Batch Result!");
-            break;
         }
     }
 
@@ -287,7 +285,6 @@ function insertJsonFromFile() returns error? {
             }
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
-            break;
         }
     }
 

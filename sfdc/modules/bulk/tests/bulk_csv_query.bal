@@ -116,7 +116,6 @@ function queryCsv() returns error? {
             }
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
-            break;
         }
     }
 
@@ -146,7 +145,6 @@ function queryCsv() returns error? {
             }
         } else {
             test:assertFail("Invalid Batch Result!");
-            break;
         }
     }
 
