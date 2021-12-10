@@ -17,6 +17,7 @@
 import ballerina/log;
 import ballerina/os;
 import ballerina/test;
+import ballerina/io;
 
 // Create Salesforce client configuration by reading from environemnt.
 configurable string & readonly clientId = os:getEnv("CLIENT_ID");
@@ -51,7 +52,6 @@ string testRecordId = "";
 function testCreateRecord() {
     log:printInfo("baseClient -> createRecord()");
     string|Error stringResponse = baseClient->createRecord(ACCOUNT, accountRecord);
-
     if (stringResponse is string) {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
         testRecordId = stringResponse;
@@ -230,5 +230,39 @@ function testdescribeSobject() {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
     } else {
         test:assertFail(msg = description.message());
+    }
+}
+
+@test:Config {
+    enable: false
+}
+function testError() returns error? {
+    ConnectionConfig sfConfig = {
+        baseUrl: baseUrl,
+        // timeout: 0.005,
+        clientConfig: {
+            clientId : clientId,
+            clientSecret: clientSecret,
+            refreshToken: refreshToken,
+            refreshUrl: refreshUrl
+        }
+    };
+
+    Client baseClient = check new (sfConfig);
+    json accountRecord = {
+        Name: "John Keells Holdings",
+        BillingCity: "Colombo 3",
+        Hello: ""
+    };
+    
+    string|Error stringResponse = baseClient->createRecord("Account", accountRecord);
+
+    if (stringResponse is string) {
+        io:println(stringResponse);
+    } else {
+        io:println(stringResponse.stackTrace());
+        io:println(stringResponse.cause());
+        io:println(stringResponse.detail()?.statusCode);
+        io:println(stringResponse.detail()?.body);
     }
 }
