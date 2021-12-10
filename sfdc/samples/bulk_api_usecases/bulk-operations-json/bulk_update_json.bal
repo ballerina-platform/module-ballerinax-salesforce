@@ -65,7 +65,7 @@ public function main(){
     sfdc:BulkJob|error updateJob = baseClient->createJob("update", "Contact", "JSON");
 
     if (updateJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = baseClient->addBatch(updateJob, <@untainted>contacts);
+        error|sfdc:BatchInfo batch = baseClient->addBatch(updateJob, contacts);
         if (batch is sfdc:BatchInfo) {
            string message = batch.id.length() > 0 ? "Batch Updated Successfully" :"Failed to Update the Batch";
            batchId = batch.id;

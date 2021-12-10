@@ -48,14 +48,14 @@ function insertJson() returns error? {
     BulkJob jsonInsertJob = check baseClient->createJob("insert", "Contact", "JSON");
 
     //add json content
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(jsonInsertJob, contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             jsonBatchId = batch.id;
             break;
         } else {
-            if i != 5 {
+            if currentRetry != 5 {
                 log:printWarn("addBatch Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -66,14 +66,14 @@ function insertJson() returns error? {
     }
 
     //get job info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
 
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getJobInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -84,13 +84,13 @@ function insertJson() returns error? {
     }
 
     //get batch info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -117,7 +117,7 @@ function insertJson() returns error? {
     }
 
     //get batch request
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]>batchRequest;
@@ -128,7 +128,7 @@ function insertJson() returns error? {
             }
             break;
         } else if (batchRequest is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -141,7 +141,7 @@ function insertJson() returns error? {
         }
     }
 
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
         if (batchResult is Result[]) {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
@@ -151,7 +151,7 @@ function insertJson() returns error? {
             }
             break;
         } else if (batchResult is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -165,14 +165,14 @@ function insertJson() returns error? {
     }
 
     //close job
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
 
         error|JobInfo closedJob = baseClient->closeJob(jsonInsertJob);
         if (closedJob is JobInfo) {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
             break;
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("closeJob Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -195,15 +195,15 @@ function insertJsonFromFile() returns error? {
     //add json content
     io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
     if (rbc is io:ReadableByteChannel) {
-        foreach var i in 1 ..< maxIterations + 1 {
-            error|BatchInfo batchUsingJsonFile = baseClient->addBatch(jsonInsertJob, <@untainted>rbc);
+        foreach int currentRetry in 1 ..< maxIterations + 1 {
+            error|BatchInfo batchUsingJsonFile = baseClient->addBatch(jsonInsertJob, rbc);
             if (batchUsingJsonFile is BatchInfo) {
                 test:assertTrue(batchUsingJsonFile.id.length() > 0, 
                     msg = "Could not upload the contacts using json file.");
                 jsonBatchId = batchUsingJsonFile.id;
                 break;
             } else {
-                if i != 5 {
+                if currentRetry != maxIterations {
                     log:printWarn("addBatch Operation Failed! Retrying...");
                     runtime:sleep(delayInSecs);
                 } else {
@@ -219,12 +219,12 @@ function insertJsonFromFile() returns error? {
     }
 
     //get job info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
         if (jobInfo is JobInfo) {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getJobInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -235,12 +235,12 @@ function insertJsonFromFile() returns error? {
     }
 
     //get batch info
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
         if (batchInfo is BatchInfo) {
             test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchInfo Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -251,12 +251,12 @@ function insertJsonFromFile() returns error? {
     }
 
     //get all batches
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(jsonInsertJob);
         if (batchInfoList is BatchInfo[]) {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getAllBatches Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -267,7 +267,7 @@ function insertJsonFromFile() returns error? {
     }
 
     //get batch request
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
         if (batchRequest is json) {
             json[]|error batchRequestArr = <json[]>batchRequest;
@@ -278,7 +278,7 @@ function insertJsonFromFile() returns error? {
             }
             break;
         } else if (batchRequest is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
@@ -291,7 +291,7 @@ function insertJsonFromFile() returns error? {
         }
     }
 
-    foreach var i in 1 ..< maxIterations + 1 {
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
         if (batchResult is Result[]) {
             foreach json res in batchResult {
@@ -300,7 +300,7 @@ function insertJsonFromFile() returns error? {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             break;
         } else if (batchResult is error) {
-            if i != 5 {
+            if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
             } else {
