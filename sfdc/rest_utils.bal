@@ -129,12 +129,16 @@ isolated function checkAndSetErrors(http:Response|error httpResponse, boolean ex
 #
 # + response - HTTP error respone
 # + return - Error
-isolated function checkAndSetErrorDetail(error response) returns Error {
-    ErrorDetails|error detail = response.detail().cloneReadOnly().ensureType(ErrorDetails);
-    if (detail is ErrorDetails){
-        return error Error(detail?.body.toString(), response, statusCode = detail?.statusCode, 
-            headers = detail?.headers, body = detail?.body);
-    } else {
-        return error Error("Error converting HTTP error response to ErrorDetails", response);
+isolated function checkAndSetErrorDetail(http:ClientError response) returns Error {
+    if (response is http:ApplicationResponseError) {
+        ErrorDetails detail = {
+            statusCode: response.detail()[STATUS_CODE],
+            headers: response.detail()[HEADERS],
+            body: response.detail()[BODY]
+        };
+        return error Error(HTTP_CLIENT_ERROR, response, statusCode = detail?.statusCode, body = detail?.body, 
+            headers = detail?.headers); 
+    } else {       
+        return error Error(HTTP_CLIENT_ERROR, response); 
     }
 }

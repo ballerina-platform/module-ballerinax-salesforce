@@ -473,7 +473,7 @@ public isolated client class Client {
     @display {label: "Get Record"}
     isolated remote function getRecord(@display {label: "Resource Path"} string path) 
                                        returns @tainted @display {label: "Result"} json|Error {
-        json|error response = self.salesforceClient->get(path);
+        json|http:ClientError response = self.salesforceClient->get(path);
         if (response is json) {
             return response;
         } else {
@@ -493,7 +493,7 @@ public isolated client class Client {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(recordPayload);
-        json|error response = self.salesforceClient->post(path, req);
+        json|http:ClientError response = self.salesforceClient->post(path, req);
         if (response is json) {
             json|error resultId = response.id;
             if (resultId is json) {
@@ -516,8 +516,8 @@ public isolated client class Client {
                                           @display {label: "SObject ID"} string id) 
                                           returns @tainted @display {label: "Result"} Error? {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-        http:Response|error response = self.salesforceClient->delete(path);
-        if (response is error) {
+        http:Response|http:ClientError response = self.salesforceClient->delete(path);
+        if (response is http:ClientError) {
             return checkAndSetErrorDetail(response);
         }
     }
@@ -536,8 +536,8 @@ public isolated client class Client {
         http:Request req = new;
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
-        http:Response|error response = self.salesforceClient->patch(path, req);
-        if (response is error) {
+        http:Response|http:ClientError response = self.salesforceClient->patch(path, req);
+        if (response is http:ClientError) {
             return checkAndSetErrorDetail(response);
         }
     }
