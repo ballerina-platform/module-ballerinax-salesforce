@@ -135,6 +135,6 @@ isolated function checkAndSetErrorDetail(error response) returns Error {
         return error Error(detail?.body.toString(), response, statusCode = detail?.statusCode, 
             headers = detail?.headers, body = detail?.body);
     } else {
-        return error Error("Error converting HTTP error response to ErrorDetails", response);
+        return error Error(HTTP_CLIENT_ERROR, response);
     }
 }
