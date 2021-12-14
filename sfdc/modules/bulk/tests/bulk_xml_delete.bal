@@ -103,7 +103,6 @@ function deleteXml() returns error? {
             }
         } else {
             test:assertFail("Invalid batch request!");
-            break;
         }
     }
 
@@ -126,7 +125,6 @@ function deleteXml() returns error? {
             }
         } else {
             test:assertFail("Invalid Batch Result!");
-            break;
         }
     }
 

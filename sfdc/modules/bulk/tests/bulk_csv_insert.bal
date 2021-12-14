@@ -120,7 +120,6 @@ function insertCsv() returns error? {
             }
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
-            break;
         }
     }
 
@@ -147,7 +146,6 @@ function insertCsv() returns error? {
             }
         } else {
             test:assertFail("Invalid Batch Result!");
-            break;
         }
     }
 
@@ -272,7 +270,6 @@ function insertCsvFromFile() {
                 }
             } else {
                 test:assertFail(msg = "Invalid Batch Request!");
-                break;
             }
         }
 
@@ -413,7 +410,6 @@ function insertCsvStringArrayFromFile() returns error? {
                 }
             } else {
                 test:assertFail(msg = "Invalid Batch Request!");
-                break;
             }
         }
 
@@ -554,7 +550,6 @@ function insertCsvStreamFromFile() returns error? {
                 }
             } else {
                 test:assertFail(msg = "Invalid Batch Request!");
-                break;
             }
         }
 

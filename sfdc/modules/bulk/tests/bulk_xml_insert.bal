@@ -124,7 +124,6 @@ function insertXml() returns error? {
             }
         } else {
             test:assertFail("Invalid batch request!");
-            break;
         }
     }
 
@@ -151,7 +150,6 @@ function insertXml() returns error? {
             }
         } else {
             test:assertFail("Invalid Batch Result!");
-            break;
         }
     }
 
@@ -261,7 +259,6 @@ function insertXmlFromFile() returns error? {
             }
         } else {
             test:assertFail("Invalid batch request!");
-            break;
         }
     }
 

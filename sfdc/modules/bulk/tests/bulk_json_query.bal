@@ -107,7 +107,6 @@ function queryJson() returns error? {
             }
         } else {
             test:assertFail(msg = "Invalid Batch Request!");
-            break;
         }
     }
 
