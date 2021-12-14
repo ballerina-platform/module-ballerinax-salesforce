@@ -40,7 +40,7 @@ jobs:
           ./gradlew build
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@master
+        uses: ballerina-platform/ballerina-action@slbeta6
         with:
           args:
             pack ./sfdc
@@ -56,7 +56,7 @@ jobs:
           SF_USERNAME: ${{ secrets.SF_USERNAME }}
       # Push to Ballerina Central
       - name: Ballerina Push
-        uses: ballerina-platform/ballerina-action/@master
+        uses: ballerina-platform/ballerina-action@slbeta6
         with:
           args:
             push
