@@ -196,7 +196,7 @@ function insertJsonFromFile() returns error? {
     io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
     if (rbc is io:ReadableByteChannel) {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
-            error|BatchInfo batchUsingJsonFile = baseClient->addBatch(jsonInsertJob, <@untainted>rbc);
+            error|BatchInfo batchUsingJsonFile = baseClient->addBatch(jsonInsertJob, rbc);
             if (batchUsingJsonFile is BatchInfo) {
                 test:assertTrue(batchUsingJsonFile.id.length() > 0, 
                     msg = "Could not upload the contacts using json file.");

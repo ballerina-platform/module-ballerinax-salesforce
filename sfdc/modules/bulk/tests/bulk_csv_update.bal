@@ -36,7 +36,7 @@ function updateCsv() returns error? {
 
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        error|BatchInfo batch = baseClient->addBatch(updateJob, <@untainted>contacts);
+        error|BatchInfo batch = baseClient->addBatch(updateJob, contacts);
         if (batch is BatchInfo) {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
             batchId = batch.id;

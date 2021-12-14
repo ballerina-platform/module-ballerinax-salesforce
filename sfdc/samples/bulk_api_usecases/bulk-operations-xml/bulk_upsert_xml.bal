@@ -67,7 +67,7 @@ public function main(){
     sfdc:BulkJob|error updateJob = baseClient->createJob("upsert", "Contact", "XML","My_External_Id__c");
 
     if (updateJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = baseClient->addBatch(updateJob, <@untainted>contacts);
+        error|sfdc:BatchInfo batch = baseClient->addBatch(updateJob, contacts);
         if (batch is sfdc:BatchInfo) {
             batchId = batch.id;
             string message = batch.id.length() > 0 ? "Batch added to upsert Successfully" :"Failed to add the batch";
