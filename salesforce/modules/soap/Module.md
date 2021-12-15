@@ -42,7 +42,7 @@ soap:Client soapClient = new(sfConfig);
 Following is an example on how to convert lead using the connector.
     ```ballerina
     public function main() returns error? {
-      ConvertedLead response = check soapClient->convertLead(leadId);
+      soap:ConvertedLead response = check soapClient->convertLead(leadId);
     }
     ```
 2. Use `bal run` command to compile and run the Ballerina program. 

@@ -16,9 +16,10 @@
 
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.bulk;
 import ballerina/regex;
 
-public function main(){
+public function main() {
 
     string batchId = "";
 
@@ -34,49 +35,48 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    bulk:Client bulkClient = checkpanic new (sfConfig);
 
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
         "Created_from_Ballerina_Sf_Bulk_API,Tony,Stark,Software Engineer Level 02,0332236677,tonys@gmail.com,862\n" +
         "Created_from_Ballerina_Sf_Bulk_API,Peter,Parker,Software Engineer Level 02,0332211777,peter77@gmail.com,863";
-    
 
-    sfdc:BulkJob|error insertJob = baseClient->createJob("insert", "Contact", "CSV");
+    bulk:BulkJob|error insertJob = bulkClient->createJob("insert", "Contact", "CSV");
 
-    if (insertJob is sfdc:BulkJob){
-        error|sfdc:BatchInfo batch = baseClient->addBatch(insertJob, contacts);
-        if (batch is sfdc:BatchInfo) {
-           string message = batch.id.length() > 0 ? "Batch Added Successfully" :"Failed to add the Batch";
-           batchId = batch.id;
-           log:printInfo(message + " : " + message + " " + batchId);
+    if (insertJob is bulk:BulkJob) {
+        error|bulk:BatchInfo batch = bulkClient->addBatch(insertJob, contacts);
+        if (batch is bulk:BatchInfo) {
+            string message = batch.id.length() > 0 ? "Batch Added Successfully" : "Failed to add the Batch";
+            batchId = batch.id;
+            log:printInfo(message + " : " + message + " " + batchId);
         } else {
-           log:printError(batch.message());
+            log:printError(batch.message());
         }
 
         //get batch info
-        error|sfdc:BatchInfo batchInfo = baseClient->getBatchInfo(insertJob, batchId);
-        if (batchInfo is sfdc:BatchInfo) {
-            string message = batchInfo.id == batchId ? "Batch Info Received Successfully" :"Failed to Retrieve Batch Info";
+        error|bulk:BatchInfo batchInfo = bulkClient->getBatchInfo(insertJob, batchId);
+        if (batchInfo is bulk:BatchInfo) {
+            string message = batchInfo.id == batchId ? "Batch Info Received Successfully" : "Failed to Retrieve Batch Info";
             log:printInfo(message);
         } else {
             log:printError(batchInfo.message());
         }
 
         //get all batches
-        error|sfdc:BatchInfo[] batchInfoList = baseClient->getAllBatches(insertJob);
-        if (batchInfoList is sfdc:BatchInfo[]) {
-            string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" :"Failed to Retrieve All Batches";
+        error|bulk:BatchInfo[] batchInfoList = bulkClient->getAllBatches(insertJob);
+        if (batchInfoList is bulk:BatchInfo[]) {
+            string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" : "Failed to Retrieve All Batches";
             log:printInfo(message);
         } else {
             log:printError(batchInfoList.message());
         }
 
         //get batch request
-        var batchRequest = baseClient->getBatchRequest(insertJob, batchId);
+        var batchRequest = bulkClient->getBatchRequest(insertJob, batchId);
         if (batchRequest is string) {
-            string message = (regex:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" :"Failed to Retrieve Batch Request";
+            string message = (regex:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" : "Failed to Retrieve Batch Request";
             log:printInfo(message);
-            
+
         } else if (batchRequest is error) {
             log:printError(batchRequest.message());
         } else {
@@ -84,9 +84,9 @@ public function main(){
         }
 
         //get batch result
-        var batchResult = baseClient->getBatchResult(insertJob, batchId);
-        if (batchResult is sfdc:Result[]) {
-            foreach sfdc:Result res in batchResult {
+        var batchResult = bulkClient->getBatchResult(insertJob, batchId);
+        if (batchResult is bulk:Result[]) {
+            foreach bulk:Result res in batchResult {
                 if (!res.success) {
                     log:printError("Failed result, res=" + res.toString(), err = ());
                 }
@@ -98,15 +98,13 @@ public function main(){
         }
 
         //close job
-        error|sfdc:JobInfo closedJob = baseClient->closeJob(insertJob);
-        if (closedJob is sfdc:JobInfo) {
-            string message = closedJob.state == "Closed" ? "Job Closed Successfully" :"Failed to Close the Job";
+        error|bulk:JobInfo closedJob = bulkClient->closeJob(insertJob);
+        if (closedJob is bulk:JobInfo) {
+            string message = closedJob.state == "Closed" ? "Job Closed Successfully" : "Failed to Close the Job";
             log:printInfo(message);
         } else {
             log:printError(closedJob.message());
         }
     }
-
-
 
 }
