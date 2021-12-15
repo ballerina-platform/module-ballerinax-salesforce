@@ -1,4 +1,4 @@
-import ballerinax/sfdc;
+import ballerinax/salesforce as sfdc;
 import ballerina/io;
 
 sfdc:ListenerConfiguration listenerConfig = {

@@ -44,7 +44,7 @@ jobs:
         uses: ballerina-platform/ballerina-action/@nightly
         with:
           args:
-            pack ./sfdc
+            pack ./salesforce
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
 
@@ -53,7 +53,7 @@ jobs:
         uses: ballerina-platform/ballerina-action/@nightly
         with:
           args:
-            test ./sfdc
+            test ./salesforce
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}

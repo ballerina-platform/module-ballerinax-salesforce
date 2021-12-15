@@ -43,7 +43,7 @@ jobs:
         uses: ballerina-platform/ballerina-action/@master
         with:
           args:
-            pack ./sfdc
+            pack ./salesforce
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
@@ -63,4 +63,4 @@ jobs:
         env:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
           JAVA_HOME: /usr/lib/jvm/default-jvm
-          WORKING_DIR: ./sfdc
+          WORKING_DIR: ./salesforce

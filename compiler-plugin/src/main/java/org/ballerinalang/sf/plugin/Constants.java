@@ -24,7 +24,7 @@ package org.ballerinalang.sf.plugin;
  */
 public class Constants {
     public static final String BALLERINAX = "ballerinax";
-    public static final String SFDC = "sfdc";
+    public static final String SFDC = "salesforce";
     public static final String REMOTE_KEYWORD = "remote";
     public static final String SERVICE_CONFIG_ANNOTATION = "ServiceConfig";
     public static final String EVENT_DATA_TYPE = "EventData";
