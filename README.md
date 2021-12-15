@@ -8,12 +8,12 @@ Salesforce has a vast collection of APIs since they follow an API-first approach
 
 Ballerina Salesforce connector utilizes the Salesforce REST API, Bulk API, and SOAP API for convenient data manipulation. The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and describe SObjects and organizational data through the Salesforce REST API and SOAP API. Also, it supports adding bulk data jobs and batches of types JSON, XML, and CSV via the Salesforce Bulk API. Apart from these functionalities, Ballerina Salesforce connector includes a listener to capture events.
 For more information about configuration and operations, go to the module(s).
-- [sfdc](sfdc/Module.md) 
+- [salesforce](salesforce/Module.md) 
    - Perform Salesforce operations programmatically through the Salesforce REST API. Users can perform CRUD operations for SObjects, query using SOQL, search using SOSL and, describe SObjects and organizational data.
    - Listen for Salesforce events and process them. Internally Bayeux protocol is used for polling for events.
-- [sfdc.rest](sfdc/modules/bulk/Module.md) 
+- [salesforce.rest](salesforce/modules/bulk/Module.md) 
    - Perform Salesforce bulk operations programatically through the Salesforce Bulk API. Users can perform CRUD operations in bulk for Salesforce.
-- [sfdc.soap](sfdc/modules/soap/Module.md)
+- [salesforce.soap](salesforce/modules/soap/Module.md)
    - Perform Salesforce operations programmatically through the Salesforce SOAP API which is not supported by the Salesforce REST API. The connector is comprised of limited operations on SOAP API.
 
 ## Building from the source
@@ -34,11 +34,11 @@ Execute the commands below to build from the source.
    ```
 2. * To build the package:
       ```   
-      bal pack ./sfdc
+      bal pack ./salesforce
       ```
    * To run tests after build:
       ```
-      bal test ./sfdc
+      bal test ./salesforce
       ```
 ## Contributing to Ballerina
  

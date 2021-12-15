@@ -50,13 +50,13 @@ subprojects {
 }
 
 def artifactCacheParent = file("${project.projectDir}/build/cache_parent/")
-def packageName = "sfdc"
+def packageName = "salesforce"
 def packageOrg = "ballerinax"
-def pathToBala = file("${project.projectDir}/sfdc/target/bala")
+def pathToBala = file("${project.projectDir}/salesforce/target/bala")
 def platform = "java11"
 
 task createBalaDirectory {
-    mkdir "${project.projectDir}/sfdc/target/bala"
+    mkdir "${project.projectDir}/salesforce/target/bala"
 }
 
 task copyDistribution {
@@ -69,7 +69,7 @@ task copyDistribution {
         }
     }
     copy {
-        from file("${project.projectDir}/sfdc/target/cache")
+        from file("${project.projectDir}/salesforce/target/cache")
         exclude '**/*-testable.jar'
         exclude '**/tests_cache/'
         into file("${artifactCacheParent}/cache/")
