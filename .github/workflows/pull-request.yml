@@ -40,6 +40,6 @@ jobs:
         uses: ballerina-platform/ballerina-action@slbeta6
         with:
           args:
-            pack ./sfdc
+            pack ./salesforce
         env:
             JAVA_HOME: /usr/lib/jvm/default-jvm
