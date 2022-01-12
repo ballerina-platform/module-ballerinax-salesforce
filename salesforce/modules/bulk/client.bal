@@ -197,10 +197,10 @@ public isolated client class Client {
                 } else {
                     payload = check convertToJson(content);
                 }
-            } else if (content is string[][]|stream<string[], error?>) {
-                return error("Invalid request content");
-            } else {
+            } else if (content is string|json|xml) {
                 payload = content;
+            } else {
+                return error("Invalid request content");
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, APP_JSON);
             http:Response response = check self.salesforceClient->post(path, payload, headers = headerMap);
@@ -214,10 +214,10 @@ public isolated client class Client {
                 } else {
                     payload = check convertToXml(content);
                 }
-            } else if (content is string[][]|stream<string[], error?>) {
-                return error("Invalid request content");
-            } else {
+            } else if (content is string|json|xml) {
                 payload = content;
+            } else {
+                return error("Invalid request content");
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, APP_XML);
             http:Response response = check self.salesforceClient->post(path, payload, headers = headerMap);
@@ -229,8 +229,10 @@ public isolated client class Client {
                 payload = check convertToString(content);
             } else if (content is string[][]|stream<string[], error?>) {
                 payload = check convertStringListToString(content);
-            } else {
+            } else if (content is string|json|xml) {
                 payload = content;
+            } else {
+                return error("Invalid request content");
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, TEXT_CSV);
             http:Response response = check self.salesforceClient->post(path, payload, headers = headerMap);
