@@ -40,24 +40,26 @@ bulk:Client bulkClient = new (sfConfig);
 
 1. Now you can use the operations available within the connector. Note that they are in the form of remote operations.  
 Following is an example on how to insert bulk contacts using the connector.
-    ```ballerina
-    json contacts = [
-        {
-            description: "Created_from_Ballerina_Sf_Bulk_API",
-            FirstName: "Morne",
-            LastName: "Morkel",
-            Title: "Professor Grade 03",
-            Phone: "0442226670",
-            Email: "morne89@gmail.com"
-        }
-    ];
 
-    public function main() returns error? {
-        bulk:BulkJob insertJob = check bulkClient->createJob("insert", "Contact", "JSON");
+```ballerina
 
-        bulk:BatchInfo batch = check bulkClient->addBatch(insertJob, contacts);
+json contacts = [
+    {
+        description: "Created_from_Ballerina_Sf_Bulk_API",
+        FirstName: "Morne",
+        LastName: "Morkel",
+        Title: "Professor Grade 03",
+        Phone: "0442226670",
+        Email: "morne89@gmail.com"
     }
-    ```
+];
+
+public function main() returns error? {
+    bulk:BulkJob insertJob = check bulkClient->createJob("insert", "Contact", "JSON");
+
+    bulk:BatchInfo batch = check bulkClient->addBatch(insertJob, contacts);
+}
+```
 
 2. Use `bal run` command to compile and run the Ballerina program. 
 

@@ -42,16 +42,16 @@ salesforce:Client baseClient = new(sfConfig);
 1. Now you can use the operations available within the connector. Note that they are in the form of remote operations.  
 Following is an example on how to create a record using the connector.
 
-    ```ballerina
-    json accountRecord = {
-      Name: "John Keells Holdings",
-      BillingCity: "Colombo 3"
-    };
+  ```ballerina
+  json accountRecord = {
+    Name: "John Keells Holdings",
+    BillingCity: "Colombo 3"
+  };
 
-    public function main() returns error? {
-      string recordId = check baseClient->createRecord("Account", accountRecord);
-    }
-    ```
+  public function main() returns error? {
+    string recordId = check baseClient->createRecord("Account", accountRecord);
+  }
+  ```
 2. Use `bal run` command to compile and run the Ballerina program.
 
 ### Listener
@@ -76,16 +76,16 @@ The password should be the concatenation of the user's Salesforce password and s
 1. Now you can use the channel available in the Salesforce and capture the events occurred.  
 Following is an example on how to capture all events using the connector.
 
-    ```ballerina
-    @salesforce:ServiceConfig {
-        channelName:"/data/ChangeEvents"
-    }
-    service /quoteUpdate on eventListener {
-        remote function onUpdate (salesforce:EventData quoteUpdate) { 
-            json quote = quoteUpdate.changedData.get("Status");
-        }
-    }
-    ```
+  ```ballerina
+  @salesforce:ServiceConfig {
+      channelName:"/data/ChangeEvents"
+  }
+  service /quoteUpdate on eventListener {
+      remote function onUpdate (salesforce:EventData quoteUpdate) { 
+          json quote = quoteUpdate.changedData.get("Status");
+      }
+  }
+  ```
   2. Use `bal run` command to compile and run the Ballerina program.
 
 
