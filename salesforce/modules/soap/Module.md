@@ -40,9 +40,9 @@ soap:Client soapClient = new(sfConfig);
 ### Step 3: Invoke connector operation
 1. Now you can use the operations available within the connector. Note that they are in the form of remote operations.  
 Following is an example on how to convert lead using the connector.
-    ```ballerina
-    public function main() returns error? {
-      soap:ConvertedLead response = check soapClient->convertLead(leadId);
-    }
-    ```
+  ```ballerina
+  public function main() returns error? {
+    soap:ConvertedLead response = check soapClient->convertLead(leadId);
+  }
+  ```
 2. Use `bal run` command to compile and run the Ballerina program. 

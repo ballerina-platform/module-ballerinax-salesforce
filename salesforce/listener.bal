@@ -80,7 +80,7 @@ function stopListener() returns error? =
     'class: "org.ballerinalang.sf.ListenerUtil"
 } external;
 
-# Salesforce listener configuration
+# Salesforce listener configuration.
 # 
 # + username - Salesforce login username
 # + password - Salesforce login password appended with the security token (<password><security token>)
@@ -92,11 +92,21 @@ public type ListenerConfiguration record {|
     string password;
 |};
 
-const REPLAY_FROM_TIP = -1;
-const REPLAY_FROM_EARLIEST = -2;
+# Replay ID `-1` to get all new events sent after subscription.
+public const REPLAY_FROM_TIP = -1;
+# Replay ID `-2` to get all new events sent after subscription and all past events within the retention window.
+public const REPLAY_FROM_EARLIEST = -2;
 
+# The replay ID to change the point in time when events are read
 public type ReplayFrom REPLAY_FROM_TIP|REPLAY_FROM_EARLIEST;
 
+# The channel configuration data.
+#
+# + channelName - The channel name to which a client can subscribe to receive event notifications
+# + replayFrom - The replay ID to change the point in time when events are read
+#   - `-1` - Get all new events sent after subscription. This option is the default
+#   - `-2` - Get all new events sent after subscription and all past events within the retention window
+#   - `Specific number` - Get all events that occurred after the event with the specified replay ID 
 public type SFDCChannelConfigData record {|
     string channelName;
     ReplayFrom replayFrom = REPLAY_FROM_TIP;
