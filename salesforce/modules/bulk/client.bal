@@ -229,10 +229,8 @@ public isolated client class Client {
                 payload = check convertToString(content);
             } else if (content is string[][]|stream<string[], error?>) {
                 payload = check convertStringListToString(content);
-            } else if (content is string|json|xml) {
-                payload = content;
             } else {
-                return error("Invalid request content");
+                payload = content;
             }
             map<string> headerMap = check getBulkApiHeaders(self.clientHandler, TEXT_CSV);
             http:Response response = check self.salesforceClient->post(path, payload, headers = headerMap);
