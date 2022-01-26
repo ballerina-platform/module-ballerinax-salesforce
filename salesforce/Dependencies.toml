@@ -259,7 +259,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "observe"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -341,7 +341,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "4.0.0"
+version = "4.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
