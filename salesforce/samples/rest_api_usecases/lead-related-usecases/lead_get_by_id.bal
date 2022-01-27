@@ -36,9 +36,9 @@ public function main(){
 
     json|sfdc:Error lead = baseClient->getLeadById(leadId, "FirstName", "LastName", "Title");
 
-    if (lead is json) {
+    if lead is json {
         json|error leadName = lead.FirstName; 
-        if (leadName is json){
+        if leadName is json {
             log:printInfo("Lead data retrieved successfully. Lead's Name : " + leadName.toString());
         }
     } else {

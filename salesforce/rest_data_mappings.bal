@@ -23,7 +23,7 @@ isolated function toVersions(json payload) returns Version[]|Error {
     foreach json ele in versionsArr {
         Version|error ver = ele.cloneWithType(Version);
 
-        if (ver is Version) {
+        if ver is Version {
             versions[versions.length()] = ver;
         } else {
             string errMsg = "Error occurred while constructing Version record.";
@@ -39,7 +39,7 @@ type StringMap map<string>;
 isolated function toMapOfStrings(json payload) returns map<string>|Error {
     map<string>|error strMap = payload.cloneWithType(StringMap);
 
-    if (strMap is map<string>) {
+    if strMap is map<string> {
         return strMap;
     } else {
         string errMsg = "Error occurred while constructing map<string>.";
@@ -54,14 +54,14 @@ isolated function toMapOfLimits(json payload) returns map<Limit>|Error {
     map<Limit> limits = {};
     map<json>|error payloadMap = payload.cloneWithType(JsonMap);
 
-    if (payloadMap is error) {
+    if payloadMap is error {
         string errMsg = "Error occurred while constructing map<json> using json payload.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = payloadMap);
         return error Error(errMsg, payloadMap);
     } else {
         foreach var [key, value] in payloadMap.entries() {
             Limit|error lim = value.cloneWithType(Limit);
-            if (lim is Limit) {
+            if lim is Limit {
                 limits[key] = lim;
             } else {
                 string errMsg = "Error occurred while constructing Limit record.";
@@ -76,7 +76,7 @@ isolated function toMapOfLimits(json payload) returns map<Limit>|Error {
 isolated function toSoqlResult(json payload) returns SoqlResult|Error {
     SoqlResult|error res = payload.cloneWithType(SoqlResult);
 
-    if (res is SoqlResult) {
+    if res is SoqlResult {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SoqlResult record.";
@@ -88,7 +88,7 @@ isolated function toSoqlResult(json payload) returns SoqlResult|Error {
 isolated function toSoslResult(json payload) returns SoslResult|Error {
     SoslResult|error res = payload.cloneWithType(SoslResult);
 
-    if (res is SoslResult) {
+    if res is SoslResult {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SoslResult record.";
@@ -100,7 +100,7 @@ isolated function toSoslResult(json payload) returns SoslResult|Error {
 isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error {
     SObjectMetaData|error res = payload.cloneWithType(SObjectMetaData);
 
-    if (res is SObjectMetaData) {
+    if res is SObjectMetaData {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SObjectMetaData record.";
@@ -112,7 +112,7 @@ isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error 
 isolated function toOrgMetadata(json payload) returns OrgMetadata|Error {
     OrgMetadata|error res = payload.cloneWithType(OrgMetadata);
 
-    if (res is OrgMetadata) {
+    if res is OrgMetadata {
         return res;
     } else {
         string errMsg = "Error occurred while constructing OrgMetadata record.";
@@ -124,7 +124,7 @@ isolated function toOrgMetadata(json payload) returns OrgMetadata|Error {
 isolated function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Error {
     SObjectBasicInfo|error res = payload.cloneWithType(SObjectBasicInfo);
 
-    if (res is SObjectBasicInfo) {
+    if res is SObjectBasicInfo {
         return res;
     } else {
         string errMsg = "Error occurred while constructing SObjectBasicInfo record.";

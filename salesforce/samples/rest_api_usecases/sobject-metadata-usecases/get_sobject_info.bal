@@ -36,7 +36,7 @@ public function main(){
     string objName = "Account";
     sfdc:SObjectBasicInfo|sfdc:Error sobjectInfo = baseClient->getSObjectBasicInfo(objName);
 
-    if (sobjectInfo is sfdc:SObjectBasicInfo) {
+    if sobjectInfo is sfdc:SObjectBasicInfo {
         log:printInfo("SObject basic info received " + sobjectInfo.toString());
     } else {
         log:printError(msg = sobjectInfo.message());

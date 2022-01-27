@@ -37,7 +37,7 @@ function updateCsv() returns error? {
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(updateJob, contacts);
-        if (batch is BatchInfo) {
+        if batch is BatchInfo {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using CSV.");
             batchId = batch.id;
             break;
@@ -55,7 +55,7 @@ function updateCsv() returns error? {
     //get job info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|JobInfo jobInfo = baseClient->getJobInfo(updateJob);
-        if (jobInfo is JobInfo) {
+        if jobInfo is JobInfo {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
             break;
         } else {
@@ -72,7 +72,7 @@ function updateCsv() returns error? {
     //get batch info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(updateJob, batchId);
-        if (batchInfo is BatchInfo) {
+        if batchInfo is BatchInfo {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
             break;
         } else {
@@ -89,7 +89,7 @@ function updateCsv() returns error? {
     //get all batches
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(updateJob);
-        if (batchInfoList is BatchInfo[]) {
+        if batchInfoList is BatchInfo[] {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
@@ -105,11 +105,11 @@ function updateCsv() returns error? {
 
     //get batch request
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchRequest = baseClient->getBatchRequest(updateJob, batchId);
-        if (batchRequest is string) {
+        error|json|xml|string batchRequest = baseClient->getBatchRequest(updateJob, batchId);
+        if batchRequest is string {
             test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
             break;
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -123,14 +123,14 @@ function updateCsv() returns error? {
     }
 
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchResult = baseClient->getBatchResult(updateJob, batchId);
-        if (batchResult is Result[]) {
+        error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(updateJob, batchId);
+        if batchResult is Result[] {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             foreach Result res in batchResult {
                 test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
             }
             break;
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getAllBatches Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);

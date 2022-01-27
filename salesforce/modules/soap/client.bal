@@ -50,7 +50,7 @@ public isolated client class Client {
             httpHandlerResult = trap new (<http:BearerTokenConfig>self.clientConfig);
         }
 
-        if (httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler) {
+        if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
             self.clientHandler = httpHandlerResult;
         } else {
             return error(sfdc:INVALID_CLIENT_CONFIG);
@@ -73,7 +73,7 @@ public isolated client class Client {
             responseLimits: salesforceConfig.responseLimits
         });
 
-        if (httpClientResult is http:Client) {
+        if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
             return error(sfdc:INVALID_CLIENT_CONFIG);

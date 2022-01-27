@@ -41,9 +41,9 @@ public function main() {
 
     bulk:BulkJob|error queryJob = bulkClient->createJob("query", "Contact", "CSV");
 
-    if (queryJob is bulk:BulkJob) {
+    if queryJob is bulk:BulkJob {
         error|bulk:BatchInfo batch = bulkClient->addBatch(queryJob, queryStr);
-        if (batch is bulk:BatchInfo) {
+        if batch is bulk:BatchInfo {
             _ = batch.id.length() > 0 ? "Query Executed Successfully" : "Failed to Execute the Quesry";
             batchId = batch.id;
         } else {
@@ -52,7 +52,7 @@ public function main() {
 
         //get batch info
         error|bulk:BatchInfo batchInfo = bulkClient->getBatchInfo(queryJob, batchId);
-        if (batchInfo is bulk:BatchInfo) {
+        if batchInfo is bulk:BatchInfo {
             string message = batchInfo.id == batchId ? "Batch Info Received Successfully" : "Failed to Retrieve Batch Info";
             log:printInfo(message);
         } else {
@@ -61,7 +61,7 @@ public function main() {
 
         //get all batches
         error|bulk:BatchInfo[] batchInfoList = bulkClient->getAllBatches(queryJob);
-        if (batchInfoList is bulk:BatchInfo[]) {
+        if batchInfoList is bulk:BatchInfo[] {
             string message = batchInfoList.length() == 1 ? "All Batches Received Successfully" : "Failed to Retrieve All Batches";
             log:printInfo(message);
         } else {
@@ -70,11 +70,11 @@ public function main() {
 
         //get batch request
         var batchRequest = bulkClient->getBatchRequest(queryJob, batchId);
-        if (batchRequest is string) {
+        if batchRequest is string {
             string message = batchRequest.startsWith("SELECT") ? "Batch Request Received Successfully" : "Failed to Retrieve Batch Request";
             log:printInfo(message);
 
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             log:printError(batchRequest.message());
         } else {
             log:printError(batchRequest.toString());
@@ -82,11 +82,11 @@ public function main() {
 
         //get batch result
         var batchResult = bulkClient->getBatchResult(queryJob, batchId);
-        if (batchResult is string) {
+        if batchResult is string {
             string[] records = regex:split(batchResult, "\n");
             log:printInfo("Number of Records Received :" + (records.length() - 1).toString());
 
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             string msg = batchResult.message();
             log:printError(msg);
         } else {
@@ -95,7 +95,7 @@ public function main() {
 
         //close job
         error|bulk:JobInfo closedJob = bulkClient->closeJob(queryJob);
-        if (closedJob is bulk:JobInfo) {
+        if closedJob is bulk:JobInfo {
             string message = closedJob.state == "Closed" ? "Job Closed Successfully" : "Failed to Close the Job";
             log:printInfo(message);
         } else {

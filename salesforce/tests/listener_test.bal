@@ -33,7 +33,7 @@ isolated boolean isUpdated = false;
 service on eventListener {
     remote isolated  function onUpdate(EventData event) {
         json accountName = event.changedData.get("Name");
-        if (accountName.toString() == "WSO2 Inc") {
+        if accountName.toString() == "WSO2 Inc" {
             lock {
                 isUpdated = true;
             }

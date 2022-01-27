@@ -30,7 +30,7 @@ function deleteJson() returns error? {
     //add json content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(deleteJob, contacts);
-        if (batch is BatchInfo) {
+        if batch is BatchInfo {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using json.");
             batchId = batch.id;
             break;
@@ -47,7 +47,7 @@ function deleteJson() returns error? {
 
     //get job info
     error|JobInfo jobInfo = baseClient->getJobInfo(deleteJob);
-    if (jobInfo is JobInfo) {
+    if jobInfo is JobInfo {
         test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
     } else {
         test:assertFail(msg = jobInfo.message());
@@ -56,7 +56,7 @@ function deleteJson() returns error? {
     //get batch info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(deleteJob, batchId);
-        if (batchInfo is BatchInfo) {
+        if batchInfo is BatchInfo {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
             break;
         } else {
@@ -73,7 +73,7 @@ function deleteJson() returns error? {
     //get all batches
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(deleteJob);
-        if (batchInfoList is BatchInfo[]) {
+        if batchInfoList is BatchInfo[] {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
@@ -89,16 +89,16 @@ function deleteJson() returns error? {
 
     //get batch request
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchRequest = baseClient->getBatchRequest(deleteJob, batchId);
-        if (batchRequest is json) {
+        error|json|xml|string batchRequest = baseClient->getBatchRequest(deleteJob, batchId);
+        if batchRequest is json {
             json[]|error batchRequestArr = <json[]>batchRequest;
-            if (batchRequestArr is json[]) {
+            if batchRequestArr is json[] {
                 test:assertTrue(batchRequestArr.length() == 4, msg = "Retrieving batch request failed.");
             } else {
                 test:assertFail(msg = batchRequestArr.toString());
             }
             break;
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -113,14 +113,14 @@ function deleteJson() returns error? {
 
     //get batch result
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchResult = baseClient->getBatchResult(deleteJob, batchId);
-        if (batchResult is Result[]) {
+        error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(deleteJob, batchId);
+        if batchResult is Result[] {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             foreach Result res in batchResult {
                 test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
             }
             break;
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -135,7 +135,7 @@ function deleteJson() returns error? {
 
     //close job
     error|JobInfo closedJob = baseClient->closeJob(deleteJob);
-    if (closedJob is JobInfo) {
+    if closedJob is JobInfo {
         test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
     } else {
         test:assertFail(msg = closedJob.message());

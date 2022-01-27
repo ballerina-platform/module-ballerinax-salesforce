@@ -3,8 +3,8 @@ import ballerina/io;
 
 
 sfdc:ListenerConfiguration listenerConfig = {
-   username: "",
-   password: ""
+   username: "<USER_NAME>",
+   password: "<PASSWORD>"
 };
 listener sfdc:Listener eventListener = new (listenerConfig);
 

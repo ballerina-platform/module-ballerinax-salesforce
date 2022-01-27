@@ -39,7 +39,7 @@ public function main() {
 
     string|sfdc:Error res = baseClient->createProduct(productRecord);
 
-    if (res is string) {
+    if res is string {
         log:printInfo("Product Created Successfully. Product ID : " + res);
     } else {
         log:printError(msg = res.message());

@@ -53,7 +53,7 @@ function createLead() {
         Company: "IT World"
     };
     string|sfdc:Error res = restClient->createLead(leadRecord);
-    if (res is string) {
+    if res is string {
         leadId = res;
     } else {
         test:assertFail("Lead Not Created");
@@ -63,7 +63,7 @@ function createLead() {
 @test:Config {enable: true}
 function testconvertLead() {
     ConvertedLead|error response = soapClient->convertLead(leadId);
-    if (response is ConvertedLead) {
+    if response is ConvertedLead {
         test:assertEquals(leadId, response.leadId, "Lead Not Converted");
         accountId = response.accountId;
         contactId = response.contactId;

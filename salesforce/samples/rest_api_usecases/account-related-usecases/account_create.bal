@@ -40,7 +40,7 @@ public function main() {
 
     string|sfdc:Error res = baseClient->createAccount(accountRecord);
 
-    if (res is string) {
+    if res is string {
         log:printInfo("Account Created Successfully. Account ID : " + res);
     } else {
         log:printError(msg = res.message());

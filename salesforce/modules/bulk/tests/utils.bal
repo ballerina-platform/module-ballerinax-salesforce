@@ -47,14 +47,14 @@ Client baseClient = check new (sfConfig);
 sfdc:Client restClient = check new (sfConfig);
 
 isolated function closeRb(io:ReadableByteChannel ch) {
-    var cr = ch.close();
-    if (cr is error) {
+    io:Error? cr = ch.close();
+    if cr is error {
         log:printError("Error occured while closing the channel: ", 'error = cr);
     }
 }
 
 isolated function checkBatchResults(Result result) returns boolean {
-    if (!result.success) {
+    if !result.success {
         return false;
     }
     return true;
@@ -72,9 +72,9 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName + "' AND Title='" + title + "'";
     sfdc:SoqlResult|sfdc:Error res = restClient->getQueryResult(sampleQuery);
 
-    if (res is sfdc:SoqlResult) {
+    if res is sfdc:SoqlResult {
         sfdc:SoqlRecord[]|error records = res.records;
-        if (records is sfdc:SoqlRecord[]) {
+        if records is sfdc:SoqlRecord[] {
             string id = records[0]["Id"].toString();
             contactId = id;
         } else {
@@ -88,9 +88,9 @@ function getContactIdByName(string firstName, string lastName, string title) ret
 
 isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
     json[] contacts = [];
-    foreach var item in resultList {
+    foreach json item in resultList {
         json|error itemId = item.id;
-        if (itemId is json) {
+        if itemId is json {
             string id = itemId.toString();
             contacts[contacts.length()] = {"Id": id};
         }
