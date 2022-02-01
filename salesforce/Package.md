@@ -10,12 +10,12 @@ The `ballerinax/salesforce` is a [Ballerina](https://ballerina.io/) connector fo
 * Listen for Salesforce events and process them. Internally Bayeux protocol is used for polling for events. The `ballerinax/salesforce` module provides this capability.
 
 ### Compatibility
-|                     | Version         |
-|---------------------|-----------------|
-| Ballerina Language  | Swan Lake Beta6 |
-| Salesforce REST API | v48.0           |
-| Salesforce Bulk API | v1              |
-| Salesforce SOAP API | Enterprise WSDL |
+|                     | Version            |
+|---------------------|--------------------|
+| Ballerina Language  | Swan Lake 2201.0.0 |
+| Salesforce REST API | v48.0              |
+| Salesforce Bulk API | v1                 |
+| Salesforce SOAP API | Enterprise WSDL    |
 
 ## Report issues
 To report bugs, request new features, start new discussions, view project boards, etc., go to the [Ballerina Extended Library repository](https://github.com/ballerina-platform/ballerina-extended-library)
