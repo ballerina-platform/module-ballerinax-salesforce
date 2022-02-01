@@ -24,9 +24,9 @@ import ballerina/url;
 public isolated function prepareUrl(string[] paths) returns string {
     string url = EMPTY_STRING;
 
-    if (paths.length() > 0) {
-        foreach var path in paths {
-            if (!path.startsWith(FORWARD_SLASH)) {
+    if paths.length() > 0 {
+        foreach string path in paths {
+            if !path.startsWith(FORWARD_SLASH) {
                 url = url + FORWARD_SLASH;
             }
             url = url + path;
@@ -47,12 +47,12 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
     url = url + QUESTION_MARK;
     boolean first = true;
     int i = 0;
-    foreach var name in queryParamNames {
+    foreach string name in queryParamNames {
         string value = queryParamValues[i];
-        var encoded = url:encode(value, ENCODING_CHARSET);
+        string|url:Error encoded = url:encode(value, ENCODING_CHARSET);
 
-        if (encoded is string) {
-            if (first) {
+        if encoded is string {
+            if first {
                 url = url + name + EQUAL_SIGN + encoded;
                 first = false;
             } else {
@@ -74,13 +74,13 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
 # + return - JSON result if successful, else Error occured
 isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
                                     returns @tainted json|Error {
-    if (httpResponse is http:Response) {
-        if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
-        statusCode == http:STATUS_NO_CONTENT) {
-            if (expectPayload) {
+    if httpResponse is http:Response {
+        if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
+        statusCode == http:STATUS_NO_CONTENT {
+            if expectPayload {
                 json|error jsonResponse = httpResponse.getJsonPayload();
 
-                if (jsonResponse is json) {
+                if jsonResponse is json {
                     return jsonResponse;
                 } else {
                     log:printError(JSON_ACCESSING_ERROR_MSG, 'error = jsonResponse);
@@ -95,7 +95,7 @@ isolated function checkAndSetErrors(http:Response|error httpResponse, boolean ex
         } else {
             json|error jsonResponse = httpResponse.getJsonPayload();
 
-            if (jsonResponse is json) {
+            if jsonResponse is json {
                 json[] errArr = <json[]>jsonResponse;
                 string errCodes = "";
                 string errMssgs = "";
@@ -104,10 +104,10 @@ isolated function checkAndSetErrors(http:Response|error httpResponse, boolean ex
                 foreach json err in errArr {
                     json|error errorCode = err.errorCode;
                     json|error errMessage = err.message;
-                    if (errorCode is json && errMessage is json) {
+                    if errorCode is json && errMessage is json {
                         errCodes = errCodes + errorCode.toString();
                         errMssgs = errMssgs + errMessage.toString();
-                        if (counter != errArr.length()) {
+                        if counter != errArr.length() {
                             errCodes = errCodes + ", ";
                             errMssgs = errMssgs + ", ";
                         }
@@ -130,7 +130,7 @@ isolated function checkAndSetErrors(http:Response|error httpResponse, boolean ex
 # + response - HTTP error respone
 # + return - Error
 isolated function checkAndSetErrorDetail(http:ClientError response) returns Error {
-    if (response is http:ApplicationResponseError) {
+    if response is http:ApplicationResponseError {
         ErrorDetails detail = {
             statusCode: response.detail()[STATUS_CODE],
             headers: response.detail()[HEADERS],

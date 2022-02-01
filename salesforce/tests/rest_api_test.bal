@@ -52,7 +52,7 @@ function testCreateRecord() {
     log:printInfo("baseClient -> createRecord()");
     string|Error stringResponse = baseClient->createRecord(ACCOUNT, accountRecord);
 
-    if (stringResponse is string) {
+    if stringResponse is string {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
         testRecordId = stringResponse;
     } else {
@@ -70,7 +70,7 @@ function testGetRecord() {
     string path = "/services/data/v48.0/sobjects/Account/" + testRecordId;
     response = baseClient->getRecord(path);
 
-    if (response is json) {
+    if response is json {
         test:assertNotEquals(response, (), msg = "Found null JSON response!");
         test:assertEquals(response.Name, "John Keells Holdings", msg = "Name key mismatched in response");
         test:assertEquals(response.BillingCity, "Colombo 3", msg = "BillingCity key mismatched in response");
@@ -92,7 +92,7 @@ function testUpdateRecord() {
     };
     Error? response = baseClient->updateRecord(ACCOUNT, testRecordId, account);
 
-    if (response is Error) {
+    if response is Error {
         test:assertFail(msg = response.message());
     }
 }
@@ -105,7 +105,7 @@ function testDeleteRecord() {
     log:printInfo("baseClient -> deleteRecord()");
     Error? response = baseClient->deleteRecord(ACCOUNT, testRecordId);
 
-    if (response is Error) {
+    if response is Error {
         test:assertFail(msg = response.message());
     }
 }
@@ -137,7 +137,7 @@ function testSearchSOSLString() {
     string searchString = "FIND {WSO2 Inc}";
     SoslResult|Error res = baseClient->searchSOSLString(searchString);
 
-    if (res is SoslResult) {
+    if res is SoslResult {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
         test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT,
         msg = "Matched search record is not an Account type!");
@@ -147,7 +147,7 @@ function testSearchSOSLString() {
 }
 
 isolated function assertSoqlResult(SoqlResult|Error res) {
-    if (res is SoqlResult) {
+    if res is SoqlResult {
         test:assertTrue(res.totalSize > 0, "Total number result records is 0");
         test:assertTrue(res.'done, "Query is not completed");
         test:assertTrue(res.records.length() == res.totalSize, "Query result records not equal to totalSize");
@@ -163,7 +163,7 @@ function testGetAvailableApiVersions() {
     log:printInfo("baseClient -> getAvailableApiVersions()");
     Version[]|Error versions = baseClient->getAvailableApiVersions();
 
-    if (versions is Version[]) {
+    if versions is Version[] {
         test:assertTrue(versions.length() > 0, msg = "Found 0 or No API versions");
     } else {
         test:assertFail(msg = versions.message());
@@ -177,7 +177,7 @@ function testGetResourcesByApiVersion() {
     log:printInfo("baseClient -> getResourcesByApiVersion()");
     map<string>|Error resources = baseClient->getResourcesByApiVersion(API_VERSION);
 
-    if (resources is map<string>) {
+    if resources is map<string> {
         test:assertTrue(resources.length() > 0, msg = "Found empty resource map");
 
         test:assertTrue((resources["sobjects"].toString().trim()).length() > 0, msg = "Found null for resource sobjects");
@@ -201,13 +201,13 @@ function testGetOrganizationLimits() {
     log:printInfo("baseClient -> getOrganizationLimits()");
     map<Limit>|Error limits = baseClient->getOrganizationLimits();
 
-    if (limits is map<Limit>) {
+    if limits is map<Limit> {
         test:assertTrue(limits.length() > 0, msg = "Found empty resource map");
         string[] keys = limits.keys();
         test:assertTrue(keys.length() > 0, msg = "Response doesn't have enough keys");
-        foreach var key in keys {
+        foreach string key in keys {
             Limit? lim = limits[key];
-            if (lim is Limit) {
+            if lim is Limit {
                 test:assertNotEquals(lim.Max, (), msg = "Max limit not found");
                 test:assertNotEquals(lim.Remaining, (), msg = "Remaining resources not found");
             } else {
@@ -226,7 +226,7 @@ function testdescribeSobject() {
     log:printInfo("baseClient -> describeAvailableObjects()");
     OrgMetadata|Error description = baseClient->describeAvailableObjects();
 
-    if (description is OrgMetadata) {
+    if description is OrgMetadata {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
     } else {
         test:assertFail(msg = description.message());

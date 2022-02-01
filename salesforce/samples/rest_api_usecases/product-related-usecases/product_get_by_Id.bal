@@ -37,9 +37,9 @@ public function main(){
 
     json|sfdc:Error product = baseClient->getProductById(productId, "Name");
 
-    if (product is json) {
+    if product is json {
         json|error productName = product.Name; 
-        if (productName is json){
+        if productName is json {
             log:printInfo("Product data retrieved successfully. Product's Name : " + productName.toString());
         }
     } else {

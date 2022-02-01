@@ -43,11 +43,11 @@ isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|error {
         apexProcessingTime: getIntValue((jobDetails/<ns:apexProcessingTime>/*).toString())
     };
 
-    if (job is JobInfo) {
-        if ((jobDetails/<ns:externalIdFieldName>/*).length() > 0) {
+    if job is JobInfo {
+        if (jobDetails/<ns:externalIdFieldName>/*).length() > 0 {
             job["externalIdFieldName"] = (jobDetails/<ns:externalIdFieldName>/*).toString();
         }
-        if ((jobDetails/<ns:assignmentRuleId>/*).length() > 0) {
+        if (jobDetails/<ns:assignmentRuleId>/*).length() > 0 {
             job["assignmentRuleId"] = (jobDetails/<ns:assignmentRuleId>/*).toString();
         }
         return job;
@@ -72,8 +72,8 @@ isolated function createBatchRecordFromXml(xml batchDetails) returns BatchInfo|e
         apiActiveProcessingTime: getIntValue((batchDetails/<ns:apiActiveProcessingTime>/*).toString()),
         apexProcessingTime: getIntValue((batchDetails/<ns:apexProcessingTime>/*).toString())
     };
-    if (batch is BatchInfo) {
-        if ((batchDetails/<ns:stateMessage>/*).length() > 0) {
+    if batch is BatchInfo {
+        if (batchDetails/<ns:stateMessage>/*).length() > 0 {
             batch["stateMessage"] = (batchDetails/<ns:stateMessage>/*).toString();
         }
         return batch;
@@ -95,7 +95,7 @@ isolated function createBatchResultRecordFromXml(xml payload) returns Result[]|e
         };
         // Check whether an error occured.
         xml|error errors = result/<ns:errors>;
-        if (errors is xml) {
+        if errors is xml {
             batchResult.errors = (errors/<ns:statusCode>/*).toString() + " : " + (errors/<ns:message>/*).toString();
         }
         // Add to the batch results array.
@@ -116,13 +116,13 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
         // Check whether an error occured.
         json|error errors = element.errors;
 
-        if (errors is json) {
+        if errors is json {
             json[] errorsArr = <json[]>errors;
             string errMsg = EMPTY_STRING;
             foreach json err in errorsArr {
                 json|error errStatusCode = err.statusCode;
                 json|error errMessage = err.message;
-                if (errStatusCode is json && errMessage is json) {
+                if errStatusCode is json && errMessage is json {
                     errMsg = errMsg  + errStatusCode.toString() + " : " + errMessage.toString();
                 }
             }
@@ -144,7 +144,7 @@ isolated function createBatchResultRecordFromCsv(string payload) returns Result[
     int counter = 1;
     while (counter < arrLength) {
         string? line = payloadArr[counter];
-        if (line is string) {
+        if line is string {
             string[] lineArr = regex:split(line, COMMA);
             string? idStr = lineArr[0];
             string? successStr = lineArr[1];
@@ -152,22 +152,22 @@ isolated function createBatchResultRecordFromCsv(string payload) returns Result[
             string? errorStr = lineArr[3];
 
             // Remove quotes of "true" or "false".
-            if (successStr is string && createdStr is string) {
+            if successStr is string && createdStr is string {
                 successStr = regex:replaceAll(successStr, "\"", EMPTY_STRING);
                 createdStr = regex:replaceAll(createdStr, "\"", EMPTY_STRING);
             }
 
-            if (successStr is string && successStr.length() > 0 && createdStr is string && createdStr.length() > 0) {
+            if successStr is string && successStr.length() > 0 && createdStr is string && createdStr.length() > 0 {
                 Result|error batchRes = trap {
                     success: getBooleanValue(successStr),
                     created: getBooleanValue(createdStr)
                 };
 
-                if (batchRes is Result) {
-                    if (idStr is string && idStr.length() > 0) {
+                if batchRes is Result {
+                    if idStr is string && idStr.length() > 0 {
                         batchRes.id = idStr;
                     }
-                    if (errorStr is string && errorStr.length() > 0) {
+                    if errorStr is string && errorStr.length() > 0 {
                         batchRes.errors = errorStr;
                     }
                     // Add batch result to array.

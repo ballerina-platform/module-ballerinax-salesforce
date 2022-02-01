@@ -37,9 +37,9 @@ public function main(){
 
     json|sfdc:Error account = baseClient->getAccountById(accountId, "Name", "BillingCity");
 
-    if (account is json) {
+    if account is json {
         json|error accountName = account.Name;
-        if (accountName is json){
+        if accountName is json {
             log:printInfo("Account data retrieved successfully. Account Name : " + accountName.toString());
         }
     } else {

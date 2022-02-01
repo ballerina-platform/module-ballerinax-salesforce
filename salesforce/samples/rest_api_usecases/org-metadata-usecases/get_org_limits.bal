@@ -35,7 +35,7 @@ public function main(){
 
     map<sfdc:Limit>|sfdc:Error orgLimits = baseClient->getOrganizationLimits();
 
-    if (orgLimits is map<sfdc:Limit>) {
+    if orgLimits is map<sfdc:Limit> {
         log:printInfo("Versions retrieved successfully : " + orgLimits.toString());
     } else {
         log:printError(msg = orgLimits.message());

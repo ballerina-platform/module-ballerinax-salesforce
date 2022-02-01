@@ -47,9 +47,9 @@ function getAccountIdByName(string name) returns @tainted string {
     string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
-    if (res is sfdc:SoqlResult) {
+    if res is sfdc:SoqlResult {
         sfdc:SoqlRecord[]|error records = res.records;
-        if (records is sfdc:SoqlRecord[]) {
+        if records is sfdc:SoqlRecord[] {
             string id = records[0]["Id"].toString();
             contactId = id;
         } else {

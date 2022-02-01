@@ -37,15 +37,15 @@ public function main(){
     string sampleQuery = "SELECT name FROM Account";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
-    if (res is sfdc:SoqlResult) {
-        if (res.totalSize > 0){
+    if res is sfdc:SoqlResult {
+        if res.totalSize > 0 {
             totalRecords = res.records.length() ;
             string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
             while (nextRecordsUrl is string && nextRecordsUrl.trim() != "") {
                 log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
                 sfdc:SoqlResult|sfdc:Error nextRes = baseClient->getNextQueryResult(nextRecordsUrl);
                 
-                if (nextRes is sfdc:SoqlResult) {
+                if nextRes is sfdc:SoqlResult {
                     totalRecords = totalRecords + nextRes.records.length();
                     res = nextRes;
                 } 

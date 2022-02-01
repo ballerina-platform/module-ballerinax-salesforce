@@ -35,7 +35,7 @@ public function main(){
 
     map<string>|sfdc:Error apiVersionResources = baseClient->getResourcesByApiVersion("v48.0");
 
-    if (apiVersionResources is map<string>) {
+    if apiVersionResources is map<string> {
         log:printInfo("Versions retrieved successfully : " + apiVersionResources.toString());
     } else {
         log:printError(msg = apiVersionResources.message());

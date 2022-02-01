@@ -37,9 +37,9 @@ public function main(){
 
     json|sfdc:Error opportunity = baseClient->getOpportunityById(opportunityId, "Name", "CloseDate", "StageName");
 
-    if (opportunity is json) {
+    if opportunity is json {
         json|error opportunityName = opportunity.Name; 
-        if (opportunityName is json){
+        if opportunityName is json {
             log:printInfo("Opportunity data retrieved successfully. Opportunity's Name : " + opportunityName.toString());
         }
     } else {

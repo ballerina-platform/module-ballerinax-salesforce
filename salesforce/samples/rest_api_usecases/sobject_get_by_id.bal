@@ -36,9 +36,9 @@ public function main() {
 
     json|sfdc:Error res = baseClient->getRecordById("Account", accountId, "Name", "BillingCity");
 
-    if (res is json) {
+    if res is json {
         json|error recName = res.Name;
-        if (recName is json) {
+        if recName is json {
             log:printInfo("Record data received successfully. Record Name : " + recName.toString());
         }
     } else {

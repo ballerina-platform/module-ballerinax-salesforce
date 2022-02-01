@@ -34,7 +34,7 @@ function queryJson() returns error? {
     //add query string
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(queryJob, queryStr);
-        if (batch is BatchInfo) {
+        if batch is BatchInfo {
             test:assertTrue(batch.id.length() > 0, msg = "Could not add batch.");
             batchId = batch.id;
             break;
@@ -51,7 +51,7 @@ function queryJson() returns error? {
 
     //get job info
     error|JobInfo jobInfo = baseClient->getJobInfo(queryJob);
-    if (jobInfo is JobInfo) {
+    if jobInfo is JobInfo {
         test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
     } else {
         test:assertFail(msg = jobInfo.message());
@@ -60,7 +60,7 @@ function queryJson() returns error? {
     //get batch info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(queryJob, batchId);
-        if (batchInfo is BatchInfo) {
+        if batchInfo is BatchInfo {
             test:assertTrue(batchInfo.id == batchId, msg = "Getting batch info failed.");
             break;
         } else {
@@ -77,7 +77,7 @@ function queryJson() returns error? {
     //get all batches
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(queryJob);
-        if (batchInfoList is BatchInfo[]) {
+        if batchInfoList is BatchInfo[] {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
@@ -93,11 +93,11 @@ function queryJson() returns error? {
 
     //get batch request
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchRequest = baseClient->getBatchRequest(queryJob, batchId);
-        if (batchRequest is string) {
+        error|json|xml|string batchRequest = baseClient->getBatchRequest(queryJob, batchId);
+        if batchRequest is string {
             test:assertTrue(batchRequest.startsWith("SELECT"), msg = "Retrieving batch request failed.");
             break;
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -112,11 +112,11 @@ function queryJson() returns error? {
 
     //get batch result
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchResult = baseClient->getBatchResult(queryJob, batchId);
-        if (batchResult is json) {
+        error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(queryJob, batchId);
+        if batchResult is json {
             json[]|error batchResultArr = <json[]>batchResult;
-            if (batchResultArr is json[]) {
-                if (batchResultArr.length() == 4) {
+            if batchResultArr is json[] {
+                if batchResultArr.length() == 4 {
                     test:assertTrue(batchResultArr.length() == 4, msg = "Retrieving batch result failed.");
                     break;
                 } else {
@@ -132,7 +132,7 @@ function queryJson() returns error? {
                 test:assertFail(msg = batchResultArr.toString());
             }
             break;
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);

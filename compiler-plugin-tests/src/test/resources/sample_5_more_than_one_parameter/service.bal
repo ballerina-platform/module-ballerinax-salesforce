@@ -1,8 +1,8 @@
 import ballerinax/salesforce as sfdc;
 
 sfdc:ListenerConfiguration listenerConfig = {
-   username: "",
-   password: ""
+   username: "<USER_NAME>",
+   password: "<PASSWORD>"
 };
 listener sfdc:Listener eventListener = new (listenerConfig);
 

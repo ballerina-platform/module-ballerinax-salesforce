@@ -29,7 +29,7 @@ listener sfdc:Listener eventListener = new (listenerConfig);
 service on eventListener {
     remote function onUpdate(sfdc:EventData op) {
         json accountName = op.changedData.get("Name");
-        if (accountName is json) {
+        if accountName is json {
             log:printInfo(accountName.toString() + " Account Updated");
         }
     }

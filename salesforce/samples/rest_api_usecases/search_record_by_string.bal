@@ -37,7 +37,7 @@ public function main(){
     string searchString = "FIND {WSO2 Inc}";
     sfdc:SoslResult|sfdc:Error res = baseClient->searchSOSLString(searchString);
 
-    if (res is sfdc:SoslResult){
+    if res is sfdc:SoslResult {
         log:printInfo(res.searchRecords.length().toString() + " Record Received");
     }
     else{

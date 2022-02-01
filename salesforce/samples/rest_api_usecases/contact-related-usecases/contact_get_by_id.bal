@@ -37,9 +37,9 @@ public function main(){
 
     json|sfdc:Error contact = baseClient->getContactById(contactId, "FirstName", "LastName", "Title");
 
-    if (contact is json) {
+    if contact is json {
         json|error contactName = contact.FirstName; 
-        if (contactName is json){
+        if contactName is json {
             log:printInfo("Contact data retrieved successfully. Cotact's Name : " + contactName.toString());
         }
     } else {

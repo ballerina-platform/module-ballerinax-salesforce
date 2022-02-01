@@ -51,7 +51,7 @@ public isolated client class Client {
             httpHandlerResult = trap new (<http:BearerTokenConfig>self.clientConfig);
         }
 
-        if (httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler) {
+        if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
             self.clientHandler = httpHandlerResult;
         } else {
             return error(sfdc:INVALID_CLIENT_CONFIG);
@@ -75,7 +75,7 @@ public isolated client class Client {
             responseLimits: salesforceConfig.responseLimits
         });
 
-        if (httpClientResult is http:Client) {
+        if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
             return error(sfdc:INVALID_CLIENT_CONFIG);
@@ -101,8 +101,8 @@ public isolated client class Client {
             "object": sobj,
             "contentType": contentType
         };
-        if (UPSERT == operation) {
-            if (extIdFieldName.length() > 0) {
+        if UPSERT == operation {
+            if extIdFieldName.length() > 0 {
                 json extField = {"externalIdFieldName": extIdFieldName};
                 jobPayload = check jobPayload.mergeJson(extField);
             } else {
@@ -134,7 +134,7 @@ public isolated client class Client {
         string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
-        if (JSON == jobDataType) {
+        if JSON == jobDataType {
             json jobResponse = check checkJsonPayloadAndSetErrors(response);
             JobInfo jobInfo = check jobResponse.cloneWithType(JobInfo);
             return jobInfo;
@@ -190,14 +190,14 @@ public isolated client class Client {
         string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         // https://github.com/ballerina-platform/ballerina-lang/issues/26798
         string|json|xml payload;
-        if (bulkJob.jobDataType == JSON) {
-            if (content is io:ReadableByteChannel) {
-                if (QUERY == bulkJob.operation) {
+        if bulkJob.jobDataType == JSON {
+            if content is io:ReadableByteChannel {
+                if QUERY == bulkJob.operation {
                     payload = check convertToString(content);
                 } else {
                     payload = check convertToJson(content);
                 }
-            } else if (content is string|json|xml) {
+            } else if content is string|json|xml {
                 payload = content;
             } else {
                 return error("Invalid request content");
@@ -207,14 +207,14 @@ public isolated client class Client {
             json batchResponse = check checkJsonPayloadAndSetErrors(response);
             BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
             return binfo;
-        } else if (bulkJob.jobDataType == XML) {
-            if (content is io:ReadableByteChannel) {
-                if (QUERY == bulkJob.operation) {
+        } else if bulkJob.jobDataType == XML {
+            if content is io:ReadableByteChannel {
+                if QUERY == bulkJob.operation {
                     payload = check convertToString(content);
                 } else {
                     payload = check convertToXml(content);
                 }
-            } else if (content is string|json|xml) {
+            } else if content is string|json|xml {
                 payload = content;
             } else {
                 return error("Invalid request content");
@@ -224,10 +224,10 @@ public isolated client class Client {
             xml batchResponse = check checkXmlPayloadAndSetErrors(response);
             BatchInfo binfo = check createBatchRecordFromXml(batchResponse);
             return binfo;
-        } else if (bulkJob.jobDataType == CSV) {
-            if (content is io:ReadableByteChannel) {
+        } else if bulkJob.jobDataType == CSV {
+            if content is io:ReadableByteChannel {
                 payload = check convertToString(content);
-            } else if (content is string[][]|stream<string[], error?>) {
+            } else if content is string[][]|stream<string[], error?> {
                 payload = check convertStringListToString(content);
             } else {
                 payload = content;
@@ -254,7 +254,7 @@ public isolated client class Client {
         string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
-        if (JSON == bulkJob.jobDataType) {
+        if JSON == bulkJob.jobDataType {
             json batchResponse = check checkJsonPayloadAndSetErrors(response);
             BatchInfo binfo = check batchResponse.cloneWithType(BatchInfo);
             return binfo;
@@ -276,7 +276,7 @@ public isolated client class Client {
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
         BatchInfo[] batchInfoList = [];
-        if (JSON == bulkJob.jobDataType) {
+        if JSON == bulkJob.jobDataType {
             json batchResponse = check checkJsonPayloadAndSetErrors(response);
             json batchInfoRes = check batchResponse.batchInfo;
             json[] batchInfoArr = <json[]>batchInfoRes;
@@ -306,7 +306,7 @@ public isolated client class Client {
         string path = sfdc:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
         http:Response response = check self.salesforceClient->get(path, headerMap);
-        if (QUERY == bulkJob.operation) {
+        if QUERY == bulkJob.operation {
             return getQueryRequest(response, bulkJob.jobDataType);
         } else {
             match bulkJob.jobDataType {
@@ -341,7 +341,7 @@ public isolated client class Client {
         match bulkJob.jobDataType {
             JSON => {
                 json resultResponse = check checkJsonPayloadAndSetErrors(response);
-                if (QUERY == bulkJob.operation) {
+                if QUERY == bulkJob.operation {
                     return getJsonQueryResult(resultResponse, path, self.salesforceClient, 
                          self.clientHandler);
                 }
@@ -349,14 +349,14 @@ public isolated client class Client {
             }
             XML => {
                 xml resultResponse = check checkXmlPayloadAndSetErrors(response);
-                if (QUERY == bulkJob.operation) {
+                if QUERY == bulkJob.operation {
                     return getXmlQueryResult(resultResponse, path, self.salesforceClient, 
                          self.clientHandler);
                 }
                 return createBatchResultRecordFromXml(resultResponse);
             }
             CSV => {
-                if (QUERY == bulkJob.operation) {
+                if QUERY == bulkJob.operation {
                     xml resultResponse = check checkXmlPayloadAndSetErrors(response);
                     return getCsvQueryResult(resultResponse, path, self.salesforceClient, 
                          self.clientHandler);

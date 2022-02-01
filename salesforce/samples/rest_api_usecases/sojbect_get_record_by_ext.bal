@@ -35,9 +35,9 @@ public function main(){
 
     json|sfdc:Error res = baseClient->getRecordByExtId("Contact", "My_External_Id__c", "102", "FirstName");
 
-    if (res is json) {
+    if res is json {
         json|error recName = res.FirstName;
-        if (recName is json){
+        if recName is json {
             log:printInfo("Account data received successfully. Account Name : " + recName.toString());
         }
     } else {

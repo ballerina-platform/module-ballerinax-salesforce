@@ -52,7 +52,7 @@ function insertXml() returns error? {
     //add xml content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(xmlInsertJob, contacts);
-        if (batch is BatchInfo) {
+        if batch is BatchInfo {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using xml.");
             xmlBatchId = batch.id;
             break;
@@ -69,7 +69,7 @@ function insertXml() returns error? {
 
     //get job info
     error|JobInfo jobInfo = baseClient->getJobInfo(xmlInsertJob);
-    if (jobInfo is JobInfo) {
+    if jobInfo is JobInfo {
         test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
     } else {
         test:assertFail(msg = jobInfo.message());
@@ -78,7 +78,7 @@ function insertXml() returns error? {
     //get batch info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(xmlInsertJob, xmlBatchId);
-        if (batchInfo is BatchInfo) {
+        if batchInfo is BatchInfo {
             test:assertTrue(batchInfo.id == xmlBatchId, msg = "Getting batch info failed.");
             break;
         } else {
@@ -93,9 +93,9 @@ function insertXml() returns error? {
     }
 
     //get all batches
-    foreach var i in 1 ..< 3 {
+    foreach int i in 1 ..< 3 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(xmlInsertJob);
-        if (batchInfoList is BatchInfo[]) {
+        if batchInfoList is BatchInfo[] {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
@@ -111,10 +111,10 @@ function insertXml() returns error? {
     //get batch request
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(xmlInsertJob, xmlBatchId);
-        if (batchRequest is xml) {
+        if batchRequest is xml {
             test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
             break;
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -130,17 +130,17 @@ function insertXml() returns error? {
     //get batch result
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(xmlInsertJob, xmlBatchId);
-        if (batchResult is Result[]) {
-            foreach var item in batchResult {
+        if batchResult is Result[] {
+            foreach Result item in batchResult {
                 json|error itemId = item?.id;
-                if (itemId is json) {
+                if itemId is json {
                     string id = itemId.toString();
                     xmlInsertResult = xmlInsertResult + xml `<sObject><Id>${id}</Id></sObject>`;
                 }
                 test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
             }
             break;
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -172,10 +172,10 @@ function insertXmlFromFile() returns error? {
 
     //add xml content via file
     io:ReadableByteChannel|io:Error rbc = io:openReadableFile(xmlContactsFilePath);
-    if (rbc is io:ReadableByteChannel) {
+    if rbc is io:ReadableByteChannel {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|BatchInfo batchUsingXmlFile = baseClient->addBatch(xmlInsertJob, rbc);
-            if (batchUsingXmlFile is BatchInfo) {
+            if batchUsingXmlFile is BatchInfo {
                 test:assertTrue(batchUsingXmlFile.id.length() > 0, msg = "Could not upload the contacts using xml file.");
                 xmlBatchId = batchUsingXmlFile.id;
                 break;
@@ -198,7 +198,7 @@ function insertXmlFromFile() returns error? {
     //get job info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|JobInfo jobInfo = baseClient->getJobInfo(xmlInsertJob);
-        if (jobInfo is JobInfo) {
+        if jobInfo is JobInfo {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
             if currentRetry != maxIterations {
@@ -214,7 +214,7 @@ function insertXmlFromFile() returns error? {
     //get batch info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(xmlInsertJob, xmlBatchId);
-        if (batchInfo is BatchInfo) {
+        if batchInfo is BatchInfo {
             test:assertTrue(batchInfo.id == xmlBatchId, msg = "Getting batch info failed.");
         } else {
             if currentRetry != maxIterations {
@@ -230,7 +230,7 @@ function insertXmlFromFile() returns error? {
     //get all batches
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(xmlInsertJob);
-        if (batchInfoList is BatchInfo[]) {
+        if batchInfoList is BatchInfo[] {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
             if currentRetry != maxIterations {
@@ -246,10 +246,10 @@ function insertXmlFromFile() returns error? {
     //get batch request
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchRequest = baseClient->getBatchRequest(xmlInsertJob, xmlBatchId);
-        if (batchRequest is xml) {
+        if batchRequest is xml {
             test:assertTrue((batchRequest/<*>).length() == 2, msg = "Retrieving batch request failed.");
             break;
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -265,17 +265,17 @@ function insertXmlFromFile() returns error? {
     //get batch result
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         var batchResult = baseClient->getBatchResult(xmlInsertJob, xmlBatchId);
-        if (batchResult is Result[]) {
-            foreach var item in batchResult {
+        if batchResult is Result[] {
+            foreach Result item in batchResult {
                 json|error itemId = item?.id;
-                if (itemId is json) {
+                if itemId is json {
                     string id = itemId.toString();
                     xmlInsertResult = xmlInsertResult + xml `<sObject><Id>${id}</Id></sObject>`;
                 }
                 test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
             }
             break;
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -290,7 +290,7 @@ function insertXmlFromFile() returns error? {
 
     //close job
     error|JobInfo closedJob = baseClient->closeJob(xmlInsertJob);
-    if (closedJob is JobInfo) {
+    if closedJob is JobInfo {
         test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
     } else {
         test:assertFail(msg = closedJob.message());

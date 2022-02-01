@@ -31,8 +31,8 @@ isolated string csvContent = EMPTY_STRING;
 # + httpResponse - HTTP response or error occurred
 # + return - XML response if successful else Error occured
 isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) returns @tainted xml|error {
-    if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
-    statusCode == http:STATUS_NO_CONTENT) {
+    if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
+    statusCode == http:STATUS_NO_CONTENT {
         return check httpResponse.getXmlPayload();
     } else {
         return handleXmlErrorResponse(httpResponse);
@@ -44,8 +44,8 @@ isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) return
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
 isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) returns @tainted string|error {
-    if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
-    statusCode == http:STATUS_NO_CONTENT) {
+    if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
+    statusCode == http:STATUS_NO_CONTENT {
         return check httpResponse.getTextPayload();
     } else {
         return handleXmlErrorResponse(httpResponse);
@@ -57,8 +57,8 @@ isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) retur
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
 isolated function checkJsonPayloadAndSetErrors(http:Response httpResponse) returns @tainted json|error {
-    if (httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
-    statusCode == http:STATUS_NO_CONTENT) {
+    if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
+    statusCode == http:STATUS_NO_CONTENT {
         return check httpResponse.getJsonPayload();
     } else {
         return handleJsonErrorResponse(httpResponse);
@@ -71,10 +71,10 @@ isolated function checkJsonPayloadAndSetErrors(http:Response httpResponse) retur
 # + jobtype - Job type
 # + return - Query string response if successful or else an sfdc:Error
 isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) returns @tainted string|error {
-    if (httpResponse.statusCode == http:STATUS_OK) {
+    if httpResponse.statusCode == http:STATUS_OK {
         return check httpResponse.getTextPayload();
     } else {
-        if (JSON == jobtype) {
+        if JSON == jobtype {
             return handleJsonErrorResponse(httpResponse);
         } else {
             return handleXmlErrorResponse(httpResponse);
@@ -89,7 +89,7 @@ isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) r
 isolated function handleXmlErrorResponse(http:Response httpResponse) returns @tainted error {
     xml|error xmlResponse = httpResponse.getXmlPayload();
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
-    if (xmlResponse is xml) {
+    if xmlResponse is xml {
         return error((xmlResponse/<ns:exceptionCode>/*).toString());
     } else {
         log:printError(sfdc:ERR_EXTRACTING_ERROR_MSG, 'error = xmlResponse);
@@ -103,9 +103,9 @@ isolated function handleXmlErrorResponse(http:Response httpResponse) returns @ta
 # + return - error
 isolated function handleJsonErrorResponse(http:Response httpResponse) returns @tainted error {
     json|error response = httpResponse.getJsonPayload();
-    if (response is json) {
+    if response is json {
         json|error resExceptionCode = response.exceptionCode;
-        if (resExceptionCode is json) {
+        if resExceptionCode is json {
             return error(resExceptionCode.toString());
         } else {
             return error(resExceptionCode.message());
@@ -122,7 +122,7 @@ isolated function handleJsonErrorResponse(http:Response httpResponse) returns @t
 # + return - converted integer
 isolated function getIntValue(string value) returns int {
     int|error intValue = ints:fromString(value);
-    if (intValue is int) {
+    if intValue is int {
         return intValue;
     } else {
         log:printError("String to int conversion failed, string value='" + value + "' ", 'error = intValue);
@@ -136,7 +136,7 @@ isolated function getIntValue(string value) returns int {
 # + return - converted float
 isolated function getFloatValue(string value) returns float {
     float|error floatValue = floats:fromString(value);
-    if (floatValue is float) {
+    if floatValue is float {
         return floatValue;
     } else {
         log:printError("String to float conversion failed, string value='" + value + "' ", 'error = floatValue);
@@ -149,9 +149,9 @@ isolated function getFloatValue(string value) returns float {
 # + value - string value
 # + return - converted boolean
 isolated function getBooleanValue(string value) returns boolean {
-    if (value == "true") {
+    if value == "true" {
         return true;
-    } else if (value == "false") {
+    } else if value == "false" {
         return false;
     } else {
         log:printError("Invalid boolean value, string value='" + value + "' ", 'error = ());
@@ -168,16 +168,16 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted s
     string textContent = EMPTY_STRING;
     while (true) {
         byte[]|io:Error result = rbc.read(1000);
-        if (result is io:EofError) {
+        if result is io:EofError {
             break;
-        } else if (result is io:Error) {
+        } else if result is io:Error {
             string errMsg = "Error occurred while reading from Readable Byte Channel.";
             log:printError(errMsg, 'error = result);
             return error(errMsg, result);
         } else {
             readContent = result;
             string|error readContentStr = strings:fromBytes(readContent);
-            if (readContentStr is string) {
+            if readContentStr is string {
                 textContent = textContent + readContentStr;
             } else {
                 string errMsg = "Error occurred while converting readContent byte array to string.";
@@ -195,14 +195,14 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted s
 # + return - converted json
 isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
-    if (rch is io:Error) {
+    if rch is io:Error {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, 'error = rch);
         return error(errMsg, rch);
     } else {
         json|error jsonContent = rch.readJson();
 
-        if (jsonContent is json) {
+        if jsonContent is json {
             return jsonContent;
         } else {
             string errMsg = "Error occurred while reading ReadableCharacterChannel as json.";
@@ -218,14 +218,14 @@ isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted jso
 # + return - converted xml
 isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
-    if (rch is io:Error) {
+    if rch is io:Error {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
         log:printError(errMsg, 'error = rch);
         return error(errMsg, rch);
     } else {
         xml|error xmlContent = rch.readXml();
 
-        if (xmlContent is xml) {
+        if xmlContent is xml {
             return xmlContent;
         } else {
             string errMsg = "Error occurred while reading ReadableCharacterChannel as xml.";
@@ -243,7 +243,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
     lock {
         csvContent = EMPTY_STRING;
     }
-    if (stringCsvInput is string[][]) {
+    if stringCsvInput is string[][] {
         foreach var row in stringCsvInput {
             lock {
                 csvContent += row.reduce(isolated function (string s, string t) returns string { 
@@ -270,15 +270,15 @@ isolated function getJsonQueryResult(json resultlist, string path, http:Client h
                                      http:ClientBearerTokenAuthHandler clientHandler) returns @tainted json|error {
     json[] finalResults = [];
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
-    if (headerMap is map<string|string[]>) {
+    if headerMap is map<string|string[]> {
         //result list is always a json[]
-        if (resultlist is json[]) {
-            foreach var item in resultlist {
+        if resultlist is json[] {
+            foreach json item in resultlist {
                 string resultId = item.toString();
                 http:Response response = check httpClient->get(path + FORWARD_SLASH + resultId, headerMap);
                 json result = check checkJsonPayloadAndSetErrors(response);
                 //result is always a json[]
-                if (result is json[]) {
+                if result is json[] {
                     finalResults = mergeJson(finalResults, result);
                 }
             }
@@ -294,7 +294,7 @@ isolated function getXmlQueryResult(xml resultlist, string path, http:Client htt
                                     http:ClientBearerTokenAuthHandler clientHandler) returns @tainted xml|error {
     xml finalResults = xml `<queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
-    if (headerMap is map<string|string[]>) {
+    if headerMap is map<string|string[]> {
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
             http:Response response = check httpClient->get(path + FORWARD_SLASH + resultId, headerMap);
@@ -311,13 +311,13 @@ isolated function getCsvQueryResult(xml resultlist, string path, http:Client htt
                                     http:ClientBearerTokenAuthHandler clientHandler) returns @tainted string|error {
     string finalResults = EMPTY_STRING;
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
-    if (headerMap is map<string|string[]>) {
+    if headerMap is map<string|string[]> {
         int i = 0;
         foreach var item in resultlist/<*> {
             string resultId = (item/*).toString();
             http:Response response = check httpClient->get(path + FORWARD_SLASH + resultId, headerMap);
             string result = check checkTextPayloadAndSetErrors(response);
-            if (i == 0) {
+            if i == 0 {
                 finalResults = result;
             } else {
                 finalResults = mergeCsv(finalResults, result);
@@ -331,7 +331,7 @@ isolated function getCsvQueryResult(xml resultlist, string path, http:Client htt
 }
 
 isolated function mergeJson(json[] list1, json[] list2) returns json[] {
-    foreach var item in list2 {
+    foreach json item in list2 {
         list1[list1.length()] = item;
     }
     return list1;
@@ -347,7 +347,7 @@ isolated function mergeXml(xml list1, xml list2) returns xml {
 isolated function mergeCsv(string list1, string list2) returns string {
     int? inof = list2.indexOf(NEW_LINE);
     string finalList = list1;
-    if (inof is int) {
+    if inof is int {
         string list2new = list2.substring(inof);
         finalList = finalList.concat(list2new);
     }
@@ -359,16 +359,16 @@ isolated function getBulkApiHeaders(http:ClientOAuth2Handler|http:ClientBearerTo
     string token;
     map<string> finalHeaderMap = {};
     map<string|string[]> authorizationHeaderMap;
-    if (clientHandler is http:ClientOAuth2Handler) {
+    if clientHandler is http:ClientOAuth2Handler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
-    } else if (clientHandler is http:ClientBearerTokenAuthHandler) {
+    } else if clientHandler is http:ClientBearerTokenAuthHandler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     } else {
         return error("Invalid authentication handler");
     }
     token = (regex:split(<string>authorizationHeaderMap["Authorization"], " "))[1];
     finalHeaderMap[X_SFDC_SESSION] = token;
-    if (contentType != ()) {
+    if contentType != () {
         finalHeaderMap[CONTENT_TYPE] = <string>contentType;
     }
     return finalHeaderMap;

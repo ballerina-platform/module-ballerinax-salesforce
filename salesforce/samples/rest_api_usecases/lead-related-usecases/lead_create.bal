@@ -41,7 +41,7 @@ public function main() {
 
     string|sfdc:Error res = baseClient->createLead(leadRecord);
 
-    if (res is string) {
+    if res is string {
         log:printInfo("Leade Created Successfully. Lead ID : " + res);
     } else {
         log:printError(msg = res.message());

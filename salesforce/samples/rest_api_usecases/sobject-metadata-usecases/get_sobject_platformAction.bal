@@ -35,7 +35,7 @@ public function main(){
 
     sfdc:SObjectBasicInfo|sfdc:Error actionInfo = baseClient->sObjectPlatformAction();
 
-    if (actionInfo is sfdc:SObjectBasicInfo) {
+    if actionInfo is sfdc:SObjectBasicInfo {
         log:printInfo("Platform Action Info Received : " + actionInfo.toString());
     } else {
         log:printError(msg = actionInfo.message());

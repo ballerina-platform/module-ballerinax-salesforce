@@ -50,7 +50,7 @@ function insertJson() returns error? {
     //add json content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(jsonInsertJob, contacts);
-        if (batch is BatchInfo) {
+        if batch is BatchInfo {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts using json.");
             jsonBatchId = batch.id;
             break;
@@ -69,7 +69,7 @@ function insertJson() returns error? {
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
 
-        if (jobInfo is JobInfo) {
+        if jobInfo is JobInfo {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
             break;
         } else {
@@ -86,7 +86,7 @@ function insertJson() returns error? {
     //get batch info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
-        if (batchInfo is BatchInfo) {
+        if batchInfo is BatchInfo {
             test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
             break;
         } else {
@@ -101,9 +101,9 @@ function insertJson() returns error? {
     }
 
     //get all batches
-    foreach var i in 1 ..< 3 {
+    foreach int i in 1 ..< 3 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(jsonInsertJob);
-        if (batchInfoList is BatchInfo[]) {
+        if batchInfoList is BatchInfo[] {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
             break;
         } else {
@@ -118,16 +118,16 @@ function insertJson() returns error? {
 
     //get batch request
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
-        if (batchRequest is json) {
+        error|json|xml|string batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
+        if batchRequest is json {
             json[]|error batchRequestArr = <json[]>batchRequest;
-            if (batchRequestArr is json[]) {
+            if batchRequestArr is json[] {
                 test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
             } else {
                 test:assertFail(msg = batchRequestArr.toString());
             }
             break;
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -141,15 +141,15 @@ function insertJson() returns error? {
     }
 
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
-        if (batchResult is Result[]) {
+        error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
+        if batchResult is Result[] {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             foreach json res in batchResult {
                 jsonInsertResult.push(res);
                 test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
             }
             break;
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -166,7 +166,7 @@ function insertJson() returns error? {
     foreach int currentRetry in 1 ..< maxIterations + 1 {
 
         error|JobInfo closedJob = baseClient->closeJob(jsonInsertJob);
-        if (closedJob is JobInfo) {
+        if closedJob is JobInfo {
             test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
             break;
         } else {
@@ -192,10 +192,10 @@ function insertJsonFromFile() returns error? {
 
     //add json content
     io:ReadableByteChannel|io:Error rbc = io:openReadableFile(jsonContactsFilePath);
-    if (rbc is io:ReadableByteChannel) {
+    if rbc is io:ReadableByteChannel {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|BatchInfo batchUsingJsonFile = baseClient->addBatch(jsonInsertJob, rbc);
-            if (batchUsingJsonFile is BatchInfo) {
+            if batchUsingJsonFile is BatchInfo {
                 test:assertTrue(batchUsingJsonFile.id.length() > 0, 
                     msg = "Could not upload the contacts using json file.");
                 jsonBatchId = batchUsingJsonFile.id;
@@ -219,7 +219,7 @@ function insertJsonFromFile() returns error? {
     //get job info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|JobInfo jobInfo = baseClient->getJobInfo(jsonInsertJob);
-        if (jobInfo is JobInfo) {
+        if jobInfo is JobInfo {
             test:assertTrue(jobInfo.id.length() > 0, msg = "Getting job info failed.");
         } else {
             if currentRetry != maxIterations {
@@ -235,7 +235,7 @@ function insertJsonFromFile() returns error? {
     //get batch info
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batchInfo = baseClient->getBatchInfo(jsonInsertJob, jsonBatchId);
-        if (batchInfo is BatchInfo) {
+        if batchInfo is BatchInfo {
             test:assertTrue(batchInfo.id == jsonBatchId, msg = "Getting batch info failed.");
         } else {
             if currentRetry != maxIterations {
@@ -251,7 +251,7 @@ function insertJsonFromFile() returns error? {
     //get all batches
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo[] batchInfoList = baseClient->getAllBatches(jsonInsertJob);
-        if (batchInfoList is BatchInfo[]) {
+        if batchInfoList is BatchInfo[] {
             test:assertTrue(batchInfoList.length() == 1, msg = "Getting all batches info failed.");
         } else {
             if currentRetry != maxIterations {
@@ -266,16 +266,16 @@ function insertJsonFromFile() returns error? {
 
     //get batch request
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
-        if (batchRequest is json) {
+        error|json|xml|string batchRequest = baseClient->getBatchRequest(jsonInsertJob, jsonBatchId);
+        if batchRequest is json {
             json[]|error batchRequestArr = <json[]>batchRequest;
-            if (batchRequestArr is json[]) {
+            if batchRequestArr is json[] {
                 test:assertTrue(batchRequestArr.length() == 2, msg = "Retrieving batch request failed.");
             } else {
                 test:assertFail(msg = batchRequestArr.toString());
             }
             break;
-        } else if (batchRequest is error) {
+        } else if batchRequest is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchRequest Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
@@ -289,14 +289,14 @@ function insertJsonFromFile() returns error? {
     }
 
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        var batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
-        if (batchResult is Result[]) {
+        error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
+        if batchResult is Result[] {
             foreach json res in batchResult {
                 jsonInsertResult.push(res);
             }
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             break;
-        } else if (batchResult is error) {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);

@@ -39,9 +39,9 @@ public function main(){
 
     json|sfdc:Error res = baseClient->getRecord(path);
 
-    if (res is json) {
+    if res is json {
         json|error recName = res.Name;
-        if (recName is json){
+        if recName is json {
             log:printInfo("Account data received successfully. Account Name : " + recName.toString());
         }
     } else {

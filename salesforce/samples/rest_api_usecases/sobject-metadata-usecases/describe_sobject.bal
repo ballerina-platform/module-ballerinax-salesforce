@@ -37,7 +37,7 @@ public function main(){
 
     sfdc:SObjectMetaData|sfdc:Error objDesc = baseClient->describeSObject(objName);
 
-    if (objDesc is sfdc:SObjectMetaData) {
+    if objDesc is sfdc:SObjectMetaData {
         log:printInfo("Object description received : " + objDesc.toString());
     } else {
         log:printError(msg = objDesc.message());

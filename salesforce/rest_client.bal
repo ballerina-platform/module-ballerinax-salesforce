@@ -57,7 +57,7 @@ public isolated client class Client {
             responseLimits: salesforceConfig.responseLimits
         });
 
-        if (httpClientResult is http:Client) {
+        if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
             return error Error(INVALID_CLIENT_CONFIG);
@@ -127,7 +127,7 @@ public isolated client class Client {
                                            @display {label: "Fields to Retrieve"} string... fields) 
                                            returns @tainted @display {label: "Result"} json|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
-        if (fields.length() > 0) {
+        if fields.length() > 0 {
             path = path.concat(self.appendQueryParams(fields));
         }
         json response = check self->getRecord(path);
@@ -148,7 +148,7 @@ public isolated client class Client {
                                               @display {label: "Fields to Retrieve"} string... fields) 
                                               returns @tainted @display {label: "Result"} json|Error {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
-        if (fields.length() > 0) {
+        if fields.length() > 0 {
             path = path.concat(self.appendQueryParams(fields));
         }
         json response = check self->getRecord(path);
@@ -474,7 +474,7 @@ public isolated client class Client {
     isolated remote function getRecord(@display {label: "Resource Path"} string path) 
                                        returns @tainted @display {label: "Result"} json|Error {
         json|http:ClientError response = self.salesforceClient->get(path);
-        if (response is json) {
+        if response is json {
             return response;
         } else {
             return checkAndSetErrorDetail(response);
@@ -494,9 +494,9 @@ public isolated client class Client {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(recordPayload);
         json|http:ClientError response = self.salesforceClient->post(path, req);
-        if (response is json) {
+        if response is json {
             json|error resultId = response.id;
-            if (resultId is json) {
+            if resultId is json {
                 return resultId.toString();
             } else {
                 return error Error(resultId.message());
@@ -517,7 +517,7 @@ public isolated client class Client {
                                           returns @tainted @display {label: "Result"} Error? {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         http:Response|http:ClientError response = self.salesforceClient->delete(path);
-        if (response is http:ClientError) {
+        if response is http:ClientError {
             return checkAndSetErrorDetail(response);
         }
     }
@@ -537,7 +537,7 @@ public isolated client class Client {
         string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
         http:Response|http:ClientError response = self.salesforceClient->patch(path, req);
-        if (response is http:ClientError) {
+        if response is http:ClientError {
             return checkAndSetErrorDetail(response);
         }
     }
