@@ -37,7 +37,7 @@ jobs:
         
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action@2201.0.0
         with:
           args:
             pack ./salesforce
