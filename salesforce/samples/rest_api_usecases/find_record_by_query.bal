@@ -40,14 +40,14 @@ public function main(){
     if res is sfdc:SoqlResult {
         if res.totalSize > 0 {
             totalRecords = res.records.length() ;
-            string|error nextRecordsUrl = res["nextRecordsUrl"].toString();
-            while (nextRecordsUrl is string && nextRecordsUrl.trim() != "") {
+            string nextRecordsUrl = res["nextRecordsUrl"].toString();
+            while (nextRecordsUrl.trim() != "") {
                 log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
                 sfdc:SoqlResult|sfdc:Error nextRes = baseClient->getNextQueryResult(nextRecordsUrl);
                 
                 if nextRes is sfdc:SoqlResult {
+                    nextRecordsUrl = nextRes["nextRecordsUrl"].toString();
                     totalRecords = totalRecords + nextRes.records.length();
-                    res = nextRes;
                 } 
             }
             log:printInfo(totalRecords.toString() + " Records Recieved");
@@ -59,5 +59,4 @@ public function main(){
     } else {
         log:printError(msg = res.message());
     }
-
 }
