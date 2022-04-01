@@ -62,7 +62,7 @@ function createLead() {
 
 @test:Config {enable: true}
 function testconvertLead() {
-    ConvertedLead|error response = soapClient->convertLead(leadId);
+    ConvertedLead|error response = soapClient->convertLead(leadId, "Closed - Converted");
     if response is ConvertedLead {
         test:assertEquals(leadId, response.leadId, "Lead Not Converted");
         accountId = response.accountId;

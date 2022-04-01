@@ -19,26 +19,28 @@ import ballerina/lang.'boolean as booleanLib;
 import ballerina/regex;
 import ballerinax/salesforce as sfdc;
 
-isolated function buildXMLPayload(string sessionId, string leadId, boolean? opporinityNotRequired) returns string|error {
+isolated function buildXMLPayload(string sessionId, string leadId, string convertedStatus, string? accountId,
+string? contactId, boolean? opporinityNotRequired) returns string|error {
     string opportunity = opporinityNotRequired is boolean ? opporinityNotRequired.toString() : false.toString();
+    string accountIdVal = accountId is string ? string `<urn:accountId>${accountId.toString()}</urn:accountId>` : "";
+    string contactIdVal = contactId is string ? string `<urn:contactId>${contactId.toString()}</urn:contactId>` : "";
     string header = string `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
         xmlns:urn="urn:enterprise.soap.sforce.com"
         xmlns:urn1="urn:sobject.enterprise.soap.sforce.com">
         <soapenv:Header>
             <urn:SessionHeader>
-                <urn:sessionId>${
-    sessionId}</urn:sessionId>
+                <urn:sessionId>${sessionId}</urn:sessionId>
             </urn:SessionHeader>
         </soapenv:Header>
         <soapenv:Body>
             <urn:convertLead>
                 <urn:leadConverts>
-                    <urn:doNotCreateOpportunity>${
-    opportunity}</urn:doNotCreateOpportunity>
-                    <urn:convertedStatus>Closed - Converted</urn:convertedStatus>
-                        <urn:leadId>${
-    leadId}</urn:leadId>
-                    </urn:leadConverts>
+                    ${accountIdVal}
+                    ${contactIdVal}
+                    <urn:doNotCreateOpportunity>${opportunity}</urn:doNotCreateOpportunity>
+                    <urn:convertedStatus>${convertedStatus}</urn:convertedStatus>
+                        <urn:leadId>${leadId}</urn:leadId>
+                    </urn:leadConverts>u
                 </urn:convertLead>
             </soapenv:Body>
         </soapenv:Envelope>`;
@@ -83,12 +85,12 @@ isolated function createRecord(xml payload) returns ConvertedLead {
     return lead;
 }
 
-isolated function getSessionId(http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler, 
-                               string? contentType = ()) returns string|http:ClientAuthError {
+isolated function getSessionId(http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler,
+                                string? contentType = ()) returns string|http:ClientAuthError {
     map<string|string[]> authorizationHeaderMap;
     if clientHandler is http:ClientOAuth2Handler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
-    } else if clientHandler is http:ClientBearerTokenAuthHandler  {
+    } else if clientHandler is http:ClientBearerTokenAuthHandler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     } else {
         return error("Invalid authentication handler");
