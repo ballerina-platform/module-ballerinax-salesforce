@@ -341,7 +341,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "4.1.1"
+version = "4.2.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
