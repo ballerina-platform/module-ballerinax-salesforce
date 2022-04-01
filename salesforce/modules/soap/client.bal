@@ -83,15 +83,21 @@ public isolated client class Client {
     # Convert lead to to account and contact
     #
     # + leadId - Lead ID
+    # + convertedStatus - Expected converted status
+    # + accountId - Existing account id if you want to convert into existing account
+    # + contactId - Existing contact id if you want to convert into existing account
     # + opportunityNotRequired - By default an opportunity is also created in the conversion. Can be omited by providing
     # `True` value
     # + return - `ConvertedLead` or error
     isolated remote function convertLead(@display {label: "Lead ID"} string leadId,
+                                         @display {label: "Converted Status"} string convertedStatus,
+                                         @display {label: "Account ID"} string? accountId = (),
+                                         @display {label: "Contact ID"} string? contactId = (), 
                                          @display {label: "Not to Create Opportunity?"} 
                                          boolean? opportunityNotRequired = ()) 
                                          returns ConvertedLead|error {
         string sessionId = check getSessionId(self.clientHandler);
-        string payload = check buildXMLPayload(sessionId, leadId, opportunityNotRequired);
+        string payload = check buildXMLPayload(sessionId, leadId, convertedStatus, accountId, contactId, opportunityNotRequired);
         http:Request request = new;
         request.setHeader(SOAP_ACTION, ADD);
         request.setTextPayload(payload, contentType = TEXT_XML);
