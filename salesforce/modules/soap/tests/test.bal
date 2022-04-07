@@ -62,7 +62,7 @@ function createLead() {
 
 @test:Config {enable: true}
 function testconvertLead() {
-    ConvertedLead|error response = soapClient->convertLead(leadId, "Closed - Converted");
+    ConvertedLead|error response = soapClient->convertLead({leadId: leadId, convertedStatus: "Closed - Converted"});
     if response is ConvertedLead {
         test:assertEquals(leadId, response.leadId, "Lead Not Converted");
         accountId = response.accountId;
@@ -76,4 +76,6 @@ function testconvertLead() {
 @test:AfterSuite {}
 function testDeleteRecord() returns error? {
     check restClient->deleteAccount(accountId);
+    check restClient->deleteContact(contactId);
+    check restClient->deleteOpportunity(opportunityId);
 }

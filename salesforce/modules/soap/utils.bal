@@ -19,11 +19,52 @@ import ballerina/lang.'boolean as booleanLib;
 import ballerina/regex;
 import ballerinax/salesforce as sfdc;
 
-isolated function buildXMLPayload(string sessionId, string leadId, string convertedStatus, string? accountId,
-string? contactId, boolean? opporinityNotRequired) returns string|error {
-    string opportunity = opporinityNotRequired is boolean ? opporinityNotRequired.toString() : false.toString();
-    string accountIdVal = accountId is string ? string `<urn:accountId>${accountId.toString()}</urn:accountId>` : "";
-    string contactIdVal = contactId is string ? string `<urn:contactId>${contactId.toString()}</urn:contactId>` : "";
+isolated function buildXMLPayload(string sessionId, LeadConvert convert) returns string|error {
+    string newOpportunity = convert?.doNotCreateOpportunity.toString();
+
+    string accountRecordVal = EMPTY_STRING;
+    if convert?.accountRecord is AccountRecord {       
+        accountRecordVal = string `<urn:accountRecord><urn1:Id>${getValue(convert?.accountRecord?.id)}</urn1:Id>
+        ${getRecordValue(convert?.accountRecord)}</urn:accountRecord>`;
+    }
+
+    string accountDedupeCheck = convert?.bypassAccountDedupeCheck is boolean ?
+    string `<urn:bypassAccountDedupeCheck>${convert?.bypassAccountDedupeCheck.toString()}</urn:bypassAccountDedupeCheck>` 
+    : EMPTY_STRING;
+
+    string contactDedupeCheck = convert?.bypassContactDedupeCheck is boolean ?
+    string `<urn:bypassContactDedupeCheck>${convert?.bypassContactDedupeCheck.toString()}</urn:bypassContactDedupeCheck>` 
+    : EMPTY_STRING;
+
+    string contactRecordVal = EMPTY_STRING;
+    if convert?.contactRecord is ContactRecord {
+        contactRecordVal = string `<urn:contactRecord><urn1:Id>${getValue(convert?.contactRecord?.id)}</urn1:Id>
+        ${getRecordValue(convert?.contactRecord)}</urn:contactRecord>`;
+    }
+
+    string opportunityId = convert?.opportunityId is string ?
+    string `<urn:opportunityId>${convert?.opportunityId.toString()}</urn:opportunityId>` : EMPTY_STRING;
+    string opportunityName = convert?.opportunityName is string ?
+    string `<urn:opportunityName>${convert?.opportunityName.toString()}</urn:opportunityName>` : EMPTY_STRING;
+
+    string opportunityRecordVal = EMPTY_STRING;
+    if convert?.opportunityRecord is OpportunityRecord {
+        opportunityRecordVal =
+        string `<urn:opportunityRecord><urn1:Id>${getValue(convert?.opportunityRecord?.id)}</urn1:Id>
+        ${getRecordValue(convert?.opportunityRecord)}</urn:opportunityRecord>`;
+    }
+
+    string overwriteLeadSource = convert?.overwriteLeadSource is boolean ?
+    string `<urn:overwriteLeadSource>${convert?.overwriteLeadSource.toString()}</urn:overwriteLeadSource>` 
+    : EMPTY_STRING;
+
+    string ownerId = convert?.ownerId is string ? 
+    string `<urn:ownerId>${convert?.ownerId.toString()}</urn:ownerId>` : EMPTY_STRING;
+    
+    string notification = convert?.sendNotificationEmail is boolean ?
+    string `<urn:sendNotificationEmail>${convert?.sendNotificationEmail.toString()}</urn:sendNotificationEmail>` 
+    : EMPTY_STRING;
+
     string header = string `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" 
         xmlns:urn="urn:enterprise.soap.sforce.com"
         xmlns:urn1="urn:sobject.enterprise.soap.sforce.com">
@@ -35,16 +76,43 @@ string? contactId, boolean? opporinityNotRequired) returns string|error {
         <soapenv:Body>
             <urn:convertLead>
                 <urn:leadConverts>
-                    ${accountIdVal}
-                    ${contactIdVal}
-                    <urn:doNotCreateOpportunity>${opportunity}</urn:doNotCreateOpportunity>
-                    <urn:convertedStatus>${convertedStatus}</urn:convertedStatus>
-                        <urn:leadId>${leadId}</urn:leadId>
-                    </urn:leadConverts>u
-                </urn:convertLead>
-            </soapenv:Body>
-        </soapenv:Envelope>`;
+                    <urn:accountId>${getValue(convert?.accountId)}</urn:accountId>
+                    <urn:contactId>${getValue(convert?.contactId)}</urn:contactId>
+                    ${accountRecordVal}
+                    ${accountDedupeCheck}
+                    ${contactDedupeCheck}
+                    <urn:contactId>${getValue(convert?.contactId)}</urn:contactId>
+                    ${contactRecordVal}
+                    <urn:convertedStatus>${convert.convertedStatus}</urn:convertedStatus>
+                    <urn:doNotCreateOpportunity>${newOpportunity}</urn:doNotCreateOpportunity>
+                    <urn:leadId>${convert.leadId}</urn:leadId>
+                    ${opportunityId}
+                    ${opportunityName}
+                    ${opportunityRecordVal}
+                    ${ownerId}
+                    ${overwriteLeadSource}
+                    ${notification}
+                </urn:leadConverts>
+            </urn:convertLead>
+        </soapenv:Body>
+    </soapenv:Envelope>`;
     return header;
+}
+
+isolated function getValue(string? val) returns string {
+    string str = val is string ? val : EMPTY_STRING;
+    return str;
+}
+
+isolated function getRecordValue(AccountRecord?|ContactRecord?|OpportunityRecord? rec) returns string {
+    string[]? accountFields = rec?.fieldsToNull;
+    string fields = EMPTY_STRING;
+    if accountFields is string[] {
+        foreach string item in accountFields {
+            fields += string `<urn1:fieldsToNull>${item}</urn1:fieldsToNull>`;
+        }
+    }
+    return fields;
 }
 
 isolated function createResponse(http:Response response) returns ConvertedLead|error {
