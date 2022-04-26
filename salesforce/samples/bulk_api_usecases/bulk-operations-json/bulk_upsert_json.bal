@@ -30,15 +30,15 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:Client baseClient = checkpanic new (sfConfig);
-bulk:Client bulkClient = checkpanic new (sfConfig);
+sfdc:Client baseClient = check new (sfConfig);
+bulk:Client bulkClient = check new (sfConfig);
 
-public function main() {
+public function main() returns error? {
 
     string batchId = "";
 
-    string id1 = getContactIdByName("Avenra", "Stanis", "Software Engineer Level 1");
-    string id2 = getContactIdByName("Irma", "Martin", "Software Engineer Level 1");
+    string id1 = check getContactIdByName("Avenra", "Stanis", "Software Engineer Level 1");
+    string id2 = check getContactIdByName("Irma", "Martin", "Software Engineer Level 1");
 
     json contacts = [
         {
@@ -134,23 +134,21 @@ public function main() {
 
 }
 
-function getContactIdByName(string firstName, string lastName, string title) returns @tainted string {
+function getContactIdByName(string firstName, string lastName, string title) returns string|error {
     string contactId = "";
-    string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName
-        + "' AND Title='" + title + "'";
-    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
-
-    if res is sfdc:SoqlResult {
-        sfdc:SoqlRecord[]|error records = res.records;
-        if records is sfdc:SoqlRecord[] {
-            string id = records[0]["Id"].toString();
-            contactId = id;
-        } else {
-            log:printInfo("Getting contact ID by name failed. err=" + records.toString());
-        }
+    string sampleQuery = string `SELECT Id FROM Contact WHERE FirstName='${firstName}' AND LastName='${lastName}' 
+        AND Title='${title}' LIMIT 1`;
+    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    var result = queryResults.next();
+    if result is ResultValue {
+        contactId = check result.value.get("Id").ensureType();
     } else {
-        log:printInfo("Getting contact ID by name failed. err=" + res.toString());
+        log:printError(msg = "Getting Contact ID by name failed.");
     }
     return contactId;
 }
+
+type ResultValue record {|
+    record {} value;
+|};
 

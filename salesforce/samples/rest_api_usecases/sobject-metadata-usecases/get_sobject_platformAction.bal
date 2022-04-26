@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,7 +31,7 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = check new (sfConfig);
 
     sfdc:SObjectBasicInfo|sfdc:Error actionInfo = baseClient->sObjectPlatformAction();
 

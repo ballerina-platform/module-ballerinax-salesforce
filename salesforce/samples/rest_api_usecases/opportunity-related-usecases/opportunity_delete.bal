@@ -29,15 +29,15 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:Client baseClient = checkpanic new(sfConfig);
+sfdc:Client baseClient = check new (sfConfig);
 
-public function main(){
+public function main() returns error? {
 
-    string opportunityId = getOpportunityIdByName("Alan Kimberly", "New");
+    string opportunityId = check getOpportunityIdByName("Alan Kimberly", "New");
 
     sfdc:Error? res = baseClient->deleteOpportunity(opportunityId);
 
-    if res is sfdc:Error{
+    if res is sfdc:Error {
         log:printError(res.message());
     } else {
         log:printInfo("Opportunity deleted successfully");
@@ -45,21 +45,19 @@ public function main(){
 
 }
 
-function getOpportunityIdByName(string name, string stageName) returns @tainted string {
+function getOpportunityIdByName(string name, string stageName) returns string|error {
     string opportunityId = "";
     string sampleQuery = "SELECT Id FROM Opportunity WHERE Name='" + name + "' AND StageName='" + stageName + "'";
-    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
-
-    if res is sfdc:SoqlResult {
-        sfdc:SoqlRecord[]|error records = res.records;
-        if records is sfdc:SoqlRecord[] {
-            string id = records[0]["Id"].toString();
-            opportunityId = id;
-        } else {
-            log:printInfo("Getting Opportunity ID by name failed. err=" + records.toString());            
-        }
+    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    var result = queryResults.next();
+    if result is ResultValue {
+        opportunityId = check result.value.get("Id").ensureType();
     } else {
-        log:printInfo("Getting Opportunity ID by name failed. err=" + res.toString());
+        log:printError(msg = "Getting Opportunity ID by name failed.");
     }
     return opportunityId;
 }
+
+type ResultValue record {|
+    record {} value;
+|};

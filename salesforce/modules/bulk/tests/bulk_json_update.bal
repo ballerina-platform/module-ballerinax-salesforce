@@ -25,8 +25,9 @@ import ballerina/lang.runtime;
 function updateJson() returns error? {
     log:printInfo("baseClient -> updateJson");
     string batchId = "";
-    string mornsId = getContactIdByName("Remus", "Lupin", "Professor Level 03");
-    string andisId = getContactIdByName("Minerva", "McGonagall", "Professor Level 03");
+    string mornsId = check getContactIdByName("Remus", "Lupin", "Professor Level 03");
+    string andisId = check getContactIdByName("Minerva", "McGonagall", "Professor Level 03");
+
     json contacts = [{
         description: "Created_from_Ballerina_Sf_Bulk_API",
         Id: mornsId,

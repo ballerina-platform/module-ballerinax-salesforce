@@ -398,24 +398,14 @@ public isolated client class Client {
     # Executes the specified SOQL query.
     #
     # + receivedQuery - Sent SOQL query
-    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    # + return - `stream<record{}, error?>` if successful. Else, the occurred `error`.
     @display {label: "Get Query Result"}
     isolated remote function getQueryResult(@display {label: "SOQL Query"} string receivedQuery) 
-                                            returns @tainted @display {label: "SOQL Result"} SoqlResult|Error {
+                                            returns @display {label: "SOQL Result"} stream<record{}, error?>|error {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
-        json res = check self->getRecord(path);
-        return toSoqlResult(res);
-    }
-
-    # If the query results are too large, retrieve the next batch of results using the nextRecordUrl.
-    #
-    # + nextRecordsUrl - URL to get the next query results
-    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
-    @display {label: "Get Next Query Result"}
-    isolated remote function getNextQueryResult(@display {label: "Next Records URL"} string nextRecordsUrl) 
-                                                returns @tainted @display {label: "SOQL Result"} SoqlResult|Error {
-        json res = check self->getRecord(nextRecordsUrl);
-        return toSoqlResult(res);
+        SoqlQueryResultStream objectInstance = check new (self.salesforceClient, path);
+        stream<record{}, error?> finalStream = new (objectInstance);
+        return finalStream;
     }
 
     //Search
@@ -425,10 +415,11 @@ public isolated client class Client {
     # + return - `SoslResult` record if successful. Else, the occurred `Error`.
     @display {label: "SOSL Search"}
     isolated remote function searchSOSLString(@display {label: "SOSL Search Query"} string searchString) 
-                                              returns @tainted @display {label: "SOSL Result"} SoslResult|Error {
+                                              returns @display {label: "SOSL Result"} stream<record{}, error?>|error {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
-        json res = check self->getRecord(path);
-        return toSoslResult(res);
+        SoslSearchResultStream objectInstance = check new (self.salesforceClient, path);
+        stream<record{}, error?> finalStream = new (objectInstance);
+        return finalStream;
     }
 
     # Lists summary details about each REST API version available.

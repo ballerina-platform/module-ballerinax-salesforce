@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main() {
+public function main() returns error? {
 
     sfdc:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
@@ -30,7 +30,7 @@ public function main() {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = check new(sfConfig);
 
     json leadRecord = {
         FirstName: "Mark",

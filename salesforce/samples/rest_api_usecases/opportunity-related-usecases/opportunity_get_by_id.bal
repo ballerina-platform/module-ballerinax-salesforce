@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,14 +31,14 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = check new (sfConfig);
 
     string opportunityId = "0062w000008E6moAAC";
 
     json|sfdc:Error opportunity = baseClient->getOpportunityById(opportunityId, "Name", "CloseDate", "StageName");
 
     if opportunity is json {
-        json|error opportunityName = opportunity.Name; 
+        json|error opportunityName = opportunity.Name;
         if opportunityName is json {
             log:printInfo("Opportunity data retrieved successfully. Opportunity's Name : " + opportunityName.toString());
         }

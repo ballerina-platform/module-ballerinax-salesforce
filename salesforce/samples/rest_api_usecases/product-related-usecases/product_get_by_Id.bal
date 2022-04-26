@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -29,16 +29,16 @@ public function main(){
             refreshUrl: "<REFRESH_URL>"
         }
     };
-    
+
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = check new (sfConfig);
 
     string productId = "01t2w000008nOXcAAM";
 
     json|sfdc:Error product = baseClient->getProductById(productId, "Name");
 
     if product is json {
-        json|error productName = product.Name; 
+        json|error productName = product.Name;
         if productName is json {
             log:printInfo("Product data retrieved successfully. Product's Name : " + productName.toString());
         }

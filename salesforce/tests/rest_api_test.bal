@@ -115,45 +115,31 @@ function testDeleteRecord() {
 }
 function testGetQueryResult() returns error? {
     log:printInfo("baseClient -> getQueryResult()");
-    string sampleQuery = "SELECT name FROM Account";
-    SoqlResult res = check baseClient->getQueryResult(sampleQuery);
-    assertSoqlResult(res);
-    string nextRecordsUrl = res["nextRecordsUrl"].toString();
-
-    while (nextRecordsUrl.trim() != EMPTY_STRING) {
-        log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-        SoqlResult resp = check baseClient->getNextQueryResult(nextRecordsUrl);
-        assertSoqlResult(resp);
-        res = resp;
-    }
+    string sampleQuery = "SELECT Name,Industry FROM Account";
+    stream<record{}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
+    int count = check countStream(resultStream);
+    test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
 
 @test:Config {
     enable: true,
     dependsOn: [testUpdateRecord]
 }
-function testSearchSOSLString() {
+function testSearchSOSLString() returns error? {
     log:printInfo("baseClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
-    SoslResult|Error res = baseClient->searchSOSLString(searchString);
-
-    if res is SoslResult {
-        test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT,
-        msg = "Matched search record is not an Account type!");
-    } else {
-        test:assertFail(msg = res.message());
-    }
+    stream<record{}, error?> resultStream = check baseClient->searchSOSLString(searchString);
+    int count = check countStream(resultStream);
+    test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
 
-isolated function assertSoqlResult(SoqlResult|Error res) {
-    if res is SoqlResult {
-        test:assertTrue(res.totalSize > 0, "Total number result records is 0");
-        test:assertTrue(res.'done, "Query is not completed");
-        test:assertTrue(res.records.length() == res.totalSize, "Query result records not equal to totalSize");
-    } else {
-        test:assertFail(msg = res.message());
-    }
+isolated function countStream(stream<record{}, error?> resultStream) returns int|error{
+    int nLines = 0;
+    var _ = check from var _ in resultStream
+        do {
+            nLines += 1;
+        };
+    return nLines;
 }
 
 @test:Config {

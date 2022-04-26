@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,14 +31,14 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = check new (sfConfig);
 
     string contactId = "0032w00000QD5PcAAL";
 
     json|sfdc:Error contact = baseClient->getContactById(contactId, "FirstName", "LastName", "Title");
 
     if contact is json {
-        json|error contactName = contact.FirstName; 
+        json|error contactName = contact.FirstName;
         if contactName is json {
             log:printInfo("Contact data retrieved successfully. Cotact's Name : " + contactName.toString());
         }

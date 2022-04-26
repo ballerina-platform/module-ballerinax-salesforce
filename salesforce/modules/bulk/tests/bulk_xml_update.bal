@@ -25,8 +25,8 @@ import ballerina/lang.runtime;
 function updateXml() returns error? {
     log:printInfo("baseClient -> updateXml");
     string batchId = "";
-    string flitchID = getContactIdByName("Argus", "Filch", "Professor Level 01");
-    string poppyID = getContactIdByName("Poppy", "Pomfrey", "Professor Level 01");
+    string flitchID = check getContactIdByName("Argus", "Filch", "Professor Level 01");
+    string poppyID = check getContactIdByName("Poppy", "Pomfrey", "Professor Level 01");
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">
         <sObject>
             <description>Created_from_Ballerina_Sf_Bulk_API</description>

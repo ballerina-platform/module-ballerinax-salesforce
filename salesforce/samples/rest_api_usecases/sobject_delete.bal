@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,18 +31,8 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
-
+    sfdc:Client baseClient = check new (sfConfig);
     string accountId = "0015Y00002adsuhQAA";
-
-    boolean|sfdc:Error res = baseClient->deleteRecord("Account", accountId);
-
-    if res is boolean{
-        string outputMessage = (res == true) ? "Record Deleted Successfully!" : "Failed to Delete the Record";
-        log:printInfo(outputMessage);
-    }
-    else{
-        log:printError(res.message());
-    }
-
+    check baseClient->deleteRecord("Account", accountId);
+    log:printInfo("Record Deleted Successfully!");
 }

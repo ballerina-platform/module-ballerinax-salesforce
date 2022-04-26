@@ -29,15 +29,15 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:Client baseClient = checkpanic new(sfConfig);
+sfdc:Client baseClient = check new (sfConfig);
 
-public function main(){
+public function main() returns error? {
 
-    string productId = getProductIdByName("Test Product");
+    string productId = check getProductIdByName("Test Product");
 
     sfdc:Error? res = baseClient->deleteProduct(productId);
 
-    if res is sfdc:Error{
+    if res is sfdc:Error {
         log:printError(res.message());
     } else {
         log:printInfo("Product deleted successfully");
@@ -45,22 +45,20 @@ public function main(){
 
 }
 
-function getProductIdByName(string name) returns @tainted string {
+function getProductIdByName(string name) returns string|error {
     string productId = "";
     string sampleQuery = "SELECT Id FROM Product2 WHERE Name='" + name + "'";
-    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
-
-    if res is sfdc:SoqlResult {
-        sfdc:SoqlRecord[]|error records = res.records;
-        if records is sfdc:SoqlRecord[] {
-            string id = records[0]["Id"].toString();
-            productId = id;
-        } else {
-            log:printInfo("Getting Product ID by name failed. err=" + records.toString());            
-        }
+    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    var result = queryResults.next();
+    if result is ResultValue {
+        productId = check result.value.get("Id").ensureType();
     } else {
-        log:printInfo("Getting Product ID by name failed. err=" + res.toString());
+        log:printError(msg = "Getting Product ID by name failed.");
     }
     return productId;
 }
+
+type ResultValue record {|
+    record {} value;
+|};
 

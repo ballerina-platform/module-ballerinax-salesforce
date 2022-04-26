@@ -18,7 +18,7 @@ import ballerina/log;
 import ballerinax/salesforce as sfdc;
 import ballerinax/salesforce.bulk;
 
-public function main() {
+public function main() returns error? {
 
     string batchId = "";
 
@@ -34,7 +34,7 @@ public function main() {
     };
 
     // Create Salesforce client.
-    bulk:Client bulkClient = checkpanic new (sfConfig);
+    bulk:Client bulkClient = check new (sfConfig);
 
     json contacts = [
         {

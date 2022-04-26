@@ -19,7 +19,7 @@ import ballerinax/salesforce as sfdc;
 import ballerinax/salesforce.bulk;
 import ballerina/regex;
 
-public function main() {
+public function main() returns error? {
 
     string batchId = "";
 
@@ -35,7 +35,7 @@ public function main() {
     };
 
     // Create Salesforce client.
-    bulk:Client bulkClient = checkpanic new (sfConfig);
+    bulk:Client bulkClient = check new (sfConfig);
 
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" +
         "Created_from_Ballerina_Sf_Bulk_API,Tony,Stark,Software Engineer Level 02,0332236677,tonys@gmail.com,862\n" +
