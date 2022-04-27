@@ -19,13 +19,13 @@
 # + label - Label of the Salesforce version
 # + url - URL of the Salesforce version
 # + version - Salesforce version number
-@display{label: "Version"}
+@display {label: "Version"}
 public type Version record {|
-    @display{label: "Label"}
+    @display {label: "Label"}
     string label;
-    @display{label: "URL"}
+    @display {label: "URL"}
     string url;
-    @display{label: "Version"}
+    @display {label: "Version"}
     string 'version;
 |};
 
@@ -39,19 +39,18 @@ public type Limit record {|
     json...;
 |};
 
-
 # Metadata for your organization and available to the logged-in user.
 #
 # + encoding - Encoding
 # + maxBatchSize - Maximum batch size
 # + sobjects - Available SObjects
-@display{label: "Organizational meta data"}
+@display {label: "Organizational meta data"}
 public type OrgMetadata record {|
-    @display{label: "Encoding"}
+    @display {label: "Encoding"}
     string encoding;
-    @display{label: "Maximum batch size"}
+    @display {label: "Maximum batch size"}
     int maxBatchSize;
-    @display{label: "SObject meta data"}
+    @display {label: "SObject meta data"}
     SObjectMetaData[] sobjects;
     json...;
 |};
@@ -65,21 +64,21 @@ public type OrgMetadata record {|
 # + queryable - Is queryable
 # + label - SObject label
 # + urls - SObject URLs
-@display{label: "SObject meta data"}
+@display {label: "SObject meta data"}
 public type SObjectMetaData record {|
-    @display{label: "Name"}
+    @display {label: "Name"}
     string name;
-    @display{label: "Creatable"}
+    @display {label: "Creatable"}
     boolean createable;
-    @display{label: "Deletable"}
+    @display {label: "Deletable"}
     boolean deletable;
-    @display{label: "Updatable"}
+    @display {label: "Updatable"}
     boolean updateable;
-    @display{label: "Queryable"}
+    @display {label: "Queryable"}
     boolean queryable;
-    @display{label: "Label"}
+    @display {label: "Label"}
     string label;
-    @display{label: "URLs"}
+    @display {label: "URLs"}
     map<string> urls;
     json...;
 |};
@@ -87,9 +86,9 @@ public type SObjectMetaData record {|
 # Basic info of a SObject.
 #
 # + objectDescribe - Metadata related to the SObject
-@display{label: "SObject basic info"}
+@display {label: "SObject basic info"}
 public type SObjectBasicInfo record {|
-    @display{label: "SObject meta data"}
+    @display {label: "SObject meta data"}
     SObjectMetaData objectDescribe;
     json...;
 |};

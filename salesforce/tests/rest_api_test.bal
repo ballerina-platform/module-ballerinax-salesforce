@@ -116,9 +116,32 @@ function testDeleteRecord() {
 function testGetQueryResult() returns error? {
     log:printInfo("baseClient -> getQueryResult()");
     string sampleQuery = "SELECT Name,Industry FROM Account";
-    stream<record{}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
+    stream<record {}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
+}
+
+@test:Config {
+    enable: true
+}
+function testGetQueryResultWithLimit() returns error? {
+    log:printInfo("baseClient -> getQueryResult()");
+    string sampleQuery = "SELECT Name,Industry FROM Account LIMIT 3";
+    stream<record {}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
+    int count = check countStream(resultStream);
+    test:assertTrue(count > 0, msg = "Found 0 search records!");
+}
+
+@test:Config {
+    enable: false
+}
+function testGetQueryResultWithPagination() returns error? {
+    log:printInfo("baseClient -> getQueryResult()");
+    string sampleQuery = "SELECT Name FROM Contact";
+    stream<record {}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
+    int count = check countStream(resultStream);
+    log:printInfo("Number of records", count = count);
+    test:assertTrue(count > 2000, msg = "Found less than 2000 search records!");
 }
 
 @test:Config {
@@ -128,12 +151,12 @@ function testGetQueryResult() returns error? {
 function testSearchSOSLString() returns error? {
     log:printInfo("baseClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
-    stream<record{}, error?> resultStream = check baseClient->searchSOSLString(searchString);
+    stream<record {}, error?> resultStream = check baseClient->searchSOSLString(searchString);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
 
-isolated function countStream(stream<record{}, error?> resultStream) returns int|error{
+isolated function countStream(stream<record {}, error?> resultStream) returns int|error {
     int nLines = 0;
     var _ = check from var _ in resultStream
         do {

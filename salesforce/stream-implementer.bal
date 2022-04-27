@@ -17,22 +17,22 @@
 import ballerina/http;
 
 class SoqlQueryResultStream {
-    private record{}[] currentEntries = [];
+    private record {}[] currentEntries = [];
     private string nextRecordsUrl;
     int index = 0;
     private final http:Client httpClient;
     private final string path;
 
-    isolated function  init(http:Client httpClient, string path) returns @tainted error? {
+    isolated function init(http:Client httpClient, string path) returns error? {
         self.httpClient = httpClient;
         self.path = path;
         self.nextRecordsUrl = EMPTY_STRING;
         self.currentEntries = check self.fetchQueryResult();
     }
 
-    public isolated function next() returns @tainted record {| record{} value; |}|error? {
-        if(self.index < self.currentEntries.length()) {
-            record {| record{} value; |} singleRecord = {value: self.currentEntries[self.index]};
+    public isolated function next() returns record {|record {} value;|}|error? {
+        if (self.index < self.currentEntries.length()) {
+            record {|record {} value;|} singleRecord = {value: self.currentEntries[self.index]};
             self.index += 1;
             return singleRecord;
         }
@@ -40,73 +40,75 @@ class SoqlQueryResultStream {
         if (self.nextRecordsUrl.trim() != EMPTY_STRING) {
             self.index = 0;
             self.currentEntries = check self.fetchQueryResult();
-            record {| record{} value; |} singleRecord = {value: self.currentEntries[self.index]};
+            record {|record {} value;|} singleRecord = {value: self.currentEntries[self.index]};
             self.index += 1;
             return singleRecord;
         }
         return;
     }
 
-    isolated function fetchQueryResult() returns @tainted record{}[]|error {
-          SoqlQueryResult response;
-          if (self.nextRecordsUrl.trim() != EMPTY_STRING) {
-               response = check self.httpClient->get(self.nextRecordsUrl);
-          } else {
-               response = check self.httpClient->get(self.path);
-          }
-          self.nextRecordsUrl = response.hasKey("nextRecordsUrl") ? check response.get("nextRecordsUrl").ensureType() : EMPTY_STRING;
+    isolated function fetchQueryResult() returns record {}[]|error {
+        SoqlQueryResult response;
+        if (self.nextRecordsUrl.trim() != EMPTY_STRING) {
+            response = check self.httpClient->get(self.nextRecordsUrl);
+        } else {
+            response = check self.httpClient->get(self.path);
+        }
+        self.nextRecordsUrl = response.hasKey("nextRecordsUrl") ? check response.get("nextRecordsUrl").ensureType() :
+            EMPTY_STRING;
 
-          map<json>[] array = response.records;
-          return check covertToRecordsArray(array);
+        map<json>[] array = response.records;
+        return check covertToRecordsArray(array);
     }
 }
 
-isolated function covertToRecordsArray(map<json>[] queryResultArray) returns record{}[]|error {
-     record {}[] resultRecordArray = [];
-     foreach map<json> queryResult in queryResultArray {
-          _ = check queryResult.removeIfHasKey("attributes").ensureType();
-          resultRecordArray.push(check queryResult.cloneWithType(Record));
-     }
-     return resultRecordArray;
+isolated function covertToRecordsArray(map<json>[] queryResultArray) returns record {}[]|error {
+    record {}[] resultRecordArray = [];
+    foreach map<json> queryResult in queryResultArray {
+        _ = check queryResult.removeIfHasKey("attributes").ensureType();
+        resultRecordArray.push(check queryResult.cloneWithType(Record));
+    }
+    return resultRecordArray;
 }
 
 class SoslSearchResultStream {
-    private record{}[] currentEntries = [];
+    private record {}[] currentEntries = [];
     int index = 0;
     private final http:Client httpClient;
     private final string path;
 
-    isolated function  init(http:Client httpClient, string path) returns @tainted error? {
+    isolated function init(http:Client httpClient, string path) returns error? {
         self.httpClient = httpClient;
         self.path = path;
         self.currentEntries = check self.fetchSearchResult();
     }
 
-    public isolated function next() returns @tainted record {| record{} value; |}|error? {
-        if(self.index < self.currentEntries.length()) {
-            record {| record{} value; |} singleRecord = {value: self.currentEntries[self.index]};
+    public isolated function next() returns record {|record {} value;|}|error? {
+        if (self.index < self.currentEntries.length()) {
+            record {|record {} value;|} singleRecord = {value: self.currentEntries[self.index]};
             self.index += 1;
             return singleRecord;
         }
         return;
     }
 
-    isolated function fetchSearchResult() returns @tainted record{}[]|error {
-          SoslSearchResult response = check self.httpClient->get(self.path);
-          map<json>[] array = response.searchRecords;
-          return check covertSearchResultsToRecordsArray(array);
+    isolated function fetchSearchResult() returns record {}[]|error {
+        SoslSearchResult response = check self.httpClient->get(self.path);
+        map<json>[] array = response.searchRecords;
+        return check covertSearchResultsToRecordsArray(array);
     }
 }
 
-isolated function covertSearchResultsToRecordsArray(map<json>[] queryResultArray) returns record{}[]|error {
-     record {}[] resultRecordArray = [];
-     foreach map<json> queryResult in queryResultArray {
+isolated function covertSearchResultsToRecordsArray(map<json>[] queryResultArray) returns record {}[]|error {
+    record {}[] resultRecordArray = [];
+    foreach map<json> queryResult in queryResultArray {
         resultRecordArray.push(check queryResult.cloneWithType(Record));
-     }
-     return resultRecordArray;
+    }
+    return resultRecordArray;
 }
 
-type Record record{};
+type Record record {
+};
 
 # Define the SOQL result type.
 #

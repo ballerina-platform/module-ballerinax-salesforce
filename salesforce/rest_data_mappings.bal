@@ -73,18 +73,6 @@ isolated function toMapOfLimits(json payload) returns map<Limit>|Error {
     return limits;
 }
 
-// isolated function toSoslResult(json payload) returns SoslResult|Error {
-//     SoslResult|error res = payload.cloneWithType(SoslResult);
-
-//     if res is SoslResult {
-//         return res;
-//     } else {
-//         string errMsg = "Error occurred while constructing SoslResult record.";
-//         log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
-//         return error Error(errMsg, res);
-//     }
-// }
-
 isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error {
     SObjectMetaData|error res = payload.cloneWithType(SObjectMetaData);
 
