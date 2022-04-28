@@ -55,7 +55,7 @@ function getOpportunityIdByName(string name, string stageName) returns string|er
     string opportunityId = "";
     string sampleQuery = "SELECT Id FROM Opportunity WHERE Name='" + name + "' AND StageName='" + stageName + "'";
     stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
-    var result = queryResults.next();
+    ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         opportunityId = check result.value.get("Id").ensureType();
     } else {

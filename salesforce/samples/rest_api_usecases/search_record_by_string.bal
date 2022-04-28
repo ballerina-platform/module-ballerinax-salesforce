@@ -40,10 +40,9 @@ public function main() returns error? {
 
 isolated function countStream(stream<record{}, error?> resultStream) returns int|error{
     int nLines = 0;
-    var _ = check from var i in resultStream
+    check from record{} _ in resultStream
         do {
             nLines += 1;
-            log:printInfo(i.toString());
         };
     return nLines;
 }

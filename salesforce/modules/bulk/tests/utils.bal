@@ -75,7 +75,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string sampleQuery = 
     string `SELECT Id FROM Contact WHERE FirstName='${firstName}' AND LastName='${lastName}' AND Title='${title}'`;
     stream<record{}, error?> queryResults = check restClient->getQueryResult(sampleQuery);
-    var result = queryResults.next();
+    ResultValue|error? result = queryResults.next();
     if (result is ResultValue) {
         contactId = check result.value.get("Id").ensureType();
     } else {

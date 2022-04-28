@@ -57,7 +57,7 @@ function getLeadIdByName(string firstName, string lastName, string compnay) retu
     string sampleQuery = "SELECT Id FROM Lead WHERE FirstName='" + firstName + "' AND LastName='" + lastName
         + "' AND Company='" + compnay + "'";
     stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
-    var result = queryResults.next();
+    ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         leadId = check result.value.get("Id").ensureType();
     } else {

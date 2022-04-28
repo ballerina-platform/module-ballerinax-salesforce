@@ -49,7 +49,7 @@ function getContactIdByName(string firstName, string lastName) returns string|er
     string contactId = "";
     string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName + "'";
     stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
-    var result = queryResults.next();
+    ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         contactId = check result.value.get("Id").ensureType();
     } else {

@@ -141,7 +141,7 @@ function testGetQueryResultWithPagination() returns error? {
     stream<record {}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
     int count = check countStream(resultStream);
     log:printInfo("Number of records", count = count);
-    test:assertTrue(count > 2000, msg = "Found less than 2000 search records!");
+    test:assertTrue(count > 2000, msg = "Found less than or exactly 2000 search records!");
 }
 
 @test:Config {
@@ -158,7 +158,7 @@ function testSearchSOSLString() returns error? {
 
 isolated function countStream(stream<record {}, error?> resultStream) returns int|error {
     int nLines = 0;
-    var _ = check from var _ in resultStream
+    check from record{} _ in resultStream
         do {
             nLines += 1;
         };

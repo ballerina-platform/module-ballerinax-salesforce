@@ -46,7 +46,7 @@ function getAccountIdByName(string name) returns string|error {
     string contactId = "";
     string sampleQuery = string `SELECT Id FROM Account WHERE Name='${name}'`;
     stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
-    var result = queryResults.next();
+    ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         contactId = check result.value.get("Id").ensureType();
     } else {

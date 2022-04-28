@@ -16,7 +16,7 @@
 
 import ballerina/http;
 
-class SoqlQueryResultStream {
+class SOQLQueryResultStream {
     private record {}[] currentEntries = [];
     private string nextRecordsUrl;
     int index = 0;
@@ -54,7 +54,7 @@ class SoqlQueryResultStream {
         } else {
             response = check self.httpClient->get(self.path);
         }
-        self.nextRecordsUrl = response.hasKey("nextRecordsUrl") ? check response.get("nextRecordsUrl").ensureType() :
+        self.nextRecordsUrl = response.hasKey(NEXT_RECORDS_URL) ? check response.get(NEXT_RECORDS_URL).ensureType() :
             EMPTY_STRING;
 
         map<json>[] array = response.records;
@@ -65,13 +65,13 @@ class SoqlQueryResultStream {
 isolated function covertToRecordsArray(map<json>[] queryResultArray) returns record {}[]|error {
     record {}[] resultRecordArray = [];
     foreach map<json> queryResult in queryResultArray {
-        _ = check queryResult.removeIfHasKey("attributes").ensureType();
+        _ = check queryResult.removeIfHasKey(ATTRIBUTES).ensureType();
         resultRecordArray.push(check queryResult.cloneWithType(Record));
     }
     return resultRecordArray;
 }
 
-class SoslSearchResultStream {
+class SOSLSearchResult {
     private record {}[] currentEntries = [];
     int index = 0;
     private final http:Client httpClient;
@@ -107,8 +107,7 @@ isolated function covertSearchResultsToRecordsArray(map<json>[] queryResultArray
     return resultRecordArray;
 }
 
-type Record record {
-};
+type Record record {};
 
 # Define the SOQL result type.
 #

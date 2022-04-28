@@ -128,3 +128,5 @@ const string FORWARD_SLASH = "/";
 
 # Next records URl
 const NEXT_RECORDS_URL = "nextRecordsUrl";
+
+const ATTRIBUTES = "attributes";

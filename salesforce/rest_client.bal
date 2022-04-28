@@ -403,7 +403,7 @@ public isolated client class Client {
     isolated remote function getQueryResult(@display {label: "SOQL Query"} string receivedQuery) 
                                             returns @display {label: "SOQL Result"} stream<record{}, error?>|error {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
-        SoqlQueryResultStream objectInstance = check new (self.salesforceClient, path);
+        SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
         stream<record{}, error?> finalStream = new (objectInstance);
         return finalStream;
     }
@@ -417,7 +417,7 @@ public isolated client class Client {
     isolated remote function searchSOSLString(@display {label: "SOSL Search Query"} string searchString) 
                                               returns @display {label: "SOSL Result"} stream<record{}, error?>|error {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
-        SoslSearchResultStream objectInstance = check new (self.salesforceClient, path);
+        SOSLSearchResult objectInstance = check new (self.salesforceClient, path);
         stream<record{}, error?> finalStream = new (objectInstance);
         return finalStream;
     }

@@ -53,7 +53,7 @@ function getProductIdByName(string name) returns string|error {
     string productId = "";
     string sampleQuery = "SELECT Id FROM Product2 WHERE Name='" + name + "'";
     stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
-    var result = queryResults.next();
+    ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         productId = check result.value.get("Id").ensureType();
     } else {
