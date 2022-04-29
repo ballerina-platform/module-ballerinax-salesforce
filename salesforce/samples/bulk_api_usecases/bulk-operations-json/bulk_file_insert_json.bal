@@ -19,7 +19,7 @@ import ballerinax/salesforce as sfdc;
 import ballerinax/salesforce.bulk;
 import ballerina/io;
 
-public function main() {
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -33,7 +33,7 @@ public function main() {
     };
 
     // Create Salesforce client.
-    bulk:Client bulkClient = checkpanic new (sfConfig);
+    bulk:Client bulkClient = check new (sfConfig);
 
     string batchId = "";
     string jsonContactsFilePath = "resources/contacts.json";

@@ -25,8 +25,8 @@ import ballerina/lang.runtime;
 function updateCsv() returns error? {
     log:printInfo("baseClient -> updateCsv");
     string batchId = "";
-    string binnsID = getContactIdByName("Cuthbert", "Binns", "Professor Level 02");
-    string shanesID = getContactIdByName("Burbage", "Shane", "Professor Level 02");
+    string binnsID = check getContactIdByName("Cuthbert", "Binns", "Professor Level 02");
+    string shanesID = check getContactIdByName("Burbage", "Shane", "Professor Level 02");
     string contacts = "Id,description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" + binnsID 
         + ",Created_from_Ballerina_Sf_Bulk_API,Cuthbert,Binns,Professor Level 02,0222236677,bins98@gmail.com,845\n" 
         + shanesID + ",Created_from_Ballerina_Sf_Bulk_API,Burbage,Shane,Professor Level 02,0332211788,shane78@gmail.com,846";

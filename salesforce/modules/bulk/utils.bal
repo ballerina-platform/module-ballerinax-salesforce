@@ -30,7 +30,7 @@ isolated string csvContent = EMPTY_STRING;
 #
 # + httpResponse - HTTP response or error occurred
 # + return - XML response if successful else Error occured
-isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) returns @tainted xml|error {
+isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) returns xml|error {
     if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
     statusCode == http:STATUS_NO_CONTENT {
         return check httpResponse.getXmlPayload();
@@ -43,7 +43,7 @@ isolated function checkXmlPayloadAndSetErrors(http:Response httpResponse) return
 #
 # + httpResponse - HTTP response or error occurred
 # + return - Text response if successful else Error occured
-isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) returns @tainted string|error {
+isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) returns string|error {
     if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
     statusCode == http:STATUS_NO_CONTENT {
         return check httpResponse.getTextPayload();
@@ -56,7 +56,7 @@ isolated function checkTextPayloadAndSetErrors(http:Response httpResponse) retur
 #
 # + httpResponse - HTTP response or error occurred
 # + return - JSON response if successful else Error occured
-isolated function checkJsonPayloadAndSetErrors(http:Response httpResponse) returns @tainted json|error {
+isolated function checkJsonPayloadAndSetErrors(http:Response httpResponse) returns json|error {
     if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
     statusCode == http:STATUS_NO_CONTENT {
         return check httpResponse.getJsonPayload();
@@ -70,7 +70,7 @@ isolated function checkJsonPayloadAndSetErrors(http:Response httpResponse) retur
 # + httpResponse - HTTP response or error occurred  
 # + jobtype - Job type
 # + return - Query string response if successful or else an sfdc:Error
-isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) returns @tainted string|error {
+isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) returns string|error {
     if httpResponse.statusCode == http:STATUS_OK {
         return check httpResponse.getTextPayload();
     } else {
@@ -86,7 +86,7 @@ isolated function getQueryRequest(http:Response httpResponse, JobType jobtype) r
 #
 # + httpResponse - error response
 # + return - error
-isolated function handleXmlErrorResponse(http:Response httpResponse) returns @tainted error {
+isolated function handleXmlErrorResponse(http:Response httpResponse) returns error {
     xml|error xmlResponse = httpResponse.getXmlPayload();
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
     if xmlResponse is xml {
@@ -101,7 +101,7 @@ isolated function handleXmlErrorResponse(http:Response httpResponse) returns @ta
 #
 # + httpResponse - error response
 # + return - error
-isolated function handleJsonErrorResponse(http:Response httpResponse) returns @tainted error {
+isolated function handleJsonErrorResponse(http:Response httpResponse) returns error {
     json|error response = httpResponse.getJsonPayload();
     if response is json {
         json|error resExceptionCode = response.exceptionCode;
@@ -163,7 +163,7 @@ isolated function getBooleanValue(string value) returns boolean {
 #
 # + rbc - ReadableByteChannel
 # + return - converted string
-isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted string|error {
+isolated function convertToString(io:ReadableByteChannel rbc) returns string|error {
     byte[] readContent;
     string textContent = EMPTY_STRING;
     while (true) {
@@ -193,7 +193,7 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns @tainted s
 #
 # + rbc - ReadableByteChannel
 # + return - converted json
-isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted json|error {
+isolated function convertToJson(io:ReadableByteChannel rbc) returns json|error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
     if rch is io:Error {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
@@ -216,7 +216,7 @@ isolated function convertToJson(io:ReadableByteChannel rbc) returns @tainted jso
 #
 # + rbc - ReadableByteChannel
 # + return - converted xml
-isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|error {
+isolated function convertToXml(io:ReadableByteChannel rbc) returns xml|error {
     io:ReadableCharacterChannel|io:Error rch = new (rbc, ENCODING_CHARSET);
     if rch is io:Error {
         string errMsg = "Error occurred while converting ReadableByteChannel to ReadableCharacterChannel.";
@@ -239,7 +239,7 @@ isolated function convertToXml(io:ReadableByteChannel rbc) returns @tainted xml|
 #
 # + stringCsvInput - Multi dimentional array of strings or a stream of strings
 # + return - converted string
-isolated function convertStringListToString(string[][]|stream<string[], error?> stringCsvInput) returns @tainted string|error {
+isolated function convertStringListToString(string[][]|stream<string[], error?> stringCsvInput) returns string|error {
     lock {
         csvContent = EMPTY_STRING;
     }
@@ -267,7 +267,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
 }
 
 isolated function getJsonQueryResult(json resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
-                                     http:ClientBearerTokenAuthHandler clientHandler) returns @tainted json|error {
+                                     http:ClientBearerTokenAuthHandler clientHandler) returns json|error {
     json[] finalResults = [];
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if headerMap is map<string|string[]> {
@@ -291,7 +291,7 @@ isolated function getJsonQueryResult(json resultlist, string path, http:Client h
 }
 
 isolated function getXmlQueryResult(xml resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
-                                    http:ClientBearerTokenAuthHandler clientHandler) returns @tainted xml|error {
+                                    http:ClientBearerTokenAuthHandler clientHandler) returns xml|error {
     xml finalResults = xml `<queryResult xmlns="http://www.force.com/2009/06/asyncapi/dataload"/>`;
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if headerMap is map<string|string[]> {
@@ -308,7 +308,7 @@ isolated function getXmlQueryResult(xml resultlist, string path, http:Client htt
 }
 
 isolated function getCsvQueryResult(xml resultlist, string path, http:Client httpClient, http:ClientOAuth2Handler|
-                                    http:ClientBearerTokenAuthHandler clientHandler) returns @tainted string|error {
+                                    http:ClientBearerTokenAuthHandler clientHandler) returns string|error {
     string finalResults = EMPTY_STRING;
     http:ClientAuthError|map<string> headerMap = getBulkApiHeaders(clientHandler);
     if headerMap is map<string|string[]> {

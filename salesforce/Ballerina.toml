@@ -1,8 +1,8 @@
 [package]
-distribution = "2201.0.0"
+distribution = "2201.0.2"
 org = "ballerinax"
 name = "salesforce"
-version = "4.2.0"
+version = "5.0.0"
 export = ["salesforce", "salesforce.bulk", "salesforce.soap"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
@@ -14,8 +14,8 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
 observabilityIncluded = true
 
 [[platform.java11.dependency]]
-path = "../emp-wrapper/build/libs/emp-wrapper-4.2.0-all.jar"
+path = "../emp-wrapper/build/libs/emp-wrapper-5.0.0-all.jar"
 groupId = "org.ballerinalang.sf"
 artifactId = "emp-wrapper"
 module = "emp-wrapper" 
-version = "4.2.0"
+version = "5.0.0"

@@ -19,13 +19,13 @@
 # + label - Label of the Salesforce version
 # + url - URL of the Salesforce version
 # + version - Salesforce version number
-@display{label: "Version"}
+@display {label: "Version"}
 public type Version record {|
-    @display{label: "Label"}
+    @display {label: "Label"}
     string label;
-    @display{label: "URL"}
+    @display {label: "URL"}
     string url;
-    @display{label: "Version"}
+    @display {label: "Version"}
     string 'version;
 |};
 
@@ -39,80 +39,18 @@ public type Limit record {|
     json...;
 |};
 
-# Define the SOQL result type.
-#
-# + done - Query is completed or not
-# + totalSize - The total number result records
-# + records - Result records
-@display{label: "SOQL Result"}
-public type SoqlResult record {|
-    @display{label: "Completed"}
-    boolean done;
-    @display{label: "No of result records"}
-    int totalSize;
-    @display{label: "Records retreived"}
-    SoqlRecord[] records;
-    json...;
-|};
-
-# Defines the SOQL query result record type. 
-#
-# + attributes - Attribute record
-@display{label: "SOQL record"}
-public type SoqlRecord record {|
-    @display{label: "Attributes"}
-    Attribute attributes;
-    json...;
-|};
-
-# Defines SOSL query result.
-#
-# + searchRecords - Matching records for the given search string
-@display{label: "SOSL Result"}
-public type SoslResult record {|
-    @display{label: "Records retrieved"}
-    SoslRecord[] searchRecords;
-    json...;
-|};
-
-# Defines SOSL query result.
-#
-# + attributes - Attribute record
-# + Id - ID of the matching object
-@display{label: "SOSL record"}
-public type SoslRecord record {|
-    @display{label: "Attributes"}
-    Attribute attributes;
-    @display{label: "Id"}
-    string Id;
-    json...;
-|};
-
-# Defines the Attribute type.
-# Contains the attribute information of the resultant record.
-#
-# + type - Type of the resultant record
-# + url - URL of the resultant record
-@display{label: "Attribute"}
-public type Attribute record {|
-    @display{label: "Type"}
-    string 'type;
-    @display{label: "URL"}
-    string url;
-|};
-
 # Metadata for your organization and available to the logged-in user.
 #
 # + encoding - Encoding
 # + maxBatchSize - Maximum batch size
 # + sobjects - Available SObjects
-@display{label: "Organizational meta data"}
+@display {label: "Organizational meta data"}
 public type OrgMetadata record {|
-    @display{label: "Encoding"}
+    @display {label: "Encoding"}
     string encoding;
-    @display{label: "Maximum batch size"}
+    @display {label: "Maximum batch size"}
     int maxBatchSize;
-    @display{label: "SObject meta data"}
+    @display {label: "SObject meta data"}
     SObjectMetaData[] sobjects;
     json...;
 |};
@@ -126,21 +64,21 @@ public type OrgMetadata record {|
 # + queryable - Is queryable
 # + label - SObject label
 # + urls - SObject URLs
-@display{label: "SObject meta data"}
+@display {label: "SObject meta data"}
 public type SObjectMetaData record {|
-    @display{label: "Name"}
+    @display {label: "Name"}
     string name;
-    @display{label: "Creatable"}
+    @display {label: "Creatable"}
     boolean createable;
-    @display{label: "Deletable"}
+    @display {label: "Deletable"}
     boolean deletable;
-    @display{label: "Updatable"}
+    @display {label: "Updatable"}
     boolean updateable;
-    @display{label: "Queryable"}
+    @display {label: "Queryable"}
     boolean queryable;
-    @display{label: "Label"}
+    @display {label: "Label"}
     string label;
-    @display{label: "URLs"}
+    @display {label: "URLs"}
     map<string> urls;
     json...;
 |};
@@ -148,9 +86,9 @@ public type SObjectMetaData record {|
 # Basic info of a SObject.
 #
 # + objectDescribe - Metadata related to the SObject
-@display{label: "SObject basic info"}
+@display {label: "SObject basic info"}
 public type SObjectBasicInfo record {|
-    @display{label: "SObject meta data"}
+    @display {label: "SObject meta data"}
     SObjectMetaData objectDescribe;
     json...;
 |};

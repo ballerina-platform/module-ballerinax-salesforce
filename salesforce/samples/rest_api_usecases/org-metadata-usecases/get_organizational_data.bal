@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,11 +31,11 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = check new (sfConfig);
 
     sfdc:Version[]|sfdc:Error apiVersions = baseClient->getAvailableApiVersions();
 
-    if apiVersions is sfdc:Version[]) {
+    if apiVersions is sfdc:Version[] {
         log:printInfo("Versions retrieved successfully : " + apiVersions.toString());
     } else {
         log:printError(msg = apiVersions.message());

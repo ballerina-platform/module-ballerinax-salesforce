@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,7 +31,7 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
+    sfdc:Client baseClient = check new (sfConfig);
 
     string accountId = "0015Y00002adeBWQAY";
 
@@ -40,15 +40,6 @@ public function main(){
         BillingCity: "Kelaniya",
         Phone: "+94110000000"
     };
-
-    boolean|sfdc:Error res = baseClient->updateRecord("Account", accountId, accountRecord);
-
-    if res is boolean{
-        string outputMessage = (res == true) ? "Record Updated Successfully!" : "Failed to Update the Record";
-        log:printInfo(outputMessage);
-    }
-    else{
-        log:printError(res.message());
-    }
-
+    check baseClient->updateRecord("Account", accountId, accountRecord);
+    log:printInfo("Record Updated Successfully!");
 }

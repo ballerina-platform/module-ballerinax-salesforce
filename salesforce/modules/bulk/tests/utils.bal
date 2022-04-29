@@ -66,22 +66,20 @@ isolated function checkCsvResult(string result) returns int {
     return arrLength - 1;
 }
 
-function getContactIdByName(string firstName, string lastName, string title) returns @tainted string {
+type ResultValue record {|
+    record{} value;
+|};
+
+function getContactIdByName(string firstName, string lastName, string title) returns string|error {
     string contactId = "";
     string sampleQuery = 
-    "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName + "' AND Title='" + title + "'";
-    sfdc:SoqlResult|sfdc:Error res = restClient->getQueryResult(sampleQuery);
-
-    if res is sfdc:SoqlResult {
-        sfdc:SoqlRecord[]|error records = res.records;
-        if records is sfdc:SoqlRecord[] {
-            string id = records[0]["Id"].toString();
-            contactId = id;
-        } else {
-            test:assertFail(msg = "Getting contact ID by name failed. err=" + records.toString());
-        }
+    string `SELECT Id FROM Contact WHERE FirstName='${firstName}' AND LastName='${lastName}' AND Title='${title}'`;
+    stream<record{}, error?> queryResults = check restClient->getQueryResult(sampleQuery);
+    ResultValue|error? result = queryResults.next();
+    if (result is ResultValue) {
+        contactId = check result.value.get("Id").ensureType();
     } else {
-        test:assertFail(msg = "Getting contact ID by name failed. err=" + res.toString());
+        test:assertFail(msg = "Getting contact ID by name failed.");
     }
     return contactId;
 }

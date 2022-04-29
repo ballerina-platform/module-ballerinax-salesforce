@@ -29,40 +29,37 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:Client baseClient = checkpanic new(sfConfig);
+sfdc:Client baseClient = check new (sfConfig);
 
-public function main(){
+public function main() returns error? {
 
-    string accountId = getAccountIdByName("University of Colombo");
+    string accountId = check getAccountIdByName("University of Colombo");
 
     json accountRecord = {
         Name: "University of Colombo",
         BillingCity: "Colombo 3"
     };
 
-    sfdc:Error? res = baseClient->updateAccount(accountId,accountRecord);
+    sfdc:Error? res = baseClient->updateAccount(accountId, accountRecord);
 
-    if res is sfdc:Error{
+    if res is sfdc:Error {
         log:printError(res.message());
     }
 }
 
-function getAccountIdByName(string name) returns @tainted string {
+function getAccountIdByName(string name) returns string|error {
     string contactId = "";
     string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
-    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
-
-    if res is sfdc:SoqlResult {
-        sfdc:SoqlRecord[]|error records = res.records;
-        if records is sfdc:SoqlRecord[] {
-            log:printInfo(records.toString());
-            string id = records[0]["Id"].toString();
-            contactId = id;
-        } else {
-            log:printInfo("Getting contact ID by name failed. err=" + records.toString());            
-        }
+    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    ResultValue|error? result = queryResults.next();
+    if result is ResultValue {
+        contactId = check result.value.get("Id").ensureType();
     } else {
-        log:printInfo("Getting contact ID by name failed. err=" + res.toString());
+        log:printError(msg = "Getting Account ID by name failed.");
     }
     return contactId;
 }
+
+type ResultValue record {|
+    record {} value;
+|};

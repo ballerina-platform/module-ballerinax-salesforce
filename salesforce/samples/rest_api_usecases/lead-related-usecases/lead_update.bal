@@ -29,11 +29,11 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:Client baseClient = checkpanic new(sfConfig);
+sfdc:Client baseClient = check new (sfConfig);
 
-public function main(){
+public function main() returns error? {
 
-    string leadId = getLeadIdByName("Mark", "Wahlberg", "IT World");
+    string leadId = check getLeadIdByName("Mark", "Wahlberg", "IT World");
 
     json leadRecord = {
         FirstName: "Mark",
@@ -42,9 +42,9 @@ public function main(){
         Company: "IT World"
     };
 
-    sfdc:Error? res = baseClient->updateLead(leadId,leadRecord);
+    sfdc:Error? res = baseClient->updateLead(leadId, leadRecord);
 
-    if res is sfdc:Error{
+    if res is sfdc:Error {
         log:printError(res.message());
     } else {
         log:printInfo("Lead updated successfully");
@@ -52,22 +52,20 @@ public function main(){
 
 }
 
-function getLeadIdByName(string firstName, string lastName, string compnay) returns @tainted string {
+function getLeadIdByName(string firstName, string lastName, string compnay) returns string|error {
     string leadId = "";
-    string sampleQuery = "SELECT Id FROM Lead WHERE FirstName='" + firstName + "' AND LastName='" + lastName 
+    string sampleQuery = "SELECT Id FROM Lead WHERE FirstName='" + firstName + "' AND LastName='" + lastName
         + "' AND Company='" + compnay + "'";
-    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
-
-    if res is sfdc:SoqlResult {
-        sfdc:SoqlRecord[]|error records = res.records;
-        if records is sfdc:SoqlRecord[] {
-            string id = records[0]["Id"].toString();
-            leadId = id;
-        } else {
-            log:printInfo("Getting Lead ID by name failed. err=" + records.toString());            
-        }
+    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    ResultValue|error? result = queryResults.next();
+    if result is ResultValue {
+        leadId = check result.value.get("Id").ensureType();
     } else {
-        log:printInfo("Getting Lead ID by name failed. err=" + res.toString());
+        log:printError(msg = "Getting Lead ID by name failed.");
     }
     return leadId;
 }
+
+type ResultValue record {|
+    record {} value;
+|};

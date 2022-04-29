@@ -125,3 +125,8 @@ const string AMPERSAND = "&";
 
 # Constant field `FORWARD_SLASH`. Holds the value of "/".
 const string FORWARD_SLASH = "/";
+
+# Next records URl
+const NEXT_RECORDS_URL = "nextRecordsUrl";
+
+const ATTRIBUTES = "attributes";

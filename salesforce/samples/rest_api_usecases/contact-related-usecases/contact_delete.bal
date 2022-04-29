@@ -29,15 +29,15 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:Client baseClient = checkpanic new(sfConfig);
+sfdc:Client baseClient = check new (sfConfig);
 
-public function main(){
+public function main() returns error? {
 
-    string contactId = getContactIdByName("Peter", "Potts");
+    string contactId = check getContactIdByName("Peter", "Potts");
 
     sfdc:Error? res = baseClient->deleteContact(contactId);
 
-    if res is sfdc:Error{
+    if res is sfdc:Error {
         log:printError(res.message());
     } else {
         log:printInfo("Contact deleted successfully");
@@ -45,21 +45,19 @@ public function main(){
 
 }
 
-function getContactIdByName(string firstName, string lastName) returns @tainted string {
+function getContactIdByName(string firstName, string lastName) returns string|error {
     string contactId = "";
     string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName + "'";
-    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
-
-    if res is sfdc:SoqlResult {
-        sfdc:SoqlRecord[]|error records = res.records;
-        if records is sfdc:SoqlRecord[] {
-            string id = records[0]["Id"].toString();
-            contactId = id;
-        } else {
-            log:printInfo("Getting contact ID by name failed. err=" + records.toString());            
-        }
+    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    ResultValue|error? result = queryResults.next();
+    if result is ResultValue {
+        contactId = check result.value.get("Id").ensureType();
     } else {
-        log:printInfo("Getting contact ID by name failed. err=" + res.toString());
+        log:printError(msg = "Getting Contact ID by name failed.");
     }
     return contactId;
 }
+
+type ResultValue record {|
+    record {} value;
+|};
