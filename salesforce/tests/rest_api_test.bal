@@ -113,10 +113,10 @@ function testDeleteRecord() {
 @test:Config {
     enable: true
 }
-function testGetQueryResult() returns error? {
-    log:printInfo("baseClient -> getQueryResult()");
+function testGetQueryResultStream() returns error? {
+    log:printInfo("baseClient -> getQueryResultStream()");
     string sampleQuery = "SELECT Name,Industry FROM Account";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
+    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
@@ -125,9 +125,9 @@ function testGetQueryResult() returns error? {
     enable: true
 }
 function testGetQueryResultWithLimit() returns error? {
-    log:printInfo("baseClient -> getQueryResult()");
+    log:printInfo("baseClient -> getQueryResultWithLimit()");
     string sampleQuery = "SELECT Name,Industry FROM Account LIMIT 3";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
+    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
@@ -136,9 +136,9 @@ function testGetQueryResultWithLimit() returns error? {
     enable: false
 }
 function testGetQueryResultWithPagination() returns error? {
-    log:printInfo("baseClient -> getQueryResult()");
+    log:printInfo("baseClient -> getQueryResultWithPagination()");
     string sampleQuery = "SELECT Name FROM Contact";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResult(sampleQuery);
+    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
     int count = check countStream(resultStream);
     log:printInfo("Number of records", count = count);
     test:assertTrue(count > 2000, msg = "Found less than or exactly 2000 search records!");
@@ -148,10 +148,10 @@ function testGetQueryResultWithPagination() returns error? {
     enable: true,
     dependsOn: [testUpdateRecord]
 }
-function testSearchSOSLString() returns error? {
-    log:printInfo("baseClient -> searchSOSLString()");
+function testSearchSOSLStringStream() returns error? {
+    log:printInfo("baseClient -> searchSOSLStringStream()");
     string searchString = "FIND {WSO2 Inc}";
-    stream<record {}, error?> resultStream = check baseClient->searchSOSLString(searchString);
+    stream<record {}, error?> resultStream = check baseClient->searchSOSLStringStream(searchString);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
@@ -239,5 +239,51 @@ function testdescribeSobject() {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
     } else {
         test:assertFail(msg = description.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
+function testGetQueryResult() returns error? {
+    log:printInfo("baseClient -> getQueryResult()");
+    string sampleQuery = "SELECT name FROM Account";
+    SoqlResult res = check baseClient->getQueryResult(sampleQuery);
+    assertSoqlResult(res);
+    string nextRecordsUrl = res["nextRecordsUrl"].toString();
+
+    while (nextRecordsUrl.trim() != EMPTY_STRING) {
+        log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
+        SoqlResult resp = check baseClient->getNextQueryResult(nextRecordsUrl);
+        assertSoqlResult(resp);
+        res = resp;
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testUpdateRecord]
+}
+function testSearchSOSLString() {
+    log:printInfo("baseClient -> searchSOSLString()");
+    string searchString = "FIND {WSO2 Inc}";
+    SoslResult|Error res = baseClient->searchSOSLString(searchString);
+
+    if res is SoslResult {
+        test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
+        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT,
+        msg = "Matched search record is not an Account type!");
+    } else {
+        test:assertFail(msg = res.message());
+    }
+}
+
+isolated function assertSoqlResult(SoqlResult|Error res) {
+    if res is SoqlResult {
+        test:assertTrue(res.totalSize > 0, "Total number result records is 0");
+        test:assertTrue(res.'done, "Query is not completed");
+        test:assertTrue(res.records.length() == res.totalSize, "Query result records not equal to totalSize");
+    } else {
+        test:assertFail(msg = res.message());
     }
 }

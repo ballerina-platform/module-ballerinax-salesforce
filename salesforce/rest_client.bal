@@ -396,11 +396,44 @@ public isolated client class Client {
 
     //Query
     # Executes the specified SOQL query.
+    # 
+    # + receivedQuery - Sent SOQL query
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    # 
+    # # Deprecated
+    # This function is deprecated as it does not handle the pagination of records
+    # Use the new and improved `getQueryResultStream(string receivedQuery)` function instead. 
+    @display {label: "Get Query Result"}
+    @deprecated
+    isolated remote function getQueryResult(@display {label: "SOQL Query"} string receivedQuery) 
+                                            returns @display {label: "SOQL Result"} SoqlResult|Error {
+        string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
+        json res = check self->getRecord(path);
+        return toSoqlResult(res);
+    }
+
+    # If the query results are too large, retrieve the next batch of results using the nextRecordUrl.
+    # 
+    # + nextRecordsUrl - URL to get the next query results
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    # 
+    # # Deprecated
+    # This function is deprecated as it is related to pagination of results in `getQueryResult(string receivedQuery)`
+    # Use the new and improved `getQueryResultStream(string receivedQuery)` function instead.
+    @display {label: "Get Next Query Result"}
+    @deprecated
+    isolated remote function getNextQueryResult(@display {label: "Next Records URL"} string nextRecordsUrl) 
+                                                returns @display {label: "SOQL Result"} SoqlResult|Error {
+        json res = check self->getRecord(nextRecordsUrl);
+        return toSoqlResult(res);
+    }
+
+    # Executes the specified SOQL query.
     #
     # + receivedQuery - Sent SOQL query
-    # + return - `stream<record{}, error?>` if successful. Else, the occurred `error`.
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
     @display {label: "Get Query Result"}
-    isolated remote function getQueryResult(@display {label: "SOQL Query"} string receivedQuery) 
+    isolated remote function getQueryResultStream(@display {label: "SOQL Query"} string receivedQuery) 
                                             returns @display {label: "SOQL Result"} stream<record{}, error?>|error {
         string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
@@ -410,11 +443,28 @@ public isolated client class Client {
 
     //Search
     # Executes the specified SOSL search.
+    # 
+    # + searchString - Sent SOSL search query
+    # + return - `SoslResult` record if successful. Else, the occurred `Error`.
+    # 
+    # # Deprecated
+    # This function is deprecated as it does not handle the pagination of returned data
+    # Use the new and improved `searchSOSLStringStream(string searchString)` function instead.
+    @display {label: "SOSL Search"}
+    @deprecated
+    isolated remote function searchSOSLString(@display {label: "SOSL Search Query"} string searchString) 
+                                              returns @display {label: "SOSL Result"} SoslResult|Error {
+        string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
+        json res = check self->getRecord(path);
+        return toSoslResult(res);
+    }
+
+    # Executes the specified SOSL search.
     #
     # + searchString - Sent SOSL search query
     # + return - `stream<record{}, error?>` record if successful. Else, the occurred `error`.
     @display {label: "SOSL Search"}
-    isolated remote function searchSOSLString(@display {label: "SOSL Search Query"} string searchString) 
+    isolated remote function searchSOSLStringStream(@display {label: "SOSL Search Query"} string searchString) 
                                               returns @display {label: "SOSL Result"} stream<record{}, error?>|error {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
         SOSLSearchResult objectInstance = check new (self.salesforceClient, path);

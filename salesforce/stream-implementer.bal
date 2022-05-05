@@ -117,14 +117,14 @@ type Record record {};
 type SoqlQueryResult record {|
     boolean done;
     int totalSize;
-    SoqlRecord[] records;
+    SoqlRecordData[] records;
     json...;
 |};
 
 # Defines the SOQL query result record type. 
 #
 # + attributes - Attribute record
-type SoqlRecord record {|
+type SoqlRecordData record {|
     Attribute attributes?;
     json...;
 |};
@@ -133,26 +133,19 @@ type SoqlRecord record {|
 #
 # + searchRecords - Matching records for the given search string
 type SoslSearchResult record {|
-    SoslRecord[] searchRecords;
+    SoslRecordData[] searchRecords;
     json...;
 |};
+
 
 # Defines SOSL query result.
 #
 # + attributes - Attribute record
 # + Id - ID of the matching object
-type SoslRecord record {|
+type SoslRecordData record {|
     Attribute attributes;
     string Id;
     json...;
 |};
 
-# Defines the Attribute type.
-# Contains the attribute information of the resultant record.
-#
-# + type - Type of the resultant record
-# + url - URL of the resultant record
-type Attribute record {|
-    string 'type;
-    string url;
-|};
+
