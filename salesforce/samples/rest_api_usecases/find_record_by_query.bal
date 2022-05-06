@@ -17,8 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main(){
-
+public function main() {
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
@@ -31,31 +30,31 @@ public function main(){
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new(sfConfig);
-    
+    sfdc:Client baseClient = checkpanic new (sfConfig);
+
     int totalRecords = 0;
     string sampleQuery = "SELECT name FROM Account";
     sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
     if res is sfdc:SoqlResult {
         if res.totalSize > 0 {
-            totalRecords = res.records.length() ;
+            totalRecords = res.records.length();
             string nextRecordsUrl = res["nextRecordsUrl"].toString();
             while (nextRecordsUrl.trim() != "") {
                 log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
                 sfdc:SoqlResult|sfdc:Error nextRes = baseClient->getNextQueryResult(nextRecordsUrl);
-                
+
                 if nextRes is sfdc:SoqlResult {
                     nextRecordsUrl = nextRes["nextRecordsUrl"].toString();
                     totalRecords = totalRecords + nextRes.records.length();
-                } 
+                }
             }
             log:printInfo(totalRecords.toString() + " Records Recieved");
         }
-        else{
+        else {
             log:printInfo("No Results Found");
         }
-        
+
     } else {
         log:printError(msg = res.message());
     }
