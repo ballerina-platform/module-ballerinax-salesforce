@@ -34,14 +34,14 @@ public function main() returns error? {
     sfdc:Client baseClient = check new (sfConfig);
 
     string sampleQuery = "SELECT name FROM Account";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
     int count = check countStream(queryResults);
     log:printInfo(string `${count} Records Recieved`);
 }
 
 isolated function countStream(stream<record {}, error?> resultStream) returns int|error {
     int nLines = 0;
-    check from record{} _ in resultStream
+    check from record {} _ in resultStream
         do {
             nLines += 1;
         };

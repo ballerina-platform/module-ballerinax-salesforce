@@ -1,4 +1,4 @@
-// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2022 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main() {
+public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,15 +31,19 @@ public function main() {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = checkpanic new (sfConfig);
-
+    sfdc:Client baseClient = check new (sfConfig);
     string searchString = "FIND {WSO2 Inc}";
-    sfdc:SoslResult|sfdc:Error res = baseClient->searchSOSLString(searchString);
-
-    if res is sfdc:SoslResult {
-        log:printInfo(res.searchRecords.length().toString() + " Record Received");
-    }
-    else {
-        log:printError(res.message());
-    }
+    stream<record {}, error?> resultStream = check baseClient->searchSOSLStringStream(searchString);
+    int count = check countStream(resultStream);
+    log:printInfo(string `${count} Record Received`);
 }
+
+isolated function countStream(stream<record {}, error?> resultStream) returns int|error {
+    int nLines = 0;
+    check from record {} _ in resultStream
+        do {
+            nLines += 1;
+        };
+    return nLines;
+}
+
