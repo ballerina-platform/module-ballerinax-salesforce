@@ -108,3 +108,27 @@ isolated function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Erro
         return error Error(errMsg, res);
     }
 }
+
+isolated function toSoqlResult(json payload) returns SoqlResult|Error {
+    SoqlResult|error res = payload.cloneWithType(SoqlResult);
+
+    if res is SoqlResult {
+        return res;
+    } else {
+        string errMsg = "Error occurred while constructing SoqlResult record.";
+        log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
+        return error Error(errMsg, res);
+    }
+}
+
+isolated function toSoslResult(json payload) returns SoslResult|Error {
+    SoslResult|error res = payload.cloneWithType(SoslResult);
+
+    if res is SoslResult {
+        return res;
+    } else {
+        string errMsg = "Error occurred while constructing SoslResult record.";
+        log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
+        return error Error(errMsg, res);
+    }
+}

@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
-public function main() returns error? {
+public function main(){
 
     // Create Salesforce client configuration by reading from config file.
     sfdc:ConnectionConfig sfConfig = {
@@ -31,19 +31,32 @@ public function main() returns error? {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = check new (sfConfig);
-
+    sfdc:Client baseClient = checkpanic new(sfConfig);
+    
+    int totalRecords = 0;
     string sampleQuery = "SELECT name FROM Account";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
-    int count = check countStream(queryResults);
-    log:printInfo(string `${count} Records Recieved`);
-}
+    sfdc:SoqlResult|sfdc:Error res = baseClient->getQueryResult(sampleQuery);
 
-isolated function countStream(stream<record {}, error?> resultStream) returns int|error {
-    int nLines = 0;
-    check from record{} _ in resultStream
-        do {
-            nLines += 1;
-        };
-    return nLines;
+    if res is sfdc:SoqlResult {
+        if res.totalSize > 0 {
+            totalRecords = res.records.length() ;
+            string nextRecordsUrl = res["nextRecordsUrl"].toString();
+            while (nextRecordsUrl.trim() != "") {
+                log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
+                sfdc:SoqlResult|sfdc:Error nextRes = baseClient->getNextQueryResult(nextRecordsUrl);
+                
+                if nextRes is sfdc:SoqlResult {
+                    nextRecordsUrl = nextRes["nextRecordsUrl"].toString();
+                    totalRecords = totalRecords + nextRes.records.length();
+                } 
+            }
+            log:printInfo(totalRecords.toString() + " Records Recieved");
+        }
+        else{
+            log:printInfo("No Results Found");
+        }
+        
+    } else {
+        log:printError(msg = res.message());
+    }
 }

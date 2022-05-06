@@ -92,3 +92,65 @@ public type SObjectBasicInfo record {|
     SObjectMetaData objectDescribe;
     json...;
 |};
+
+# Define the SOQL result type.
+#
+# + done - Query is completed or not
+# + totalSize - The total number result records
+# + records - Result records
+@display{label: "SOQL Result"}
+public type SoqlResult record {|
+    @display{label: "Completed"}
+    boolean done;
+    @display{label: "No of result records"}
+    int totalSize;
+    @display{label: "Records retreived"}
+    SoqlRecord[] records;
+    json...;
+|};
+
+# Defines the SOQL query result record type. 
+#
+# + attributes - Attribute record
+@display{label: "SOQL record"}
+public type SoqlRecord record {|
+    @display{label: "Attributes"}
+    Attribute attributes;
+    json...;
+|};
+
+# Defines SOSL query result.
+#
+# + searchRecords - Matching records for the given search string
+@display{label: "SOSL Result"}
+public type SoslResult record {|
+    @display{label: "Records retrieved"}
+    SoslRecord[] searchRecords;
+    json...;
+|};
+
+# Defines SOSL query result.
+#
+# + attributes - Attribute record
+# + Id - ID of the matching object
+@display{label: "SOSL record"}
+public type SoslRecord record {|
+    @display{label: "Attributes"}
+    Attribute attributes;
+    @display{label: "Id"}
+    string Id;
+    json...;
+|};
+
+# Defines the Attribute type.
+# Contains the attribute information of the resultant record.
+#
+# + type - Type of the resultant record
+# + url - URL of the resultant record
+@display{label: "Attribute"}
+public type Attribute record {|
+    @display{label: "Type"}
+    string 'type;
+    @display{label: "URL"}
+    string url;
+|};
