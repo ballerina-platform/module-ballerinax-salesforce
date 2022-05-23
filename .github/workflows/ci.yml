@@ -7,6 +7,9 @@ on:
     branches-ignore:
       - "automated/dependency_version_update"
       - "automated/dependency_version_update_tmp"
+  repository_dispatch:
+    types:
+      check_connector_for_breaking_changes
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -79,3 +82,19 @@ jobs:
       - name: Code Coverage
         run: |
           echo "Code Coverage Percentage : ${{fromJson(steps.test_results.outputs.testResultsJson).coveragePercentage}}"
+
+      - name: Allert notifier on failure
+        if: failure() && (github.event.action == 'check_connector_for_breaking_changes')
+        run: |
+          curl -X POST \
+          'https://api.github.com/repos/ballerina-platform/ballerina-release/dispatches' \
+          --header 'Accept: application/vnd.github.v3+json' \
+          --header 'Authorization: Bearer ${{ secrets.BALLERINA_BOT_TOKEN }}' \
+          --data-raw '{
+            "event_type": "notify-ballerinax-connector-build-failure",
+            "client_payload": {
+              "repoName": "module-ballerinax-sfdc",
+              "workflow": "CI"
+            }
+          }'
+
