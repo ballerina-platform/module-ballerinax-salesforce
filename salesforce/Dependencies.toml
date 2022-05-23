@@ -97,9 +97,6 @@ modules = [
 org = "ballerina"
 name = "jballerina.java"
 version = "0.0.0"
-modules = [
-	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
-]
 
 [[package]]
 org = "ballerina"
@@ -238,7 +235,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "mime"
-version = "2.2.1"
+version = "2.2.2"
 dependencies = [
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -260,7 +257,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "observe"
-version = "1.0.3"
+version = "1.0.4"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
@@ -342,11 +339,10 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "5.0.0"
+version = "6.0.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
-	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.boolean"},
 	{org = "ballerina", name = "lang.float"},
 	{org = "ballerina", name = "lang.int"},

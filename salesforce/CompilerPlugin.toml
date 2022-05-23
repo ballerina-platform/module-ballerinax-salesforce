@@ -1,6 +1,0 @@
-[plugin]
-id = "compiler-plugin"
-class = "org.ballerinalang.sf.plugin.SfdcCompilerPlugin"
-
-[[dependency]]
-path = "../compiler-plugin/build/libs/compiler-plugin-5.0.0.jar"
