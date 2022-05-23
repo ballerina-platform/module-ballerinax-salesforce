@@ -40,9 +40,6 @@ jobs:
         with:
           args:
             pack ./salesforce
-        env:
-          JAVA_HOME: /usr/lib/jvm/default-jvm
-
       - name: Push to Staging
         if: github.event.inputs.bal_central_environment == 'STAGE'
         uses: ballerina-platform/ballerina-action/@master
@@ -51,7 +48,6 @@ jobs:
             push
         env:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_STAGE_ACCESS_TOKEN }}
-          JAVA_HOME: /usr/lib/jvm/default-jvm
           WORKING_DIR: ./salesforce
           
       - name: Push to Dev
@@ -62,5 +58,4 @@ jobs:
             push
         env:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_DEV_ACCESS_TOKEN }}
-          JAVA_HOME: /usr/lib/jvm/default-jvm
           WORKING_DIR: ./salesforce

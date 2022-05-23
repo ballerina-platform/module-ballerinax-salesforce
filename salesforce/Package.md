@@ -7,7 +7,6 @@ The `ballerinax/salesforce` is a [Ballerina](https://ballerina.io/) connector fo
 * Perform Salesforce operations programmatically through the Salesforce REST API. Users can perform CRUD operations for SObjects, query using SOQL, search using SOSL and, describe SObjects and organizational data. The `ballerinax/salesforce` module provides this capability.
 * Perform Salesforce bulk operations programmatically through the Salesforce Bulk API. Users can perform CRUD operations in bulk for Salesforce. The `ballerinax/salesforce.bulk` module provides this capability.
 * Perform Salesforce operations programmatically through the Salesforce SOAP API which is not supported by the Salesforce REST API. The connector is comprised of limited operations on SOAP API. The `ballerinax/salesforce.soap` module provides this capability.
-* Listen for Salesforce events and process them. Internally Bayeux protocol is used for polling for events. The `ballerinax/salesforce` module provides this capability.
 
 ### Compatibility
 |                     | Version            |
