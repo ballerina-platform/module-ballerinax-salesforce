@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 import ballerinax/salesforce.bulk;
 import ballerina/regex;
 
@@ -114,7 +114,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string contactId = "";
     string sampleQuery = string `SELECT Id FROM Contact WHERE FirstName='${firstName}' AND LastName='${lastName}' 
         AND Title='${title}' LIMIT 1`;
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStreamWithType(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         contactId = check result.value.get("Id").ensureType();

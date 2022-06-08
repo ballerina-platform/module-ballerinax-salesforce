@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/jballerina.java;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
@@ -34,7 +35,7 @@ public isolated client class Client {
     # 
     # + salesforceConfig - Salesforce Connector configuration
     # + return - `sfdc:Error` on failure of initialization or else `()`
-    public isolated function init(ConnectionConfig salesforceConfig) returns Error? {
+    public isolated function init(ConnectionConfig salesforceConfig) returns error? {
         self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
@@ -60,7 +61,7 @@ public isolated client class Client {
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
-            return error Error(INVALID_CLIENT_CONFIG);
+            return error (INVALID_CLIENT_CONFIG);
         }
     }
 
@@ -115,6 +116,78 @@ public isolated client class Client {
         return toSObjectBasicInfo(res);
     }
 
+
+    # Lists summary details about each REST API version available.
+    #
+    # + return - List of `Version` if successful. Else, the occured Error.
+    @display {label: "Get Available API Versions"}
+    isolated remote function getAvailableApiVersions() returns @display {label: "Versions"} Version[]|Error {
+        string path = prepareUrl([BASE_PATH]);
+        json res = check self->getRecord(path);
+        return toVersions(res);
+    }
+
+    # Lists the resources available for the specified API version.
+    #
+    # + apiVersion - API version (v37)
+    # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
+    @display {label: "Get Resources by API Version"}
+    isolated remote function getResourcesByApiVersion(@display {label: "API Version"} string apiVersion) 
+                                                      returns @display {label: "Resources"} map<string>|Error {
+        string path = prepareUrl([BASE_PATH, apiVersion]);
+        json res = check self->getRecord(path);
+        return toMapOfStrings(res);
+    }
+
+    # Lists the Limits information for your organization.
+    #
+    # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
+    @display {label: "Get Organization Limits"}
+    isolated remote function getOrganizationLimits() 
+                                                   returns @display {label: "Organization Limits"} 
+                                                   map<Limit>|Error {
+        string path = prepareUrl([API_BASE_PATH, LIMITS]);
+        json res = check self->getRecord(path);
+        return toMapOfLimits(res);
+    }
+
+    //Basic CRUD
+    # Accesses records based on the specified object ID, can be used with external objects.
+    #
+    # + path - Resource path
+    # + return - JSON result if successful else or else `sfdc:Error`
+    @display {label: "Get Record"}
+    isolated remote function getRecord(@display {label: "Resource Path"} string path) 
+                                       returns @display {label: "Result"} json|Error {
+        json|http:ClientError response = self.salesforceClient->get(path);
+        if response is json {
+            return response;
+        } else {
+            return checkAndSetErrorDetail(response);
+        }
+    }
+
+    # Accesses records based on the specified object ID, can be used with external objects.
+    #
+    # + path - Resource path
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - JSON result if successful else or else `sfdc:Error`
+    @display {label: "Get Record"}
+    isolated remote function getRecordWithType(@display {label: "Resource Path"} string path, typedesc<record {}> returnType = <>) 
+                                       returns @display {label: "Result"} returnType|Error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getRecord"
+    } external;
+
+    private isolated function processGetRecord(typedesc<record{}> returnType, string path) returns record {}|error {
+        json|http:ClientError response = self.salesforceClient->get(path);
+        if response is json {
+            return check response.cloneWithType(returnType);
+        } else {
+            return checkAndSetErrorDetail(response);
+        }                                         
+    }
+
     # Gets an object record by ID.
     #
     # + sobject - SObject name 
@@ -132,6 +205,35 @@ public isolated client class Client {
         }
         json response = check self->getRecord(path);
         return response;
+    }
+
+    # Gets an object record by ID.
+    #
+    # + sobject - SObject name 
+    # + id - SObject ID
+    # + fields - Fields to retrieve 
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - JSON result if successful or else `sfdc:Error`
+    @display {label: "Get Record by ID"}
+    isolated remote function getRecordByIdWithType(@display {label: "SObject Name"} string sobject, 
+                                           @display {label: "SObject ID"} string id, 
+                                           @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>) 
+                                           returns @tainted @display {label: "Result"} returnType|Error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getRecordById"
+    } external;
+
+    private isolated function processGetRecordById(typedesc<record{}> returnType, string sobject, string id, string[] fields) returns record {}|error {
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
+        if fields.length() > 0 {
+            path = path.concat(self.appendQueryParams(fields));
+        }
+        json|http:ClientError response = self.salesforceClient->get(path);
+        if response is json {
+            return check response.cloneWithType(returnType);
+        } else {
+            return checkAndSetErrorDetail(response);
+        }                                         
     }
 
     # Gets an object record by external ID.
@@ -153,6 +255,182 @@ public isolated client class Client {
         }
         json response = check self->getRecord(path);
         return response;
+    }
+
+    # Gets an object record by external ID.
+    #
+    # + sobject - SObject name 
+    # + extIdField - External ID field name 
+    # + extId - External ID value 
+    # + fields - Fields to retrieve 
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - JSON result if successful or else `sfdc:Error`
+    @display {label: "Get Record by External ID"}
+    isolated remote function getRecordByExtIdWithType(@display {label: "SObject Name"} string sobject, @display 
+                                              {label: "External ID Field Name"} string extIdField, 
+                                              @display {label: "External ID"} string extId, 
+                                              @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>) 
+                                              returns @tainted @display {label: "Result"} returnType|Error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getRecordByExtId"
+    } external;
+
+    private isolated function processGetRecordByExtId(typedesc<record{}> returnType, string sobject, string extIdField, string extId, string[] fields) returns record {}|error {
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
+        if fields.length() > 0 {
+            path = path.concat(self.appendQueryParams(fields));
+        }
+        json|http:ClientError response = self.salesforceClient->get(path);
+        if response is json {
+            return check response.cloneWithType(returnType);
+        } else {
+            return checkAndSetErrorDetail(response);
+        }                                          
+    }
+
+    # Creates records based on relevant object type sent with json record.
+    #
+    # + sObjectName - SObject name value
+    # + recordPayload - JSON record to be inserted
+    # + return - Created entity ID if successful or else `sfdc:Error`
+    @display {label: "Create Record"}
+    isolated remote function createRecord(@display {label: "SObject Name"} string sObjectName, 
+                                          @display {label: "Record Payload"} json recordPayload) 
+                                          returns @display {label: "Created Entity ID"} string|Error {
+        http:Request req = new;
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
+        req.setJsonPayload(recordPayload);
+        json|http:ClientError response = self.salesforceClient->post(path, req);
+        if response is json {
+            json|error resultId = response.id;
+            if resultId is json {
+                return resultId.toString();
+            } else {
+                return error Error(resultId.message());
+            }
+        } else {
+            return checkAndSetErrorDetail(response);
+        }
+    }
+
+
+    # Creates records based on relevant object type sent with json record.
+    #
+    # + sObjectName - SObject name value
+    # + recordPayload - JSON record to be inserted
+    # + return - Created entity ID if successful or else `sfdc:Error`
+    @display {label: "Create Record"}
+    isolated remote function createRecordWithType(@display {label: "SObject Name"} string sObjectName, 
+                                          @display {label: "Record Payload"} record{} recordPayload) 
+                                          returns @tainted @display {label: "Created Entity ID"} string|Error {
+        http:Request req = new;
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
+        req.setJsonPayload(recordPayload.toJson());
+        json|http:ClientError response = self.salesforceClient->post(path, req);
+        if response is json {
+            json|error resultId = response.id;
+            if resultId is json {
+                return resultId.toString();
+            } else {
+                return error Error(resultId.message());
+            }
+        } else {
+            return checkAndSetErrorDetail(response);
+        }
+    }
+
+    # Delete existing records based on relevant object ID.
+    #
+    # + sObjectName - SObject name value
+    # + id - SObject ID
+    # + return - true if successful else false or else `sfdc:Error`
+    @display {label: "Delete Record"}
+    isolated remote function deleteRecord(@display {label: "SObject Name"} string sObjectName, 
+                                          @display {label: "SObject ID"} string id) 
+                                          returns @display {label: "Result"} Error? {
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+        http:Response|http:ClientError response = self.salesforceClient->delete(path);
+        if response is http:ClientError {
+            return checkAndSetErrorDetail(response);
+        }
+    }
+
+    # Updates records based on relevant object ID.
+    #
+    # + sObjectName - SObject name value
+    # + id - SObject ID
+    # + recordPayload - JSON record to be updated
+    # + return - true if successful else false or else `sfdc:Error`
+    @display {label: "Update Record"}
+    isolated remote function updateRecord(@display {label: "SObject Name"} string sObjectName, 
+                                          @display {label: "SObject ID"} string id, 
+                                          @display {label: "Record Payload"} json recordPayload) 
+                                          returns @display {label: "Result"} Error? {
+        http:Request req = new;
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+        req.setJsonPayload(recordPayload);
+        http:Response|http:ClientError response = self.salesforceClient->patch(path, req);
+        if response is http:ClientError {
+            return checkAndSetErrorDetail(response);
+        }
+    }
+
+        # Updates records based on relevant object ID.
+    #
+    # + sObjectName - SObject name value
+    # + id - SObject ID
+    # + recordPayload - JSON record to be updated
+    # + return - true if successful else false or else `sfdc:Error`
+    @display {label: "Update Record"}
+    isolated remote function updateRecordWithType(@display {label: "SObject Name"} string sObjectName, 
+                                          @display {label: "SObject ID"} string id, 
+                                          @display {label: "Record Payload"} record{} recordPayload) 
+                                          returns @tainted @display {label: "Result"} Error? {
+        http:Request req = new;
+        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+        req.setJsonPayload(recordPayload.toJson());
+        http:Response|http:ClientError response = self.salesforceClient->patch(path, req);
+        if response is http:ClientError {
+            return checkAndSetErrorDetail(response);
+        }
+    }
+
+    # Executes the specified SOQL query.
+    #
+    # + receivedQuery - Sent SOQL query
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
+    @display {label: "Get Query Result"}
+    isolated remote function getQueryResultStreamWithType(@display {label: "SOQL Query"} string receivedQuery, typedesc<record {}> returnType = <>) 
+                                                          returns @display {label: "SOQL Result"} stream<returnType, error?>|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getQueryResult"
+    } external;
+
+    private isolated function processGetQueryResult(typedesc<record{}> returnType, string receivedQuery) returns stream<record{}, error?>|error {
+        string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
+        SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
+        stream<record{}, error?> finalStream = new (objectInstance);
+        return finalStream;                                        
+    }
+
+    # Executes the specified SOSL search.
+    #
+    # + searchString - Sent SOSL search query
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - `stream<record{}, error?>` record if successful. Else, the occurred `error`.
+    @display {label: "SOSL Search"}
+    isolated remote function searchSOSLStringStreamWithType(@display {label: "SOSL Search Query"} string searchString, typedesc<record {}> returnType = <>) 
+                                                            returns @display {label: "SOSL Result"} stream<returnType, error?>|error = @java:Method{
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "searchSOSLString"
+    } external;
+
+    private isolated function processSearchSOSLString(typedesc<record{}> returnType, string searchString) returns stream<record{}, error?>|error {
+        string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
+        SOSLSearchResult objectInstance = check new (self.salesforceClient, path);
+        stream<record{}, error?> finalStream = new (objectInstance);
+        return finalStream;                                      
     }
 
     //Account
@@ -428,19 +706,6 @@ public isolated client class Client {
         return toSoqlResult(res);
     }
 
-    # Executes the specified SOQL query.
-    #
-    # + receivedQuery - Sent SOQL query
-    # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
-    @display {label: "Get Query Result"}
-    isolated remote function getQueryResultStream(@display {label: "SOQL Query"} string receivedQuery) 
-                                            returns @display {label: "SOQL Result"} stream<record{}, error?>|error {
-        string path = prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
-        SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
-        stream<record{}, error?> finalStream = new (objectInstance);
-        return finalStream;
-    }
-
     //Search
     # Executes the specified SOSL search.
     # 
@@ -457,130 +722,6 @@ public isolated client class Client {
         string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
         json res = check self->getRecord(path);
         return toSoslResult(res);
-    }
-
-    # Executes the specified SOSL search.
-    #
-    # + searchString - Sent SOSL search query
-    # + return - `stream<record{}, error?>` record if successful. Else, the occurred `error`.
-    @display {label: "SOSL Search"}
-    isolated remote function searchSOSLStringStream(@display {label: "SOSL Search Query"} string searchString) 
-                                              returns @display {label: "SOSL Result"} stream<record{}, error?>|error {
-        string path = prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
-        SOSLSearchResult objectInstance = check new (self.salesforceClient, path);
-        stream<record{}, error?> finalStream = new (objectInstance);
-        return finalStream;
-    }
-
-    # Lists summary details about each REST API version available.
-    #
-    # + return - List of `Version` if successful. Else, the occured Error.
-    @display {label: "Get Available API Versions"}
-    isolated remote function getAvailableApiVersions() returns @display {label: "Versions"} Version[]|Error {
-        string path = prepareUrl([BASE_PATH]);
-        json res = check self->getRecord(path);
-        return toVersions(res);
-    }
-
-    # Lists the resources available for the specified API version.
-    #
-    # + apiVersion - API version (v37)
-    # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
-    @display {label: "Get Resources by API Version"}
-    isolated remote function getResourcesByApiVersion(@display {label: "API Version"} string apiVersion) 
-                                                      returns @display {label: "Resources"} map<string>|Error {
-        string path = prepareUrl([BASE_PATH, apiVersion]);
-        json res = check self->getRecord(path);
-        return toMapOfStrings(res);
-    }
-
-    # Lists the Limits information for your organization.
-    #
-    # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
-    @display {label: "Get Organization Limits"}
-    isolated remote function getOrganizationLimits() 
-                                                   returns @display {label: "Organization Limits"} 
-                                                   map<Limit>|Error {
-        string path = prepareUrl([API_BASE_PATH, LIMITS]);
-        json res = check self->getRecord(path);
-        return toMapOfLimits(res);
-    }
-
-    //Basic CRUD
-    # Accesses records based on the specified object ID, can be used with external objects.
-    #
-    # + path - Resource path
-    # + return - JSON result if successful else or else `sfdc:Error`
-    @display {label: "Get Record"}
-    isolated remote function getRecord(@display {label: "Resource Path"} string path) 
-                                       returns @display {label: "Result"} json|Error {
-        json|http:ClientError response = self.salesforceClient->get(path);
-        if response is json {
-            return response;
-        } else {
-            return checkAndSetErrorDetail(response);
-        }
-    }
-
-    # Creates records based on relevant object type sent with json record.
-    #
-    # + sObjectName - SObject name value
-    # + recordPayload - JSON record to be inserted
-    # + return - Created entity ID if successful or else `sfdc:Error`
-    @display {label: "Create Record"}
-    isolated remote function createRecord(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "Record Payload"} json recordPayload) 
-                                          returns @display {label: "Created Entity ID"} string|Error {
-        http:Request req = new;
-        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
-        req.setJsonPayload(recordPayload);
-        json|http:ClientError response = self.salesforceClient->post(path, req);
-        if response is json {
-            json|error resultId = response.id;
-            if resultId is json {
-                return resultId.toString();
-            } else {
-                return error Error(resultId.message());
-            }
-        } else {
-            return checkAndSetErrorDetail(response);
-        }
-    }
-
-    # Delete existing records based on relevant object ID.
-    #
-    # + sObjectName - SObject name value
-    # + id - SObject ID
-    # + return - true if successful else false or else `sfdc:Error`
-    @display {label: "Delete Record"}
-    isolated remote function deleteRecord(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "SObject ID"} string id) 
-                                          returns @display {label: "Result"} Error? {
-        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-        http:Response|http:ClientError response = self.salesforceClient->delete(path);
-        if response is http:ClientError {
-            return checkAndSetErrorDetail(response);
-        }
-    }
-
-    # Updates records based on relevant object ID.
-    #
-    # + sObjectName - SObject name value
-    # + id - SObject ID
-    # + recordPayload - JSON record to be updated
-    # + return - true if successful else false or else `sfdc:Error`
-    @display {label: "Update Record"}
-    isolated remote function updateRecord(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "SObject ID"} string id, 
-                                          @display {label: "Record Payload"} json recordPayload) 
-                                          returns @display {label: "Result"} Error? {
-        http:Request req = new;
-        string path = prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-        req.setJsonPayload(recordPayload);
-        http:Response|http:ClientError response = self.salesforceClient->patch(path, req);
-        if response is http:ClientError {
-            return checkAndSetErrorDetail(response);
-        }
     }
 }
 

@@ -97,6 +97,9 @@ modules = [
 org = "ballerina"
 name = "jballerina.java"
 version = "0.0.0"
+modules = [
+	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
+]
 
 [[package]]
 org = "ballerina"
@@ -339,10 +342,11 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "6.0.0"
+version = "7.0.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.boolean"},
 	{org = "ballerina", name = "lang.float"},
 	{org = "ballerina", name = "lang.int"},
@@ -359,6 +363,7 @@ dependencies = [
 modules = [
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulk"},
+	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.rest"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.soap"}
 ]
 

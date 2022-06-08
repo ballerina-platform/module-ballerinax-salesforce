@@ -60,3 +60,6 @@ target/
 
 # Allow files in the bulk test folder
 !**/tests/resources/*
+
+# Ignore Gradle build output directory
+build

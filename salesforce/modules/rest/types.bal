@@ -19,13 +19,13 @@
 # + label - Label of the Salesforce version
 # + url - URL of the Salesforce version
 # + version - Salesforce version number
-@display {label: "Version"}
+@display{label: "Version"}
 public type Version record {|
-    @display {label: "Label"}
+    @display{label: "Label"}
     string label;
-    @display {label: "URL"}
+    @display{label: "URL"}
     string url;
-    @display {label: "Version"}
+    @display{label: "Version"}
     string 'version;
 |};
 
@@ -36,60 +36,6 @@ public type Version record {|
 public type Limit record {|
     int Max;
     int Remaining;
-    json...;
-|};
-
-# Metadata for your organization and available to the logged-in user.
-#
-# + encoding - Encoding
-# + maxBatchSize - Maximum batch size
-# + sobjects - Available SObjects
-@display {label: "Organizational meta data"}
-public type OrgMetadata record {|
-    @display {label: "Encoding"}
-    string encoding;
-    @display {label: "Maximum batch size"}
-    int maxBatchSize;
-    @display {label: "SObject meta data"}
-    SObjectMetaData[] sobjects;
-    json...;
-|};
-
-# Metadata for an SObject, including information about each field, URLs, and child relationships.
-#
-# + name - SObject name
-# + createable - Is createable
-# + deletable - Is deletable
-# + updateable - Is updateable
-# + queryable - Is queryable
-# + label - SObject label
-# + urls - SObject URLs
-@display {label: "SObject meta data"}
-public type SObjectMetaData record {|
-    @display {label: "Name"}
-    string name;
-    @display {label: "Creatable"}
-    boolean createable;
-    @display {label: "Deletable"}
-    boolean deletable;
-    @display {label: "Updatable"}
-    boolean updateable;
-    @display {label: "Queryable"}
-    boolean queryable;
-    @display {label: "Label"}
-    string label;
-    @display {label: "URLs"}
-    map<string> urls;
-    json...;
-|};
-
-# Basic info of a SObject.
-#
-# + objectDescribe - Metadata related to the SObject
-@display {label: "SObject basic info"}
-public type SObjectBasicInfo record {|
-    @display {label: "SObject meta data"}
-    SObjectMetaData objectDescribe;
     json...;
 |};
 
@@ -153,4 +99,58 @@ public type Attribute record {|
     string 'type;
     @display{label: "URL"}
     string url;
+|};
+
+# Metadata for your organization and available to the logged-in user.
+#
+# + encoding - Encoding
+# + maxBatchSize - Maximum batch size
+# + sobjects - Available SObjects
+@display{label: "Organizational meta data"}
+public type OrgMetadata record {|
+    @display{label: "Encoding"}
+    string encoding;
+    @display{label: "Maximum batch size"}
+    int maxBatchSize;
+    @display{label: "SObject meta data"}
+    SObjectMetaData[] sobjects;
+    json...;
+|};
+
+# Metadata for an SObject, including information about each field, URLs, and child relationships.
+#
+# + name - SObject name
+# + createable - Is createable
+# + deletable - Is deletable
+# + updateable - Is updateable
+# + queryable - Is queryable
+# + label - SObject label
+# + urls - SObject URLs
+@display{label: "SObject meta data"}
+public type SObjectMetaData record {|
+    @display{label: "Name"}
+    string name;
+    @display{label: "Creatable"}
+    boolean createable;
+    @display{label: "Deletable"}
+    boolean deletable;
+    @display{label: "Updatable"}
+    boolean updateable;
+    @display{label: "Queryable"}
+    boolean queryable;
+    @display{label: "Label"}
+    string label;
+    @display{label: "URLs"}
+    map<string> urls;
+    json...;
+|};
+
+# Basic info of a SObject.
+#
+# + objectDescribe - Metadata related to the SObject
+@display{label: "SObject basic info"}
+public type SObjectBasicInfo record {|
+    @display{label: "SObject meta data"}
+    SObjectMetaData objectDescribe;
+    json...;
 |};

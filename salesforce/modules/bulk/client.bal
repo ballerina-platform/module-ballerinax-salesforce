@@ -16,7 +16,7 @@
 
 import ballerina/http;
 import ballerina/io;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce Bulk API.
 # This connector lets you to perform bulk data operations for CSV, JSON, and XML data types.
@@ -54,7 +54,7 @@ public isolated client class Client {
         if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
             self.clientHandler = httpHandlerResult;
         } else {
-            return error(sfdc:INVALID_CLIENT_CONFIG);
+            return error(INVALID_CLIENT_CONFIG);
         }
 
         http:Client|http:ClientError|error httpClientResult;
@@ -78,7 +78,7 @@ public isolated client class Client {
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
-            return error(sfdc:INVALID_CLIENT_CONFIG);
+            return error(INVALID_CLIENT_CONFIG);
         }
     }
 

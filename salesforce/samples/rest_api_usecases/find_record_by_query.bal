@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() {
     // Create Salesforce client configuration by reading from config file.

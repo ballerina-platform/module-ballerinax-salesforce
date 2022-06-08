@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerina/os;
 import ballerina/test;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 configurable string clientId = os:getEnv("CLIENT_ID");
 configurable string clientSecret = os:getEnv("CLIENT_SECRET");

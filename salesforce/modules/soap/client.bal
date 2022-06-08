@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/http;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 # Ballerina Salesforce SOAP connector provides the capability to access Salesforce SOAP API. 
 # This connector lets you to perform operations like create, retrieve, update or delete sobjects, such as accounts,

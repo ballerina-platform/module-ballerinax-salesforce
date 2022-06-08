@@ -2,8 +2,8 @@
 distribution = "2201.0.3"
 org = "ballerinax"
 name = "salesforce"
-version = "6.0.0"
-export = ["salesforce", "salesforce.bulk", "salesforce.soap"]
+version = "7.0.0"
+export = ["salesforce.rest", "salesforce.bulk", "salesforce.soap"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["Sales & CRM/Customer Relationship Management", "Cost/Freemium"]
@@ -12,3 +12,9 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
 
 [build-options]
 observabilityIncluded = true
+
+[[platform.java11.dependency]]
+path = "../salesforce-native/build/libs/salesforce-native-7.0.0.jar"
+groupId = "io.ballerinax"
+artifactId = "salesforce"
+version = "7.0.0"

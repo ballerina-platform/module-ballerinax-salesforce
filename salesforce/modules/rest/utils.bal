@@ -72,8 +72,8 @@ isolated function prepareQueryUrl(string[] paths, string[] queryParamNames, stri
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
-isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true)
-                                    returns json|Error {
+isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
+                                    returns @tainted json|Error {
     if httpResponse is http:Response {
         if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT {
@@ -136,9 +136,9 @@ isolated function checkAndSetErrorDetail(http:ClientError response) returns Erro
             headers: response.detail()[HEADERS],
             body: response.detail()[BODY]
         };
-        return error Error(HTTP_CLIENT_ERROR, response, statusCode = detail?.statusCode, body = detail?.body,
-            headers = detail?.headers);
-    } else {
-        return error Error(HTTP_CLIENT_ERROR, response);
+        return error Error(HTTP_CLIENT_ERROR, response, statusCode = detail?.statusCode, body = detail?.body, 
+            headers = detail?.headers); 
+    } else {       
+        return error Error(HTTP_CLIENT_ERROR, response); 
     }
 }
