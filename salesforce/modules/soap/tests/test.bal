@@ -1,12 +1,12 @@
 // Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-//
+
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
-//
+
 // http://www.apache.org/licenses/LICENSE-2.0
-//
+
 // Unless required by applicable law or agreed to in writing,
 // software distributed under the License is distributed on an
 // "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -46,15 +46,15 @@ string opportunityId = sfdc:EMPTY_STRING;
 @test:BeforeSuite
 function createLead() {
     log:printInfo("baseClient -> convertLead()");
-    json leadRecord = {
-        FirstName: "Mark",
-        LastName: "Zucker",
-        Title: "Director",
-        Company: "IT World"
+    record{} leadRecord = {
+        "FirstName": "Mark",
+        "LastName": "Zucker",
+        "Title": "Director",
+        "Company": "IT World"
     };
-    string|sfdc:Error res = restClient->createLead(leadRecord);
-    if res is string {
-        leadId = res;
+    sfdc:CreationResponse|error res = restClient->create("Lead", leadRecord);
+    if res is sfdc:CreationResponse {
+        leadId = res.id;
     } else {
         test:assertFail("Lead Not Created");
     }
@@ -75,7 +75,7 @@ function testconvertLead() {
 
 @test:AfterSuite {}
 function testDeleteRecord() returns error? {
-    check restClient->deleteAccount(accountId);
-    check restClient->deleteContact(contactId);
-    check restClient->deleteOpportunity(opportunityId);
+    check restClient->delete("Account", accountId);
+    // check restClient->delete("Contact", contactId);
+    // check restClient->delete("Opportunity", opportunityId);
 }

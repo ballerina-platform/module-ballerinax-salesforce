@@ -110,26 +110,26 @@ isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error 
     }
 }
 
-isolated function toOrgMetadata(json payload) returns OrgMetadata|Error {
-    OrgMetadata|error res = payload.cloneWithType(OrgMetadata);
+// isolated function toOrgMetadata(json payload) returns OrgMetadata|Error {
+//     OrgMetadata|error res = payload.cloneWithType(OrgMetadata);
 
-    if res is OrgMetadata {
-        return res;
-    } else {
-        string errMsg = "Error occurred while constructing OrgMetadata record.";
-        log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
-        return error Error(errMsg, res);
-    }
-}
+//     if res is OrgMetadata {
+//         return res;
+//     } else {
+//         string errMsg = "Error occurred while constructing OrgMetadata record.";
+//         log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
+//         return error Error(errMsg, res);
+//     }
+// }
 
-isolated function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Error {
-    SObjectBasicInfo|error res = payload.cloneWithType(SObjectBasicInfo);
+// isolated function toSObjectBasicInfo(json payload) returns SObjectBasicInfo|Error {
+//     SObjectBasicInfo|error res = payload.cloneWithType(SObjectBasicInfo);
 
-    if res is SObjectBasicInfo {
-        return res;
-    } else {
-        string errMsg = "Error occurred while constructing SObjectBasicInfo record.";
-        log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
-        return error Error(errMsg, res);
-    }
-}
+//     if res is SObjectBasicInfo {
+//         return res;
+//     } else {
+//         string errMsg = "Error occurred while constructing SObjectBasicInfo record.";
+//         log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
+//         return error Error(errMsg, res);
+//     }
+// }

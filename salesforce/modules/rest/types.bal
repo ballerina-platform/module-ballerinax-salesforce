@@ -154,3 +154,9 @@ public type SObjectBasicInfo record {|
     SObjectMetaData objectDescribe;
     json...;
 |};
+
+public type CreationResponse record {
+    string id;
+    anydata[] errors;
+    boolean success;
+};
