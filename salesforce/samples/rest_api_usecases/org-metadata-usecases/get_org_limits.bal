@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -33,7 +33,7 @@ public function main() returns error? {
     // Create Salesforce client.
     sfdc:Client baseClient = check new (sfConfig);
 
-    map<sfdc:Limit>|sfdc:Error orgLimits = baseClient->getOrganizationLimits();
+    map<sfdc:Limit>|error orgLimits = baseClient->getOrganizationLimits();
 
     if orgLimits is map<sfdc:Limit> {
         log:printInfo("Versions retrieved successfully : " + orgLimits.toString());

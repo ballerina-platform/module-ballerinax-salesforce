@@ -33,32 +33,39 @@ sfdc:Client baseClient = check new (sfConfig);
 
 public function main() returns error? {
 
-    string productId = check getProductIdByName("Test Product");
+    string leadId = check getLeadIdByName("Mark", "Wahlberg", "IT World");
 
-    sfdc:Error? res = baseClient->deleteProduct(productId);
+    json leadRecord = {
+        FirstName: "Mark",
+        LastName: "Wahlberg",
+        Title: "Director in Technology",
+        Company: "IT World"
+    };
+
+    sfdc:Error? res = baseClient->updateLead(leadId, leadRecord);
 
     if res is sfdc:Error {
         log:printError(res.message());
     } else {
-        log:printInfo("Product deleted successfully");
+        log:printInfo("Lead updated successfully");
     }
 
 }
 
-function getProductIdByName(string name) returns string|error {
-    string productId = "";
-    string sampleQuery = "SELECT Id FROM Product2 WHERE Name='" + name + "'";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+function getLeadIdByName(string firstName, string lastName, string compnay) returns string|error {
+    string leadId = "";
+    string sampleQuery = "SELECT Id FROM Lead WHERE FirstName='" + firstName + "' AND LastName='" + lastName
+        + "' AND Company='" + compnay + "'";
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
-        productId = check result.value.get("Id").ensureType();
+        leadId = check result.value.get("Id").ensureType();
     } else {
-        log:printError(msg = "Getting Product ID by name failed.");
+        log:printError(msg = "Getting Lead ID by name failed.");
     }
-    return productId;
+    return leadId;
 }
 
 type ResultValue record {|
     record {} value;
 |};
-

@@ -14,18 +14,17 @@ Before using this connector in your Ballerina application, complete the followin
 ## Quickstart
 To use the Salesforce connector in your Ballerina application, update the .bal file as follows:
 
-### Client
 #### Step 1: Import connector
-Import the `ballerinax/salesforce` module into the Ballerina project.
+Import the `ballerinax/salesforce.rest` module into the Ballerina project.
 
 ```ballerina
-import ballerinax/salesforce;
+import ballerinax/salesforce.rest;
 ```
 
 #### Step 2: Create a new connector instance
-Create a `salesforce:ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
+Create a `rest:ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 ```ballerina
-salesforce:ConnectionConfig sfConfig = {
+rest:ConnectionConfig sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
      clientId: <"CLIENT_ID">,
@@ -35,7 +34,7 @@ salesforce:ConnectionConfig sfConfig = {
    }
 };
 
-salesforce:Client baseClient = new(sfConfig);
+rest:Client baseClient = new(sfConfig);
 ```
 
 #### Step 3: Invoke connector operation
@@ -53,40 +52,6 @@ Following is an example on how to create a record using the connector.
   }
   ```
 2. Use `bal run` command to compile and run the Ballerina program.
-
-### Listener
-#### Step 1: Import connector
-Import the `ballerinax/salesforce` module into the Ballerina project.
-
-```ballerina
-import ballerinax/salesforce;
-```
-#### Step 2: Create a new connector listener instance
-Create a `salesforce:ListenerConfiguration` with the basic credentials obtained, and initialize the connector with it.
-The password should be the concatenation of the user's Salesforce password and secret key.
-
-  ```ballerina
-  salesforce:ListenerConfiguration listenerConfig = {
-    username: config:getAsString("SF_USERNAME"),
-    password: config:getAsString("SF_PASSWORD")
-  };
-  listener salesforce:Listener eventListener = new (listenerConfig);
-  ```
-#### Step 3: Invoke listener service
-1. Now you can use the channel available in the Salesforce and capture the events occurred.  
-Following is an example on how to capture all events using the connector.
-
-  ```ballerina
-  @salesforce:ServiceConfig {
-      channelName:"/data/ChangeEvents"
-  }
-  service /quoteUpdate on eventListener {
-      remote function onUpdate (salesforce:EventData quoteUpdate) { 
-          json quote = quoteUpdate.changedData.get("Status");
-      }
-  }
-  ```
-  2. Use `bal run` command to compile and run the Ballerina program.
 
 
 **[You can find a list of samples here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/salesforce/samples/rest_api_usecases)**

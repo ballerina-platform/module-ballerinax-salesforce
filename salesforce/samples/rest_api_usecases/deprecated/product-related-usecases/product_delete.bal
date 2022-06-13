@@ -33,18 +33,14 @@ sfdc:Client baseClient = check new (sfConfig);
 
 public function main() returns error? {
 
-    string productId = check getProductIdByName("P2");
+    string productId = check getProductIdByName("Test Product");
 
-    json productRecord = {
-        Name: "Test Product"
-    };
-
-    sfdc:Error? res = baseClient->updateProduct(productId, productRecord);
+    sfdc:Error? res = baseClient->deleteProduct(productId);
 
     if res is sfdc:Error {
         log:printError(res.message());
     } else {
-        log:printInfo("Product updated successfully");
+        log:printInfo("Product deleted successfully");
     }
 
 }
@@ -52,7 +48,7 @@ public function main() returns error? {
 function getProductIdByName(string name) returns string|error {
     string productId = "";
     string sampleQuery = "SELECT Id FROM Product2 WHERE Name='" + name + "'";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         productId = check result.value.get("Id").ensureType();
@@ -65,3 +61,4 @@ function getProductIdByName(string name) returns string|error {
 type ResultValue record {|
     record {} value;
 |};
+

@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce.rest as sfdc;
-import ballerinax/salesforce.bulk;
 import ballerina/regex;
+import ballerinax/salesforce.bulk;
+import ballerinax/salesforce.rest;
 
 // Create Salesforce client configuration by reading from config file.
-sfdc:ConnectionConfig sfConfig = {
+rest:ConnectionConfig sfConfig = {
     baseUrl: "<BASE_URL>",
     clientConfig: {
         clientId: "<CLIENT_ID>",
@@ -31,7 +31,7 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-sfdc:Client baseClient = check new (sfConfig);
+rest:Client baseClient = check new (sfConfig);
 bulk:Client bulkClient = check new (sfConfig);
 
 public function main() returns error? {
@@ -114,7 +114,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string contactId = "";
     string sampleQuery = string `SELECT Id FROM Contact WHERE FirstName='${firstName}' AND LastName='${lastName}' 
         AND Title='${title}' LIMIT 1`;
-    stream<record {}, error?> queryResults = check baseClient->getQueryResultStreamWithType(sampleQuery);
+    stream<record {}, error?> queryResults = check baseClient->query(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         contactId = check result.value.get("Id").ensureType();

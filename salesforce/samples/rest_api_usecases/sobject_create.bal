@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -33,17 +33,16 @@ public function main() returns error? {
     // Create Salesforce client.
     sfdc:Client baseClient = check new (sfConfig);
 
-    json accountRecord = {
-        Name: "IT World",
-        BillingCity: "Colombo 1"
+    record{} accountRecord = {
+        "Name": "IT World",
+        "BillingCity": "Colombo 1"
     };
 
-    string|sfdc:Error res = baseClient->createRecord("Account", accountRecord);
+    sfdc:CreationResponse|error res = baseClient->create("Account", accountRecord);
 
-    if res is string {
-        log:printInfo("Account Created Successfully. Account ID : " + res);
+    if res is sfdc:CreationResponse {
+        log:printInfo("Account Created Successfully. Account ID : " + res.id);
     } else {
         log:printError(msg = res.message());
     }
-
 }

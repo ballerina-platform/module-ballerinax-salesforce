@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// ************************************ Salesforce soap client constants ***********************************************
+
 // Path constants
 const string SERVICES = "services";
 const string SOAP = "Soap";
@@ -36,6 +38,3 @@ const string XMLNS_XSI = "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\
 
 const string VERSION = "48.0";
 const string EMPTY_STRING = "";
-
-const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
-const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";

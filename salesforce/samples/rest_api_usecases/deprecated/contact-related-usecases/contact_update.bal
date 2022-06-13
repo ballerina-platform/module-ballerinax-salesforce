@@ -33,24 +33,36 @@ sfdc:Client baseClient = check new (sfConfig);
 
 public function main() returns error? {
 
-    string accountId = check getAccountIdByName("University of Kelaniya");
+    string contactId = check getContactIdByName("Peter", "Potts", "Software Engineer");
 
-    sfdc:Error? res = baseClient->deleteAccount(accountId);
+    json contactRecord = {
+        FirstName: "Peter",
+        LastName: "Potts",
+        Title: "Senior Software Engineer",
+        Phone: "0475626670",
+        Email: "peter@gmail.com",
+        My_External_Id__c: "870"
+    };
+
+    sfdc:Error? res = baseClient->updateContact(contactId, contactRecord);
 
     if res is sfdc:Error {
         log:printError(res.message());
+    } else {
+        log:printInfo("Contact updated successfully");
     }
 }
 
-function getAccountIdByName(string name) returns string|error {
+function getContactIdByName(string firstName, string lastName, string title) returns string|error {
     string contactId = "";
-    string sampleQuery = string `SELECT Id FROM Account WHERE Name='${name}'`;
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+    string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName
+        + "' AND Title='" + title + "'";
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
         contactId = check result.value.get("Id").ensureType();
     } else {
-        log:printError(msg = "Getting Account ID by name failed.");
+        log:printError(msg = "Getting Contact ID by name failed.");
     }
     return contactId;
 }

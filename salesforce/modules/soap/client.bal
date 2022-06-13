@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/http;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce SOAP connector provides the capability to access Salesforce SOAP API. 
 # This connector lets you to perform operations like create, retrieve, update or delete sobjects, such as accounts,
@@ -39,7 +39,7 @@ public isolated client class Client {
     #
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
-    public isolated function init(sfdc:ConnectionConfig salesforceConfig) returns error? {
+    public isolated function init(ConnectionConfig salesforceConfig) returns error? {
         self.clientConfig = salesforceConfig.clientConfig.cloneReadOnly();
         http:ClientSecureSocket? socketConfig = salesforceConfig?.secureSocketConfig;
 
@@ -53,7 +53,7 @@ public isolated client class Client {
         if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
             self.clientHandler = httpHandlerResult;
         } else {
-            return error(sfdc:INVALID_CLIENT_CONFIG);
+            return error(utils:INVALID_CLIENT_CONFIG);
         }
 
         http:Client|error httpClientResult = trap new (salesforceConfig.baseUrl, {
@@ -76,7 +76,7 @@ public isolated client class Client {
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
-            return error(sfdc:INVALID_CLIENT_CONFIG);
+            return error(utils:INVALID_CLIENT_CONFIG);
         }
     }
 
@@ -90,8 +90,49 @@ public isolated client class Client {
         http:Request request = new;
         request.setHeader(SOAP_ACTION, ADD);
         request.setTextPayload(xmlPayload, contentType = TEXT_XML);
-        string path = sfdc:prepareUrl([SERVICES, SOAP, C, VERSION]);
+        string path = utils:prepareUrl([SERVICES, SOAP, C, VERSION]);
         http:Response response = check self.salesforceClient->post(path, request);
         return createResponse(response);
     }
 }
+
+# Salesforce client configuration.
+#
+# + baseUrl - The Salesforce endpoint URL
+# + clientConfig - OAuth2 direct token configuration
+# + secureSocketConfig - HTTPS secure socket configuration
+# + httpVersion - The HTTP version understood by the client
+# + http1Settings - Configurations related to HTTP/1.x protocol
+# + http2Settings - Configurations related to HTTP/2 protocol
+# + timeout - The maximum time to wait (in seconds) for a response before closing the connection
+# + forwarded - The choice of setting `forwarded`/`x-forwarded` header
+# + followRedirects - Configurations associated with Redirection
+# + poolConfig - Configurations associated with request pooling
+# + cache - HTTP caching related configurations
+# + compression - Specifies the way of handling compression (`accept-encoding`) header
+# + circuitBreaker - Configurations associated with the behaviour of the Circuit Breaker
+# + retryConfig - Configurations associated with retrying
+# + cookieConfig - Configurations associated with cookies
+# + responseLimits - Configurations associated with inbound response size limits
+@display {label: "Connection Config"}
+public type ConnectionConfig record {|
+    @display {label: "Salesforce Domain URL"}
+    string baseUrl;
+    @display {label: "Auth Config"}
+    http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
+    @display {label: "SSL Config"}
+    http:ClientSecureSocket secureSocketConfig?;
+    string httpVersion = "1.1";
+    http:ClientHttp1Settings http1Settings = {};
+    http:ClientHttp2Settings http2Settings = {};
+    decimal timeout = 60;
+    string forwarded = "disable";
+    http:FollowRedirects? followRedirects = ();
+    http:PoolConfiguration? poolConfig = ();
+    http:CacheConfig cache = {};
+    http:Compression compression = http:COMPRESSION_AUTO;
+    http:CircuitBreakerConfig? circuitBreaker = ();
+    http:RetryConfig? retryConfig = ();
+    http:CookieConfig? cookieConfig = ();
+    http:ResponseLimitConfigs responseLimits = {};
+|};

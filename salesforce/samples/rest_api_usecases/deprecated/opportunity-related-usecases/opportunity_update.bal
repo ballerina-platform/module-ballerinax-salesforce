@@ -33,33 +33,38 @@ sfdc:Client baseClient = check new (sfConfig);
 
 public function main() returns error? {
 
-    string accountId = check getAccountIdByName("University of Colombo");
+    string opportunityId = check getOpportunityIdByName("Alan Kimberly", "New");
 
-    json accountRecord = {
-        Name: "University of Colombo",
-        BillingCity: "Colombo 3"
+    json opportunityRecord = {
+        Name: "Alan Kimberly",
+        CloseDate: "2020-02-25",
+        StageName: "Prospecting"
     };
 
-    sfdc:Error? res = baseClient->updateAccount(accountId, accountRecord);
+    sfdc:Error? res = baseClient->updateOpportunity(opportunityId, opportunityRecord);
 
     if res is sfdc:Error {
         log:printError(res.message());
+    } else {
+        log:printInfo("Opportunity updated successfully");
     }
+
 }
 
-function getAccountIdByName(string name) returns string|error {
-    string contactId = "";
-    string sampleQuery = "SELECT Id FROM Account WHERE Name='" + name + "'";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+function getOpportunityIdByName(string name, string stageName) returns string|error {
+    string opportunityId = "";
+    string sampleQuery = "SELECT Id FROM Opportunity WHERE Name='" + name + "' AND StageName='" + stageName + "'";
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
-        contactId = check result.value.get("Id").ensureType();
+        opportunityId = check result.value.get("Id").ensureType();
     } else {
-        log:printError(msg = "Getting Account ID by name failed.");
+        log:printError(msg = "Getting Opportunity ID by name failed.");
     }
-    return contactId;
+    return opportunityId;
 }
 
 type ResultValue record {|
     record {} value;
 |};
+

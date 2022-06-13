@@ -12,18 +12,17 @@ Before using this connector in your Ballerina application, complete the followin
 ## Quickstart
 To use the Salesforce connector in your Ballerina application, update the .bal file as follows:
 ### Step 1: Import connector
-Import the `ballerinax/salesforce` and `ballerinax/salesforce.bulk` modules into the Ballerina project.
+Import the `ballerinax/salesforce.bulk` module into the Ballerina project.
 
 ```ballerina
-import ballerinax/salesforce;
 import ballerinax/salesforce.bulk;
 ```
 
 ### Step 2: Create a new connector instance
-Create a `salesforce:ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
+Create a `ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 ```ballerina
 
-salesforce:ConnectionConfig sfConfig = {
+bulk:ConnectionConfig sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
      clientId: <"CLIENT_ID">,

@@ -33,38 +33,29 @@ sfdc:Client baseClient = check new (sfConfig);
 
 public function main() returns error? {
 
-    string contactId = check getContactIdByName("Peter", "Potts", "Software Engineer");
+    string opportunityId = check getOpportunityIdByName("Alan Kimberly", "New");
 
-    json contactRecord = {
-        FirstName: "Peter",
-        LastName: "Potts",
-        Title: "Senior Software Engineer",
-        Phone: "0475626670",
-        Email: "peter@gmail.com",
-        My_External_Id__c: "870"
-    };
-
-    sfdc:Error? res = baseClient->updateContact(contactId, contactRecord);
+    sfdc:Error? res = baseClient->deleteOpportunity(opportunityId);
 
     if res is sfdc:Error {
         log:printError(res.message());
     } else {
-        log:printInfo("Contact updated successfully");
+        log:printInfo("Opportunity deleted successfully");
     }
+
 }
 
-function getContactIdByName(string firstName, string lastName, string title) returns string|error {
-    string contactId = "";
-    string sampleQuery = "SELECT Id FROM Contact WHERE FirstName='" + firstName + "' AND LastName='" + lastName
-        + "' AND Title='" + title + "'";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+function getOpportunityIdByName(string name, string stageName) returns string|error {
+    string opportunityId = "";
+    string sampleQuery = "SELECT Id FROM Opportunity WHERE Name='" + name + "' AND StageName='" + stageName + "'";
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
-        contactId = check result.value.get("Id").ensureType();
+        opportunityId = check result.value.get("Id").ensureType();
     } else {
-        log:printError(msg = "Getting Contact ID by name failed.");
+        log:printError(msg = "Getting Opportunity ID by name failed.");
     }
-    return contactId;
+    return opportunityId;
 }
 
 type ResultValue record {|

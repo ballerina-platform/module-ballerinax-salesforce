@@ -17,6 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce as sfdc;
 
+// Create Salesforce client configuration by reading from config file.
 sfdc:ConnectionConfig sfConfig = {
     baseUrl: "<BASE_URL>",
     clientConfig: {
@@ -32,29 +33,26 @@ sfdc:Client baseClient = check new (sfConfig);
 
 public function main() returns error? {
 
-    string leadId = check getLeadIdByName("Mark", "Wahlberg", "IT World");
+    string accountId = check getAccountIdByName("University of Kelaniya");
 
-    sfdc:Error? res = baseClient->deleteLead(leadId);
+    sfdc:Error? res = baseClient->deleteAccount(accountId);
 
     if res is sfdc:Error {
         log:printError(res.message());
-    } else {
-        log:printInfo("Lead deleted successfully");
     }
 }
 
-function getLeadIdByName(string firstName, string lastName, string compnay) returns string|error {
-    string leadId = "";
-    string sampleQuery = "SELECT Id FROM Lead WHERE FirstName='" + firstName + "' AND LastName='" + lastName
-        + "' AND Company='" + compnay + "'";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResult(sampleQuery);
+function getAccountIdByName(string name) returns string|error {
+    string contactId = "";
+    string sampleQuery = string `SELECT Id FROM Account WHERE Name='${name}'`;
+    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if result is ResultValue {
-        leadId = check result.value.get("Id").ensureType();
+        contactId = check result.value.get("Id").ensureType();
     } else {
-        log:printError(msg = "Getting Lead ID by name failed.");
+        log:printError(msg = "Getting Account ID by name failed.");
     }
-    return leadId;
+    return contactId;
 }
 
 type ResultValue record {|

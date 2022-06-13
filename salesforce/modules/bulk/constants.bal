@@ -21,9 +21,6 @@ const string REQUEST = "request";
 # Constant field `RESULT`. Holds the value of "result".
 const string RESULT = "result";
 
-# Constant field `STATUS_CODE`. Header name for bulk API response .
-const string STATUS_CODE = "STATUS_CODE";
-
 # Constant field `TEXT_CSV`. Holds the value of "text/csv".
 const TEXT_CSV = "text/csv";
 
@@ -42,14 +39,8 @@ const string CONTENT_TYPE = "Content-Type";
 # Holds the value of "X-SFDC-Session" which used as Authorization header name of bulk API.
 const string X_SFDC_SESSION = "X-SFDC-Session";
 
-# Holds the value of "InvalidSessionId" which used to identify Unauthorized 401 response.
-const string INVALID_SESSION_ID = "InvalidSessionId";
-
 # Constant field `EMPTY_STRING`. Holds the value of "".
 const string EMPTY_STRING = "";
-
-# Constant field `AMPERSAND`. Holds the value of "&".
-const string AMPERSAND = "&";
 
 # Constant field `COMMA`. Holds the value of ",".
 const string COMMA = ",";
@@ -61,9 +52,8 @@ const string NEW_LINE = "\n";
 const string FORWARD_SLASH = "/";
 
 // Payloads
-
 # Constant field `JSON_STATE_CLOSED_PAYLOAD`. Holds the value of JSON body which needs to close the job.
 final json JSON_STATE_CLOSED_PAYLOAD = {state: "Closed"};
 
-const INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";
-const ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
+public const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
+public const INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";

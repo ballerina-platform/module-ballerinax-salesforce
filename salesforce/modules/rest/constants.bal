@@ -14,28 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-const string REFRESH_URL = "https://login.salesforce.com/services/oauth2/token";
+// ************************************ Salesforce rest client constants ***********************************************
 
-// Ballerina config keys
-# Constant field `ENDPOINT`. Holds the value for Salesforce endpoint.
-const string ENDPOINT = "ENDPOINT";
-
-# Constant field `ACCESS_TOKEN`. Holds the value for the access token generated for your app.
-const string ACCESS_TOKEN = "ACCESS_TOKEN";
-
-# Constant field `CLIENT_ID`. Holds the value for the client id generated for your app.
-const string CLIENT_ID = "CLIENT_ID";
-
-# Constant field `CLIENT_SECRET`. Holds the value for the client secret generated for your app.
-const string CLIENT_SECRET = "CLIENT_SECRET";
-
-# Constant field `REFRESH_TOKEN`. Holds the value for the refresh token generated for your app.
-const string REFRESH_TOKEN = "REFRESH_TOKEN";
-
-# Constant field `REFRESH_TOKEN_ENDPOINT`. Holds the value for Salesforce refresh token endpoint.
-const string REFRESH_TOKEN_ENDPOINT = "REFRESH_URL";
-
-//Latest API Version
 # Constant field `API_VERSION`. Holds the value for the Salesforce API version.
 public const string API_VERSION = "v48.0";
 
@@ -56,26 +36,14 @@ const string SOBJECTS = "sobjects";
 # Constant field `LIMITS`. Holds the value limits for get limits resource prefix.
 const string LIMITS = "limits";
 
-# Constant field `DELETED`. Holds the value deleted for deleted records resource prefix.
-const string DELETED = "deleted";
-
-# Constant field `UPDATED`. Holds the value updated for updated records resource prefix.
-const string UPDATED = "updated";
-
 # Constant field `DESCRIBE`. Holds the value describe for describe resource prefix.
 const string DESCRIBE = "describe";
 
 # Constant field `search`. Holds the value search for SOSL search resource prefix.
 const string SEARCH = "search";
 
-# Constant field `QUERYALL`. Holds the value `queryAll` for query all resource prefix and bulk API queryAll operator.
-const QUERYALL = "queryAll";
-
 # Constant field `PLATFORM_ACTION`. Holds the value PlatformAction for resource prefix.
 const string PLATFORM_ACTION = "PlatformAction";
-
-# Constant field `MULTIPLE_RECORDS`. Holds the value composite/tree for resource prefix.
-const string MULTIPLE_RECORDS = "composite/tree";
 
 // Query param names
 const string QUERY = "query";
@@ -83,33 +51,8 @@ const string QUERY = "query";
 # Constant field `FIELDS`. Holds the value fields for resource prefix.
 const string FIELDS = "fields";
 
-# Constant field `start`. Holds the value for start.
-const string START = "start";
-
-# Constant field `end`. Holds the value for end.
-const string END = "end";
-
 # Constant field `q`. Holds the value q for query resource prefix.
 const string Q = "q";
-
-# Constant field `EXPLAIN`. Holds the value explain for resource prefix.
-const string EXPLAIN = "explain";
-
-//  SObjects
-# Constant field `ACCOUNT`. Holds the value Account for account object.
-const string ACCOUNT = "Account";
-
-# Constant field `LEAD`. Holds the value Lead for lead object.
-const string LEAD = "Lead";
-
-# Constant field `CONTACT`. Holds the value Contact for contact object.
-const string CONTACT = "Contact";
-
-# Constant field `OPPORTUNITY`. Holds the value Opportunity for opportunity object.
-const string OPPORTUNITY = "Opportunity";
-
-# Constant field `PRODUCT`. Holds the value Product2 for product object.
-const string PRODUCT = "Product2";
 
 # Constant field `QUESTION_MARK`. Holds the value of "?".
 const string QUESTION_MARK = "?";
@@ -130,3 +73,6 @@ const string FORWARD_SLASH = "/";
 const NEXT_RECORDS_URL = "nextRecordsUrl";
 
 const ATTRIBUTES = "attributes";
+
+const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
+const INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";
