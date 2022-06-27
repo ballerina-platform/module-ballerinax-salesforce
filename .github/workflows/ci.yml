@@ -41,7 +41,7 @@ jobs:
 
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action/@2201.1.0
         with:
           args:
             pack ./salesforce
@@ -50,7 +50,7 @@ jobs:
 
       # Test Ballerina Project
       - name: Ballerina Test
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action/@2201.1.0
         with:
           args:
             test --code-coverage ./salesforce
@@ -60,7 +60,8 @@ jobs:
           EP_URL: ${{ secrets.EP_URL }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           REFRESH_URL: ${{ secrets.REFRESH_URL }}
-
+          JAVA_HOME: /usr/lib/jvm/default-jvm
+          
       # Read the ballerina test results
       - name: Read Ballerina Test Results
         id: test_results

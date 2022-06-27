@@ -1,5 +1,5 @@
 [package]
-distribution = "2201.0.3"
+distribution = "2201.1.0"
 org = "ballerinax"
 name = "salesforce"
 version = "7.0.0"

@@ -20,7 +20,7 @@ import ballerinax/salesforce.utils;
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
 # and organizational data.
-# 
+#
 # # Deprecated
 # This client class is deprecated as it is exposed as a seperate client.
 # Use the new and improved `salesforce.rest` client instead.
@@ -71,20 +71,20 @@ public isolated client class Client {
     }
 
     ///////////////////////////////////////////// DEPRECATED ///////////////////////////////////////////////////////////
-    
+
     //Describe SObjects
     # Lists the available objects and their metadata for your organization and available to the logged-in user.
     #
     # + return - `OrgMetadata` record if successful or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as the `salesforce` client is deprecated.
     # Use the `describeAvailableObjects` function in `salesforce.rest` client instead.
     @display {label: "Get Available Objects"}
     @deprecated
-    isolated remote function describeAvailableObjects() 
-                                                      returns @display {label: "Organization Metadata"} 
-                                                      OrgMetadata|Error {
+    isolated remote function describeAvailableObjects()
+                                                    returns @display {label: "Organization Metadata"}
+                                                    OrgMetadata|Error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS]);
         json res = check self.get(path);
         return toOrgMetadata(res);
@@ -94,15 +94,15 @@ public isolated client class Client {
     #
     # + sobjectName - SObject name
     # + return - `SObjectBasicInfo` record if successful or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as the `salesforce` client is deprecated.
     # Use the `getSObjectBasicInfo` function in `salesforce.rest` client instead.
     @display {label: "Get SObject Basic Information"}
     @deprecated
-    isolated remote function getSObjectBasicInfo(@display {label: "SObject Name"} string sobjectName) 
-                                                 returns @display {label: "SObject Basic Information"} 
-                                                 SObjectBasicInfo|Error {
+    isolated remote function getSObjectBasicInfo(@display {label: "SObject Name"} string sobjectName)
+                                                returns @display {label: "SObject Basic Information"}
+                                                SObjectBasicInfo|Error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
         json res = check self.get(path);
         return toSObjectBasicInfo(res);
@@ -113,13 +113,13 @@ public isolated client class Client {
     #
     # + sObjectName - SObject name value
     # + return - `SObjectMetaData` record if successful or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as the `salesforce` client is deprecated.
     # Use the `describeSObject` function in `salesforce.rest` client instead.
     @display {label: "Get SObject Description"}
     @deprecated
-    isolated remote function describeSObject(@display {label: "SObject Name"} string sObjectName) 
+    isolated remote function describeSObject(@display {label: "SObject Name"} string sObjectName)
                                             returns @display {label: "SObject Metadata"} SObjectMetaData|Error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
         json res = check self.get(path);
@@ -129,26 +129,25 @@ public isolated client class Client {
     # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
     #
     # + return - `SObjectBasicInfo` record if successful or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as the `salesforce` client is deprecated.
     # Use the `sObjectPlatformAction` function in `salesforce.rest` client instead.
     @display {label: "Get SObject Platform Action"}
     @deprecated
-    isolated remote function sObjectPlatformAction() 
-                                                  returns @display {label: "SObject Basic Information"} 
-                                                  SObjectBasicInfo|Error {
+    isolated remote function sObjectPlatformAction()
+                                                returns @display {label: "SObject Basic Information"}
+                                                SObjectBasicInfo|Error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
         json res = check self.get(path);
         return toSObjectBasicInfo(res);
     }
 
-
     //Describe Organization
     # Lists summary details about each REST API version available.
     #
     # + return - List of `Version` if successful. Else, the occured Error.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as the `salesforce` client is deprecated.
     # Use the `getAvailableApiVersions` function in `salesforce.rest` client instead.
@@ -164,14 +163,14 @@ public isolated client class Client {
     #
     # + apiVersion - API version (v37)
     # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as the `salesforce` client is deprecated.
     # Use the `getResourcesByApiVersion` function in `salesforce.rest` client instead.
     @display {label: "Get Resources by API Version"}
     @deprecated
-    isolated remote function getResourcesByApiVersion(@display {label: "API Version"} string apiVersion) 
-                                                      returns @display {label: "Resources"} map<string>|Error {
+    isolated remote function getResourcesByApiVersion(@display {label: "API Version"} string apiVersion)
+                                                     returns @display {label: "Resources"} map<string>|Error {
         string path = utils:prepareUrl([BASE_PATH, apiVersion]);
         json res = check self.get(path);
         return toMapOfStrings(res);
@@ -180,33 +179,32 @@ public isolated client class Client {
     # Lists the Limits information for your organization.
     #
     # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as the `salesforce` client is deprecated.
     # Use the `getOrganizationLimits` function in `salesforce.rest` client instead.
     @display {label: "Get Organization Limits"}
     @deprecated
-    isolated remote function getOrganizationLimits() 
-                                                   returns @display {label: "Organization Limits"} 
-                                                   map<Limit>|Error {
+    isolated remote function getOrganizationLimits()
+                                                    returns @display {label: "Organization Limits"}
+                                                    map<Limit>|Error {
         string path = utils:prepareUrl([API_BASE_PATH, LIMITS]);
         json res = check self.get(path);
         return toMapOfLimits(res);
     }
 
-
     # Accesses records based on the specified object ID, can be used with external objects.
-    # 
+    #
     # + path - Resource path
     # + return - JSON result if successful else or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getById(string sObject, string id)` function instead.
     @display {label: "Get Record"}
     @deprecated
-    isolated remote function getRecord(@display {label: "Resource Path"} string path) 
-                                       returns @display {label: "Result"} json|Error {
+    isolated remote function getRecord(@display {label: "Resource Path"} string path)
+                                        returns @display {label: "Result"} json|Error {
         json|http:ClientError response = self.salesforceClient->get(path);
         if response is json {
             return response;
@@ -215,8 +213,8 @@ public isolated client class Client {
         }
     }
 
-    private isolated function get(@display {label: "Resource Path"} string path) 
-                         returns @display {label: "Result"} json|Error {
+    private isolated function get(@display {label: "Resource Path"} string path)
+                                  returns @display {label: "Result"} json|Error {
         json|http:ClientError response = self.salesforceClient->get(path);
         if response is json {
             return response;
@@ -231,16 +229,17 @@ public isolated client class Client {
     # + id - SObject ID
     # + fields - Fields to retrieve 
     # + return - JSON result if successful or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getById(string sObject, string id)` function instead.
     @display {label: "Get Record by ID"}
     @deprecated
-    isolated remote function getRecordById(@display {label: "SObject Name"} string sobject, 
-                                           @display {label: "SObject ID"} string id, 
-                                           @display {label: "Fields to Retrieve"} string... fields) 
-                                           returns @display {label: "Result"} json|Error {
+    isolated remote function getRecordById(@display {label: "SObject Name"} string sobject,
+                                            @display {label: "SObject ID"} string id,
+                                            @display {label: "Fields to Retrieve"}
+                                           string... fields)
+                                            returns @display {label: "Result"} json|Error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
@@ -249,10 +248,11 @@ public isolated client class Client {
         return response;
     }
 
-    private isolated function getByIdUtil(@display {label: "SObject Name"} string sobject, 
-                                           @display {label: "SObject ID"} string id, 
-                                           @display {label: "Fields to Retrieve"} string... fields) 
-                                           returns @display {label: "Result"} json|Error {
+    private isolated function getByIdUtil(@display {label: "SObject Name"} string sobject,
+                                            @display {label: "SObject ID"} string id,
+                                            @display {label: "Fields to Retrieve"}
+                                          string... fields)
+                                            returns @display {label: "Result"} json|Error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
@@ -268,17 +268,18 @@ public isolated client class Client {
     # + extId - External ID value 
     # + fields - Fields to retrieve 
     # + return - JSON result if successful or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getByExternalId(string sObject, string extIdField, string extId)` function instead.
     @display {label: "Get Record by External ID"}
     @deprecated
-    isolated remote function getRecordByExtId(@display {label: "SObject Name"} string sobject, 
-                                              @display {label: "External ID Field Name"} string extIdField, 
-                                              @display {label: "External ID"} string extId, 
-                                              @display {label: "Fields to Retrieve"} string... fields) 
-                                              returns @display {label: "Result"} json|Error {
+    isolated remote function getRecordByExtId(@display {label: "SObject Name"} string sobject,
+                                            @display {label: "External ID Field Name"} string extIdField,
+                                            @display {label: "External ID"} string extId,
+                                            @display {label: "Fields to Retrieve"}
+                                              string... fields)
+                                            returns @display {label: "Result"} json|Error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
@@ -292,15 +293,15 @@ public isolated client class Client {
     # + sObjectName - SObject name value
     # + recordPayload - JSON record to be inserted
     # + return - Created entity ID if successful or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `create(string sObjectName, record{} recordPayload)` function instead.
     @display {label: "Create Record"}
     @deprecated
-    isolated remote function createRecord(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "Record Payload"} json recordPayload) 
-                                          returns @display {label: "Created Entity ID"} string|Error {
+    isolated remote function createRecord(@display {label: "SObject Name"} string sObjectName,
+                                        @display {label: "Record Payload"} json recordPayload)
+                                        returns @display {label: "Created Entity ID"} string|Error {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(recordPayload);
@@ -317,9 +318,9 @@ public isolated client class Client {
         }
     }
 
-    private isolated function createUtil(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "Record Payload"} json recordPayload) 
-                                          returns @display {label: "Created Entity ID"} string|Error {
+    private isolated function createUtil(@display {label: "SObject Name"} string sObjectName,
+                                        @display {label: "Record Payload"} json recordPayload)
+                                        returns @display {label: "Created Entity ID"} string|Error {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(recordPayload);
@@ -341,15 +342,15 @@ public isolated client class Client {
     # + sObjectName - SObject name value
     # + id - SObject ID
     # + return - true if successful else false or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated to rename it.
     # Use the new and improved `delete(string sObjectName, string id)` function instead.
     @display {label: "Delete Record"}
     @deprecated
-    isolated remote function deleteRecord(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "SObject ID"} string id) 
-                                          returns @display {label: "Result"} Error? {
+    isolated remote function deleteRecord(@display {label: "SObject Name"} string sObjectName,
+                                        @display {label: "SObject ID"} string id)
+                                        returns @display {label: "Result"} Error? {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         http:Response|http:ClientError response = self.salesforceClient->delete(path);
         if response is http:ClientError {
@@ -357,9 +358,9 @@ public isolated client class Client {
         }
     }
 
-    private isolated function deleteUtil(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "SObject ID"} string id) 
-                                          returns @display {label: "Result"} Error? {
+    private isolated function deleteUtil(@display {label: "SObject Name"} string sObjectName,
+                                        @display {label: "SObject ID"} string id)
+                                        returns @display {label: "Result"} Error? {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         http:Response|http:ClientError response = self.salesforceClient->delete(path);
         if response is http:ClientError {
@@ -373,16 +374,16 @@ public isolated client class Client {
     # + id - SObject ID
     # + recordPayload - JSON record to be updated
     # + return - true if successful else false or else `sfdc:Error`
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `update(string sObjectName, string id, record{} recordPayload)` function instead.
     @display {label: "Update Record"}
     @deprecated
-    isolated remote function updateRecord(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "SObject ID"} string id, 
-                                          @display {label: "Record Payload"} json recordPayload) 
-                                          returns @display {label: "Result"} Error? {
+    isolated remote function updateRecord(@display {label: "SObject Name"} string sObjectName,
+                                        @display {label: "SObject ID"} string id,
+                                        @display {label: "Record Payload"} json recordPayload)
+                                        returns @display {label: "Result"} Error? {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
@@ -392,10 +393,10 @@ public isolated client class Client {
         }
     }
 
-    private isolated function updateUtil(@display {label: "SObject Name"} string sObjectName, 
-                                          @display {label: "SObject ID"} string id, 
-                                          @display {label: "Record Payload"} json recordPayload) 
-                                          returns @display {label: "Result"} Error? {
+    private isolated function updateUtil(@display {label: "SObject Name"} string sObjectName,
+                                        @display {label: "SObject ID"} string id,
+                                        @display {label: "Record Payload"} json recordPayload)
+                                        returns @display {label: "Result"} Error? {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(recordPayload);
@@ -411,14 +412,15 @@ public isolated client class Client {
     # + accountId - Account ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getById(string sObject, string id)` function instead.
     @display {label: "Get Account by ID"}
     @deprecated
-    isolated remote function getAccountById(@display {label: "Account ID"} string accountId, 
-                                            @display {label: "Fields to Retrieve"} string... fields) 
+    isolated remote function getAccountById(@display {label: "Account ID"} string accountId,
+                                            @display {label: "Fields to Retrieve"}
+                                            string... fields)
                                             returns @display {label: "Result"} json|Error {
         json res = check self.getByIdUtil(ACCOUNT, accountId, ...fields);
         return res;
@@ -433,8 +435,8 @@ public isolated client class Client {
     # Use the new and improved `create(string sObjectName, record{} recordPayload)` function instead.
     @display {label: "Create Account"}
     @deprecated
-    isolated remote function createAccount(@display {label: "Account Record"} json accountRecord) 
-                                           returns @display {label: "Account ID"} string|Error {
+    isolated remote function createAccount(@display {label: "Account Record"} json accountRecord)
+                                            returns @display {label: "Account ID"} string|Error {
         return self.createUtil(ACCOUNT, accountRecord);
     }
 
@@ -442,14 +444,14 @@ public isolated client class Client {
     #
     # + accountId - Account ID
     # + return - `true` if successful `false` otherwise, or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated to rename it.
     # Use the new and improved `delete(string sObjectName, string id)` function instead.
     @display {label: "Delete Account"}
     @deprecated
-    isolated remote function deleteAccount(@display {label: "Account ID"} string accountId) 
-                                           returns @display {label: "Result"} Error? {
+    isolated remote function deleteAccount(@display {label: "Account ID"} string accountId)
+                                            returns @display {label: "Result"} Error? {
         return self.deleteUtil(ACCOUNT, accountId);
     }
 
@@ -464,9 +466,9 @@ public isolated client class Client {
     # Use the new and improved `update(string sObjectName, string id, record{} recordPayload)` function instead.
     @display {label: "Update Account"}
     @deprecated
-    isolated remote function updateAccount(@display {label: "Account ID"} string accountId, 
-                                           @display {label: "Account Record"} json accountRecord) 
-                                           returns @display {label: "Result"} Error? {
+    isolated remote function updateAccount(@display {label: "Account ID"} string accountId,
+                                            @display {label: "Account Record"} json accountRecord)
+                                            returns @display {label: "Result"} Error? {
         return self.updateUtil(ACCOUNT, accountId, accountRecord);
     }
 
@@ -476,15 +478,16 @@ public isolated client class Client {
     # + leadId - Lead ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getById(string sObject, string id)` function instead.
     @display {label: "Get Lead by ID"}
     @deprecated
-    isolated remote function getLeadById(@display {label: "Lead ID"} string leadId, 
-                                         @display {label: "Fields to Retrieve"} string... fields) 
-                                         returns @display {label: "Result"} json|Error {
+    isolated remote function getLeadById(@display {label: "Lead ID"} string leadId,
+                                        @display {label: "Fields to Retrieve"}
+                                         string... fields)
+                                        returns @display {label: "Result"} json|Error {
         json res = check self.getByIdUtil(LEAD, leadId, ...fields);
         return res;
     }
@@ -493,13 +496,13 @@ public isolated client class Client {
     #
     # + leadRecord - Lead JSON record to be inserted
     # + return - Lead ID if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `create(string sObjectName, record{} recordPayload)` function instead.
     @display {label: "Create Lead"}
     @deprecated
-    isolated remote function createLead(@display {label: "Lead Record"} json leadRecord) 
+    isolated remote function createLead(@display {label: "Lead Record"} json leadRecord)
                                         returns @display {label: "Lead ID"} string|Error {
         return self.createUtil(LEAD, leadRecord);
     }
@@ -508,13 +511,13 @@ public isolated client class Client {
     #
     # + leadId - Lead ID
     # + return - `true`  if successful, `false` otherwise or an sfdc:Error incase of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated to rename it.
     # Use the new and improved `delete(string sObjectName, string id)` function instead.
     @display {label: "Delete Lead"}
     @deprecated
-    isolated remote function deleteLead(@display {label: "Lead ID"} string leadId) 
+    isolated remote function deleteLead(@display {label: "Lead ID"} string leadId)
                                         returns @display {label: "Result"} Error? {
         return self.deleteUtil(LEAD, leadId);
     }
@@ -524,14 +527,14 @@ public isolated client class Client {
     # + leadId - Lead ID
     # + leadRecord - Lead JSON record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `update(string sObjectName, string id, record{} recordPayload)` function instead.
     @display {label: "Update Lead"}
     @deprecated
-    isolated remote function updateLead(@display {label: "Lead ID"} string leadId, 
-                                        @display {label: "Lead Record"} json leadRecord) 
+    isolated remote function updateLead(@display {label: "Lead ID"} string leadId,
+                                        @display {label: "Lead Record"} json leadRecord)
                                         returns @display {label: "Result"} Error? {
         return self.updateUtil(LEAD, leadId, leadRecord);
     }
@@ -542,13 +545,13 @@ public isolated client class Client {
     # + contactId - Contact ID
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getById(string sObject, string id)` function instead.
     @display {label: "Get Contact by ID"}
     @deprecated
-    isolated remote function getContactById(@display {label: "Contact ID"} string contactId, 
+    isolated remote function getContactById(@display {label: "Contact ID"} string contactId,
                                             @display {label: "Fields to Retrieve"}
                                             string... fields) returns @display {label: "Result"} json|Error {
         json res = check self.getByIdUtil(CONTACT, contactId, ...fields);
@@ -559,14 +562,14 @@ public isolated client class Client {
     #
     # + contactRecord - JSON contact record
     # + return - Contact ID if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `create(string sObjectName, record{} recordPayload)` function instead.
     @display {label: "Create Contact"}
     @deprecated
-    isolated remote function createContact(@display {label: "Contact Record"} json contactRecord) 
-                                           returns @display {label: "Contact ID"} string|Error {
+    isolated remote function createContact(@display {label: "Contact Record"} json contactRecord)
+                                            returns @display {label: "Contact ID"} string|Error {
         return self.createUtil(CONTACT, contactRecord);
     }
 
@@ -574,14 +577,14 @@ public isolated client class Client {
     #
     # + contactId - Contact ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated to rename it.
     # Use the new and improved `delete(string sObjectName, string id)` function instead.
     @display {label: "Delete Contact"}
     @deprecated
-    isolated remote function deleteContact(@display {label: "Contact ID"} string contactId) 
-                                           returns @display {label: "Result"} Error? {
+    isolated remote function deleteContact(@display {label: "Contact ID"} string contactId)
+                                            returns @display {label: "Result"} Error? {
         return self.deleteUtil(CONTACT, contactId);
     }
 
@@ -590,15 +593,15 @@ public isolated client class Client {
     # + contactId - Contact ID
     # + contactRecord - JSON contact record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `update(string sObjectName, string id, record{} recordPayload)` function instead.
     @display {label: "Update Contact"}
     @deprecated
-    isolated remote function updateContact(@display {label: "Contact ID"} string contactId, 
-                                           @display {label: "Contact Record"} json contactRecord) 
-                                           returns @display {label: "Result"} Error? {
+    isolated remote function updateContact(@display {label: "Contact ID"} string contactId,
+                                            @display {label: "Contact Record"} json contactRecord)
+                                            returns @display {label: "Result"} Error? {
         return self.updateUtil(CONTACT, contactId, contactRecord);
     }
 
@@ -608,14 +611,15 @@ public isolated client class Client {
     # + opportunityId - Opportunity ID
     # + fields - Fields to retireve
     # + return - JSON response if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getById(string sObject, string id)` function instead.
     @display {label: "Get Opportunity by ID"}
     @deprecated
-    isolated remote function getOpportunityById(@display {label: "Opportunity ID"} string opportunityId, 
-                                                @display {label: "Fields to Retrieve"} string... fields) 
+    isolated remote function getOpportunityById(@display {label: "Opportunity ID"} string opportunityId,
+                                                @display {label: "Fields to Retrieve"}
+                                                string... fields)
                                                 returns @display {label: "Result"} json|Error {
         json res = check self.getByIdUtil(OPPORTUNITY, opportunityId, ...fields);
         return res;
@@ -625,14 +629,14 @@ public isolated client class Client {
     #
     # + opportunityRecord - JSON opportunity record
     # + return - Opportunity ID if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `create(string sObjectName, record{} recordPayload)` function instead.
     @display {label: "Create Opportunity"}
     @deprecated
-    isolated remote function createOpportunity(@display {label: "Opportunity Record"} json opportunityRecord) 
-                                               returns @display {label: "Opportunity ID"} string|Error {
+    isolated remote function createOpportunity(@display {label: "Opportunity Record"} json opportunityRecord)
+                                                returns @display {label: "Opportunity ID"} string|Error {
         return self.createUtil(OPPORTUNITY, opportunityRecord);
     }
 
@@ -640,14 +644,14 @@ public isolated client class Client {
     #
     # + opportunityId - Opportunity ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated to rename it.
     # Use the new and improved `delete(string sObjectName, string id)` function instead.
     @display {label: "Delete Opportunity"}
     @deprecated
-    isolated remote function deleteOpportunity(@display {label: "Opportunity ID"} string opportunityId) 
-                                               returns @display {label: "Result"} Error? {
+    isolated remote function deleteOpportunity(@display {label: "Opportunity ID"} string opportunityId)
+                                                returns @display {label: "Result"} Error? {
         return self.deleteUtil(OPPORTUNITY, opportunityId);
     }
 
@@ -656,15 +660,15 @@ public isolated client class Client {
     # + opportunityId - Opportunity ID
     # + opportunityRecord - Opportunity JSON payload
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `update(string sObjectName, string id, record{} recordPayload)` function instead.
     @display {label: "Update Opportunity"}
     @deprecated
-    isolated remote function updateOpportunity(@display {label: "Opportunity ID"} string opportunityId, 
-                                               @display {label: "Opportunity Record"} json opportunityRecord) 
-                                               returns @display {label: "Result"} Error? {
+    isolated remote function updateOpportunity(@display {label: "Opportunity ID"} string opportunityId,
+                                                @display {label: "Opportunity Record"} json opportunityRecord)
+                                                returns @display {label: "Result"} Error? {
         return self.updateUtil(OPPORTUNITY, opportunityId, opportunityRecord);
     }
 
@@ -674,14 +678,15 @@ public isolated client class Client {
     # + productId - Product ID
     # + fields - Fields to retireve
     # + return - JSON result if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it returns a json response.
     # Use the new and improved `getById(string sObject, string id)` function instead.
     @display {label: "Get Product by ID"}
     @deprecated
-    isolated remote function getProductById(@display {label: "Product ID"} string productId, 
-                                            @display {label: "Fields to Retrieve"} string... fields) 
+    isolated remote function getProductById(@display {label: "Product ID"} string productId,
+                                            @display {label: "Fields to Retrieve"}
+                                            string... fields)
                                             returns @display {label: "Result"} json|Error {
         json res = check self.getByIdUtil(PRODUCT, productId, ...fields);
         return res;
@@ -691,14 +696,14 @@ public isolated client class Client {
     #
     # + productRecord - JSON product record
     # + return - Product ID if successful or else an sfdc:Error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `create(string sObjectName, record{} recordPayload)` function instead.
     @display {label: "Create Product"}
     @deprecated
-    isolated remote function createProduct(@display {label: "Product Record"} json productRecord) 
-                                           returns @display {label: "Product ID"} string|Error {
+    isolated remote function createProduct(@display {label: "Product Record"} json productRecord)
+                                            returns @display {label: "Product ID"} string|Error {
         return self.createUtil(PRODUCT, productRecord);
     }
 
@@ -706,14 +711,14 @@ public isolated client class Client {
     #
     # + productId - Product ID
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated to rename it.
     # Use the new and improved `delete(string sObjectName, string id)` function instead.
     @display {label: "Delete Product"}
     @deprecated
-    isolated remote function deleteProduct(@display {label: "Product ID"} string productId) 
-                                           returns @display {label: "Result"} Error? {
+    isolated remote function deleteProduct(@display {label: "Product ID"} string productId)
+                                            returns @display {label: "Result"} Error? {
         return self.deleteUtil(PRODUCT, productId);
     }
 
@@ -722,30 +727,30 @@ public isolated client class Client {
     # + productId - Product ID
     # + productRecord - JSON product record
     # + return - `true` if successful, `false` otherwise or an sfdc:Error in case of an error
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it expects a json payload.
     # Use the new and improved `update(string sObjectName, string id, record{} recordPayload)` function instead.
     @display {label: "Update Product"}
     @deprecated
-    isolated remote function updateProduct(@display {label: "Product ID"} string productId, 
-                                           @display {label: "Product Record"} json productRecord) 
-                                           returns @display {label: "Result"} Error? {
+    isolated remote function updateProduct(@display {label: "Product ID"} string productId,
+                                            @display {label: "Product Record"} json productRecord)
+                                            returns @display {label: "Result"} Error? {
         return self.updateUtil(PRODUCT, productId, productRecord);
     }
 
     //Query
     # Executes the specified SOQL query.
-    # 
+    #
     # + receivedQuery - Sent SOQL query
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it does not handle the pagination of records
     # Use the new and improved `query(string soql)` function instead. 
     @display {label: "Get Query Result"}
     @deprecated
-    isolated remote function getQueryResult(@display {label: "SOQL Query"} string receivedQuery) 
+    isolated remote function getQueryResult(@display {label: "SOQL Query"} string receivedQuery)
                                             returns @display {label: "SOQL Result"} SoqlResult|Error {
         string path = utils:prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         json res = check self.get(path);
@@ -753,16 +758,16 @@ public isolated client class Client {
     }
 
     # If the query results are too large, retrieve the next batch of results using the nextRecordUrl.
-    # 
+    #
     # + nextRecordsUrl - URL to get the next query results
     # + return - `SoqlResult` record if successful. Else, the occurred `Error`.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it is related to pagination of results in `query(string soql)`
     # Use the new and improved `query(string soql)` function instead.
     @display {label: "Get Next Query Result"}
     @deprecated
-    isolated remote function getNextQueryResult(@display {label: "Next Records URL"} string nextRecordsUrl) 
+    isolated remote function getNextQueryResult(@display {label: "Next Records URL"} string nextRecordsUrl)
                                                 returns @display {label: "SOQL Result"} SoqlResult|Error {
         json res = check self.get(nextRecordsUrl);
         return toSoqlResult(res);
@@ -772,33 +777,33 @@ public isolated client class Client {
     #
     # + receivedQuery - Sent SOQL query
     # + return - `SoqlResult` record if successful. Else, the occurred `error`.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it does not handle the pagination of records
     # Use the new and improved `query(string soql)` function instead.
     @display {label: "Get Query Result"}
     @deprecated
-    isolated remote function getQueryResultStream(@display {label: "SOQL Query"} string receivedQuery) 
-                                            returns @display {label: "SOQL Result"} stream<record{}, error?>|error {
+    isolated remote function getQueryResultStream(@display {label: "SOQL Query"} string receivedQuery)
+                                            returns @display {label: "SOQL Result"} stream<record {}, error?>|error {
         string path = utils:prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
-        stream<record{}, error?> finalStream = new (objectInstance);
+        stream<record {}, error?> finalStream = new (objectInstance);
         return finalStream;
     }
 
     //Search
     # Executes the specified SOSL search.
-    # 
+    #
     # + searchString - Sent SOSL search query
     # + return - `SoslResult` record if successful. Else, the occurred `Error`.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it does not handle the pagination of returned data
     # Use the new and improved `search(string sosl)` function instead.
     @display {label: "SOSL Search"}
     @deprecated
-    isolated remote function searchSOSLString(@display {label: "SOSL Search Query"} string searchString) 
-                                              returns @display {label: "SOSL Result"} SoslResult|Error {
+    isolated remote function searchSOSLString(@display {label: "SOSL Search Query"} string searchString)
+                                            returns @display {label: "SOSL Result"} SoslResult|Error {
         string path = utils:prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
         json res = check self.get(path);
         return toSoslResult(res);
@@ -808,17 +813,17 @@ public isolated client class Client {
     #
     # + searchString - Sent SOSL search query
     # + return - `stream<record{}, error?>` record if successful. Else, the occurred `error`.
-    # 
+    #
     # # Deprecated
     # This function is deprecated as it does not handle the pagination of returned data
     # Use the new and improved `search(string sosl)` function instead.
     @display {label: "SOSL Search"}
     @deprecated
-    isolated remote function searchSOSLStringStream(@display {label: "SOSL Search Query"} string searchString) 
-                                              returns @display {label: "SOSL Result"} stream<record{}, error?>|error {
+    isolated remote function searchSOSLStringStream(@display {label: "SOSL Search Query"} string searchString)
+                                            returns @display {label: "SOSL Result"} stream<record {}, error?>|error {
         string path = utils:prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
         SOSLSearchResult objectInstance = check new (self.salesforceClient, path);
-        stream<record{}, error?> finalStream = new (objectInstance);
+        stream<record {}, error?> finalStream = new (objectInstance);
         return finalStream;
     }
 }

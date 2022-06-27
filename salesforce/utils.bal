@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/log;
 import ballerina/http;
 
@@ -22,7 +23,7 @@ import ballerina/http;
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
 isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
-                                    returns @tainted json|Error {
+                                    returns json|Error {
     if httpResponse is http:Response {
         if httpResponse.statusCode == http:STATUS_OK || httpResponse.statusCode == http:STATUS_CREATED || httpResponse.
         statusCode == http:STATUS_NO_CONTENT {

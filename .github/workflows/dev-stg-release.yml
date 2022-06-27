@@ -36,26 +36,31 @@ jobs:
           ./gradlew build
           
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@master
+        uses: ballerina-platform/ballerina-action/@2201.1.0
         with:
           args:
             pack ./salesforce
+        env:
+          JAVA_HOME: /usr/lib/jvm/default-jvm
+
       - name: Push to Staging
         if: github.event.inputs.bal_central_environment == 'STAGE'
-        uses: ballerina-platform/ballerina-action/@master
+        uses: ballerina-platform/ballerina-action/@2201.1.0
         with:
           args:
             push
         env:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_STAGE_ACCESS_TOKEN }}
           WORKING_DIR: ./salesforce
+          JAVA_HOME: /usr/lib/jvm/default-jvm
           
       - name: Push to Dev
         if: github.event.inputs.bal_central_environment == 'DEV'
-        uses: ballerina-platform/ballerina-action/@master
+        uses: ballerina-platform/ballerina-action/@2201.1.0
         with:
           args:
             push
         env:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_DEV_ACCESS_TOKEN }}
           WORKING_DIR: ./salesforce
+          JAVA_HOME: /usr/lib/jvm/default-jvm

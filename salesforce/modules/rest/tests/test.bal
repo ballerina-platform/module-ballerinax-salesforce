@@ -188,7 +188,7 @@ function testGetRecordByExternalIdNew() {
 function updateRecordNew() {
     log:printInfo("baseClient -> updateRecordNew()");
     Account account = {
-        Name: "WSO2 Inc",
+        Name: "MAAS Holdings",
         BillingCity: "Jaffna",
         Phone: "+94110000000"
     };
@@ -247,25 +247,13 @@ function testGetQueryResultWithPaginationNew() returns error? {
 }
 function testSearchSOSLStringNew() returns error? {
     log:printInfo("baseClient -> searchSOSLStringNew()");
-    string searchString = "FIND {WSO2 Inc}";
+    string searchString = "FIND {MAAS Holdings}";
     stream<record {}, error?>|error queryResult = baseClient->search(searchString);
     if queryResult is error {
         test:assertFail(msg = queryResult.message());
     } else {
         int count = check countStream(queryResult);
         test:assertTrue(count > 0, msg = "Found 0 search records!");
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testSearchSOSLStringNew]
-}
-function testDeleteRecordNew() {
-    log:printInfo("baseClient -> deleteRecordNew()");
-    error? response = baseClient->delete(ACCOUNT, testRecordIdNew);
-    if response is error {
-        test:assertFail(msg = response.message());
     }
 }
 
@@ -385,6 +373,15 @@ function testGetResourcesByApiVersion() {
         test:assertTrue((resources["recent"].toString().trim()).length() > 0, msg = "Found null for resource recent");
     } else {
         test:assertFail(msg = resources.message());
+    }
+}
+
+@test:AfterSuite {}
+function testDeleteRecordNew() returns error? {
+    log:printInfo("baseClient -> deleteRecordNew()");
+    error? response = baseClient->delete(ACCOUNT, testRecordIdNew);
+    if response is error {
+        test:assertFail(msg = response.message());
     }
 }
 

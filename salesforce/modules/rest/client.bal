@@ -77,7 +77,7 @@ public isolated client class Client {
     isolated remote function getById(@display {label: "sObject Name"} string sobject,
                                     @display {label: "sObject ID"} string id,
                                     @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
-                                    returns @tainted@display {label: "Result"} returnType|error = @java:Method {
+                                    returns @display {label: "Result"} returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordById"
     } external;
@@ -101,11 +101,11 @@ public isolated client class Client {
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - Record if successful or else `error`
     @display {label: "Get Record by External ID"}
-    isolated remote function getByExternalId(@display {label: "sObject Name"} string sobject, 
-                                             @display {label: "External ID Field Name"} string extIdField,
-                                             @display {label: "External ID"} string extId,
-                                             @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
-                                             returns @tainted@display {label: "Result"} returnType|error = @java:Method {
+    isolated remote function getByExternalId(@display {label: "sObject Name"} string sobject,
+                                            @display {label: "External ID Field Name"} string extIdField,
+                                            @display {label: "External ID"} string extId,
+                                            @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
+                                            returns @display {label: "Result"} returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordByExtId"
     } external;
@@ -128,7 +128,7 @@ public isolated client class Client {
     @display {label: "Create Record"}
     isolated remote function create(@display {label: "sObject Name"} string sObjectName,
                                     @display {label: "sObject Data"} record {} sObjectRecord)
-                                    returns @tainted@display {label: "Created Entity ID"} CreationResponse|error {
+                                    returns @display {label: "Created Entity ID"} CreationResponse|error {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(sObjectRecord.toJson());
@@ -229,9 +229,9 @@ public isolated client class Client {
     #
     # + return - `OrgMetadata` record if successful or else `sfdc:Error`
     @display {label: "Get Available Objects"}
-    isolated remote function describeAvailableObjects() 
-                                                      returns @display {label: "Organization Metadata"} 
-                                                      OrgMetadata|error {
+    isolated remote function describeAvailableObjects()
+                                                    returns @display {label: "Organization Metadata"}
+                                                    OrgMetadata|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS]);
         return check self.salesforceClient->get(path);
     }
@@ -241,9 +241,9 @@ public isolated client class Client {
     # + sobjectName - sObject name
     # + return - `SObjectBasicInfo` record if successful or else `sfdc:Error`
     @display {label: "Get sObject Basic Information"}
-    isolated remote function getSObjectBasicInfo(@display {label: "sObject Name"} string sobjectName) 
-                                                 returns @display {label: "sObject Basic Information"} 
-                                                 SObjectBasicInfo|error {
+    isolated remote function getSObjectBasicInfo(@display {label: "sObject Name"} string sobjectName)
+                                                returns @display {label: "sObject Basic Information"}
+                                                SObjectBasicInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
         return check self.salesforceClient->get(path);
     }
@@ -254,19 +254,19 @@ public isolated client class Client {
     # + sObjectName - sObject name value
     # + return - `SObjectMetaData` record if successful or else `sfdc:Error`
     @display {label: "Get sObject Description"}
-    isolated remote function describeSObject(@display {label: "sObject Name"} string sObjectName) 
-                                             returns @display {label: "sObject Metadata"} SObjectMetaData|error {
+    isolated remote function describeSObject(@display {label: "sObject Name"} string sObjectName)
+                                            returns @display {label: "sObject Metadata"} SObjectMetaData|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
-          return check self.salesforceClient->get(path);
+        return check self.salesforceClient->get(path);
     }
 
     # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
     #
     # + return - `SObjectBasicInfo` record if successful or else `sfdc:Error`
     @display {label: "Get sObject Platform Action"}
-    isolated remote function sObjectPlatformAction() 
-                                                  returns @display {label: "sObject Basic Information"} 
-                                                  SObjectBasicInfo|error {
+    isolated remote function sObjectPlatformAction()
+                                                returns @display {label: "sObject Basic Information"}
+                                                SObjectBasicInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
         return check self.salesforceClient->get(path);
     }
@@ -285,8 +285,8 @@ public isolated client class Client {
     # + apiVersion - API version (v37)
     # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
     @display {label: "Get Resources by API Version"}
-    isolated remote function getResourcesByApiVersion(@display {label: "API Version"} string apiVersion) 
-                                                      returns @display {label: "Resources"} map<string>|error {
+    isolated remote function getResourcesByApiVersion(@display {label: "API Version"} string apiVersion)
+                                                    returns @display {label: "Resources"} map<string>|error {
         string path = utils:prepareUrl([BASE_PATH, apiVersion]);
         json res = check self.salesforceClient->get(path);
         return toMapOfStrings(res);
@@ -296,9 +296,9 @@ public isolated client class Client {
     #
     # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
     @display {label: "Get Organization Limits"}
-    isolated remote function getOrganizationLimits() 
-                                                   returns @display {label: "Organization Limits"} 
-                                                   map<Limit>|error {
+    isolated remote function getOrganizationLimits()
+                                                    returns @display {label: "Organization Limits"}
+                                                    map<Limit>|error {
         string path = utils:prepareUrl([API_BASE_PATH, LIMITS]);
         json res = check self.salesforceClient->get(path);
         return toMapOfLimits(res);
