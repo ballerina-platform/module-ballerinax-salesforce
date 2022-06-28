@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -33,7 +33,7 @@ public function main() returns error? {
     // Create Salesforce client.
     sfdc:Client baseClient = check new (sfConfig);
     string searchString = "FIND {WSO2 Inc}";
-    stream<record {}, error?> resultStream = check baseClient->searchSOSLStringStream(searchString);
+    stream<record {}, error?> resultStream = check baseClient->search(searchString);
     int count = check countStream(resultStream);
     log:printInfo(string `${count} Record Received`);
 }

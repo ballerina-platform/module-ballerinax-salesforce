@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -35,11 +35,11 @@ public function main() returns error? {
 
     string accountId = "0015Y00002adeBWQAY";
 
-    json accountRecord = {
-        Name: "University of Kelaniya",
-        BillingCity: "Kelaniya",
-        Phone: "+94110000000"
+    record{} accountRecord = {
+        "Name": "University of Kelaniya",
+        "BillingCity": "Kelaniya",
+        "Phone": "+94110000000"
     };
-    check baseClient->updateRecord("Account", accountId, accountRecord);
+    check baseClient->update("Account", accountId, accountRecord);
     log:printInfo("Record Updated Successfully!");
 }

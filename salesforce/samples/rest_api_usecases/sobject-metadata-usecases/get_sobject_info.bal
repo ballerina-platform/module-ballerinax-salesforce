@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -34,7 +34,7 @@ public function main() returns error? {
     sfdc:Client baseClient = check new (sfConfig);
 
     string objName = "Account";
-    sfdc:SObjectBasicInfo|sfdc:Error sobjectInfo = baseClient->getSObjectBasicInfo(objName);
+    sfdc:SObjectBasicInfo|error sobjectInfo = baseClient->getSObjectBasicInfo(objName);
 
     if sobjectInfo is sfdc:SObjectBasicInfo {
         log:printInfo("SObject basic info received " + sobjectInfo.toString());

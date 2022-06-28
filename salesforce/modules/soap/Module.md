@@ -13,18 +13,17 @@ Before using this connector in your Ballerina application, complete the followin
 To use the Salesforce connector in your Ballerina application, update the .bal file as follows:
 
 ### Step 1: Import connector
-Import the `ballerinax/salesforce` and `ballerinax/salesforce.soap` modules into the Ballerina project.
+Import the `ballerinax/salesforce.soap` module into the Ballerina project.
 
 ```ballerina
-import ballerinax/salesforce;
 import ballerinax/salesforce.soap;
 ```
 
 ### Step 2: Create a new connector instance
-Create a `salesforce:ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
+Create a `soap:ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 
 ```ballerina
-salesforce:ConnectionConfig sfConfig = {
+soap:ConnectionConfig sfConfig = {
    baseUrl: <"EP_URL">,
    clientConfig: {
      clientId: <"CLIENT_ID">,
@@ -46,3 +45,5 @@ Following is an example on how to convert lead using the connector.
   }
   ```
 2. Use `bal run` command to compile and run the Ballerina program. 
+
+**[You can find a sample here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/salesforce/samples/soap_api_usecases)**

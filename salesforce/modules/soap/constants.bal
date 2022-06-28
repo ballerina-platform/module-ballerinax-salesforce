@@ -14,6 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+// ************************************ Salesforce soap client constants ***********************************************
+
 // Path constants
 const string SERVICES = "services";
 const string SOAP = "Soap";

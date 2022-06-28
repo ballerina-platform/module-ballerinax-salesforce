@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -33,7 +33,7 @@ public function main() returns error? {
     // Create Salesforce client.
     sfdc:Client baseClient = check new (sfConfig);
 
-    sfdc:OrgMetadata|sfdc:Error availableObjsDes = baseClient->describeAvailableObjects();
+    sfdc:OrgMetadata|error availableObjsDes = baseClient->describeAvailableObjects();
 
     if availableObjsDes is sfdc:OrgMetadata {
         int|error countSobjects = availableObjsDes.sobjects.length();

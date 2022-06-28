@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -33,7 +33,7 @@ public function main() returns error? {
     // Create Salesforce client.
     sfdc:Client baseClient = check new (sfConfig);
 
-    sfdc:Version[]|sfdc:Error apiVersions = baseClient->getAvailableApiVersions();
+    sfdc:Version[]|error apiVersions = baseClient->getAvailableApiVersions();
 
     if apiVersions is sfdc:Version[] {
         log:printInfo("Versions retrieved successfully : " + apiVersions.toString());

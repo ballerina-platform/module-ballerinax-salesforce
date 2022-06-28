@@ -41,3 +41,5 @@ jobs:
         with:
           args:
             pack ./salesforce
+        env:
+          JAVA_HOME: /usr/lib/jvm/default-jvm            

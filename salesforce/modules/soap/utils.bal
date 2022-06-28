@@ -17,7 +17,7 @@
 import ballerina/http;
 import ballerina/lang.'boolean as booleanLib;
 import ballerina/regex;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 isolated function buildXMLPayload(string sessionId, LeadConvert convert) returns string|error {
     string newOpportunity = convert?.doNotCreateOpportunity.toString();

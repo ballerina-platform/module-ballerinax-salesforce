@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -34,7 +34,7 @@ public function main() returns error? {
     sfdc:Client baseClient = check new (sfConfig);
 
     string sampleQuery = "SELECT name FROM Account";
-    stream<record {}, error?> queryResults = check baseClient->getQueryResultStream(sampleQuery);
+    stream<record {}, error?> queryResults = check baseClient->query(sampleQuery);
     int count = check countStream(queryResults);
     log:printInfo(string `${count} Records Recieved`);
 }

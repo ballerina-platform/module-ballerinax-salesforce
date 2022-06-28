@@ -14,15 +14,15 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/log;
-import ballerinax/salesforce as sfdc;
-import ballerinax/salesforce.bulk;
 import ballerina/io;
+import ballerina/log;
+import ballerinax/salesforce.bulk;
+import ballerinax/salesforce.rest;
 
 public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
-    sfdc:ConnectionConfig sfConfig = {
+    rest:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",

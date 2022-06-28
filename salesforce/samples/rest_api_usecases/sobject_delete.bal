@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -33,6 +33,6 @@ public function main() returns error? {
     // Create Salesforce client.
     sfdc:Client baseClient = check new (sfConfig);
     string accountId = "0015Y00002adsuhQAA";
-    check baseClient->deleteRecord("Account", accountId);
+    check baseClient->delete("Account", accountId);
     log:printInfo("Record Deleted Successfully!");
 }

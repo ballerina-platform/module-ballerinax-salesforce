@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -33,13 +33,11 @@ public function main() returns error? {
     // Create Salesforce client.
     sfdc:Client baseClient = check new (sfConfig);
 
-    json|sfdc:Error res = baseClient->getRecordByExtId("Contact", "My_External_Id__c", "102", "FirstName");
+    record {}|error res = baseClient->getByExternalId("Contact", "My_External_Id__c", "102", ["FirstName"]);
 
-    if res is json {
-        json|error recName = res.FirstName;
-        if recName is json {
-            log:printInfo("Account data received successfully. Account Name : " + recName.toString());
-        }
+    if res is record {} {
+        anydata recName = res["FirstName"];
+        log:printInfo("Account data received successfully. Account Name : " + recName.toString());
     } else {
         log:printError(msg = res.message());
     }

@@ -19,18 +19,18 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/regex;
 import ballerina/os;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 json[] jsonInsertResult = [];
 xml xmlInsertResult = xml ``;
 string csvInputResult = "Id";
 
 // Create Salesforce client configuration by reading from environemnt.
-configurable string & readonly clientId = os:getEnv("CLIENT_ID");
-configurable string & readonly clientSecret = os:getEnv("CLIENT_SECRET");
-configurable string & readonly refreshToken = os:getEnv("REFRESH_TOKEN");
-configurable string & readonly refreshUrl = os:getEnv("REFRESH_URL");
-configurable string & readonly baseUrl = os:getEnv("EP_URL");
+configurable string clientId = os:getEnv("CLIENT_ID");
+configurable string clientSecret = os:getEnv("CLIENT_SECRET");
+configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
+configurable string refreshUrl = os:getEnv("REFRESH_URL");
+configurable string baseUrl = os:getEnv("EP_URL");
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfig = {
@@ -74,7 +74,7 @@ function getContactIdByName(string firstName, string lastName, string title) ret
     string contactId = "";
     string sampleQuery = 
     string `SELECT Id FROM Contact WHERE FirstName='${firstName}' AND LastName='${lastName}' AND Title='${title}'`;
-    stream<record{}, error?> queryResults = check restClient->getQueryResultStream(sampleQuery);
+    stream<record{}, error?> queryResults = check restClient->query(sampleQuery);
     ResultValue|error? result = queryResults.next();
     if (result is ResultValue) {
         contactId = check result.value.get("Id").ensureType();

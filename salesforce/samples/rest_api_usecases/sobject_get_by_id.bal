@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 import ballerina/log;
-import ballerinax/salesforce as sfdc;
+import ballerinax/salesforce.rest as sfdc;
 
 public function main() returns error? {
 
@@ -34,13 +34,12 @@ public function main() returns error? {
 
     string accountId = "0015Y00002adeBWQAY";
 
-    json|sfdc:Error res = baseClient->getRecordById("Account", accountId, "Name", "BillingCity");
+    record{}|error res = baseClient->getById("Account", accountId, ["Name", "BillingCity"]);
 
-    if res is json {
-        json|error recName = res.Name;
-        if recName is json {
-            log:printInfo("Record data received successfully. Record Name : " + recName.toString());
-        }
+    if res is record{} {
+        anydata recName = res["Name"];
+        log:printInfo("Record data received successfully. Record Name : " + recName.toString());
+        
     } else {
         log:printError(msg = res.message());
     }

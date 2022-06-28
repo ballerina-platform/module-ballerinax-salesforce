@@ -22,7 +22,6 @@ import ballerina/lang.'float as floats;
 import ballerina/lang.'string as strings;
 import ballerina/lang.'xml as xmllib;
 import ballerina/regex;
-import ballerinax/salesforce as sfdc;
 
 isolated string csvContent = EMPTY_STRING;
 
@@ -92,8 +91,8 @@ isolated function handleXmlErrorResponse(http:Response httpResponse) returns err
     if xmlResponse is xml {
         return error((xmlResponse/<ns:exceptionCode>/*).toString());
     } else {
-        log:printError(sfdc:ERR_EXTRACTING_ERROR_MSG, 'error = xmlResponse);
-        return error(sfdc:ERR_EXTRACTING_ERROR_MSG, xmlResponse);
+        log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = xmlResponse);
+        return error(ERR_EXTRACTING_ERROR_MSG, xmlResponse);
     }
 }
 
@@ -111,8 +110,8 @@ isolated function handleJsonErrorResponse(http:Response httpResponse) returns er
             return error(resExceptionCode.message());
         }
     } else {
-        log:printError(sfdc:ERR_EXTRACTING_ERROR_MSG, 'error = response);
-        return error(sfdc:ERR_EXTRACTING_ERROR_MSG, response);
+        log:printError(ERR_EXTRACTING_ERROR_MSG, 'error = response);
+        return error(ERR_EXTRACTING_ERROR_MSG, response);
     }
 }
 
