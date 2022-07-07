@@ -54,4 +54,3 @@ isolated function toMapOfLimits(json payload) returns map<Limit>|error {
 isolated function toSObjectMetaData(json payload) returns SObjectMetaData|error {
     return check payload.cloneWithType(SObjectMetaData);
 }
-
