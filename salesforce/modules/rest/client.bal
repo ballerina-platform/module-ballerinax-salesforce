@@ -201,7 +201,7 @@ public isolated client class Client {
         string path = utils:prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
         stream<record {}, error?> finalStream = new (objectInstance);
-        return finalStream;
+        return self.streamConverter(finalStream, returnType);
     }
 
     # Executes the specified SOSL search.
@@ -219,9 +219,10 @@ public isolated client class Client {
     private isolated function processSearchSOSLString(typedesc<record {}> returnType, string searchString)
                                                     returns stream<record {}, error?>|error {
         string path = utils:prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
+
         SOSLSearchResult objectInstance = check new (self.salesforceClient, path);
         stream<record {}, error?> finalStream = new (objectInstance);
-        return finalStream;
+        return self.streamConverter(finalStream, returnType);
     }
 
     //Describe SObjects
@@ -303,6 +304,13 @@ public isolated client class Client {
         json res = check self.salesforceClient->get(path);
         return toMapOfLimits(res);
     }
+
+
+    // External function for the conversion of stream
+    isolated function streamConverter(stream<record {}, error?> data, typedesc<record {}> returnType) returns 
+    stream<record {}, error?>|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor"
+    } external;
 }
 
 # Salesforce client configuration.

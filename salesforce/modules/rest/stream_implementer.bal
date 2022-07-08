@@ -107,7 +107,8 @@ isolated function covertSearchResultsToRecordsArray(map<json>[] queryResultArray
     return resultRecordArray;
 }
 
-type Record record {};
+type Record record {
+};
 
 # Define the SOQL result type.
 #
@@ -136,7 +137,6 @@ type SoslSearchResult record {|
     SoslRecordData[] searchRecords;
     json...;
 |};
-
 
 # Defines SOSL query result.
 #

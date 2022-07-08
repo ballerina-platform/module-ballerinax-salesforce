@@ -22,9 +22,14 @@ import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.creators.TypeCreator;
+import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.RecordType;
+import io.ballerina.runtime.api.types.StreamType;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
 
@@ -135,5 +140,11 @@ public class ReadOperationExecutor {
                     }, null, PredefinedTypes.TYPE_NULL, paramFeed);
         }
         return null;
+    }
+
+    public static BStream streamConverter(Environment env, BObject client, BStream data, BTypedesc returnType) {
+        RecordType recordType = (RecordType) returnType.getDescribingType();
+        StreamType bStream = TypeCreator.createStreamType(recordType, PredefinedTypes.TYPE_NULL);
+        return ValueCreator.createStreamValue(bStream, data.getIteratorObj());
     }
 }
