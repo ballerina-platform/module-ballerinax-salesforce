@@ -362,8 +362,6 @@ isolated function getBulkApiHeaders(http:ClientOAuth2Handler|http:ClientBearerTo
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     } else if clientHandler is http:ClientBearerTokenAuthHandler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
-    } else {
-        return error("Invalid authentication handler");
     }
     token = (regex:split(<string>authorizationHeaderMap["Authorization"], " "))[1];
     finalHeaderMap[X_SFDC_SESSION] = token;

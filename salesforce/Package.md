@@ -11,7 +11,7 @@ The `ballerinax/salesforce` is a [Ballerina](https://ballerina.io/) connector fo
 ### Compatibility
 |                     | Version            |
 |---------------------|--------------------|
-| Ballerina Language  | Swan Lake 2201.1.0 |
+| Ballerina Language  | Swan Lake 2201.2.0 |
 | Salesforce REST API | v48.0              |
 | Salesforce Bulk API | v1                 |
 | Salesforce SOAP API | Enterprise WSDL    |
