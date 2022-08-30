@@ -160,8 +160,6 @@ isolated function getSessionId(http:ClientOAuth2Handler|http:ClientBearerTokenAu
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     } else if clientHandler is http:ClientBearerTokenAuthHandler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
-    } else {
-        return error("Invalid authentication handler");
     }
     return (regex:split(<string>authorizationHeaderMap[AUTHORIZATION], " "))[1];
 }

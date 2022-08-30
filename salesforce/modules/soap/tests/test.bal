@@ -27,7 +27,7 @@ configurable string baseUrl = os:getEnv("EP_URL");
 
 sfdc:ConnectionConfig sfConfig = {
     baseUrl: baseUrl,
-    clientConfig: {
+    auth: {
         clientId: clientId,
         clientSecret: clientSecret,
         refreshToken: refreshToken,
