@@ -41,7 +41,7 @@ public isolated client class Client {
 
         http:Client|http:ClientError|error httpClientResult;
         httpClientResult = trap new (config.baseUrl, {
-            auth: config.auth,
+            auth: let var authConfig = config.auth in (authConfig is BearerTokenConfig ?  authConfig : {...authConfig}),
             httpVersion: config.httpVersion,
             http1Settings: {...config.http1Settings},
             http2Settings: config.http2Settings,

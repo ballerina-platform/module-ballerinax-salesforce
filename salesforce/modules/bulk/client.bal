@@ -30,7 +30,7 @@ import ballerinax/salesforce.utils;
 }
 public isolated client class Client {
     private final http:Client salesforceClient;
-    private final OAuth2RefreshTokenGrantConfig|BearerTokenConfig clientConfig;
+    private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
     private final http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
     # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
@@ -41,11 +41,13 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
-        self.clientConfig = config.auth.cloneReadOnly();
+        http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig auth = let var authConfig = config.auth in 
+                (authConfig is BearerTokenConfig ?  authConfig : {...authConfig});
+        self.clientConfig = auth.cloneReadOnly();
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
         if self.clientConfig is http:OAuth2RefreshTokenGrantConfig {
-            httpHandlerResult = trap new (<OAuth2RefreshTokenGrantConfig>self.clientConfig);
+            httpHandlerResult = trap new (<http:OAuth2RefreshTokenGrantConfig>self.clientConfig);
         } else {
             httpHandlerResult = trap new (<BearerTokenConfig>self.clientConfig);
         }
