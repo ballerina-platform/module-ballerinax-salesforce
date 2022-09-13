@@ -155,7 +155,7 @@ isolated function createRecord(xml payload) returns ConvertedLead {
 
 isolated function getSessionId(http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler,
                                 string? contentType = ()) returns string|http:ClientAuthError {
-    map<string|string[]> authorizationHeaderMap;
+    map<string|string[]> authorizationHeaderMap= {};
     if clientHandler is http:ClientOAuth2Handler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     } else if clientHandler is http:ClientBearerTokenAuthHandler {

@@ -357,7 +357,7 @@ isolated function getBulkApiHeaders(http:ClientOAuth2Handler|http:ClientBearerTo
                                     string? contentType = ()) returns map<string>|http:ClientAuthError {
     string token;
     map<string> finalHeaderMap = {};
-    map<string|string[]> authorizationHeaderMap;
+    map<string|string[]> authorizationHeaderMap = {};
     if clientHandler is http:ClientOAuth2Handler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     } else if clientHandler is http:ClientBearerTokenAuthHandler {
