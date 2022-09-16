@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
-    sfdc:ConnectionConfig sfConfig = {
+    salesforce:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",
@@ -31,9 +31,9 @@ public function main() returns error? {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = check new (sfConfig);
+    salesforce:Client baseClient = check new (sfConfig);
 
-    map<string>|error apiVersionResources = baseClient->getResourcesByApiVersion("v48.0");
+    map<string>|error apiVersionResources = baseClient->getResources("v48.0");
 
     if apiVersionResources is map<string> {
         log:printInfo("Versions retrieved successfully : " + apiVersionResources.toString());

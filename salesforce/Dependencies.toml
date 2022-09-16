@@ -343,7 +343,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "7.0.0"
+version = "7.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
@@ -364,7 +364,6 @@ dependencies = [
 modules = [
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulk"},
-	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.rest"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.soap"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.utils"}
 ]

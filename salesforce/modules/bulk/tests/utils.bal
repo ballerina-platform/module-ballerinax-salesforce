@@ -19,7 +19,7 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/regex;
 import ballerina/os;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 json[] jsonInsertResult = [];
 xml xmlInsertResult = xml ``;
@@ -44,7 +44,7 @@ ConnectionConfig sfConfig = {
 };
 
 Client baseClient = check new (sfConfig);
-sfdc:Client restClient = check new (sfConfig);
+salesforce:Client restClient = check new (sfConfig);
 
 isolated function closeRb(io:ReadableByteChannel ch) {
     io:Error? cr = ch.close();

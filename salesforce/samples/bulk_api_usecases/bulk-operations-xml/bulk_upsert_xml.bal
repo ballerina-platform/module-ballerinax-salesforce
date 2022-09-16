@@ -16,10 +16,10 @@
 
 import ballerina/log;
 import ballerinax/salesforce.bulk;
-import ballerinax/salesforce.rest;
+import ballerinax/salesforce;
 
 // Create Salesforce client configuration by reading from config file.
-rest:ConnectionConfig sfConfig = {
+salesforce:ConnectionConfig sfConfig = {
     baseUrl: "<BASE_URL>",
     clientConfig: {
         clientId: "<CLIENT_ID>",
@@ -30,7 +30,7 @@ rest:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-rest:Client baseClient = check new (sfConfig);
+salesforce:Client baseClient = check new (sfConfig);
 bulk:Client bulkClient = check new (sfConfig);
 
 public function main() returns error? {

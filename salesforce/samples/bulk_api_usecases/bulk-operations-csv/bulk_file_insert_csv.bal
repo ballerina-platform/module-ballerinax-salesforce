@@ -18,14 +18,14 @@ import ballerina/io;
 import ballerina/log;
 import ballerina/regex;
 import ballerinax/salesforce.bulk;
-import ballerinax/salesforce.rest;
+import ballerinax/salesforce;
 
 public function main() returns error? {
 
     string batchId = "";
 
     // Create Salesforce client configuration by reading from config file.
-    rest:ConnectionConfig sfConfig = {
+    salesforce:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",
