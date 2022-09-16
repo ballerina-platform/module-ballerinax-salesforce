@@ -16,13 +16,12 @@
 
 import ballerina/io;
 import ballerina/log;
-import ballerinax/salesforce.bulk;
-import ballerinax/salesforce.rest;
+import ballerinax/salesforce.bulk
 
 public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
-    rest:ConnectionConfig sfConfig = {
+    salesforce:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",

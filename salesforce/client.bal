@@ -16,19 +16,15 @@
 
 import ballerina/http;
 import ballerinax/salesforce.utils;
+import ballerina/jballerina.java;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
 # and organizational data.
-#
-# # Deprecated
-# This client class is deprecated as it is exposed as a seperate client.
-# Use the new and improved `salesforce.rest` client instead.
 @display {
-    label: "Salesforce Client",
+    label: "Salesforce REST Client",
     iconPath: "icon.png"
 }
-@deprecated
 public isolated client class Client {
     private final http:Client salesforceClient;
     private final OAuth2RefreshTokenGrantConfig|BearerTokenConfig clientConfig;
@@ -45,7 +41,7 @@ public isolated client class Client {
 
         http:Client|http:ClientError|error httpClientResult;
         httpClientResult = trap new (config.baseUrl, {
-            auth: let var authConfig = config.auth in (authConfig is BearerTokenConfig ?  authConfig : {...authConfig}),
+            auth: let var authConfig = config.auth in (authConfig is BearerTokenConfig ? authConfig : {...authConfig}),
             httpVersion: config.httpVersion,
             http1Settings: {...config.http1Settings},
             http2Settings: config.http2Settings,
@@ -69,6 +65,250 @@ public isolated client class Client {
         }
     }
 
+    //Describe SObjects
+    # Gets metadata of your organization.
+    #
+    # + return - `OrganizationMetadata` record if successful or else `error`
+    @display {label: "Get Organization Metadata"}
+    isolated remote function getOrganizationMetaData() returns @display {label: "Organization Metadata"}
+                                                    OrganizationMetadata|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS]);
+        return check self.salesforceClient->get(path);
+    }
+
+    # Gets basic data of the specified object.
+    #
+    # + sobjectName - sObject name
+    # + return - `SObjectBasicInfo` record if successful or else `error`
+    @display {label: "Get sObject Basic Information"}
+    isolated remote function getBasicInfo(@display {label: "sObject Name"} string sobjectName)
+                                                returns @display {label: "sObject Basic Information"}
+                                                SObjectBasicInfo|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
+        return check self.salesforceClient->get(path);
+    }
+
+    # Completely describes the individual metadata at all levels of the specified object. Can be used to retrieve
+    # the fields, URLs, and child relationships.
+    #
+    # + sObjectName - sObject name value
+    # + return - `SObjectMetaData` record if successful or else `error`
+    @display {label: "Get sObject Description"}
+    isolated remote function describe(@display {label: "sObject Name"} string sObjectName)
+                                            returns @display {label: "sObject Metadata"} SObjectMetaData|error {
+
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
+        return check self.salesforceClient->get(path);
+    }
+
+    # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
+    #
+    # + return - `SObjectBasicInfo` record if successful or else `error`
+    @display {label: "Get sObject Platform Action"}
+    isolated remote function getPlatformAction() returns @display {label: "sObject Basic Information"}
+                                                SObjectBasicInfo|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
+        return check self.salesforceClient->get(path);
+    }
+
+    //Describe Organization
+    # Lists summary details about each REST API version available.
+    #
+    # + return - List of `Version` if successful. Else, the occured `error`.
+    @display {label: "Get Available API Versions"}
+    isolated remote function getApiVersions() returns @display {label: "Versions"} Version[]|error {
+        string path = utils:prepareUrl([BASE_PATH]);
+        return check self.salesforceClient->get(path);
+    }
+
+    # Lists the resources available for the specified API version.
+    #
+    # + apiVersion - API version (v37)
+    # + return - `Resources` as map of strings if successful. Else, the occurred `error`.
+    @display {label: "Get Resources by API Version"}
+    isolated remote function getResources(@display {label: "API Version"} string apiVersion)
+                                                    returns @display {label: "Resources"} map<string>|error {
+        string path = utils:prepareUrl([BASE_PATH, apiVersion]);
+        json res = check self.salesforceClient->get(path);
+        return toMapOfStrings(res);
+    }
+
+    # Lists the Limits information for your organization.
+    #
+    # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `error`.
+    @display {label: "Get Organization Limits"}
+    isolated remote function getLimits() returns @display {label: "Organization Limits"}
+                                                    map<Limit>|error {
+        string path = utils:prepareUrl([API_BASE_PATH, LIMITS]);
+        json res = check self.salesforceClient->get(path);
+        return toMapOfLimits(res);
+    }
+
+    # Gets an object record by ID.
+    #
+    # + sobject - sObject name 
+    # + id - sObject ID
+    # + fields - Fields to retrieve 
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - Record if successful or else `error`
+    @display {label: "Get Record by ID"}
+    isolated remote function getById(@display {label: "sObject Name"} string sobject,
+                                    @display {label: "sObject ID"} string id,
+                                    @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
+                                    returns @display {label: "Result"} returnType|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getRecordById"
+    } external;
+
+    private isolated function processGetRecordById(typedesc<record {}> returnType, string sobject, string id,
+                                                    string[] fields) returns record {}|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
+        if fields.length() > 0 {
+            path = path.concat(utils:appendQueryParams(fields));
+        }
+        json response = check self.salesforceClient->get(path);
+        return check response.cloneWithType(returnType);
+    }
+
+    # Gets an object record by external ID.
+    #
+    # + sobject - sObject name 
+    # + extIdField - External ID field name 
+    # + extId - External ID value 
+    # + fields - Fields to retrieve 
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - Record if successful or else `error`
+    @display {label: "Get Record by External ID"}
+    isolated remote function getByExternalId(@display {label: "sObject Name"} string sobject,
+                                            @display {label: "External ID Field Name"} string extIdField,
+                                            @display {label: "External ID"} string extId,
+                                            @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
+                                            returns @display {label: "Result"} returnType|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getRecordByExtId"
+    } external;
+
+    private isolated function processGetRecordByExtId(typedesc<record {}> returnType, string sobject, string extIdField,
+                                                        string extId, string[] fields) returns record {}|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
+        if fields.length() > 0 {
+            path = path.concat(utils:appendQueryParams(fields));
+        }
+        json response = check self.salesforceClient->get(path);
+        return check response.cloneWithType(returnType);
+    }
+
+    # Creates records based on relevant object type sent with json record.
+    #
+    # + sObjectName - sObject name value
+    # + sObjectRecord - Record to be inserted
+    # + return - Creation response if successful or else `error`
+    @display {label: "Create Record"}
+    isolated remote function create(@display {label: "sObject Name"} string sObjectName,
+                                    @display {label: "sObject Data"} record {} sObjectRecord)
+                                    returns @display {label: "Created Entity ID"} CreationResponse|error {
+        http:Request req = new;
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
+        req.setJsonPayload(sObjectRecord.toJson());
+        return check self.salesforceClient->post(path, req);
+    }
+
+    # Updates records based on relevant object ID.
+    #
+    # + sObjectName - sObject name value
+    # + id - sObject ID
+    # + sObjectRecord - Record to be updated
+    # + return - Empty response if successful `error`
+    @display {label: "Update Record"}
+    isolated remote function update(@display {label: "sObject Name"} string sObjectName,
+                                    @display {label: "sObject ID"} string id,
+                                    @display {label: "Record Payload"} record {} sObjectRecord)
+                                    returns @display {label: "Result"} error? {
+        http:Request req = new;
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+        req.setJsonPayload(sObjectRecord.toJson());
+        return check self.salesforceClient->patch(path, req);
+    }
+
+    # Upsert a record based on the value of a specified external ID field.
+    #
+    # + sObjectName - sObject name value
+    # + externalIdField - External ID field of an object
+    # + externalId - External ID
+    # + sObjectRecord - Record to be upserted
+    # + return - Empty response if successful or else `error`
+    @display {label: "Upsert Record"}
+    isolated remote function upsert(@display {label: "sObject Name"} string sObjectName,
+                                    @display {label: "External ID Field"} string externalIdField,
+                                    @display {label: "External ID"} string externalId,
+                                    @display {label: "Record Payload"} record {} sObjectRecord)
+                                    returns @display {label: "Result"} error? {
+        http:Request req = new;
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, externalIdField, externalId]);
+        req.setJsonPayload(sObjectRecord.toJson());
+        return check self.salesforceClient->patch(path, req);
+    }
+
+    # Delete existing records based on relevant object ID.
+    #
+    # + sObjectName - SObject name value
+    # + id - SObject ID
+    # + return - Empty response if successful or else `error`
+    @display {label: "Delete Record"}
+    isolated remote function delete(@display {label: "SObject Name"} string sObjectName,
+                                    @display {label: "SObject ID"} string id)
+                                    returns @display {label: "Result"} error? {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
+        return check self.salesforceClient->delete(path);
+    }
+
+    # Executes the specified SOQL query.
+    #
+    # + soql - SOQL query
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - `stream<{returnType}, error?>` if successful. Else, the occurred `error`.
+    @display {label: "Get Query Result"}
+    isolated remote function query(@display {label: "SOQL Query"} string soql, typedesc<record {}> returnType = <>)
+                                    returns @display {label: "SOQL Result"} stream<returnType, error?>|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getQueryResult"
+    } external;
+
+    private isolated function processGetQueryResult(typedesc<record {}> returnType, string receivedQuery)
+                                                    returns stream<record {}, error?>|error {
+        string path = utils:prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
+        SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
+        stream<record {}, error?> finalStream = new (objectInstance);
+        return self.streamConverter(finalStream, returnType);
+    }
+
+    # Executes the specified SOSL search.
+    #
+    # + sosl - SOSL search query
+    # + returnType - The payload, which is expected to be returned after data binding.
+    # + return - `stream<{returnType}, error?>` record if successful. Else, the occurred `error`.
+    @display {label: "SOSL Search"}
+    isolated remote function search(@display {label: "SOSL Search Query"} string sosl, typedesc<record {}> returnType = <>)
+                                    returns @display {label: "SOSL Result"} stream<returnType, error?>|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "searchSOSLString"
+    } external;
+
+    private isolated function processSearchSOSLString(typedesc<record {}> returnType, string searchString)
+                                                    returns stream<record {}, error?>|error {
+        string path = utils:prepareQueryUrl([API_BASE_PATH, SEARCH], [Q], [searchString]);
+
+        SOSLSearchResult objectInstance = check new (self.salesforceClient, path);
+        stream<record {}, error?> finalStream = new (objectInstance);
+        return self.streamConverter(finalStream, returnType);
+    }
+
+    // External function for the conversion of stream
+    isolated function streamConverter(stream<record {}, error?> data, typedesc<record {}> returnType) returns
+    stream<record {}, error?>|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor"
+    } external;
+
     ///////////////////////////////////////////// DEPRECATED ///////////////////////////////////////////////////////////
 
     //Describe SObjects
@@ -77,8 +317,8 @@ public isolated client class Client {
     # + return - `OrgMetadata` record if successful or else `sfdc:Error`
     #
     # # Deprecated
-    # This function is deprecated as the `salesforce` client is deprecated.
-    # Use the `describeAvailableObjects` function in `salesforce.rest` client instead.
+    # This function is deprecated as the method signature is altered.
+    # Use the new and improved `getOrganizationMetaData()` function instead.
     @display {label: "Get Available Objects"}
     @deprecated
     isolated remote function describeAvailableObjects()
@@ -95,8 +335,8 @@ public isolated client class Client {
     # + return - `SObjectBasicInfo` record if successful or else `sfdc:Error`
     #
     # # Deprecated
-    # This function is deprecated as the `salesforce` client is deprecated.
-    # Use the `getSObjectBasicInfo` function in `salesforce.rest` client instead.
+    # This function is deprecated as the method signature is altered.
+    # Use the new and improved  `getBasicInfo(string sobjectName)` function instead.
     @display {label: "Get SObject Basic Information"}
     @deprecated
     isolated remote function getSObjectBasicInfo(@display {label: "SObject Name"} string sobjectName)
@@ -114,8 +354,8 @@ public isolated client class Client {
     # + return - `SObjectMetaData` record if successful or else `sfdc:Error`
     #
     # # Deprecated
-    # This function is deprecated as the `salesforce` client is deprecated.
-    # Use the `describeSObject` function in `salesforce.rest` client instead.
+    # This function is deprecated as the method signature is altered.
+    # Use the new and improved `describe(string sObjectName)` function instead.
     @display {label: "Get SObject Description"}
     @deprecated
     isolated remote function describeSObject(@display {label: "SObject Name"} string sObjectName)
@@ -130,8 +370,8 @@ public isolated client class Client {
     # + return - `SObjectBasicInfo` record if successful or else `sfdc:Error`
     #
     # # Deprecated
-    # This function is deprecated as the `salesforce` client is deprecated.
-    # Use the `sObjectPlatformAction` function in `salesforce.rest` client instead.
+    # This function is deprecated as the method signature is altered.
+    # Use the new and improved `getPlatformAction()` function instead.
     @display {label: "Get SObject Platform Action"}
     @deprecated
     isolated remote function sObjectPlatformAction()
@@ -148,8 +388,8 @@ public isolated client class Client {
     # + return - List of `Version` if successful. Else, the occured Error.
     #
     # # Deprecated
-    # This function is deprecated as the `salesforce` client is deprecated.
-    # Use the `getAvailableApiVersions` function in `salesforce.rest` client instead.
+    # This function is deprecated as the method signature is altered.
+    # Use the new and improved `getApiVersions()` function instead.
     @display {label: "Get Available API Versions"}
     @deprecated
     isolated remote function getAvailableApiVersions() returns @display {label: "Versions"} Version[]|Error {
@@ -164,8 +404,8 @@ public isolated client class Client {
     # + return - `Resources` as map of strings if successful. Else, the occurred `Error`.
     #
     # # Deprecated
-    # This function is deprecated as the `salesforce` client is deprecated.
-    # Use the `getResourcesByApiVersion` function in `salesforce.rest` client instead.
+    # This function is deprecated as the method signature is altered.
+    # Use the new and improved `getResources(string apiVersion)` function instead.
     @display {label: "Get Resources by API Version"}
     @deprecated
     isolated remote function getResourcesByApiVersion(@display {label: "API Version"} string apiVersion)
@@ -180,8 +420,8 @@ public isolated client class Client {
     # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `Error`.
     #
     # # Deprecated
-    # This function is deprecated as the `salesforce` client is deprecated.
-    # Use the `getOrganizationLimits` function in `salesforce.rest` client instead.
+    # This function is deprecated as the method signature is altered.
+    # Use the new and improved `getLimits()` function instead.
     @display {label: "Get Organization Limits"}
     @deprecated
     isolated remote function getOrganizationLimits()

@@ -107,6 +107,26 @@ public type Attribute record {|
 # + maxBatchSize - Maximum batch size
 # + sobjects - Available SObjects
 @display{label: "Organizational meta data"}
+public type OrganizationMetadata record {|
+    @display{label: "Encoding"}
+    string encoding;
+    @display{label: "Maximum batch size"}
+    int maxBatchSize;
+    @display{label: "SObject meta data"}
+    SObjectMetaData[] sobjects;
+    json...;
+|};
+
+# Metadata for your organization and available to the logged-in user.
+#
+# + encoding - Encoding
+# + maxBatchSize - Maximum batch size
+# + sobjects - Available SObjects
+# 
+# # Deprecated
+# This record is deprecated as the name is changed.
+@deprecated
+@display{label: "Organizational meta data"}
 public type OrgMetadata record {|
     @display{label: "Encoding"}
     string encoding;
@@ -155,3 +175,13 @@ public type SObjectBasicInfo record {|
     json...;
 |};
 
+# Response of object creation.
+#
+# + id - Created object ID  
+# + errors - Array of errors
+# + success - Success flag
+public type CreationResponse record {
+    string id;
+    anydata[] errors;
+    boolean success;
+};

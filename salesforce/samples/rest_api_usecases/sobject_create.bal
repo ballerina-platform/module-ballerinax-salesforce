@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
-    sfdc:ConnectionConfig sfConfig = {
+    salesforce:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",
@@ -31,16 +31,16 @@ public function main() returns error? {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = check new (sfConfig);
+    salesforce:Client baseClient = check new (sfConfig);
 
     record{} accountRecord = {
         "Name": "IT World",
         "BillingCity": "Colombo 1"
     };
 
-    sfdc:CreationResponse|error res = baseClient->create("Account", accountRecord);
+    salesforce:CreationResponse|error res = baseClient->create("Account", accountRecord);
 
-    if res is sfdc:CreationResponse {
+    if res is salesforce:CreationResponse {
         log:printInfo("Account Created Successfully. Account ID : " + res.id);
     } else {
         log:printError(msg = res.message());

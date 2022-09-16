@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
-    sfdc:ConnectionConfig sfConfig = {
+    salesforce:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",
@@ -31,12 +31,12 @@ public function main() returns error? {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = check new (sfConfig);
+    salesforce:Client baseClient = check new (sfConfig);
 
     string objName = "Account";
-    sfdc:SObjectBasicInfo|error sobjectInfo = baseClient->getSObjectBasicInfo(objName);
+    salesforce:SObjectBasicInfo|error sobjectInfo = baseClient->getBasicInfo(objName);
 
-    if sobjectInfo is sfdc:SObjectBasicInfo {
+    if sobjectInfo is salesforce:SObjectBasicInfo {
         log:printInfo("SObject basic info received " + sobjectInfo.toString());
     } else {
         log:printError(msg = sobjectInfo.message());
