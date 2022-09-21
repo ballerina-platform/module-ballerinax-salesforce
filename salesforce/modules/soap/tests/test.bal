@@ -17,7 +17,7 @@
 import ballerina/log;
 import ballerina/os;
 import ballerina/test;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 configurable string clientId = os:getEnv("CLIENT_ID");
 configurable string clientSecret = os:getEnv("CLIENT_SECRET");
@@ -25,7 +25,7 @@ configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
 configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
 
-sfdc:ConnectionConfig sfConfig = {
+salesforce:ConnectionConfig sfConfig = {
     baseUrl: baseUrl,
     auth: {
         clientId: clientId,
@@ -36,12 +36,12 @@ sfdc:ConnectionConfig sfConfig = {
 };
 
 Client soapClient = check new (sfConfig);
-sfdc:Client restClient = check new (sfConfig);
+salesforce:Client restClient = check new (sfConfig);
 
-string leadId = sfdc:EMPTY_STRING;
-string accountId = sfdc:EMPTY_STRING;
-string contactId = sfdc:EMPTY_STRING;
-string opportunityId = sfdc:EMPTY_STRING;
+string leadId = salesforce:EMPTY_STRING;
+string accountId = salesforce:EMPTY_STRING;
+string contactId = salesforce:EMPTY_STRING;
+string opportunityId = salesforce:EMPTY_STRING;
 
 @test:BeforeSuite
 function createLead() {
@@ -52,8 +52,8 @@ function createLead() {
         "Title": "Director",
         "Company": "IT World"
     };
-    sfdc:CreationResponse|error res = restClient->create("Lead", leadRecord);
-    if res is sfdc:CreationResponse {
+    salesforce:CreationResponse|error res = restClient->create("Lead", leadRecord);
+    if res is salesforce:CreationResponse {
         leadId = res.id;
     } else {
         test:assertFail("Lead Not Created");

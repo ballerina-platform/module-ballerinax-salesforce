@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
-    sfdc:ConnectionConfig sfConfig = {
+    salesforce:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",
@@ -31,17 +31,17 @@ public function main() returns error? {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = check new (sfConfig);
+    salesforce:Client baseClient = check new (sfConfig);
 
-    sfdc:Version[]|error apiVersions = baseClient->getAvailableApiVersions();
+    salesforce:Version[]|error apiVersions = baseClient->getApiVersions();
 
-    if apiVersions is sfdc:Version[] {
+    if apiVersions is salesforce:Version[] {
         log:printInfo("Versions retrieved successfully : " + apiVersions.toString());
     } else {
         log:printError(msg = apiVersions.message());
     }
 
-    map<string>|sfdc:Error apiVersionResources = baseClient->getResourcesByApiVersion("v48.0");
+    map<string>|sfdc:Error apiVersionResources = baseClient->getResources("v48.0");
 
     if apiVersionResources is map<string> {
         log:printInfo("Versions retrieved successfully : " + apiVersionResources.toString());
@@ -49,7 +49,7 @@ public function main() returns error? {
         log:printError(msg = apiVersionResources.message());
     }
 
-    map<sfdc:Limit>|sfdc:Error apiLimits = baseClient->getOrganizationLimits();
+    map<sfdc:Limit>|sfdc:Error apiLimits = baseClient->getLimits();
 
     if apiLimits is map<sfdc:Limit> {
         log:printInfo("Versions retrieved successfully : " + apiLimits.toString());
