@@ -15,12 +15,12 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 public function main() returns error? {
 
     // Create Salesforce client configuration by reading from config file.
-    sfdc:ConnectionConfig sfConfig = {
+    salesforce:ConnectionConfig sfConfig = {
         baseUrl: "<BASE_URL>",
         clientConfig: {
             clientId: "<CLIENT_ID>",
@@ -31,11 +31,11 @@ public function main() returns error? {
     };
 
     // Create Salesforce client.
-    sfdc:Client baseClient = check new (sfConfig);
+    salesforce:Client baseClient = check new (sfConfig);
 
-    sfdc:OrgMetadata|error availableObjsDes = baseClient->describeAvailableObjects();
+    salesforce:OrganizationMetadata|error availableObjsDes = baseClient->getOrganizationMetaData();
 
-    if availableObjsDes is sfdc:OrgMetadata {
+    if availableObjsDes is salesforce:OrganizationMetadata {
         int|error countSobjects = availableObjsDes.sobjects.length();
         if countSobjects is int {
             log:printInfo("Number of SObjects Received = " + countSobjects.toString());

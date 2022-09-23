@@ -17,7 +17,7 @@
 import ballerina/http;
 import ballerina/lang.'boolean as booleanLib;
 import ballerina/regex;
-import ballerinax/salesforce.rest as sfdc;
+import ballerinax/salesforce;
 
 isolated function buildXMLPayload(string sessionId, LeadConvert convert) returns string|error {
     string newOpportunity = convert?.doNotCreateOpportunity.toString();
@@ -133,9 +133,9 @@ isolated function createResponse(http:Response response) returns ConvertedLead|e
 isolated function formatPayload(http:Response response) returns xml|error {
     xml elements = check response.getXmlPayload();
     string formattedXMLResponse = regex:replaceAll(elements.toString(), SOAP_ENV, SOAP_ENV_);
-    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS_SOAP, sfdc:EMPTY_STRING);
-    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS, sfdc:EMPTY_STRING);
-    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS_XSI, sfdc:EMPTY_STRING);
+    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS_SOAP, salesforce:EMPTY_STRING);
+    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS, salesforce:EMPTY_STRING);
+    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS_XSI, salesforce:EMPTY_STRING);
     formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XSI, XSI_);
     return check 'xml:fromString(formattedXMLResponse);
 }
@@ -147,7 +147,7 @@ isolated function createRecord(xml payload) returns ConvertedLead {
         leadId: (payload/<leadId>/*).toString()
     };
     string opportunityId = (payload/<opportunityId>/*).toString();
-    if opportunityId != sfdc:EMPTY_STRING {
+    if opportunityId != salesforce:EMPTY_STRING {
         lead.opportunityId = opportunityId;
     }
     return lead;
