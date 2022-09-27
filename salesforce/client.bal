@@ -22,7 +22,7 @@ import ballerina/jballerina.java;
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
 # and organizational data.
 @display {
-    label: "Salesforce REST Client",
+    label: "Salesforce REST API Client",
     iconPath: "icon.png"
 }
 public isolated client class Client {
