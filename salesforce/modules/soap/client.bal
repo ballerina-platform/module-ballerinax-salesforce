@@ -13,7 +13,9 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/http;
+import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce SOAP connector provides the capability to access Salesforce SOAP API. 
@@ -40,15 +42,16 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
+        http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
         http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig auth = let var authConfig = config.auth in 
-                (authConfig is BearerTokenConfig ?  authConfig : {...authConfig});
+                (authConfig is http:BearerTokenConfig ?  authConfig : {...authConfig});
         self.clientConfig = auth.cloneReadOnly();
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
         if self.clientConfig is http:OAuth2RefreshTokenGrantConfig {
             httpHandlerResult = trap new (<http:OAuth2RefreshTokenGrantConfig>self.clientConfig);
         } else {
-            httpHandlerResult = trap new (<BearerTokenConfig>self.clientConfig);
+            httpHandlerResult = trap new (<http:BearerTokenConfig>self.clientConfig);
         }
 
         if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
@@ -57,22 +60,7 @@ public isolated client class Client {
             return error(utils:INVALID_CLIENT_CONFIG);
         }
 
-        http:Client|error httpClientResult = trap new (config.baseUrl, {
-            httpVersion: config.httpVersion,
-            http1Settings: {...config.http1Settings},
-            http2Settings: config.http2Settings,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            cache: config.cache,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            responseLimits: config.responseLimits,
-            secureSocket: config.secureSocket,
-            proxy: config.proxy,
-            validation: config.validation
-        });
+        http:Client|error httpClientResult = trap new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;

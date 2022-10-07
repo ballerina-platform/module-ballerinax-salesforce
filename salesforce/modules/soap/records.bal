@@ -14,6 +14,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
+
+import ballerina/http;
+import ballerinax/'client.config;
+
+# Salesforce client configuration.
+#
+@display {label: "Connection Config"}
+public type ConnectionConfig record {|
+    *config:ConnectionConfig;
+    # The Salesforce endpoint URL
+    string baseUrl;
+    # Configurations related to client authentication
+    http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig auth;
+|};
+
 # Represents converted lead.
 #
 # + accountId - Account ID  
