@@ -15,8 +15,9 @@
 // under the License.
 
 import ballerina/http;
-import ballerinax/salesforce.utils;
 import ballerina/jballerina.java;
+import ballerinax/'client.config;
+import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
@@ -27,7 +28,6 @@ import ballerina/jballerina.java;
 }
 public isolated client class Client {
     private final http:Client salesforceClient;
-    private final OAuth2RefreshTokenGrantConfig|BearerTokenConfig clientConfig;
 
     # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
@@ -37,26 +37,9 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - `sfdc:Error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
-        self.clientConfig = config.auth.cloneReadOnly();
-
         http:Client|http:ClientError|error httpClientResult;
-        httpClientResult = trap new (config.baseUrl, {
-            auth: let var authConfig = config.auth in (authConfig is BearerTokenConfig ? authConfig : {...authConfig}),
-            httpVersion: config.httpVersion,
-            http1Settings: {...config.http1Settings},
-            http2Settings: config.http2Settings,
-            timeout: config.timeout,
-            forwarded: config.forwarded,
-            poolConfig: config.poolConfig,
-            cache: config.cache,
-            compression: config.compression,
-            circuitBreaker: config.circuitBreaker,
-            retryConfig: config.retryConfig,
-            responseLimits: config.responseLimits,
-            secureSocket: config.secureSocket,
-            proxy: config.proxy,
-            validation: config.validation
-        });
+        http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
+        httpClientResult = trap new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
