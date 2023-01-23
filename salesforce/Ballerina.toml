@@ -1,8 +1,8 @@
 [package]
-distribution = "2201.3.0"
+distribution = "2201.3.1"
 org = "ballerinax"
 name = "salesforce"
-version = "7.2.0"
+version = "7.3.0"
 export = ["salesforce", "salesforce.bulk", "salesforce.soap"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
@@ -14,7 +14,7 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
 observabilityIncluded = true
 
 [[platform.java11.dependency]]
-path = "../salesforce-native/build/libs/salesforce-native-7.2.0.jar"
+path = "../salesforce-native/build/libs/salesforce-native-7.3.0.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "7.2.0"
+version = "7.3.0"
