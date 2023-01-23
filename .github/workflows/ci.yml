@@ -44,7 +44,7 @@ jobs:
 
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action/@2201.2.3
         with:
           args:
             pack ./salesforce
@@ -53,7 +53,7 @@ jobs:
 
       # Test Ballerina Project
       - name: Ballerina Test
-        uses: ballerina-platform/ballerina-action/@nightly
+        uses: ballerina-platform/ballerina-action/@2201.2.3
         with:
           args:
             test --code-coverage ./salesforce
