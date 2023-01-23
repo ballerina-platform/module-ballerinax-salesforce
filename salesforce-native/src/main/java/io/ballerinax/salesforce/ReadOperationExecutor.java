@@ -62,7 +62,7 @@ public class ReadOperationExecutor {
 
     private static Object invokeClientMethod(Environment env, BObject client, BString path, BTypedesc targetType,
                                              String methodName) {
-        Object[] paramFeed = new Object[10];
+        Object[] paramFeed = new Object[4];
         paramFeed[0] = targetType;
         paramFeed[1] = true;
         paramFeed[2] = path;
@@ -71,7 +71,7 @@ public class ReadOperationExecutor {
     }
     private static Object invokeClientMethodForId(Environment env, BObject client, BString sobject, BString id, BArray fields, BTypedesc targetType,
                                                   String methodName) {
-        Object[] paramFeed = new Object[10];
+        Object[] paramFeed = new Object[8];
         paramFeed[0] = targetType;
         paramFeed[1] = true;
         paramFeed[2] = sobject;
@@ -101,7 +101,7 @@ public class ReadOperationExecutor {
 
     private static Object invokeClientMethodForQuery(Environment env, BObject client, BString receivedQuery, BTypedesc targetType,
                                                   String methodName) {
-        Object[] paramFeed = new Object[10];
+        Object[] paramFeed = new Object[4];
         paramFeed[0] = targetType;
         paramFeed[1] = true;
         paramFeed[2] = receivedQuery;
