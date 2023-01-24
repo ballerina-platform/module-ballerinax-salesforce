@@ -24,8 +24,10 @@ import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.StreamType;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
@@ -111,8 +113,8 @@ public class ReadOperationExecutor {
 
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, Object[] paramFeed) {
         Future balFuture = env.markAsync();
-
-        if (client.getType().isIsolated() && client.getType().isIsolated(methodName)) {
+        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(client.getType());
+        if (objectType.isIsolated() && objectType.isIsolated(methodName)) {
             env.getRuntime().invokeMethodAsyncConcurrently(client, methodName,
                     null, null, new Callback() {
                         @Override
