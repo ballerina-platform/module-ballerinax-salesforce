@@ -20,7 +20,7 @@ import ballerina/lang.runtime;
 
 @test:Config {
     enable: true,
-    dependsOn: [updateCsv, insertCsvFromFile, insertCsv]
+    dependsOn: [updateCsv, insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryCsv() returns error? {
     runtime:sleep(delayInSecs);
