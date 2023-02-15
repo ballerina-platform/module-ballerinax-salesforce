@@ -29,6 +29,15 @@ const string BASE_PATH = "/services/data";
 # Constant field `API_BASE_PATH`. Holds the value for the Salesforce API base path/URL.
 final string API_BASE_PATH = string `${BASE_PATH}/${API_VERSION}`;
 
+# Constant field `ANALYTICS`. Holds the value analytics for analytics resource prefix.
+const string ANALYTICS = "analytics";
+
+# Constant field `INSTANCES`. Holds the value instances for instances resource prefix.
+const string INSTANCES = "instances";
+
+# Constant field `REPORTS`. Holds the value reports for reports resource prefix.
+const string REPORTS = "reports";
+
 # Constant field `SOBJECTS`. Holds the value sobjects for get sobject resource prefix.
 const string SOBJECTS = "sobjects";
 
