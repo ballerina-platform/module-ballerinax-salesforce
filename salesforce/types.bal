@@ -199,3 +199,100 @@ public type CreationResponse record {
     anydata[] errors;
     boolean success;
 };
+
+# Represents a Report
+#
+# + id - Unique report ID  
+# + name - Report display name  
+# + url - URL that returns report data  
+# + describeUrl - URL that retrieves report metadata  
+# + instancesUrl - Information for each instance of the report that was run asynchronously.
+public type Report record {
+    string id;
+    string name;
+    string url;
+    string describeUrl;
+    string instancesUrl;
+};
+
+# Represents an instance of a Report
+#
+# + id - Unique ID for a report instance
+# + status - Status of the report run
+# + requestDate - Date and time when an instance of the report run was requested
+# + completionDate - Date, time when the instance of the report run finished
+# + url - URL where results of the report run for that instance are stored
+# + ownerId - API name of the user that created the instance
+# + queryable - Indicates if it is queryable
+# + hasDetailRows - Indicates if it has detailed data
+public type ReportInstance record {
+    string id;
+    string status;
+    string requestDate;
+    string? completionDate;
+    string url;
+    string ownerId;
+    boolean queryable;
+    boolean hasDetailRows;
+};
+
+# Represents attributes of instance of an asynchronous report run
+#
+# + id - Unique ID for an instance of a report that was run  
+# + reportId - Unique report ID
+# + reportName - Display name of the report
+# + status - Status of the report run
+# + ownerId - API name of the user that created the instance
+# + requestDate - Date and time when an instance of the report run was requested 
+# + 'type - Format of the resource
+# + completionDate - Date, time when the instance of the report run finished
+# + errorMessage - Error message if the instance run failed
+# + queryable - Indicates if it is queryable
+public type AsyncReportAttributes record {
+    string id;
+    string reportId;
+    string reportName;
+    string status;
+    string ownerId;
+    string requestDate;
+    string 'type;
+    string? completionDate;
+    string? errorMessage;
+    boolean queryable;
+};
+
+# Represents attributes of instance of synchronous report run
+#
+# + reportId - Unique report ID  
+# + reportName - Display name of the report  
+# + 'type - API resource format  
+# + describeUrl - Resource URL to get report metadata  
+# + instancesUrl - Resource URL to run a report asynchronously
+public type SyncReportAttributes record {
+    string reportId;
+    string reportName;
+    string 'type;
+    string describeUrl;
+    string instancesUrl;
+};
+
+# Represents result of an asynchronous report run
+#
+# + attributes - Attributes for the instance of the report run
+# + allData - Indicates if all report results are returned
+# + factMap - Collection of summary level data or both detailed and summary level data
+# + groupingsAcross - Collection of column groupings
+# + groupingsDown - Collection of row groupings
+# + reportMetadata - Information about the fields used to build the report
+# + hasDetailRows - Indicates if it has detailed data
+# + reportExtendedMetadata - Information on report groupings, summary fields, and detailed data columns
+public type ReportInstanceResult record {
+    AsyncReportAttributes|SyncReportAttributes attributes;
+    boolean allData;
+    map<json> factMap;
+    map<json> groupingsAcross;
+    map<json> groupingsDown;
+    map<json> reportMetadata;
+    boolean hasDetailRows;
+    map<json>? reportExtendedMetadata;
+};

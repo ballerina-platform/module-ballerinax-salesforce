@@ -245,6 +245,71 @@ public isolated client class Client {
         return check self.salesforceClient->delete(path);
     }
 
+    # Lists reports.
+    #
+    # + return - Array of Report if successful or else `error`
+    @display {label: "List Reports"}
+    isolated remote function listReports() returns @display {label: "Reports"} Report[]|error {
+        string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS]);
+        return check self.salesforceClient->get(path);
+    }
+
+    # Deletes a report.
+    #
+    # + reportId - Report Id
+    # + return - `()` if the report deletion is successful or else an error
+    @display {label: "Delete Report"}
+    isolated remote function deleteReport(@display {label: "Report Id"} string reportId) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId]);
+        return check self.salesforceClient->delete(path);
+    }
+
+    # Runs an instance of a report synchronously.
+    #
+    # + reportId - Report Id
+    # + return - ReportInstanceResult if successful or else `error`
+    @display {label: "Run Report Synchronously"}
+    isolated remote function runReportSync(@display {label: "Report Id"} string reportId)
+            returns @display {label: "Report Instance Result"} ReportInstanceResult|error {
+        string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId]);
+        return check self.salesforceClient->get(path);
+    }
+
+    # Runs an instance of a report asynchronously.
+    #
+    # + reportId - Report Id
+    # + return - ReportInstance if successful or else `error`
+    @display {label: "Run Report Asynchronously"}
+    isolated remote function runReportAsync(@display {label: "Report Id"} string reportId)
+            returns @display {label: "Report Instance"} ReportInstance|error {
+        string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId, INSTANCES]);
+        return check self.salesforceClient->post(path, {});
+    }
+
+    # Lists asynchronous runs of a Report.
+    #
+    # + reportId - Report Id
+    # + return - Array of ReportInstance if successful or else `error`
+    @display {label: "List Async Report Runs"}
+    isolated remote function listAsyncRunsOfReport(@display {label: "Report Id"} string reportId)
+            returns @display {label: "Report Instances"} ReportInstance[]|error {
+        string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId, INSTANCES]);
+        return check self.salesforceClient->get(path);
+    }
+
+    # Get report instance result.
+    #
+    # + reportId - Report Id
+    # + instanceId - Instance Id
+    # + return - ReportInstanceResult if successful or else `error`
+    @display {label: "Get Report Instance Result"}
+    isolated remote function getReportInstanceResult(@display {label: "Report Id"} string reportId, 
+            @display {label: "Instance Id"} string instanceId) returns @display {label: "Report Instance Result"} 
+            ReportInstanceResult|error {
+        string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId, INSTANCES, instanceId]);
+        return check self.salesforceClient->get(path);
+    }
+
     # Executes the specified SOQL query.
     #
     # + soql - SOQL query
