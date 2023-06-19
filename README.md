@@ -2,6 +2,7 @@ Ballerina Salesforce Connector
 ===================
 [![Build](https://github.com/ballerina-platform/module-ballerinax-sfdc/workflows/CI/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions?query=workflow%3ACI)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-sfdc.svg)](https://github.com/ballerina-platformmodule-ballerinax-sfdc/commits/master)
+[![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-native.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Salesforce has a vast collection of APIs since they follow an API-first approach to build features on the Salesforce Platform. This approach gives their users the flexibility to manipulate their data however they want. The most commonly used Salesforce Data APIs are REST API, SOAP API, Bulk API, and Streaming API. 
