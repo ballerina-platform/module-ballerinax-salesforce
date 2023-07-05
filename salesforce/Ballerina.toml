@@ -2,7 +2,7 @@
 distribution = "2201.7.0"
 org = "ballerinax"
 name = "salesforce"
-version = "7.2.0"
+version = "7.4.1"
 export = ["salesforce", "salesforce.bulk", "salesforce.soap"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
@@ -17,7 +17,7 @@ observabilityIncluded = true
 graalvmCompatible = true
 
 [[platform.java11.dependency]]
-path = "../salesforce-native/build/libs/salesforce-native-7.2.0.jar"
+path = "../salesforce-native/build/libs/salesforce-native-7.4.1.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "7.2.0"
+version = "7.4.1"
