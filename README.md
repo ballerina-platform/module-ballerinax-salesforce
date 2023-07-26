@@ -1,6 +1,7 @@
 Ballerina Salesforce Connector
 ===================
 [![Build](https://github.com/ballerina-platform/module-ballerinax-sfdc/workflows/CI/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-sfdc/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-sfdc)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-sfdc.svg)](https://github.com/ballerina-platformmodule-ballerinax-sfdc/commits/master)
 [![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-native.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -55,4 +56,3 @@ All contributors are encouraged to read the [Ballerina Code of Conduct](https://
 * Discuss code changes of the Ballerina project in [ballerina-dev@googlegroups.com](mailto:ballerina-dev@googlegroups.com).
 * Chat live with us via our [Discord server](https://discord.gg/ballerinalang).
 * Post all technical questions on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
- 
