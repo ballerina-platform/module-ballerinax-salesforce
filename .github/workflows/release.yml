@@ -38,6 +38,16 @@ jobs:
           JAVA_OPTS: -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true
         run: |
           ./gradlew build
+
+      # Perform Trivy scan
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'rootfs'
+          scan-ref: '.'
+          format: 'table'
+          timeout: '10m0s'
+          exit-code: '1'
           
       # Build Ballerina Project
       - name: Ballerina Build
