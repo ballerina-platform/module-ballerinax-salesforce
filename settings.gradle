@@ -15,5 +15,23 @@
  *
  */
 
-rootProject.name = 'module-ballerinax-sfdc'
+plugins {
+    id "com.gradle.enterprise" version "3.2"
+}
+
+rootProject.name = 'ballerinax-salesforce'
+
+include ':checkstyle'
 include ':salesforce-native'
+include ':salesforce-ballerina'
+
+project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
+project(':salesforce-native').projectDir = file('native')
+project(':salesforce-ballerina').projectDir = file('ballerina')
+
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
+}
