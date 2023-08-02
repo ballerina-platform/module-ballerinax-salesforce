@@ -43,3 +43,19 @@ jobs:
             pack ./salesforce
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm            
+      - name: Ballerina Tests
+        # tests will be skipped if the PR is from a forked repository (as the secrets are not available)
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: ballerina-platform/ballerina-action/@nightly
+        with:
+          args:
+            test --test-report --code-coverage --coverage-format=xml ./salesforce
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          EP_URL: ${{ secrets.EP_URL }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+          REFRESH_URL: ${{ secrets.REFRESH_URL }}
+          JAVA_HOME: /usr/lib/jvm/default-jvm
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
