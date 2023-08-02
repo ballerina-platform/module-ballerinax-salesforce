@@ -23,9 +23,12 @@ apply plugin: 'java'
 description = 'Ballerina - Snowflake Examples'
 
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
-
+def packageName = 'salesforce'
 def filePath = project.fileTree("${project.projectDir}")
-def examples = filePath.matching { include("**/*.bal") }
+def examples = filePath.matching {
+    include("**/*.bal")
+    exclude("**/deprecated/**/*.bal")
+}
 
 task testExamples {
     doLast {
@@ -48,7 +51,7 @@ task testExamples {
 
 task buildExamples {
     gradle.taskGraph.whenReady { graph ->
-        if (graph.hasTask(":salesforce:examples:test")) {
+        if (graph.hasTask(":${packageName}:examples:test")) {
             buildExamples.enabled = false
         } else {
             testExamples.enabled = false
@@ -72,7 +75,7 @@ task buildExamples {
     }
 }
 
-testExamples.dependsOn ":salesforce-ballerina:build"
-buildExamples.dependsOn ":salesforce-ballerina:build"
+testExamples.dependsOn ":${packageName}-ballerina:build"
+buildExamples.dependsOn ":${packageName}-ballerina:build"
 test.dependsOn testExamples
 build.dependsOn buildExamples

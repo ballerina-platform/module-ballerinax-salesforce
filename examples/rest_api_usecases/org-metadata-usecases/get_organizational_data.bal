@@ -16,20 +16,27 @@
 
 import ballerina/log;
 import ballerinax/salesforce;
+import ballerina/os;
+
+// Create Salesforce client configuration by reading from environemnt.
+configurable string clientId = os:getEnv("CLIENT_ID");
+configurable string clientSecret = os:getEnv("CLIENT_SECRET");
+configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
+configurable string refreshUrl = os:getEnv("REFRESH_URL");
+configurable string baseUrl = os:getEnv("EP_URL");
+
+// Using direct-token config for client configuration
+salesforce:ConnectionConfig sfConfig = {
+    baseUrl: baseUrl,
+    auth: {
+        clientId: clientId,
+        clientSecret: clientSecret,
+        refreshToken: refreshToken,
+        refreshUrl: refreshUrl
+    }
+};
 
 public function main() returns error? {
-
-    // Create Salesforce client configuration by reading from config file.
-    salesforce:ConnectionConfig sfConfig = {
-        baseUrl: "<BASE_URL>",
-        clientConfig: {
-            clientId: "<CLIENT_ID>",
-            clientSecret: "<CLIENT_SECRET>",
-            refreshToken: "<REFESH_TOKEN>",
-            refreshUrl: "<REFRESH_URL>"
-        }
-    };
-
     // Create Salesforce client.
     salesforce:Client baseClient = check new (sfConfig);
 
@@ -41,7 +48,7 @@ public function main() returns error? {
         log:printError(msg = apiVersions.message());
     }
 
-    map<string>|sfdc:Error apiVersionResources = baseClient->getResources("v48.0");
+    map<string>|error apiVersionResources = baseClient->getResources("v48.0");
 
     if apiVersionResources is map<string> {
         log:printInfo("Versions retrieved successfully : " + apiVersionResources.toString());
@@ -49,9 +56,9 @@ public function main() returns error? {
         log:printError(msg = apiVersionResources.message());
     }
 
-    map<sfdc:Limit>|sfdc:Error apiLimits = baseClient->getLimits();
+    map<salesforce:Limit>|error apiLimits = baseClient->getLimits();
 
-    if apiLimits is map<sfdc:Limit> {
+    if apiLimits is map<salesforce:Limit> {
         log:printInfo("Versions retrieved successfully : " + apiLimits.toString());
     } else {
         log:printError(msg = apiLimits.message());

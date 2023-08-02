@@ -16,16 +16,23 @@
 
 import ballerinax/salesforce.soap;
 import ballerina/log;
+import ballerina/os;
+
+// Create Salesforce client configuration by reading from environemnt.
+configurable string clientId = os:getEnv("CLIENT_ID");
+configurable string clientSecret = os:getEnv("CLIENT_SECRET");
+configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
+configurable string refreshUrl = os:getEnv("REFRESH_URL");
+configurable string baseUrl = os:getEnv("EP_URL");
 
 public function main() returns error? {
-
     soap:Client salesforceClient = check new ({
-        baseUrl: "<BASE_URL>",
-        clientConfig: {
-            clientId: "<CLIENT_ID>",
-            clientSecret: "<CLIENT_SECRET>",
-            refreshToken: "<REFESH_TOKEN>",
-            refreshUrl: "<REFRESH_URL>"
+        baseUrl: baseUrl,
+        auth: {
+            clientId: clientId,
+            clientSecret: clientSecret,
+            refreshToken: refreshToken,
+            refreshUrl: refreshUrl
         }
     });
 

@@ -19,17 +19,18 @@ plugins {
     id "com.gradle.enterprise" version "3.2"
 }
 
-rootProject.name = 'ballerinax-salesforce'
+def projectName = 'salesforce'
+rootProject.name = "ballerinax-${projectName}"
 
-include ':checkstyle'
-include ':salesforce-native'
-include ':salesforce-ballerina'
-include ':salesforce-examples'
+include ":checkstyle"
+include ":${projectName}-native"
+include ":${projectName}-ballerina"
+include ":${projectName}-examples"
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
-project(':salesforce-native').projectDir = file('native')
-project(':salesforce-ballerina').projectDir = file('ballerina')
-project(':salesforce-examples').projectDir = file('examples')
+project(":${projectName}-native").projectDir = file('native')
+project(":${projectName}-ballerina").projectDir = file('ballerina')
+project(":${projectName}-examples").projectDir = file('examples')
 
 gradleEnterprise {
     buildScan {
