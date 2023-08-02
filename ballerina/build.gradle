@@ -74,7 +74,21 @@ task updateTomlFiles {
 
 task commitTomlFiles {}
 
+task buildBallerina {
+    doFirst {
+        exec {
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "bal.bat build"
+            } else {
+                commandLine 'sh', '-c', "bal build"
+            }
+        }
+    }
+}
+
 updateTomlFiles.dependsOn copyStdlibs
+buildBallerina.dependsOn ":${packageName}-native:build"
 
 build.dependsOn ":${packageName}-native:build"
+build.dependsOn buildBallerina
 test.dependsOn ":${packageName}-native:build"

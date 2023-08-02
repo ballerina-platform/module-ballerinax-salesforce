@@ -30,12 +30,12 @@ configurable string baseUrl = os:getEnv("EP_URL");
 
 // Using direct-token config for client configuration
 salesforce:ConnectionConfig sfConfig = {
-    baseUrl: baseUrl,
+    baseUrl,
     auth: {
-        clientId: clientId,
-        clientSecret: clientSecret,
-        refreshToken: refreshToken,
-        refreshUrl: refreshUrl
+        clientId,
+        clientSecret,
+        refreshToken,
+        refreshUrl
     }
 };
 
