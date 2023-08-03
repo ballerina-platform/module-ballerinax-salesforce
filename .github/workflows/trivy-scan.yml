@@ -20,12 +20,13 @@ jobs:
         env:
           packageUser: ${{ github.actor }}
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build -x check -x test
+        run: ./gradlew build
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'rootfs'
           scan-ref: '.'
+          skip-dirs: 'gradle/'
           format: 'table'
           timeout: '10m0s'
           exit-code: '1'

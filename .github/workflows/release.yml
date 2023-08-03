@@ -51,26 +51,21 @@ jobs:
         with:
           scan-type: 'rootfs'
           scan-ref: '.'
+          skip-dirs: 'gradle/'
           format: 'table'
           timeout: '10m0s'
           exit-code: '1'
           
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@2201.7.0
-        with:
-          args:
-            pack ./salesforce
+        run: bal pack ./ballerina 
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
 
       # Push to Ballerina Central
       - name: Ballerina Push
-        uses: ballerina-platform/ballerina-action/@2201.7.0
-        with:
-          args:
-            push
+        run: bal push
         env:
           BALLERINA_CENTRAL_ACCESS_TOKEN: ${{ secrets.BALLERINA_CENTRAL_ACCESS_TOKEN }}
-          WORKING_DIR: ./salesforce
+          WORKING_DIR: ./ballerina
           JAVA_HOME: /usr/lib/jvm/default-jvm

@@ -50,19 +50,13 @@ jobs:
 
       # Build Ballerina Project
       - name: Ballerina Build
-        uses: ballerina-platform/ballerina-action/@nightly
-        with:
-          args:
-            pack ./salesforce
+        run: bal pack ./ballerina 
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
-
+      
       # Test Ballerina Project
       - name: Ballerina Test
-        uses: ballerina-platform/ballerina-action/@nightly
-        with:
-          args:
-            test --test-report --code-coverage --coverage-format=xml ./salesforce
+        run: bal test --test-report --code-coverage --coverage-format=xml ./ballerina 
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}

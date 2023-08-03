@@ -19,7 +19,7 @@
 
 apply plugin: 'java'
 
-description = 'Ballerina - Snowflake Examples'
+description = 'Ballerina - Salesforce Examples'
 
 def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
 def filePath = project.fileTree("${project.projectDir}")
