@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id "com.github.spotbugs" version "${githubSpotbugsVersion}"
@@ -23,8 +24,6 @@ plugins {
 }
 
 description = 'Ballerina - Salesforce'
-
-def packageName = "salesforce"
 
 allprojects {
     group = project.group
@@ -62,39 +61,26 @@ allprojects {
     }
 }
 
-subprojects {
-
-    configurations {
-        externalJars
-        ballerinaStdLibs
-    }
-
-    dependencies {
-        ballerinaStdLibs "io.ballerina.stdlib:sql-ballerina:${stdlibSqlVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:io-ballerina:${stdlibIoVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:time-ballerina:${stdlibTimeVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:regex-ballerina:${stdlibRegexVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:os-ballerina:${stdlibOsVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:log-ballerina:${stdlibLogVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:file-ballerina:${stdlibFileVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:constraint-ballerina:${stdlibConstraintVersion}"
-        ballerinaStdLibs "org.ballerinalang:transaction-ballerina:${stdlibTransactionVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:task-ballerina:${stdlibTaskVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:crypto-ballerina:${stdlibCryptoVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:uuid-ballerina:${stdlibUuidVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:mime-ballerina:${stdlibMimeVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:cache-ballerina:${stdlibCacheVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:auth-ballerina:${stdlibAuthVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:jwt-ballerina:${stdlibJwtVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:oauth2-ballerina:${stdlibOAuth2Version}"
-        ballerinaStdLibs "io.ballerina.stdlib:url-ballerina:${stdlibUrlVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:http-ballerina:${stdlibHttpVersion}"
-        ballerinaStdLibs "io.ballerina.stdlib:observe-ballerina:${observeVersion}"
-        ballerinaStdLibs "io.ballerina:observe-ballerina:${observeInternalVersion}"
+def executeBalCommand(String command) {
+    try {
+        exec {
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "bal.bat ${command} && exit %%ERRORLEVEL%%"
+            } else {
+                commandLine 'sh', '-c', "bal ${command}"
+            }
+        }
+    } catch (Exception e) {
+        println("bal command failed. " + e.message)
+        throw e
     }
 }
 
+ext {
+    packageName = "salesforce"
+}
+
 task build {
-    dependsOn("${packageName}-native:build")
-    dependsOn("${packageName}-ballerina:build")
+    dependsOn("${project.packageName}-native:build")
+    dependsOn("${project.packageName}-ballerina:build")
 }
