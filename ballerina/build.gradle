@@ -52,6 +52,9 @@ task build {
         executeBalCommand "pack ${project.projectDir}"
 
         def destinationDir = new File("${System.getProperty('user.home')}/.ballerina/repositories/central.ballerina.io/bala/ballerinax/${project.packageName}")
+        if (destinationDir.exists()) {
+            delete destinationDir;
+        }
         destinationDir.mkdirs()
 
         copy {
@@ -64,7 +67,6 @@ task build {
 task test {
     dependsOn ":${packageName}-native:build"
     doLast {
-        executeBalCommand "build ${project.projectDir}"
         executeBalCommand "test ${project.projectDir}"
     }
 }

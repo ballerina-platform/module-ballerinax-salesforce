@@ -39,7 +39,7 @@ jobs:
           packagePAT: ${{ secrets.GITHUB_TOKEN }}
           JAVA_OPTS: -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true
         run: |
-          ./gradlew build
+          ./gradlew build -x test
         
       # Build Ballerina Project
       - name: Ballerina Build

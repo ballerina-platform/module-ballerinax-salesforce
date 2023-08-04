@@ -29,14 +29,18 @@ def examples = filePath.matching {
 }
 
 task testExamples {
+    dependsOn ":${project.packageName}-ballerina:build"
+
     doLast {
         examples.each { example ->  executeBalCommand "run ${example}" }
     }
 }
 
 task buildExamples {
+    dependsOn ":${project.packageName}-ballerina:build"
+    
     gradle.taskGraph.whenReady { graph ->
-        if (graph.hasTask(":${project.packageName}:examples:test")) {
+        if (graph.hasTask(":${project.packageName}-examples:test")) {
             buildExamples.enabled = false
         } else {
             testExamples.enabled = false
@@ -47,7 +51,5 @@ task buildExamples {
     }
 }
 
-testExamples.dependsOn ":${project.packageName}-ballerina:build"
-buildExamples.dependsOn ":${project.packageName}-ballerina:build"
 test.dependsOn testExamples
 build.dependsOn buildExamples

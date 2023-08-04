@@ -32,7 +32,7 @@ jobs:
                 packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
                 JAVA_OPTS: -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true
               run: |
-                ./gradlew build
+                ./gradlew build -x test
 
             - name: Set up GraalVM
               uses: graalvm/setup-graalvm@v1

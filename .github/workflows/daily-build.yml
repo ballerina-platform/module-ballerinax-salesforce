@@ -40,7 +40,7 @@ jobs:
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
           JAVA_OPTS: -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true
         run: |
-          ./gradlew build
+          ./gradlew build -x test
           
       # Build Ballerina Project
       - name: Ballerina Build
