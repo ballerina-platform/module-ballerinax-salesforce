@@ -23,14 +23,20 @@ import ballerinax/salesforce.soap;
 Create a `soap:ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 
 ```ballerina
+configurable string clientId = ?;
+configurable string clientSecret = ?;
+configurable string refreshToken = ?;
+configurable string refreshUrl = ?;
+configurable string baseUrl = ?;
+
 soap:ConnectionConfig sfConfig = {
-   baseUrl: <"EP_URL">,
-   clientConfig: {
-     clientId: <"CLIENT_ID">,
-     clientSecret: <"CLIENT_SECRET">,
-     refreshToken: <"REFRESH_TOKEN">,
-     refreshUrl: <"REFRESH_URL"> 
-   }
+    baseUrl: baseUrl,
+    auth: {
+        clientId: clientId,
+        clientSecret: clientSecret,
+        refreshToken: refreshToken,
+        refreshUrl: refreshUrl
+    }
 };
 
 soap:Client soapClient = new(sfConfig);
@@ -46,4 +52,4 @@ Following is an example on how to convert lead using the connector.
   ```
 2. Use `bal run` command to compile and run the Ballerina program. 
 
-**[You can find a sample here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/salesforce/samples/soap_api_usecases)**
+**[You can find a sample here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/soap_api_usecases)**

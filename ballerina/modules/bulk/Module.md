@@ -22,14 +22,20 @@ import ballerinax/salesforce.bulk;
 Create a `ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 ```ballerina
 
+configurable string clientId = ?;
+configurable string clientSecret = ?;
+configurable string refreshToken = ?;
+configurable string refreshUrl = ?;
+configurable string baseUrl = ?;
+
 bulk:ConnectionConfig sfConfig = {
-   baseUrl: <"EP_URL">,
-   clientConfig: {
-     clientId: <"CLIENT_ID">,
-     clientSecret: <"CLIENT_SECRET">,
-     refreshToken: <"REFRESH_TOKEN">,
-     refreshUrl: <"REFRESH_URL"> 
-   }
+    baseUrl: baseUrl,
+    auth: {
+        clientId: clientId,
+        clientSecret: clientSecret,
+        refreshToken: refreshToken,
+        refreshUrl: refreshUrl
+    }
 };
 
 bulk:Client bulkClient = new (sfConfig);
@@ -62,4 +68,4 @@ public function main() returns error? {
 
 2. Use `bal run` command to compile and run the Ballerina program. 
 
-**[You can find a list of samples here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/salesforce/samples/bulk_api_usecases)**
+**[You can find a list of samples here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulk_api_usecases)**

@@ -60,3 +60,11 @@ task build {
         }
     }
 }
+
+task test {
+    dependsOn ":${packageName}-native:build"
+    doLast {
+        executeBalCommand "build ${project.projectDir}"
+        executeBalCommand "test ${project.projectDir}"
+    }
+}
