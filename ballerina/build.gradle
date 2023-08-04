@@ -47,26 +47,31 @@ task updateTomlFiles {
 
 task build {
     dependsOn ":${packageName}-native:build"
+    dependsOn updateTomlFiles
     doLast {
-        executeBalCommand "build ${project.projectDir}"
-        executeBalCommand "pack ${project.projectDir}"
+        executeBalCommand ("build", "${project.projectDir}")
+        executeBalCommand ("pack", "${project.projectDir}")
+        executeBalCommand ("push --repository=local", "${project.projectDir}")
+
+        def centralDir = file("${System.getProperty('user.home')}/.ballerina/repositories/central.ballerina.io/")
+        def cacheDirs = centralDir.listFiles().findAll { it.isDirectory() && it.name.startsWith('cache-') }
+        delete cacheDirs
 
         def destinationDir = new File("${System.getProperty('user.home')}/.ballerina/repositories/central.ballerina.io/bala/ballerinax/${project.packageName}")
         if (destinationDir.exists()) {
             delete destinationDir;
         }
-        destinationDir.mkdirs()
 
         copy {
-            from "${project.projectDir}/build/bala_unzipped/bala/ballerinax/${project.packageName}"
+            from "${System.getProperty('user.home')}/.ballerina/repositories/local/bala/ballerinax/${project.packageName}"
             into destinationDir
         }
     }
 }
-
 task test {
     dependsOn ":${packageName}-native:build"
+    dependsOn updateTomlFiles
     doLast {
-        executeBalCommand "test ${project.projectDir}"
+        executeBalCommand ("test", "${project.projectDir}")
     }
 }

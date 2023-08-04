@@ -59,9 +59,10 @@ allprojects {
     }
 }
 
-def executeBalCommand(String command) {
+def executeBalCommand(String command, String dir) {
     try {
         exec {
+            workingDir dir
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "bal.bat ${command} && exit %%ERRORLEVEL%%"
             } else {

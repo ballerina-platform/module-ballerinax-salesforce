@@ -21,7 +21,6 @@ apply plugin: 'java'
 
 description = 'Ballerina - Salesforce Examples'
 
-def ballerinaDist = "${project.rootDir}/target/ballerina-runtime"
 def filePath = project.fileTree("${project.projectDir}")
 def examples = filePath.matching {
     include("**/*.bal")
@@ -32,7 +31,7 @@ task testExamples {
     dependsOn ":${project.packageName}-ballerina:build"
 
     doLast {
-        examples.each { example ->  executeBalCommand "run ${example}" }
+        examples.each { example ->  executeBalCommand ("run ${example}", "${project.rootDir}") }
     }
 }
 
@@ -47,7 +46,8 @@ task buildExamples {
         }
     }
     doLast {
-        examples.each { example ->  executeBalCommand "build ${example}" }
+        // Enabled --offline due to a bug in pulling incorrect versions from the central repository.
+        examples.each { example ->  executeBalCommand ("build --offline ${example}", "${project.rootDir}") }
     }
 }
 
