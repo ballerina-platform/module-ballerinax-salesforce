@@ -112,7 +112,7 @@ public type Attribute record {|
     @display{label: "Type"}
     string 'type;
     @display{label: "URL"}
-    string url;
+    string url?;
 |};
 
 # Metadata for your organization and available to the logged-in user.

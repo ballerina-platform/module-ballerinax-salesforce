@@ -213,6 +213,45 @@ function testQueryWithLimit() returns error? {
     }
 }
 
+type AccountResultWithAlias record {|
+    string Name;
+    int NumAccounts;
+|};
+
+@test:Config {
+    enable: true
+}
+function testQueryWithAggregateFunctionWithAlias() returns error? {
+    log:printInfo("baseClient -> testQueryWithAggregateFunctionWithAlias()");
+    string sampleQuery = "SELECT COUNT(Id) NumAccounts, Name FROM Account GROUP BY Name";
+    stream<AccountResultWithAlias, error?>|error queryResult = check baseClient->query(sampleQuery);
+    if queryResult is error {
+        test:assertFail(msg = queryResult.message());
+    } else {
+        int count = check countStream(queryResult);
+        test:assertTrue(count > 0, msg = "Found 0 search records!");
+    }
+}
+
+type AccountResultWithoutAlias record {|
+    int expr0;
+|};
+
+@test:Config {
+    enable: true
+}
+function testQueryWithAggregateFunctionWithoutAlias() returns error? {
+    log:printInfo("baseClient -> testQueryWithAggregateFunctionWithoutAlias()");
+    string sampleQuery = "SELECT COUNT(Id) FROM Account";
+    stream<AccountResultWithoutAlias, error?>|error queryResult = check baseClient->query(sampleQuery);
+    if queryResult is error {
+        test:assertFail(msg = queryResult.message());
+    } else {
+        int count = check countStream(queryResult);
+        test:assertTrue(count == 1, msg = "Found 0 search records!");
+    }
+}
+
 @test:Config {
     enable: false
 }
