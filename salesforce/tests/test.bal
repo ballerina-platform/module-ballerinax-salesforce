@@ -107,6 +107,15 @@ public type Account record {
     string? SLAExpirationDate__c = ();
 };
 
+type AccountResultWithAlias record {|
+    string Name;
+    int NumAccounts;
+|};
+
+type AccountResultWithoutAlias record {|
+    int expr0;
+|};
+
 Account accountRecordNew = {
     Name: "CSK Holdings",
     BillingCity: "Colombo 3"
@@ -213,11 +222,6 @@ function testQueryWithLimit() returns error? {
     }
 }
 
-type AccountResultWithAlias record {|
-    string Name;
-    int NumAccounts;
-|};
-
 @test:Config {
     enable: true
 }
@@ -233,9 +237,6 @@ function testQueryWithAggregateFunctionWithAlias() returns error? {
     }
 }
 
-type AccountResultWithoutAlias record {|
-    int expr0;
-|};
 
 @test:Config {
     enable: true
