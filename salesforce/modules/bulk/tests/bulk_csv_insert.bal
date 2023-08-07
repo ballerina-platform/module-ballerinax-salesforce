@@ -130,8 +130,10 @@ function insertCsv() returns error? {
             foreach Result item in batchResult {
                 json|error itemId = item?.id;
                 if itemId is json {
-                    string id = itemId.toString();
-                    csvInputResult = csvInputResult + "\n" + id;
+                    if item.success && item.created {
+                        string id = itemId.toString();
+                        csvInputResult = csvInputResult + "\n" + id;
+                    }
                 }
                 test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
             }
@@ -186,7 +188,7 @@ function insertCsvFromFile() {
             foreach int currentRetry in 1 ..< maxIterations + 1 {
                 error|BatchInfo batchUsingCsvFile = baseClient->addBatch(insertJob, rbc);
                 if batchUsingCsvFile is BatchInfo {
-                    test:assertTrue(batchUsingCsvFile.id.length() > 0, 
+                    test:assertTrue(batchUsingCsvFile.id.length() > 0,
                     msg = "Could not upload the contacts using CSV file.");
                     batchId = batchUsingCsvFile.id;
                     break;
@@ -273,19 +275,20 @@ function insertCsvFromFile() {
             }
         }
 
-
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(insertJob, batchId);
             if batchResult is Result[] {
                 foreach Result item in batchResult {
                     json|error itemId = item?.id;
                     if itemId is json {
-                        string id = itemId.toString();
-                        csvInputResult = csvInputResult + "\n" + id;
+                        if item.success && item.created {
+                            string id = itemId.toString();
+                            csvInputResult = csvInputResult + "\n" + id;
+                        }
                     }
                     test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
                 }
-                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");              
+                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
                 break;
             } else if batchResult is error {
                 if currentRetry != maxIterations {
@@ -331,7 +334,7 @@ function insertCsvStringArrayFromFile() returns error? {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|BatchInfo batchUsingCsvFile = baseClient->addBatch(insertJob, csvContent);
             if batchUsingCsvFile is BatchInfo {
-                test:assertTrue(batchUsingCsvFile.id.length() > 0, 
+                test:assertTrue(batchUsingCsvFile.id.length() > 0,
                 msg = "Could not upload the contacts using CSV file.");
                 batchId = batchUsingCsvFile.id;
                 break;
@@ -413,19 +416,20 @@ function insertCsvStringArrayFromFile() returns error? {
             }
         }
 
-
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(insertJob, batchId);
             if batchResult is Result[] {
                 foreach Result item in batchResult {
                     json|error itemId = item?.id;
                     if itemId is json {
-                        string id = itemId.toString();
-                        csvInputResult = csvInputResult + "\n" + id;
+                        if item.success && item.created {
+                            string id = itemId.toString();
+                            csvInputResult = csvInputResult + "\n" + id;
+                        }
                     }
                     test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
                 }
-                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");              
+                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
                 break;
             } else if batchResult is error {
                 if currentRetry != maxIterations {
@@ -467,11 +471,11 @@ function insertCsvStreamFromFile() returns error? {
 
     if insertJob is BulkJob {
         //add csv content via file
-        stream<string[], io:Error?> csvStream = check io:fileReadCsvAsStream(csvContactsFilePath);        
+        stream<string[], io:Error?> csvStream = check io:fileReadCsvAsStream(csvContactsFilePath);
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|BatchInfo batchUsingCsvFile = baseClient->addBatch(insertJob, csvStream);
             if batchUsingCsvFile is BatchInfo {
-                test:assertTrue(batchUsingCsvFile.id.length() > 0, 
+                test:assertTrue(batchUsingCsvFile.id.length() > 0,
                 msg = "Could not upload the contacts using CSV file.");
                 batchId = batchUsingCsvFile.id;
                 break;
@@ -553,19 +557,20 @@ function insertCsvStreamFromFile() returns error? {
             }
         }
 
-
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(insertJob, batchId);
             if batchResult is Result[] {
                 foreach Result item in batchResult {
                     json|error itemId = item?.id;
                     if itemId is json {
-                        string id = itemId.toString();
-                        csvInputResult = csvInputResult + "\n" + id;
+                        if item.success && item.created {
+                            string id = itemId.toString();
+                            csvInputResult = csvInputResult + "\n" + id;
+                        }
                     }
                     test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
                 }
-                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");              
+                test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
                 break;
             } else if batchResult is error {
                 if currentRetry != maxIterations {

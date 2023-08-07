@@ -134,8 +134,10 @@ function insertXml() returns error? {
             foreach Result item in batchResult {
                 json|error itemId = item?.id;
                 if itemId is json {
-                    string id = itemId.toString();
-                    xmlInsertResult = xmlInsertResult + xml `<sObject><Id>${id}</Id></sObject>`;
+                    if item.success && item.created {
+                        string id = itemId.toString();
+                        xmlInsertResult = xmlInsertResult + xml `<sObject><Id>${id}</Id></sObject>`;
+                    }
                 }
                 test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
             }
@@ -269,8 +271,10 @@ function insertXmlFromFile() returns error? {
             foreach Result item in batchResult {
                 json|error itemId = item?.id;
                 if itemId is json {
-                    string id = itemId.toString();
-                    xmlInsertResult = xmlInsertResult + xml `<sObject><Id>${id}</Id></sObject>`;
+                    if item.success && item.created {
+                        string id = itemId.toString();
+                        xmlInsertResult = xmlInsertResult + xml `<sObject><Id>${id}</Id></sObject>`;
+                    }
                 }
                 test:assertTrue(checkBatchResults(item), msg = item?.errors.toString());
             }
