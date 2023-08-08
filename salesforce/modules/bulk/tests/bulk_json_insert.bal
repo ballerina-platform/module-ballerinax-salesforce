@@ -145,7 +145,9 @@ function insertJson() returns error? {
         if batchResult is Result[] {
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             foreach json res in batchResult {
-                jsonInsertResult.push(res);
+                if res.success && res.created {
+                    jsonInsertResult.push(res);
+                }                
                 test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
             }
             break;
@@ -291,8 +293,11 @@ function insertJsonFromFile() returns error? {
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(jsonInsertJob, jsonBatchId);
         if batchResult is Result[] {
-            foreach json res in batchResult {
-                jsonInsertResult.push(res);
+            foreach Result res in batchResult {
+                if res.success && res.created {
+                    jsonInsertResult.push(res);
+                }
+                test:assertTrue(checkBatchResults(res), msg = res?.errors.toString());
             }
             test:assertTrue(batchResult.length() > 0, msg = "Retrieving batch result failed.");
             break;

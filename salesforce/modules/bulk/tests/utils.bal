@@ -88,7 +88,7 @@ isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
     json[] contacts = [];
     foreach json item in resultList {
         json|error itemId = item.id;
-        if itemId is json {
+        if itemId is json && itemId !== EMPTY_STRING {
             string id = itemId.toString();
             contacts[contacts.length()] = {"Id": id};
         }
