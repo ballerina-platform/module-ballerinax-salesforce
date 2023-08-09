@@ -187,7 +187,7 @@ function insertJson() returns error? {
 function insertJsonFromFile() returns error? {
     log:printInfo("baseClient -> insertJsonFromFile");
     string jsonBatchId = "";
-    string jsonContactsFilePath = "salesforce/modules/bulk/tests/resources/contacts.json";
+    string jsonContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts.json";
 
     //create job
     BulkJob jsonInsertJob = check baseClient->createJob("insert", "Contact", "JSON");
