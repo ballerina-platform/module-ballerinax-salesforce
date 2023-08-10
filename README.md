@@ -11,11 +11,11 @@ Salesforce has a vast collection of APIs since they follow an API-first approach
 
 Ballerina Salesforce connector utilizes the Salesforce REST API, Bulk API, and SOAP API for convenient data manipulation. The Salesforce connector allows you to perform CRUD operations for SObjects, query using SOQL, search using SOSL, and describe SObjects and organizational data through the Salesforce REST API and SOAP API. Also, it supports adding bulk data jobs and batches of types JSON, XML, and CSV via the Salesforce Bulk API.
 For more information about configuration and operations, go to the module(s).
-- [salesforce](salesforce/Module.md) 
+- [salesforce](ballerina/Module.md) 
    - Perform Salesforce operations programmatically through the Salesforce REST API. Users can perform CRUD operations for SObjects, query using SOQL, search using SOSL and, describe SObjects and organizational data.
-- [salesforce.bulk](salesforce/modules/bulk/Module.md) 
+- [salesforce.bulk](ballerina/modules/bulk/Module.md) 
    - Perform Salesforce bulk operations programatically through the Salesforce Bulk API. Users can perform CRUD operations in bulk for Salesforce.
-- [salesforce.soap](salesforce/modules/soap/Module.md)
+- [salesforce.soap](ballerina/modules/soap/Module.md)
    - Perform Salesforce operations programmatically through the Salesforce SOAP API which is not supported by the Salesforce REST API. The connector is comprised of limited operations on SOAP API.
 
 ## Building from the source

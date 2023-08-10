@@ -176,7 +176,7 @@ function insertCsvFromFile() {
     log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "salesforce/modules/bulk/tests/resources/contacts1.csv";
+    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts1.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
@@ -323,7 +323,7 @@ function insertCsvStringArrayFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "salesforce/modules/bulk/tests/resources/contacts2.csv";
+    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts2.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
@@ -464,7 +464,7 @@ function insertCsvStreamFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStreamFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "salesforce/modules/bulk/tests/resources/contacts3.csv";
+    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts3.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");

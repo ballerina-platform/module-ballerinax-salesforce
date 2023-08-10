@@ -167,7 +167,7 @@ function insertXmlFromFile() returns error? {
     log:printInfo("baseClient -> insertXmlFromFile");
     string xmlBatchId = "";
 
-    string xmlContactsFilePath = "salesforce/modules/bulk/tests/resources/contacts.xml";
+    string xmlContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts.xml";
 
     //create job
     BulkJob xmlInsertJob = check baseClient->createJob("insert", "Contact", "XML");
