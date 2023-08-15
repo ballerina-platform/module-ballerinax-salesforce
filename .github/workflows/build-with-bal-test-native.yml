@@ -49,7 +49,7 @@ jobs:
           native-image --version
 
       - name: Run Ballerina tests using the native executable
-        run: bal test --graalvm ./salesforce
+        run: bal test --graalvm ./ballerina
         env:
           JAVA_HOME: /usr/lib/jvm/default-jvm
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
