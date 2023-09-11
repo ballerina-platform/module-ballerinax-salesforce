@@ -48,10 +48,10 @@ public isolated client class Client {
         self.clientConfig = auth.cloneReadOnly();
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
-        if self.clientConfig is http:OAuth2RefreshTokenGrantConfig {
-            httpHandlerResult = trap new (<http:OAuth2RefreshTokenGrantConfig>self.clientConfig);
+        if auth is http:OAuth2RefreshTokenGrantConfig {
+            httpHandlerResult = trap new (<http:OAuth2RefreshTokenGrantConfig>auth);
         } else {
-            httpHandlerResult = trap new (<http:BearerTokenConfig>self.clientConfig);
+            httpHandlerResult = trap new (<http:BearerTokenConfig>auth);
         }
 
         if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
