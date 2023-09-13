@@ -122,6 +122,7 @@ Account accountRecordNew = {
 };
 
 string testRecordIdNew = "";
+string reportId = "";
 
 @test:Config {
     enable: true
@@ -236,7 +237,6 @@ function testQueryWithAggregateFunctionWithAlias() returns error? {
         test:assertTrue(count > 0, msg = "Found 0 search records!");
     }
 }
-
 
 @test:Config {
     enable: true
@@ -398,6 +398,44 @@ function testResources() {
     } else {
         test:assertFail(msg = resources.message());
     }
+}
+
+@test:Config {
+    enable: true,
+    groups: ["reports"]
+}
+function testListReports() returns error? {
+    log:printInfo("baseClient -> listReports()");
+    Report[] reports = check baseClient->listReports();
+    check from Report r in reports
+        where r.name == "Opportunities Report Current FQ"
+        do {
+            reportId = r.id;
+        };
+    test:assertTrue(reports.length() > 0, msg = "Found 0 search records!");
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testListReports],
+    groups: ["reports"]
+}
+function testRunReportSync() returns error? {
+    log:printInfo("baseClient -> runReportSync()");
+    ReportInstanceResult run = check baseClient->runReportSync(reportId);
+    test:assertTrue(run.attributes.reportId  == reportId, msg = "Report run failed");
+}
+
+
+@test:Config {
+    enable: true,
+    dependsOn: [testRunReportSync],
+    groups: ["reports"]
+}
+function testRunReportAsync() returns error? {
+    log:printInfo("baseClient -> runReportAsync()");
+    ReportInstance run = check baseClient->runReportAsync(reportId);
+    test:assertTrue(run.url.includes(reportId), msg = "Report run failed");
 }
 
 @test:AfterSuite {}
