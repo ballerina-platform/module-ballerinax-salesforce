@@ -31,7 +31,8 @@ ConnectionConfig sfConfig = {
     auth: {
         clientId: clientId,
         clientSecret: clientSecret,
-        tokenUrl: refreshUrl
+        refreshToken: refreshToken,
+        refreshUrl: refreshUrl
     }
 };
 
