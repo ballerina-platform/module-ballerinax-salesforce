@@ -44,6 +44,8 @@ ConnectionConfig sfConfigPasswordFlow = {
         password: password,
         username: username,
         tokenUrl: refreshUrl,
+        clientId: clientId,
+        clientSecret: clientSecret,
         credentialBearer: "POST_BODY_BEARER"
     }
 };
