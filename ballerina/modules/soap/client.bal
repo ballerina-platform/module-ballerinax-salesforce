@@ -49,9 +49,9 @@ public isolated client class Client {
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
         if auth is http:OAuth2RefreshTokenGrantConfig {
-            httpHandlerResult = trap new (<http:OAuth2RefreshTokenGrantConfig>auth);
+            httpHandlerResult = trap new (auth);
         } else {
-            httpHandlerResult = trap new (<http:BearerTokenConfig>auth);
+            httpHandlerResult = trap new (auth);
         }
 
         if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
@@ -59,7 +59,7 @@ public isolated client class Client {
         } else {
             return error(utils:INVALID_CLIENT_CONFIG);
         }
-        
+
         http:Client|error httpClientResult = trap new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {

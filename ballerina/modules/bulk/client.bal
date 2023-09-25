@@ -49,9 +49,9 @@ public isolated client class Client {
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
         if auth is http:OAuth2RefreshTokenGrantConfig {
-            httpHandlerResult = trap new (<http:OAuth2RefreshTokenGrantConfig>auth);
+            httpHandlerResult = trap new (auth);
         } else {
-            httpHandlerResult = trap new (<http:BearerTokenConfig>auth);
+            httpHandlerResult = trap new (auth);
         }
 
         if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
