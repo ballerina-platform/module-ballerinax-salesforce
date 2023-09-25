@@ -38,7 +38,7 @@ jobs:
           packagePAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
           JAVA_OPTS: -DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true
         run: |
-          ./gradlew build -x test
+          ./gradlew build -x test -x :salesforce-examples:build
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
