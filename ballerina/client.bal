@@ -40,7 +40,7 @@ public isolated client class Client {
     public isolated function init(ConnectionConfig config) returns error? {
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
-        io:println(config);
+        //io:println(config);
         httpClientResult = trap new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
