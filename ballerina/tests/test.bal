@@ -169,30 +169,22 @@ function testCreate() {
     enable: true
 }
 function testQueryPasswordFlow() returns error? {
-    log:printInfo("baseClient -> query()");
+    log:printInfo("baseClientPasswordFlow -> query()");
     string sampleQuery = "SELECT name FROM Account";
-    stream<Account, error?>|error queryResult = check baseClientPasswordFlow->query(sampleQuery);
-    if queryResult is error {
-        test:assertFail(msg = queryResult.message());
-    } else {
-        int count = check countStream(queryResult);
-        test:assertTrue(count > 0, msg = "Found 0 search records!");
-    }
+    stream<Account, error?> queryResult = check baseClientPasswordFlow->query(sampleQuery);
+    int count = check countStream(queryResult);
+    test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
 
 @test:Config {
     enable: true
 }
 function testQueryCredentialsFlow() returns error? {
-    log:printInfo("baseClient -> query()");
+    log:printInfo("baseClientCredentialsFlow -> query()");
     string sampleQuery = "SELECT name FROM Account";
-    stream<Account, error?>|error queryResult = check baseClientCredentialsFlow->query(sampleQuery);
-    if queryResult is error {
-        test:assertFail(msg = queryResult.message());
-    } else {
-        int count = check countStream(queryResult);
-        test:assertTrue(count > 0, msg = "Found 0 search records!");
-    }
+    stream<Account, error?> queryResult = check baseClientCredentialsFlow->query(sampleQuery);
+    int count = check countStream(queryResult);
+    test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
 
 @test:Config {
