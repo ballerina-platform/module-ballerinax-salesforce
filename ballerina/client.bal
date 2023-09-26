@@ -18,7 +18,6 @@ import ballerina/http;
 import ballerina/jballerina.java;
 import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
-import ballerina/io;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
@@ -40,13 +39,11 @@ public isolated client class Client {
     public isolated function init(ConnectionConfig config) returns error? {
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
-        //io:println(config);
         httpClientResult = trap new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
-            io:println(httpClientResult.message());
             return error(INVALID_CLIENT_CONFIG);
         }
     }
