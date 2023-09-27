@@ -56,6 +56,8 @@ jobs:
           EP_URL: ${{ secrets.EP_URL }}
           REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
           REFRESH_URL: ${{ secrets.REFRESH_URL }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
           JAVA_HOME: /usr/lib/jvm/default-jvm
 
       - name: Upload coverage reports to Codecov
