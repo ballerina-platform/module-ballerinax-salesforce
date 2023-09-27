@@ -41,8 +41,8 @@ ConnectionConfig sfConfigRefreshFlow = {
 ConnectionConfig sfConfigPasswordFlow = {
     baseUrl: baseUrl,
     auth: {
-        password: password,
-        username: username,
+        password,
+        username,
         tokenUrl: refreshUrl,
         clientId: clientId,
         clientSecret: clientSecret,
