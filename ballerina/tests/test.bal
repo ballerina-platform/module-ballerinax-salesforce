@@ -28,7 +28,7 @@ configurable string username = os:getEnv("SF_USERNAME");
 configurable string password = os:getEnv("SF_PASSWORD");
 
 // Using direct-token config for client configuration
-ConnectionConfig sfConfigRefreshFlow = {
+ConnectionConfig sfRefreshFlowConfig = {
     baseUrl: baseUrl,
     auth: {
         clientId: clientId,
@@ -38,7 +38,7 @@ ConnectionConfig sfConfigRefreshFlow = {
     }
 };
 
-ConnectionConfig sfConfigPasswordFlow = {
+ConnectionConfig sfPasswordFlowConfig = {
     baseUrl: baseUrl,
     auth: {
         password,
@@ -50,7 +50,7 @@ ConnectionConfig sfConfigPasswordFlow = {
     }
 };
 
-ConnectionConfig sfConfigCredentialsFlow = {
+ConnectionConfig sfCredentialsFlowConfig = {
     baseUrl: baseUrl,
     auth: {
         clientId: clientId,
@@ -59,9 +59,9 @@ ConnectionConfig sfConfigCredentialsFlow = {
     }
 };
 
-Client baseClient = check new (sfConfigRefreshFlow);
-Client baseClientPasswordFlow = check new (sfConfigPasswordFlow);
-Client baseClientCredentialsFlow = check new (sfConfigCredentialsFlow);
+Client baseClient = check new (sfRefreshFlowConfig);
+Client passwordFlowClient = check new (sfPasswordFlowConfig);
+Client credentialsFlowClient = check new (sfCredentialsFlowConfig);
 
 public type Account record {
     string Id?;
@@ -169,9 +169,9 @@ function testCreate() {
     enable: true
 }
 function testQueryPasswordFlow() returns error? {
-    log:printInfo("baseClientPasswordFlow -> query()");
+    log:printInfo("passwordFlowClient -> query()");
     stream<Account, error?> queryResult = 
-        check baseClientPasswordFlow->query("SELECT name FROM Account");
+        check passwordFlowClient->query("SELECT name FROM Account");
     int count = check countStream(queryResult);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
@@ -180,9 +180,9 @@ function testQueryPasswordFlow() returns error? {
     enable: true
 }
 function testQueryCredentialsFlow() returns error? {
-    log:printInfo("baseClientCredentialsFlow -> query()");
+    log:printInfo("credentialsFlowClient -> query()");
     stream<Account, error?> queryResult = 
-        check baseClientCredentialsFlow->query("SELECT name FROM Account");
+        check credentialsFlowClient->query("SELECT name FROM Account");
     int count = check countStream(queryResult);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
