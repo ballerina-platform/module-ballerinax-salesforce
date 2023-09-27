@@ -170,8 +170,8 @@ function testCreate() {
 }
 function testQueryPasswordFlow() returns error? {
     log:printInfo("baseClientPasswordFlow -> query()");
-    string sampleQuery = "SELECT name FROM Account";
-    stream<Account, error?> queryResult = check baseClientPasswordFlow->query(sampleQuery);
+    stream<Account, error?> queryResult = 
+        check baseClientPasswordFlow->query("SELECT name FROM Account");
     int count = check countStream(queryResult);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
@@ -181,8 +181,8 @@ function testQueryPasswordFlow() returns error? {
 }
 function testQueryCredentialsFlow() returns error? {
     log:printInfo("baseClientCredentialsFlow -> query()");
-    string sampleQuery = "SELECT name FROM Account";
-    stream<Account, error?> queryResult = check baseClientCredentialsFlow->query(sampleQuery);
+    stream<Account, error?> queryResult = 
+        check baseClientCredentialsFlow->query("SELECT name FROM Account");
     int count = check countStream(queryResult);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
