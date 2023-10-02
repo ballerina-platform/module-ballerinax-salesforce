@@ -59,7 +59,7 @@ ConnectionConfig sfCredentialsFlowConfig = {
     }
 };
 
-Client baseClient = check new (sfRefreshFlowConfig);
+Client refreshFlowClient = check new (sfRefreshFlowConfig);
 Client passwordFlowClient = check new (sfPasswordFlowConfig);
 Client credentialsFlowClient = check new (sfCredentialsFlowConfig);
 
@@ -152,8 +152,8 @@ string testRecordIdNew = "";
     enable: true
 }
 function testCreate() {
-    log:printInfo("baseClient -> create");
-    CreationResponse|error response = baseClient->create(ACCOUNT, accountRecordNew);
+    log:printInfo("refreshFlowClient -> create");
+    CreationResponse|error response = refreshFlowClient->create(ACCOUNT, accountRecordNew);
 
     if response is CreationResponse {
         test:assertNotEquals(response, "", msg = "Found empty response!");
@@ -192,8 +192,8 @@ function testQueryCredentialsFlow() returns error? {
     dependsOn: [testCreate]
 }
 function testGetById() {
-    log:printInfo("baseClient -> getById()");
-    Account|error response = baseClient->getById(ACCOUNT, testRecordIdNew);
+    log:printInfo("refreshFlowClient -> getById()");
+    Account|error response = refreshFlowClient->getById(ACCOUNT, testRecordIdNew);
 
     if response is Account {
         test:assertNotEquals(response, (), msg = "Found null JSON response!");
@@ -208,10 +208,10 @@ function testGetById() {
     dependsOn: [testCreate]
 }
 function testGetByExternalId() {
-    log:printInfo("baseClient -> getByExternalId()");
+    log:printInfo("refreshFlowClient -> getByExternalId()");
     string externalIdField = "";
     string externalId = "";
-    Account|error response = baseClient->getByExternalId("Account", externalIdField, externalId);
+    Account|error response = refreshFlowClient->getByExternalId("Account", externalIdField, externalId);
 
     if response is Account {
         test:assertNotEquals(response, (), msg = "Found null JSON response!");
@@ -226,13 +226,13 @@ function testGetByExternalId() {
     dependsOn: [testCreateRecord, testGetById]
 }
 function testUpdate() {
-    log:printInfo("baseClient -> update()");
+    log:printInfo("refreshFlowClient -> update()");
     Account account = {
         Name: "MAAS Holdings",
         BillingCity: "Jaffna",
         Phone: "+94110000000"
     };
-    error? response = baseClient->update(ACCOUNT, testRecordIdNew, account);
+    error? response = refreshFlowClient->update(ACCOUNT, testRecordIdNew, account);
 
     if response is error {
         test:assertFail(msg = response.detail().toString());
@@ -243,9 +243,9 @@ function testUpdate() {
     enable: true
 }
 function testQuery() returns error? {
-    log:printInfo("baseClient -> query()");
+    log:printInfo("refreshFlowClient -> query()");
     string sampleQuery = "SELECT name FROM Account";
-    stream<Account, error?>|error queryResult = check baseClient->query(sampleQuery);
+    stream<Account, error?>|error queryResult = check refreshFlowClient->query(sampleQuery);
     if queryResult is error {
         test:assertFail(msg = queryResult.message());
     } else {
@@ -258,9 +258,9 @@ function testQuery() returns error? {
     enable: true
 }
 function testQueryWithLimit() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithLimit()");
+    log:printInfo("refreshFlowClient -> getQueryResultWithLimit()");
     string sampleQuery = "SELECT Name,Industry FROM Account LIMIT 3";
-    stream<Account, error?>|error queryResult = check baseClient->query(sampleQuery);
+    stream<Account, error?>|error queryResult = check refreshFlowClient->query(sampleQuery);
     if queryResult is error {
         test:assertFail(queryResult.message());
     } else {
@@ -273,9 +273,9 @@ function testQueryWithLimit() returns error? {
     enable: true
 }
 function testQueryWithAggregateFunctionWithAlias() returns error? {
-    log:printInfo("baseClient -> testQueryWithAggregateFunctionWithAlias()");
+    log:printInfo("refreshFlowClient -> testQueryWithAggregateFunctionWithAlias()");
     string sampleQuery = "SELECT COUNT(Id) NumAccounts, Name FROM Account GROUP BY Name";
-    stream<AccountResultWithAlias, error?>|error queryResult = check baseClient->query(sampleQuery);
+    stream<AccountResultWithAlias, error?>|error queryResult = check refreshFlowClient->query(sampleQuery);
     if queryResult is error {
         test:assertFail(msg = queryResult.message());
     } else {
@@ -289,9 +289,9 @@ function testQueryWithAggregateFunctionWithAlias() returns error? {
     enable: true
 }
 function testQueryWithAggregateFunctionWithoutAlias() returns error? {
-    log:printInfo("baseClient -> testQueryWithAggregateFunctionWithoutAlias()");
+    log:printInfo("refreshFlowClient -> testQueryWithAggregateFunctionWithoutAlias()");
     string sampleQuery = "SELECT COUNT(Id) FROM Account";
-    stream<AccountResultWithoutAlias, error?>|error queryResult = check baseClient->query(sampleQuery);
+    stream<AccountResultWithoutAlias, error?>|error queryResult = check refreshFlowClient->query(sampleQuery);
     if queryResult is error {
         test:assertFail(msg = queryResult.message());
     } else {
@@ -304,9 +304,9 @@ function testQueryWithAggregateFunctionWithoutAlias() returns error? {
     enable: false
 }
 function testQueryWithPagination() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithPagination()");
+    log:printInfo("refreshFlowClient -> getQueryResultWithPagination()");
     string sampleQuery = "SELECT Name FROM Contact";
-    stream<Account, error?> resultStream = check baseClient->query(sampleQuery);
+    stream<Account, error?> resultStream = check refreshFlowClient->query(sampleQuery);
     int count = check countStream(resultStream);
     log:printInfo("Number of records", count = count);
     test:assertTrue(count > 2000, msg = "Found less than or exactly 2000 search records!");
@@ -317,9 +317,9 @@ function testQueryWithPagination() returns error? {
     dependsOn: [testUpdate]
 }
 function testSearch() returns error? {
-    log:printInfo("baseClient -> search()");
+    log:printInfo("refreshFlowClient -> search()");
     string searchString = "FIND {MAAS Holdings}";
-    stream<record {}, error?>|error queryResult = baseClient->search(searchString);
+    stream<record {}, error?>|error queryResult = refreshFlowClient->search(searchString);
     if queryResult is error {
         test:assertFail(msg = queryResult.message());
     } else {
@@ -332,8 +332,8 @@ function testSearch() returns error? {
     enable: true
 }
 function testLimits() {
-    log:printInfo("baseClient -> getLimits()");
-    map<Limit>|error limits = baseClient->getLimits();
+    log:printInfo("refreshFlowClient -> getLimits()");
+    map<Limit>|error limits = refreshFlowClient->getLimits();
 
     if limits is map<Limit> {
         test:assertTrue(limits.length() > 0, msg = "Found empty resource map");
@@ -357,8 +357,8 @@ function testLimits() {
     enable: true
 }
 function testOrganizationMetaData() {
-    log:printInfo("baseClient -> getOrganizationMetaData()");
-    OrganizationMetadata|error description = baseClient->getOrganizationMetaData();
+    log:printInfo("refreshFlowClient -> getOrganizationMetaData()");
+    OrganizationMetadata|error description = refreshFlowClient->getOrganizationMetaData();
 
     if description is OrgMetadata {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
@@ -371,8 +371,8 @@ function testOrganizationMetaData() {
     enable: true
 }
 function testBasicInfo() {
-    log:printInfo("baseClient -> getBasicInfo()");
-    SObjectBasicInfo|error description = baseClient->getBasicInfo("Account");
+    log:printInfo("refreshFlowClient -> getBasicInfo()");
+    SObjectBasicInfo|error description = refreshFlowClient->getBasicInfo("Account");
 
     if description is SObjectBasicInfo {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
@@ -385,8 +385,8 @@ function testBasicInfo() {
     enable: true
 }
 function testDescribe() {
-    log:printInfo("baseClient -> describe()");
-    SObjectMetaData|error description = baseClient->describe("Account");
+    log:printInfo("refreshFlowClient -> describe()");
+    SObjectMetaData|error description = refreshFlowClient->describe("Account");
 
     if description is SObjectMetaData {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
@@ -399,8 +399,8 @@ function testDescribe() {
     enable: true
 }
 function testPlatformAction() {
-    log:printInfo("baseClient -> getPlatformAction()");
-    SObjectBasicInfo|error description = baseClient->getPlatformAction();
+    log:printInfo("refreshFlowClient -> getPlatformAction()");
+    SObjectBasicInfo|error description = refreshFlowClient->getPlatformAction();
 
     if description is SObjectBasicInfo {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
@@ -413,8 +413,8 @@ function testPlatformAction() {
     enable: true
 }
 function testApiVersions() {
-    log:printInfo("baseClient -> getApiVersions()");
-    Version[]|error versions = baseClient->getApiVersions();
+    log:printInfo("refreshFlowClient -> getApiVersions()");
+    Version[]|error versions = refreshFlowClient->getApiVersions();
 
     if versions is Version[] {
         test:assertTrue(versions.length() > 0, msg = "Found 0 or No API versions");
@@ -427,8 +427,8 @@ function testApiVersions() {
     enable: true
 }
 function testResources() {
-    log:printInfo("baseClient -> getResources()");
-    map<string>|error resources = baseClient->getResources(API_VERSION);
+    log:printInfo("refreshFlowClient -> getResources()");
+    map<string>|error resources = refreshFlowClient->getResources(API_VERSION);
 
     if resources is map<string> {
         test:assertTrue(resources.length() > 0, msg = "Found empty resource map");
@@ -449,8 +449,8 @@ function testResources() {
 
 @test:AfterSuite {}
 function testDeleteRecordNew() returns error? {
-    log:printInfo("baseClient -> delete()");
-    error? response = baseClient->delete(ACCOUNT, testRecordIdNew);
+    log:printInfo("refreshFlowClient -> delete()");
+    error? response = refreshFlowClient->delete(ACCOUNT, testRecordIdNew);
     if response is error {
         test:assertFail(msg = response.message());
     }
@@ -470,8 +470,8 @@ string testRecordIdJson = "";
     groups: ["deprecated"]
 }
 function testCreateRecord() {
-    log:printInfo("baseClient -> createRecord()");
-    string|Error stringResponse = baseClient->createRecord(ACCOUNT, accountRecordJson);
+    log:printInfo("refreshFlowClient -> createRecord()");
+    string|Error stringResponse = refreshFlowClient->createRecord(ACCOUNT, accountRecordJson);
 
     if stringResponse is string {
         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
@@ -488,9 +488,9 @@ function testCreateRecord() {
 }
 function testGetRecord() {
     json|Error response;
-    log:printInfo("baseClient -> getRecord()");
+    log:printInfo("refreshFlowClient -> getRecord()");
     string path = "/services/data/v48.0/sobjects/Account/" + testRecordIdJson;
-    response = baseClient->getRecord(path);
+    response = refreshFlowClient->getRecord(path);
 
     if response is json {
         test:assertNotEquals(response, (), msg = "Found null JSON response!");
@@ -507,13 +507,13 @@ function testGetRecord() {
     groups: ["deprecated"]
 }
 function testUpdateRecord() {
-    log:printInfo("baseClient -> updateRecord()");
+    log:printInfo("refreshFlowClient -> updateRecord()");
     json account = {
         Name: "WSO2 Inc",
         BillingCity: "Jaffna",
         Phone: "+94110000000"
     };
-    Error? response = baseClient->updateRecord(ACCOUNT, testRecordIdJson, account);
+    Error? response = refreshFlowClient->updateRecord(ACCOUNT, testRecordIdJson, account);
 
     if response is Error {
         test:assertFail(msg = response.message());
@@ -526,8 +526,8 @@ function testUpdateRecord() {
     groups: ["deprecated"]
 }
 function testDeleteRecord() {
-    log:printInfo("baseClient -> deleteRecord()");
-    Error? response = baseClient->deleteRecord(ACCOUNT, testRecordIdJson);
+    log:printInfo("refreshFlowClient -> deleteRecord()");
+    Error? response = refreshFlowClient->deleteRecord(ACCOUNT, testRecordIdJson);
 
     if response is Error {
         test:assertFail(msg = response.message());
@@ -539,15 +539,15 @@ function testDeleteRecord() {
     groups: ["deprecated"]
 }
 function testGetQueryResult() returns error? {
-    log:printInfo("baseClient -> getQueryResult()");
+    log:printInfo("refreshFlowClient -> getQueryResult()");
     string sampleQuery = "SELECT name FROM Account";
-    SoqlResult res = check baseClient->getQueryResult(sampleQuery);
+    SoqlResult res = check refreshFlowClient->getQueryResult(sampleQuery);
     assertSoqlResult(res);
     string nextRecordsUrl = res["nextRecordsUrl"].toString();
 
     while (nextRecordsUrl.trim() != EMPTY_STRING) {
         // log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-        SoqlResult resp = check baseClient->getNextQueryResult(nextRecordsUrl);
+        SoqlResult resp = check refreshFlowClient->getNextQueryResult(nextRecordsUrl);
         assertSoqlResult(resp);
         res = resp;
     }
@@ -559,9 +559,9 @@ function testGetQueryResult() returns error? {
     groups: ["deprecated"]
 }
 function testSearchSOSLString() {
-    log:printInfo("baseClient -> searchSOSLString()");
+    log:printInfo("refreshFlowClient -> searchSOSLString()");
     string searchString = "FIND {WSO2 Inc}";
-    SoslResult|Error res = baseClient->searchSOSLString(searchString);
+    SoslResult|Error res = refreshFlowClient->searchSOSLString(searchString);
 
     if res is SoslResult {
         test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
@@ -577,9 +577,9 @@ function testSearchSOSLString() {
     groups: ["deprecated"]
 }
 function testGetQueryResultStream() returns error? {
-    log:printInfo("baseClient -> getQueryResultStream()");
+    log:printInfo("refreshFlowClient -> getQueryResultStream()");
     string sampleQuery = "SELECT Name,Industry FROM Account";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
+    stream<record {}, error?> resultStream = check refreshFlowClient->getQueryResultStream(sampleQuery);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
@@ -589,9 +589,9 @@ function testGetQueryResultStream() returns error? {
     groups: ["deprecated"]
 }
 function testGetQueryResultWithLimit() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithLimit()");
+    log:printInfo("refreshFlowClient -> getQueryResultWithLimit()");
     string sampleQuery = "SELECT Name,Industry FROM Account LIMIT 3";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
+    stream<record {}, error?> resultStream = check refreshFlowClient->getQueryResultStream(sampleQuery);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
@@ -601,9 +601,9 @@ function testGetQueryResultWithLimit() returns error? {
     groups: ["deprecated"]
 }
 function testGetQueryResultWithPagination() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithPagination()");
+    log:printInfo("refreshFlowClient -> getQueryResultWithPagination()");
     string sampleQuery = "SELECT Name FROM Contact";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
+    stream<record {}, error?> resultStream = check refreshFlowClient->getQueryResultStream(sampleQuery);
     int count = check countStream(resultStream);
     log:printInfo("Number of records", count = count);
     test:assertTrue(count > 2000, msg = "Found less than or exactly 2000 search records!");
@@ -615,9 +615,9 @@ function testGetQueryResultWithPagination() returns error? {
     groups: ["deprecated"]
 }
 function testSearchSOSLStringStream() returns error? {
-    log:printInfo("baseClient -> searchSOSLStringStream()");
+    log:printInfo("refreshFlowClient -> searchSOSLStringStream()");
     string searchString = "FIND {WSO2 Inc}";
-    stream<record {}, error?> resultStream = check baseClient->searchSOSLStringStream(searchString);
+    stream<record {}, error?> resultStream = check refreshFlowClient->searchSOSLStringStream(searchString);
     int count = check countStream(resultStream);
     test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
