@@ -16,7 +16,7 @@
 
 //Latest API Version
 # Constant field `API_VERSION`. Holds the value for the Salesforce API version.
-public const string API_VERSION = "v48.0";
+public const string API_VERSION = "v59.0";
 
 // For URL encoding
 # Constant field `ENCODING_CHARSET`. Holds the value for the encoding charset.
