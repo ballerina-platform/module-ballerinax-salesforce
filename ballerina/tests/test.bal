@@ -411,9 +411,9 @@ function testDeleteRecordNew() returns error? {
 
 //////////////////////////////////////////// DEPRECATED ////////////////////////////////////////////////////////////////
 
-json accountRecordJson = {
-    Name: "John Keells Holdings",
-    BillingCity: "Colombo 3"
+record{} accountRecord = {
+    "Name": "John Keells Holdings",
+    "BillingCity": "Colombo 3"
 };
 
 string testRecordIdJson = "";
@@ -424,155 +424,11 @@ string testRecordIdJson = "";
 }
 function testCreateRecord() {
     log:printInfo("baseClient -> createRecord()");
-    string|Error stringResponse = baseClient->createRecord(ACCOUNT, accountRecordJson);
+    CreationResponse|error stringResponse = baseClient->create(ACCOUNT, accountRecord);
 
-    if stringResponse is string {
-        test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
-        testRecordIdJson = stringResponse;
-    } else {
+    if stringResponse is error {
         test:assertFail(msg = stringResponse.message());
     }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testCreateRecord],
-    groups: ["deprecated"]
-}
-function testGetRecord() {
-    json|Error response;
-    log:printInfo("baseClient -> getRecord()");
-    string path = "/services/data/v48.0/sobjects/Account/" + testRecordIdJson;
-    response = baseClient->getRecord(path);
-
-    if response is json {
-        test:assertNotEquals(response, (), msg = "Found null JSON response!");
-        test:assertEquals(response.Name, "John Keells Holdings", msg = "Name key mismatched in response");
-        test:assertEquals(response.BillingCity, "Colombo 3", msg = "BillingCity key mismatched in response");
-    } else {
-        test:assertFail(msg = response.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testCreateRecord, testGetRecord],
-    groups: ["deprecated"]
-}
-function testUpdateRecord() {
-    log:printInfo("baseClient -> updateRecord()");
-    json account = {
-        Name: "WSO2 Inc",
-        BillingCity: "Jaffna",
-        Phone: "+94110000000"
-    };
-    Error? response = baseClient->updateRecord(ACCOUNT, testRecordIdJson, account);
-
-    if response is Error {
-        test:assertFail(msg = response.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testSearchSOSLString],
-    groups: ["deprecated"]
-}
-function testDeleteRecord() {
-    log:printInfo("baseClient -> deleteRecord()");
-    Error? response = baseClient->deleteRecord(ACCOUNT, testRecordIdJson);
-
-    if response is Error {
-        test:assertFail(msg = response.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testGetQueryResult() returns error? {
-    log:printInfo("baseClient -> getQueryResult()");
-    string sampleQuery = "SELECT name FROM Account";
-    SoqlResult res = check baseClient->getQueryResult(sampleQuery);
-    assertSoqlResult(res);
-    string nextRecordsUrl = res["nextRecordsUrl"].toString();
-
-    while (nextRecordsUrl.trim() != EMPTY_STRING) {
-        // log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-        SoqlResult resp = check baseClient->getNextQueryResult(nextRecordsUrl);
-        assertSoqlResult(resp);
-        res = resp;
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testUpdateRecord],
-    groups: ["deprecated"]
-}
-function testSearchSOSLString() {
-    log:printInfo("baseClient -> searchSOSLString()");
-    string searchString = "FIND {WSO2 Inc}";
-    SoslResult|Error res = baseClient->searchSOSLString(searchString);
-
-    if res is SoslResult {
-        test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT,
-        msg = "Matched search record is not an Account type!");
-    } else {
-        test:assertFail(msg = res.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testGetQueryResultStream() returns error? {
-    log:printInfo("baseClient -> getQueryResultStream()");
-    string sampleQuery = "SELECT Name,Industry FROM Account";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
-    int count = check countStream(resultStream);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
-}
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testGetQueryResultWithLimit() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithLimit()");
-    string sampleQuery = "SELECT Name,Industry FROM Account LIMIT 3";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
-    int count = check countStream(resultStream);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
-}
-
-@test:Config {
-    enable: false,
-    groups: ["deprecated"]
-}
-function testGetQueryResultWithPagination() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithPagination()");
-    string sampleQuery = "SELECT Name FROM Contact";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
-    int count = check countStream(resultStream);
-    log:printInfo("Number of records", count = count);
-    test:assertTrue(count > 2000, msg = "Found less than or exactly 2000 search records!");
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testUpdateRecord],
-    groups: ["deprecated"]
-}
-function testSearchSOSLStringStream() returns error? {
-    log:printInfo("baseClient -> searchSOSLStringStream()");
-    string searchString = "FIND {WSO2 Inc}";
-    stream<record {}, error?> resultStream = check baseClient->searchSOSLStringStream(searchString);
-    int count = check countStream(resultStream);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
 }
 
 /////////////////////////////////////////// Helper Functions ///////////////////////////////////////////////////////////
