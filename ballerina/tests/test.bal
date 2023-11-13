@@ -176,7 +176,7 @@ function testGetByExternalId() {
 
 @test:Config {
     enable: true,
-    dependsOn: [testCreateRecord, testGetById]
+    dependsOn: [testCreate, testGetById]
 }
 function testUpdate() {
     log:printInfo("baseClient -> update()");
@@ -406,28 +406,6 @@ function testDeleteRecordNew() returns error? {
     error? response = baseClient->delete(ACCOUNT, testRecordIdNew);
     if response is error {
         test:assertFail(msg = response.message());
-    }
-}
-
-//////////////////////////////////////////// DEPRECATED ////////////////////////////////////////////////////////////////
-
-record{} accountRecord = {
-    "Name": "John Keells Holdings",
-    "BillingCity": "Colombo 3"
-};
-
-string testRecordIdJson = "";
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testCreateRecord() {
-    log:printInfo("baseClient -> createRecord()");
-    CreationResponse|error stringResponse = baseClient->create(ACCOUNT, accountRecord);
-
-    if stringResponse is error {
-        test:assertFail(msg = stringResponse.message());
     }
 }
 
