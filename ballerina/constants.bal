@@ -41,6 +41,18 @@ const string REPORTS = "reports";
 # Constant field `SOBJECTS`. Holds the value sobjects for get sobject resource prefix.
 const string SOBJECTS = "sobjects";
 
+# Constant field `PASSWORD`. Holds the value sobjects for get password resource prefix.
+const string PASSWORD = "password";
+
+# Constant field `USER`. Holds the value sobjects for get USER resource prefix.
+const string USER = "User";
+
+# Constant field `DELETED` Holds the value deleted for get deleted resource prefix.
+const string DELETED = "deleted";
+
+# Constant field `UPDATED` Holds the value updated for get updated resource prefix.
+const string UPDATED = "updated";
+
 # Constant field `LIMITS`. Holds the value limits for get limits resource prefix.
 const string LIMITS = "limits";
 

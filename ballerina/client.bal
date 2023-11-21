@@ -18,6 +18,7 @@ import ballerina/http;
 import ballerina/jballerina.java;
 import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
+import ballerina/time;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
@@ -356,4 +357,88 @@ public isolated client class Client {
     stream<record {}, error?>|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor"
     } external;
+
+
+    // Added APIs
+    
+    # Retrieves the list of individual records that have been deleted within the given timespan.
+    #
+    # + sObjectName - SObject reference
+    # + startDate - Start date of the timespan.
+    # + endDate - End date of the timespan.
+    isolated remote function getDeleted(string sObjectName, time:Civil startDate, time:Civil endDate) 
+        returns DeletedRecordsResult|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED]);
+        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(startDate), 
+            end: check time:civilToString(endDate)});
+        return check self.salesforceClient->get(finalUrl);
+    }
+
+    # Retrieves the list of individual records that have been deleted within the given timespan.
+    #
+    # + sObjectName - SObject reference
+    # + startDate - Start date of the timespan.
+    # + endDate - End date of the timespan.
+    isolated remote function getUpdated(string sObjectName, time:Civil startDate, time:Civil endDate) 
+        returns UpdatedRecordsResults|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED]);
+        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(startDate), 
+            end: check time:civilToString(endDate)});
+        return check self.salesforceClient->get(finalUrl);
+    }
+    
+    # Retrieves information about alternate named layouts for a given object.
+    #
+    # + sObjectName - SObject reference
+    # + layoutName - Name of the layout.
+    isolated remote function getNamedLayouts(string sObjectName, string layoutName, string[] fields) returns record{}|error;
+
+    # Get the password information
+    #
+    # + userId - User ID
+    isolated remote function getPasswordInfo(string userId) returns boolean|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
+        http:Response response = check self.salesforceClient->get(path);
+        if response.statusCode == 200 {
+            json payload = check response.getJsonPayload();
+            map<json> payloadMap = check payload.ensureType();
+            boolean isExpired = check payloadMap.isExpired;
+            return isExpired;
+        } else {
+            json payload = check response.getJsonPayload();
+            json[] jsonArray= check payload.ensureType();
+            map<json> payloadMap = check jsonArray[0].ensureType();
+            record {string message; string errorCode;} responseRecord = {message: check payloadMap.message, errorCode: check payloadMap.errorCode};
+            return error("Error occurred while resetting the password" + responseRecord.toString());
+        }
+    }
+
+    # Reset user password
+    #
+    # + userId - User ID
+    isolated remote function resetPassword(string userId) returns byte[]|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
+        http:Response response = check self.salesforceClient->delete(path);
+        if response.statusCode == 200 {
+            json payload = check response.getJsonPayload();
+            map<json> payloadMap = check payload.ensureType();
+            string password = check payloadMap.NewPassword;
+            return password.toBytes();
+        } else {
+            return error("Error occurred while resetting the password");
+        }
+    }
+
+    # Change user password
+    #
+    # + userId - User ID
+    # + newPassword - New user password
+    isolated remote function changePassword(string userId, byte[] newPassword) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
+        record{} payload = {"NewPassword" : check string:fromBytes(newPassword)};
+        return check self.salesforceClient->post(path, payload);
+    }
+
+
+
 }

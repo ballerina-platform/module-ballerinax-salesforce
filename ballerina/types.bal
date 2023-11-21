@@ -34,73 +34,23 @@ public type ConnectionConfig record {|
 # + url - URL of the Salesforce version
 # + version - Salesforce version number
 @display{label: "Version"}
-public type Version record {|
+public type Version record {
     @display{label: "Label"}
     string label;
     @display{label: "URL"}
     string url;
     @display{label: "Version"}
     string 'version;
-|};
+};
 
 # Defines the Limit type to list limits information for your org.
 #
 # + Max - The limit total for the org
 # + Remaining - The total number of calls or events left for the org
-public type Limit record {|
+public type Limit record {
     int Max;
     int Remaining;
-    json...;
-|};
-
-# Define the SOQL result type.
-#
-# + done - Query is completed or not
-# + totalSize - The total number result records
-# + records - Result records
-@display{label: "SOQL Result"}
-public type SoqlResult record {|
-    @display{label: "Completed"}
-    boolean done;
-    @display{label: "No of result records"}
-    int totalSize;
-    @display{label: "Records retreived"}
-    SoqlRecord[] records;
-    json...;
-|};
-
-# Defines the SOQL query result record type. 
-#
-# + attributes - Attribute record
-@display{label: "SOQL record"}
-public type SoqlRecord record {|
-    @display{label: "Attributes"}
-    Attribute attributes;
-    json...;
-|};
-
-# Defines SOSL query result.
-#
-# + searchRecords - Matching records for the given search string
-@display{label: "SOSL Result"}
-public type SoslResult record {|
-    @display{label: "Records retrieved"}
-    SoslRecord[] searchRecords;
-    json...;
-|};
-
-# Defines SOSL query result.
-#
-# + attributes - Attribute record
-# + Id - ID of the matching object
-@display{label: "SOSL record"}
-public type SoslRecord record {|
-    @display{label: "Attributes"}
-    Attribute attributes;
-    @display{label: "Id"}
-    string Id;
-    json...;
-|};
+};
 
 # Defines the Attribute type.
 # Contains the attribute information of the resultant record.
@@ -108,12 +58,12 @@ public type SoslRecord record {|
 # + type - Type of the resultant record
 # + url - URL of the resultant record
 @display{label: "Attribute"}
-public type Attribute record {|
+public type Attribute record {
     @display{label: "Type"}
     string 'type;
     @display{label: "URL"}
     string url?;
-|};
+};
 
 # Metadata for your organization and available to the logged-in user.
 #
@@ -121,15 +71,14 @@ public type Attribute record {|
 # + maxBatchSize - Maximum batch size
 # + sobjects - Available SObjects
 @display{label: "Organizational meta data"}
-public type OrganizationMetadata record {|
+public type OrganizationMetadata record {
     @display{label: "Encoding"}
     string encoding;
     @display{label: "Maximum batch size"}
     int maxBatchSize;
     @display{label: "SObject meta data"}
     SObjectMetaData[] sobjects;
-    json...;
-|};
+};
 
 # Metadata for your organization and available to the logged-in user.
 #
@@ -161,33 +110,52 @@ public type OrgMetadata record {|
 # + label - SObject label
 # + urls - SObject URLs
 @display{label: "SObject meta data"}
-public type SObjectMetaData record {|
-    @display{label: "Name"}
+public type SObjectMetaData record {
     string name;
-    @display{label: "Creatable"}
     boolean createable;
-    @display{label: "Deletable"}
     boolean deletable;
-    @display{label: "Updatable"}
     boolean updateable;
-    @display{label: "Queryable"}
     boolean queryable;
-    @display{label: "Label"}
     string label;
-    @display{label: "URLs"}
     map<string> urls;
-    json...;
-|};
+    boolean activateable;
+    boolean custom;
+    boolean customSetting;
+    boolean deprecatedAndHidden;
+    boolean feedEnabled;
+    string keyPrefix;
+    string labelPlural;
+    string layoutable;
+    boolean mergeable;
+    boolean mruEnabled;
+    boolean replicateable;
+    boolean retrieveable;
+    boolean searchable;
+    boolean triggerable;
+    boolean undeletable;
+};
+
 
 # Basic info of a SObject.
 #
 # + objectDescribe - Metadata related to the SObject
 @display{label: "SObject basic info"}
-public type SObjectBasicInfo record {|
+public type SObjectBasicInfo record {
     @display{label: "SObject meta data"}
     SObjectMetaData objectDescribe;
-    json...;
-|};
+    @display{label: "Recent items"}
+    record {|Attributes attributes; string Id; string Name;|}[] recentItems;
+};
+
+# Represent the Attributes at SObjectBasicInfo
+# 
+# + type - Type of the resultant record
+# + url - URL of the resultant record
+public type Attributes record {
+    string 'type;
+    string url;
+};
+
 
 # Response of object creation.
 #
@@ -296,3 +264,36 @@ public type ReportInstanceResult record {
     boolean hasDetailRows;
     map<json>? reportExtendedMetadata;
 };
+
+# Represent the metadata of deleted records
+#
+# + deletedRecords - Array of deleted records
+# + earliestDateAvailable - The earliest date covered by the results
+# + latestDateCovered - The latest date covered by the results
+public type DeletedRecordsResult record {
+    record {|string deletedDate; string id;|}[] deletedRecords;
+    string earliestDateAvailable;
+    string latestDateCovered;
+};
+
+# Represent the metadata of updated records
+# 
+# + ids - Array of updated record IDs
+# + latestDateCovered - The latest date covered by the results
+public type UpdatedRecordsResults record {
+string[] ids;
+string latestDateCovered;
+};
+
+# Represent the password status
+public type PasswordStatus record{
+boolean isExpired;
+};
+
+
+# Represent the Error response for password access
+public type ErrorResponse record {
+    string message;
+    string errorCode;
+};
+
