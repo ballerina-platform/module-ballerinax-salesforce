@@ -29,8 +29,17 @@ const string BASE_PATH = "/services/data";
 # Constant field `API_BASE_PATH`. Holds the value for the Salesforce API base path/URL.
 final string API_BASE_PATH = string `${BASE_PATH}/${API_VERSION}`;
 
+# Constant field `QUICK_ACTIONS`. Holds the value quickActions for quick actions resource prefix.
+final string QUICK_ACTIONS = "quickActions";
+
 # Constant field `ANALYTICS`. Holds the value analytics for analytics resource prefix.
 const string ANALYTICS = "analytics";
+
+# Constant field `COMPOSITE`. Holds the value composite for composite resource prefix.
+const string COMPOSITE = "composite";
+
+# Constant field `BATCH`. Holds the value batch for batch resource prefix.
+const string BATCH = "batch";
 
 # Constant field `INSTANCES`. Holds the value instances for instances resource prefix.
 const string INSTANCES = "instances";

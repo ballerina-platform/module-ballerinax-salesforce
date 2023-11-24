@@ -297,3 +297,42 @@ public type ErrorResponse record {
     string errorCode;
 };
 
+# Represent a quick action
+# 
+# + actionEnumOrId - Action enum or ID
+# + label - Action label
+# + name - Action name
+# + type - Action type
+# + urls - Action URLs
+# 
+public type QuickAction record {
+    string actionEnumOrId;
+    string label;
+    string name;
+    string 'type;
+    record{string defaultValues?; string quickAction?; string describe?; string defaultValuesTemplate?;} urls;
+};
+
+
+# Represent a batch execution result
+# + statusCode - Status code of the batch execution
+# + result - Result of the batch execution
+# 
+public type SubRequestResult record {
+    int statusCode;
+    json? result;
+};
+
+# Represent Subrequest of a batch
+public type Subrequest record {|
+    string binaryPartName?;
+    string binaryPartNameAlias?;
+    string method;
+    record{} richInput?;
+    string url;
+|};
+
+public type BatchResult record {
+    boolean hasErrors;
+    SubRequestResult[] results;
+};

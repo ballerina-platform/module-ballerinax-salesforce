@@ -139,6 +139,8 @@ public isolated client class Client {
     isolated remote function getById(@display {label: "sObject Name"} string sobject,
                                     @display {label: "sObject ID"} string id,
                                     @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
+                                    @display {label: "sObject ID"} string id, 
+                                    typedesc<record {}> returnType = <>)
                                     returns @display {label: "Result"} returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordById"
@@ -438,6 +440,44 @@ public isolated client class Client {
         record{} payload = {"NewPassword" : check string:fromBytes(newPassword)};
         return check self.salesforceClient->post(path, payload);
     }
+
+    # Returns a list of actions and their details
+    #
+    # + sObjectName - SObject reference
+    isolated remote function getQuickActions(string sObjectName) returns QuickAction[]|error {
+        string path = utils:prepareUrl([API_BASE_PATH, QUICK_ACTIONS]);
+        http:Response response = check self.salesforceClient->post(path, payload);
+        if response.statusCode == 200 {
+            json payload = check response.getJsonPayload();
+            QuickAction[] actions = check payload.fromJsonWithType();
+            return actions;
+        } else {
+            json payload = check response.getJsonPayload();
+            return error("Error occurred while retrieving the quick actions. " + payload.toString());
+        }
+    }
+
+    # Executes up to 25 subrequests in a single request.
+    #
+    # + batchRequest - record containing all the requests
+    isolated remote function batch(Subrequest[] batchRequests, boolean haltOnError = false) returns BatchResult|error {
+        string path = utils:prepareUrl([API_BASE_PATH, COMPOSITE, BATCH]);
+        record{} payload = {"batchRequests" : check batchRequests, "haltOnError" : haltOnError};
+        http:Response response = check self.salesforceClient->post(path, payload);
+        if response.statusCode == 200 {
+            json payload = check response.getJsonPayload();
+            BatchResult result = check payload.fromJsonWithType();
+            return result;
+        } else {
+            json payload = check response.getJsonPayload();
+            return error("Error occurred while executing the batch request. " + payload.toString());
+        }
+    }
+
+
+
+
+
 
 
 
