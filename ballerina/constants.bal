@@ -35,6 +35,10 @@ final string QUICK_ACTIONS = "quickActions";
 # Constant field `ANALYTICS`. Holds the value analytics for analytics resource prefix.
 const string ANALYTICS = "analytics";
 
+# Constant field `ACTIONS`. Holds the value actions for actions resource prefix.
+const string ACTIONS = "actions";
+
+
 # Constant field `COMPOSITE`. Holds the value composite for composite resource prefix.
 const string COMPOSITE = "composite";
 

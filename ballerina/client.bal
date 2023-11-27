@@ -132,13 +132,10 @@ public isolated client class Client {
     #
     # + sobject - sObject name 
     # + id - sObject ID
-    # + fields - Fields to retrieve 
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - Record if successful or else `error`
     @display {label: "Get Record by ID"}
     isolated remote function getById(@display {label: "sObject Name"} string sobject,
-                                    @display {label: "sObject ID"} string id,
-                                    @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
                                     @display {label: "sObject ID"} string id, 
                                     typedesc<record {}> returnType = <>)
                                     returns @display {label: "Result"} returnType|error = @java:Method {
@@ -161,14 +158,13 @@ public isolated client class Client {
     # + sobject - sObject name 
     # + extIdField - External ID field name 
     # + extId - External ID value 
-    # + fields - Fields to retrieve 
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - Record if successful or else `error`
     @display {label: "Get Record by External ID"}
     isolated remote function getByExternalId(@display {label: "sObject Name"} string sobject,
                                             @display {label: "External ID Field Name"} string extIdField,
                                             @display {label: "External ID"} string extId,
-                                            @display {label: "Fields to Retrieve"} string[] fields = [], typedesc<record {}> returnType = <>)
+                                            typedesc<record {}> returnType = <>)
                                             returns @display {label: "Result"} returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordByExtId"
@@ -388,12 +384,6 @@ public isolated client class Client {
             end: check time:civilToString(endDate)});
         return check self.salesforceClient->get(finalUrl);
     }
-    
-    # Retrieves information about alternate named layouts for a given object.
-    #
-    # + sObjectName - SObject reference
-    # + layoutName - Name of the layout.
-    isolated remote function getNamedLayouts(string sObjectName, string layoutName, string[] fields) returns record{}|error;
 
     # Get the password information
     #
@@ -446,7 +436,7 @@ public isolated client class Client {
     # + sObjectName - SObject reference
     isolated remote function getQuickActions(string sObjectName) returns QuickAction[]|error {
         string path = utils:prepareUrl([API_BASE_PATH, QUICK_ACTIONS]);
-        http:Response response = check self.salesforceClient->post(path, payload);
+        http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             json payload = check response.getJsonPayload();
             QuickAction[] actions = check payload.fromJsonWithType();
@@ -462,23 +452,79 @@ public isolated client class Client {
     # + batchRequest - record containing all the requests
     isolated remote function batch(Subrequest[] batchRequests, boolean haltOnError = false) returns BatchResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, COMPOSITE, BATCH]);
-        record{} payload = {"batchRequests" : check batchRequests, "haltOnError" : haltOnError};
+        record{} payload = {"batchRequests" : batchRequests, "haltOnError" : haltOnError};
         http:Response response = check self.salesforceClient->post(path, payload);
         if response.statusCode == 200 {
-            json payload = check response.getJsonPayload();
-            BatchResult result = check payload.fromJsonWithType();
-            return result;
+            json jsonPayload = check response.getJsonPayload();
+            return check jsonPayload.fromJsonWithType();
         } else {
-            json payload = check response.getJsonPayload();
+            json jsonPayload = check response.getJsonPayload();
             return error("Error occurred while executing the batch request. " + payload.toString());
         }
     }
 
+    # Retrieves information about alternate named layouts for a given object.
+    #
+    # + sObjectName - SObject reference
+    # + layoutName - Name of the layout.
+    isolated remote function getNamedLayouts(@display {label: "Name of the sObject"} string sObjectName, 
+                                @display {label: "Name of the layout"} string layoutName, typedesc<record {}> returnType = <>)
+                                    returns returnType|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getNamedLayouts"
+    } external;
 
+    private isolated function processgetNamedLayouts(typedesc<record {}> returnType, string sobject, string id,
+                                                    string[] fields) returns record {}|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
+        if fields.length() > 0 {
+            path = path.concat(utils:appendQueryParams(fields));
+        }
+        json response = check self.salesforceClient->get(path);
+        return check response.cloneWithType(returnType);
+    }
 
+    # Retrieve a list of general action types for the current organization.
+    #
+    # + subContext - Sub context
+    isolated remote function getInvocableActions(string subContext, 
+            typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getInvocableActions"
+    } external;
 
+    private isolated function processGetInvocableActions(string subContext, typedesc<record {}> returnType) returns record {}|error {
+        string path = utils:prepareUrl([API_BASE_PATH, ACTIONS]) + subContext;
+        json response = check self.salesforceClient->get(path);
+        return check response.cloneWithType(returnType);
+    }
 
+    # Invoke Actions.
+    #
+    # + subContext - Sub context
+    # + actionName - name of the action
+    # + payload - payload for the action
 
+    isolated remote function invokeActions(string subContext, record{} payload, 
+            typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "invokeActions"
+    } external;
 
+    private isolated function processInvocableActions(string subContext, record{} payload, typedesc<record {}> returnType) returns record {}|error {
+        string path = utils:prepareUrl([API_BASE_PATH, ACTIONS]) + subContext;
+        json response = check self.salesforceClient->get(path);
+        return check response.cloneWithType(returnType);
+    }
+
+    # Delete record using external Id.
+    #
+    # + externalId - Name of the external id field
+    # + value - value of the external id field.
+
+    isolated remote function deleteRecordsUsingExtId(string externalId, string value) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, externalId, value]);
+        return check self.salesforceClient->delete(path);
+    }
 
 }

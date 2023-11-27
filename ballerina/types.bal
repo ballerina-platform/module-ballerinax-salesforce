@@ -336,3 +336,4 @@ public type BatchResult record {
     boolean hasErrors;
     SubRequestResult[] results;
 };
+

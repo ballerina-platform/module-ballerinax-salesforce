@@ -35,6 +35,8 @@ import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
 
+import static io.ballerinax.salesforce.Utils.getMetadata;
+
 /**
  * This class holds the utility methods involved with executing the read operations.
  *
@@ -44,20 +46,37 @@ public class ReadOperationExecutor {
 
     public static Object getRecord(Environment env, BObject client, BString path, BTypedesc targetType) {
 
-        return invokeClientMethod(env, client, path, targetType,
-                "processGetRecord");
+        return invokeClientMethod(env, client, path, targetType,"processGetRecord");
+    }
+
+    public static Object getInvocableActions(Environment env, BObject client, BString subContext, BTypedesc targetType) {
+
+        return invokeClientMethod(env, client, subContext, targetType, "processGetInvocableActions");
+    }
+
+    public static Object invokeActions(Environment env, BObject client, BString subContext, BObject payload, 
+        BTypedesc targetType) {
+        return invokeClientMethodWithPayload(env, client, subContext, payload, targetType,"processInvokeActions");
     }
 
     public static Object getRecordById(Environment env, BObject client, BString sobject, BString id,
-                                       BArray fields, BTypedesc targetType) {
-
+                                       BTypedesc targetType) {
+        RecordType recordType = (RecordType) targetType.getDescribingType();
+        BArray fields = getMetadata(recordType);
         return invokeClientMethodForId(env, client, sobject, id, fields, targetType,
                 "processGetRecordById");
     }
 
-    public static Object getRecordByExtId(Environment env, BObject client, BString sobject, BString extIdField,
-                                          BString extId, BArray fields, BTypedesc targetType) {
+    public static Object getNamedLayouts(Environment env, BObject client, BString sobject, BString name,
+                                       BTypedesc targetType) {
+        return invokeClientMethodForLayouts(env, client, sobject, name, targetType,
+                "processgetNamedLayouts");
+    }
 
+    public static Object getRecordByExtId(Environment env, BObject client, BString sobject, BString extIdField,
+                                          BString extId, BTypedesc targetType) {
+        RecordType recordType = (RecordType) targetType.getDescribingType();
+        BArray fields = getMetadata(recordType);
         return invokeClientMethodForExtId(env, client, sobject, extIdField, extId, fields, targetType,
                 "processGetRecordByExtId");
     }
@@ -76,6 +95,30 @@ public class ReadOperationExecutor {
     }
 
     private static Object invokeClientMethod(Environment env, BObject client, BString path, BTypedesc targetType,
+                                             String methodName) {
+
+        Object[] paramFeed = new Object[4];
+        paramFeed[0] = targetType;
+        paramFeed[1] = true;
+        paramFeed[2] = path;
+        paramFeed[3] = true;
+        return invokeClientMethod(env, client, methodName, paramFeed);
+    }
+
+    private static Object invokeClientMethodForLayouts(Environment env, BObject client, BString sObject, BString name, BTypedesc targetType,
+                                             String methodName) {
+
+        Object[] paramFeed = new Object[6];
+        paramFeed[0] = targetType;
+        paramFeed[1] = true;
+        paramFeed[2] = sObject;
+        paramFeed[3] = true;
+        paramFeed[4] = name;
+        paramFeed[5] = true;
+        return invokeClientMethod(env, client, methodName, paramFeed);
+    }
+
+    private static Object invokeClientMethodWithPayload(Environment env, BObject client, BString path, BObject payload, BTypedesc targetType,
                                              String methodName) {
 
         Object[] paramFeed = new Object[4];
