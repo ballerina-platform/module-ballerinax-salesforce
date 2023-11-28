@@ -474,7 +474,7 @@ public isolated client class Client {
         name: "getNamedLayouts"
     } external;
 
-    private isolated function processgetNamedLayouts(typedesc<record {}> returnType, string sobject, string id,
+    private isolated function processGetNamedLayouts(typedesc<record {}> returnType, string sobject, string id,
                                                     string[] fields) returns record {}|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
         if fields.length() > 0 {
@@ -511,7 +511,7 @@ public isolated client class Client {
         name: "invokeActions"
     } external;
 
-    private isolated function processInvocableActions(string subContext, record{} payload, typedesc<record {}> returnType) returns record {}|error {
+    private isolated function processInvokeActions(typedesc<record {}> returnType, string subContext, record{} payload) returns record {}|error {
         string path = utils:prepareUrl([API_BASE_PATH, ACTIONS]) + subContext;
         json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
