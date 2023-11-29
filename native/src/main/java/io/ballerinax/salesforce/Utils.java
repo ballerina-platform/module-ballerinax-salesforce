@@ -8,9 +8,9 @@ import io.ballerina.runtime.api.types.Field;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.values.BArray;
 
-import static io.ballerina.runtime.api.utils.StringUtils.fromString;
-
 import java.util.Map;
+
+import static io.ballerina.runtime.api.utils.StringUtils.fromString;
 
 public class Utils {
     private Utils() {}

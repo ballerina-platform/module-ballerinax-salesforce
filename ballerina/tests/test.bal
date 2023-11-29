@@ -313,7 +313,7 @@ function testOrganizationMetaData() {
     log:printInfo("baseClient -> getOrganizationMetaData()");
     OrganizationMetadata|error description = baseClient->getOrganizationMetaData();
 
-    if description is OrgMetadata {
+    if description is OrganizationMetadata {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
     } else {
         test:assertFail(msg = description.message());
@@ -410,16 +410,6 @@ function testDeleteRecordNew() returns error? {
 }
 
 /////////////////////////////////////////// Helper Functions ///////////////////////////////////////////////////////////
-
-isolated function assertSoqlResult(SoqlResult|Error res) {
-    if res is SoqlResult {
-        test:assertTrue(res.totalSize > 0, "Total number result records is 0");
-        test:assertTrue(res.'done, "Query is not completed");
-        test:assertTrue(res.records.length() == res.totalSize, "Query result records not equal to totalSize");
-    } else {
-        test:assertFail(msg = res.message());
-    }
-}
 
 isolated function countStream(stream<record {}, error?> resultStream) returns int|error {
     int nLines = 0;

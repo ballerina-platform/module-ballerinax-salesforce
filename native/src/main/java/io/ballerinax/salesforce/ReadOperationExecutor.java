@@ -30,6 +30,7 @@ import io.ballerina.runtime.api.types.StreamType;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
@@ -49,12 +50,13 @@ public class ReadOperationExecutor {
         return invokeClientMethod(env, client, "processGetRecord", paramFeed);
     }
 
-    public static Object getInvocableActions(Environment env, BObject client, BString subContext, BTypedesc targetType) {
+    public static Object getInvocableActions(Environment env, BObject client, BString subContext, 
+        BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, subContext, true};
         return invokeClientMethod(env, client, "processGetInvocableActions", paramFeed);
     }
 
-    public static Object invokeActions(Environment env, BObject client, BString subContext, BObject payload, 
+    public static Object invokeActions(Environment env, BObject client, BString subContext, BMap<BString, ?> payload,
         BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, subContext, true, payload, true};
         return invokeClientMethod(env, client, "processInvokeActions", paramFeed);

@@ -47,10 +47,11 @@ public type Version record {
 #
 # + Max - The limit total for the org
 # + Remaining - The total number of calls or events left for the org
-public type Limit record {
+public type Limit record {|
     int Max;
     int Remaining;
-};
+    json...;
+|};
 
 # Defines the Attribute type.
 # Contains the attribute information of the resultant record.
@@ -58,12 +59,12 @@ public type Limit record {
 # + type - Type of the resultant record
 # + url - URL of the resultant record
 @display{label: "Attribute"}
-public type Attribute record {
+public type Attribute record {|
     @display{label: "Type"}
     string 'type;
     @display{label: "URL"}
     string url?;
-};
+|};
 
 # Metadata for your organization and available to the logged-in user.
 #
@@ -71,26 +72,7 @@ public type Attribute record {
 # + maxBatchSize - Maximum batch size
 # + sobjects - Available SObjects
 @display{label: "Organizational meta data"}
-public type OrganizationMetadata record {
-    @display{label: "Encoding"}
-    string encoding;
-    @display{label: "Maximum batch size"}
-    int maxBatchSize;
-    @display{label: "SObject meta data"}
-    SObjectMetaData[] sobjects;
-};
-
-# Metadata for your organization and available to the logged-in user.
-#
-# + encoding - Encoding
-# + maxBatchSize - Maximum batch size
-# + sobjects - Available SObjects
-# 
-# # Deprecated
-# This record is deprecated as the name is changed.
-@deprecated
-@display{label: "Organizational meta data"}
-public type OrgMetadata record {|
+public type OrganizationMetadata record {|
     @display{label: "Encoding"}
     string encoding;
     @display{label: "Maximum batch size"}
@@ -110,7 +92,7 @@ public type OrgMetadata record {|
 # + label - SObject label
 # + urls - SObject URLs
 @display{label: "SObject meta data"}
-public type SObjectMetaData record {
+public type SObjectMetaData record {|
     string name;
     boolean createable;
     boolean deletable;
@@ -133,19 +115,21 @@ public type SObjectMetaData record {
     boolean searchable;
     boolean triggerable;
     boolean undeletable;
-};
+    json...;
+|};
 
 
 # Basic info of a SObject.
 #
 # + objectDescribe - Metadata related to the SObject
 @display{label: "SObject basic info"}
-public type SObjectBasicInfo record {
+public type SObjectBasicInfo record {|
     @display{label: "SObject meta data"}
     SObjectMetaData objectDescribe;
     @display{label: "Recent items"}
     record {|Attributes attributes; string Id; string Name;|}[] recentItems;
-};
+    json...;
+|};
 
 # Represent the Attributes at SObjectBasicInfo
 # 
