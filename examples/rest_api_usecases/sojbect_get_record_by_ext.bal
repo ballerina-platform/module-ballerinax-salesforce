@@ -40,7 +40,7 @@ public function main() returns error? {
     // Create Salesforce client.
     salesforce:Client baseClient = check new (sfConfig);
 
-    record {}|error res = baseClient->getByExternalId("Contact", "My_External_Id__c", "102", ["FirstName"]);
+    record {}|error res = baseClient->getByExternalId("Contact", "My_External_Id__c", "102");
 
     if res is record {} {
         anydata recName = res["FirstName"];

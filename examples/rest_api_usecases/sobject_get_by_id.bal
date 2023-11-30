@@ -41,7 +41,7 @@ public function main() returns error? {
 
     string accountId = "0015Y00002adeBWQAY";
 
-    record{}|error res = baseClient->getById("Account", accountId, ["Name", "BillingCity"]);
+    record{}|error res = baseClient->getById("Account", accountId);
 
     if res is record{} {
         anydata recName = res["Name"];
