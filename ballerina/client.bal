@@ -69,7 +69,15 @@ public isolated client class Client {
                                                 returns @display {label: "sObject Basic Information"}
                                                 SObjectBasicInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
-        return check self.salesforceClient->get(path);
+        http:Response response = check self.salesforceClient->get(path);
+        if response.statusCode == 200 {
+            json payload = check response.getJsonPayload();
+            SObjectBasicInfo basicInfo = check payload.fromJsonWithType();
+            return basicInfo;
+        } else {
+            json payload = check response.getJsonPayload();
+            return error("Error occurred while retrieving the basic information of the sObject. " + payload.toString());
+        }
     }
 
     # Completely describes the individual metadata at all levels of the specified object. Can be used to retrieve
@@ -177,7 +185,7 @@ public isolated client class Client {
             path = path.concat(utils:appendQueryParams(fields));
         }
         json response = check self.salesforceClient->get(path);
-        return check response.cloneWithType(returnType);
+        return check response.fromJsonWithType(returnType);
     }
 
     # Creates records based on relevant object type sent with json record.

@@ -93,28 +93,20 @@ public type OrganizationMetadata record {|
 # + urls - SObject URLs
 @display{label: "SObject meta data"}
 public type SObjectMetaData record {|
+    @display{label: "Name"}
     string name;
+    @display{label: "Creatable"}
     boolean createable;
+    @display{label: "Deletable"}
     boolean deletable;
+    @display{label: "Updatable"}
     boolean updateable;
+    @display{label: "Queryable"}
     boolean queryable;
+    @display{label: "Label"}
     string label;
+    @display{label: "URLs"}
     map<string> urls;
-    boolean activateable;
-    boolean custom;
-    boolean customSetting;
-    boolean deprecatedAndHidden;
-    boolean feedEnabled;
-    string keyPrefix;
-    string labelPlural;
-    string layoutable;
-    boolean mergeable;
-    boolean mruEnabled;
-    boolean replicateable;
-    boolean retrieveable;
-    boolean searchable;
-    boolean triggerable;
-    boolean undeletable;
     json...;
 |};
 
@@ -126,8 +118,6 @@ public type SObjectMetaData record {|
 public type SObjectBasicInfo record {|
     @display{label: "SObject meta data"}
     SObjectMetaData objectDescribe;
-    @display{label: "Recent items"}
-    record {|Attributes attributes; string Id; string Name;|}[] recentItems;
     json...;
 |};
 
