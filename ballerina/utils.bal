@@ -16,6 +16,7 @@
 
 import ballerina/log;
 import ballerina/http;
+import ballerina/time;
 
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
 #
@@ -92,3 +93,16 @@ isolated function checkAndSetErrorDetail(http:ClientError response) returns Erro
         return error Error(HTTP_CLIENT_ERROR, response); 
     }
 }
+
+# remove decimal places from a civil seconds value
+# 
+# + civilTime - a time:civil record
+# + return - a time:civil record with decimal places removed
+# 
+isolated function removeDecimalPlaces(time:Civil civilTime) returns time:Civil {
+    time:Civil result = civilTime;
+    time:Seconds seconds= (result.second is ())? 0 : <time:Seconds>result.second;
+    decimal ceiling = decimal:ceiling(seconds);
+    result.second = ceiling;
+    return result;
+} 

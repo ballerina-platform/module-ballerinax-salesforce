@@ -372,11 +372,12 @@ public isolated client class Client {
     # + sObjectName - SObject reference
     # + startDate - Start date of the timespan.
     # + endDate - End date of the timespan.
+    # + return - `DeletedRecordsResult` record if successful or else `error`
     isolated remote function getDeleted(string sObjectName, time:Civil startDate, time:Civil endDate) 
         returns DeletedRecordsResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED]);
-        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(startDate), 
-            end: check time:civilToString(endDate)});
+        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(removeDecimalPlaces(startDate)), 
+            end: check time:civilToString(removeDecimalPlaces(endDate))});
         return check self.salesforceClient->get(finalUrl);
     }
 
@@ -385,17 +386,19 @@ public isolated client class Client {
     # + sObjectName - SObject reference
     # + startDate - Start date of the timespan.
     # + endDate - End date of the timespan.
+    # + return - `UpdatedRecordsResults` record if successful or else `error`
     isolated remote function getUpdated(string sObjectName, time:Civil startDate, time:Civil endDate) 
         returns UpdatedRecordsResults|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED]);
-        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(startDate), 
-            end: check time:civilToString(endDate)});
+        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(removeDecimalPlaces(startDate)), 
+            end: check time:civilToString(removeDecimalPlaces(endDate))});
         return check self.salesforceClient->get(finalUrl);
     }
 
     # Get the password information
     #
     # + userId - User ID
+    # + return - `boolean` if successful or else `error`
     isolated remote function getPasswordInfo(string userId) returns boolean|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
         http:Response response = check self.salesforceClient->get(path);
@@ -416,6 +419,7 @@ public isolated client class Client {
     # Reset user password
     #
     # + userId - User ID
+    # + return - `byte[]` if successful or else `error`
     isolated remote function resetPassword(string userId) returns byte[]|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
         http:Response response = check self.salesforceClient->delete(path);
@@ -432,7 +436,8 @@ public isolated client class Client {
     # Change user password
     #
     # + userId - User ID
-    # + newPassword - New user password
+    # + newPassword - New user password as a byte[]
+    # + return - `()` if successful or else `error`
     isolated remote function changePassword(string userId, byte[] newPassword) returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
         record{} payload = {"NewPassword" : check string:fromBytes(newPassword)};
@@ -442,6 +447,7 @@ public isolated client class Client {
     # Returns a list of actions and their details
     #
     # + sObjectName - SObject reference
+    # + return - `QuickAction[]` if successful or else `error`
     isolated remote function getQuickActions(string sObjectName) returns QuickAction[]|error {
         string path = utils:prepareUrl([API_BASE_PATH, QUICK_ACTIONS]);
         http:Response response = check self.salesforceClient->get(path);
@@ -458,6 +464,7 @@ public isolated client class Client {
     # Executes up to 25 subrequests in a single request.
     #
     # + batchRequest - record containing all the requests
+    # + return - `BatchResult` if successful or else `error`
     isolated remote function batch(Subrequest[] batchRequests, boolean haltOnError = false) returns BatchResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, COMPOSITE, BATCH]);
         record{} payload = {"batchRequests" : batchRequests, "haltOnError" : haltOnError};
@@ -475,6 +482,7 @@ public isolated client class Client {
     #
     # + sObjectName - SObject reference
     # + layoutName - Name of the layout.
+    # + return - record of `returnType` if successful or else `error`
     isolated remote function getNamedLayouts(@display {label: "Name of the sObject"} string sObjectName, 
                                 @display {label: "Name of the layout"} string layoutName, typedesc<record {}> returnType = <>)
                                     returns returnType|error = @java:Method {
@@ -482,12 +490,9 @@ public isolated client class Client {
         name: "getNamedLayouts"
     } external;
 
-    private isolated function processGetNamedLayouts(typedesc<record {}> returnType, string sobject, string id,
-                                                    string[] fields) returns record {}|error {
-        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
-        if fields.length() > 0 {
-            path = path.concat(utils:appendQueryParams(fields));
-        }
+    private isolated function processGetNamedLayouts(typedesc<record {}> returnType, string sobject, string layoutName
+                                                    ) returns record {}|error {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, DESCRIBE, NAMED_LAYOUTS, layoutName]);
         json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
     }
@@ -495,13 +500,14 @@ public isolated client class Client {
     # Retrieve a list of general action types for the current organization.
     #
     # + subContext - Sub context
+    # + return - record of `returnType` if successful or else `error`
     isolated remote function getInvocableActions(string subContext, 
             typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getInvocableActions"
     } external;
 
-    private isolated function processGetInvocableActions(string subContext, typedesc<record {}> returnType) returns record {}|error {
+    private isolated function processGetInvocableActions(typedesc<record {}> returnType, string subContext) returns record {}|error {
         string path = utils:prepareUrl([API_BASE_PATH, ACTIONS]) + subContext;
         json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
@@ -510,8 +516,9 @@ public isolated client class Client {
     # Invoke Actions.
     #
     # + subContext - Sub context
-    # + actionName - name of the action
     # + payload - payload for the action
+    # + returnType - The type of the returned variable.
+    # + return - record of `returnType` if successful or else `error`
 
     isolated remote function invokeActions(string subContext, record{} payload, 
             typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
@@ -530,8 +537,8 @@ public isolated client class Client {
     # + externalId - Name of the external id field
     # + value - value of the external id field.
 
-    isolated remote function deleteRecordsUsingExtId(string externalId, string value) returns error? {
-        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, externalId, value]);
+    isolated remote function deleteRecordsUsingExtId(string sObject, string externalId, string value) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObject, externalId, value]);
         return check self.salesforceClient->delete(path);
     }
 

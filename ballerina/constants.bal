@@ -38,6 +38,8 @@ const string ANALYTICS = "analytics";
 # Constant field `ACTIONS`. Holds the value actions for actions resource prefix.
 const string ACTIONS = "actions";
 
+# Constant field `NAMED_LAYOUTS`. Holds the value namedlayouts for layout resource prefix.
+const string NAMED_LAYOUTS = "namedLayouts";
 
 # Constant field `COMPOSITE`. Holds the value composite for composite resource prefix.
 const string COMPOSITE = "composite";
