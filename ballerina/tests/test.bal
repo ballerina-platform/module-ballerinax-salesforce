@@ -17,6 +17,7 @@
 import ballerina/log;
 import ballerina/os;
 import ballerina/test;
+import ballerina/time;
 
 // Create Salesforce client configuration by reading from environemnt.
 configurable string clientId = os:getEnv("CLIENT_ID");
@@ -105,6 +106,12 @@ public type Account record {
     anydata UpsellOpportunity__c = ();
     string? SLASerialNumber__c = ();
     string? SLAExpirationDate__c = ();
+};
+
+public type Layout record {
+    record{}[] layouts;
+    json recordTypeMappings;
+    boolean[] recordTypeSelectorRequired;
 };
 
 type AccountResultWithAlias record {|
@@ -373,6 +380,123 @@ function testApiVersions() {
         test:assertTrue(versions.length() > 0, msg = "Found 0 or No API versions");
     } else {
         test:assertFail(msg = versions.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
+function testgetDeleted() {
+    log:printInfo("baseClient -> getDeletedRecords()");
+    DeletedRecordsResult|error deletedRecords = baseClient->getDeleted("Account", time:utcToCivil(time:utcNow()),
+        time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
+
+    if deletedRecords !is DeletedRecordsResult {
+        test:assertFail(msg = deletedRecords.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
+function testgetUpdated() {
+    log:printInfo("baseClient -> getDeletedRecords()");
+    UpdatedRecordsResults|error updatedRecords = baseClient->getUpdated("Account", time:utcToCivil(time:utcNow()),
+        time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
+    if updatedRecords !is UpdatedRecordsResults {
+        test:assertFail(msg = updatedRecords.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
+function testgetPasswordInfo() returns error? {
+    log:printInfo("baseClient -> getPasswordInfo()");
+    boolean status = check baseClient->getPasswordInfo("0055g00000J48In");
+    test:assertEquals(status, true, msg = "Password status is not true");
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testgetPasswordInfo]
+}
+function testResetPassword() returns error? {
+    log:printInfo("baseClient -> resetPassword()");
+    byte[]|error resettedPassword = baseClient->resetPassword("0055g00000J48In");
+    if resettedPassword !is byte[] {
+        test:assertFail(msg = resettedPassword.message());
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testResetPassword]
+}
+function testSetPassword() returns error? {
+    log:printInfo("baseClient -> changePassword()");
+    string newPassword = "newPassword";
+    error? response = baseClient->changePassword("0055g00000J48In", newPassword.toBytes());
+    if response !is () {
+        test:assertFail(msg = response.message());
+    }
+}
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testGetQuickActions() returns error? {
+    log:printInfo("baseClient -> getQuickActions()");
+    QuickAction[]|error resp = baseClient->getQuickActions("Contact");
+    if resp !is QuickAction[] {
+        test:assertFail(msg = resp.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
+function testBatchExecute() returns error? {
+    log:printInfo("baseClient -> batch()");
+    Subrequest[] subrequests = [{method: "GET", url: "/services/data/v48.0/sobjects/Account/describe"},
+                                {method: "GET", url: "/services/data/v48.0/sobjects/Contact/describe"}];
+    BatchResult|error batchResult = baseClient->batch(subrequests, true);
+    if batchResult !is BatchResult {
+        test:assertFail(msg = batchResult.message());
+    } else {
+        test:assertTrue(batchResult.hasErrors, msg = "Batch result has errors");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testGeNamedLayouts() returns error? {
+    log:printInfo("baseClient -> getNamedLayouts()");
+    Layout|error resp = baseClient->getNamedLayouts("User", "UserAlt");
+    if resp !is Layout {
+        test:assertFail(msg = resp.message());
+    } else {
+        if (resp.layouts.length() > 0) {
+            test:assertTrue(resp.layouts.length() > 0, msg = "Layout is empty");
+        }
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testDeleteByExternalId() returns error? {
+    log:printInfo("baseClient -> deleteRecordsUsingExtId()");
+    CreationResponse|error creation = check baseClient->create("Asset", {"Name": "testAsset", "assetExt_id__c": "asdfg", "AccountId":"0015g00001Per6rAAB"});
+    if creation is error {
+        test:assertFail(msg = creation.message());
+    }
+    error? response = baseClient->deleteRecordsUsingExtId("Asset", "assetExt_id__c", "asdfg");
+    if response is error {
+        test:assertFail(msg = response.message());
     }
 }
 
