@@ -311,3 +311,14 @@ public type BatchResult record {
     SubRequestResult[] results;
 };
 
+# Represents the resource type of the APEX method
+public enum MethodType {
+    GET,
+    PATCH,
+    DELETE,
+    PUT,
+    CREATE
+}
+
+
+

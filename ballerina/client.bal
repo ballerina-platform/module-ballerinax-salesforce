@@ -542,4 +542,51 @@ public isolated client class Client {
         return check self.salesforceClient->delete(path);
     }
 
+
+    # Access Salesforce APEX resource.
+    #
+    # + urlPath - URI path
+    # + methodName - Name of the method
+    # + payload - payload
+    # + pathParameters - parameters to used with the API
+    # + return - string|int|record{} type
+    isolated remote function apexRestExecute(string urlPath, MethodType methodType, 
+        record{} payload, typedesc<record {}|string|int> returnType = <>) 
+            returns returnType|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "apexRestExecute"
+    } external;
+
+    private isolated function processApexExecute(typedesc<record {}|string|int> returnType, string urlPath, MethodType methodType, record{} payload) returns record {}|string|int|error {
+        string path = utils:prepareUrl([APEX_BASE_PATH, urlPath]);
+        http:Response response  = new;
+        match methodType {
+            "GET" => {
+                response = check self.salesforceClient->get(path);
+            }
+            "CREATE" => {
+                response = check self.salesforceClient->post(path, payload);
+            }
+            "DELETE" => {
+                response = check self.salesforceClient->delete(path);
+            }
+            "PUT" => {
+                response = check self.salesforceClient->put(path, payload);
+            }
+            "PATCH" => {
+                response = check self.salesforceClient->patch(path, payload);
+            }
+            _ => {
+                return error ("Invalid Method");
+            }
+        }
+        if response.statusCode == 200 {
+            json responsePayload = check response.getJsonPayload();
+            return check responsePayload.cloneWithType(returnType);
+        } else {
+            json responsePayload = check response.getJsonPayload();
+            return error("Error occurred while executing the apex request. " + responsePayload.toString());
+        }
+    }
+
 }

@@ -76,6 +76,13 @@ public class ReadOperationExecutor {
         return invokeClientMethod(env, client, "processGetNamedLayouts", paramFeed);
     }
 
+    public static Object apexRestExecute(Environment env, BObject client, BString urlPath, 
+                        BString methodType,  BMap<BString, ?> payload,
+                                       BTypedesc targetType) {
+        Object[] paramFeed = {targetType, true, urlPath, true, methodType, true, payload, true};
+        return invokeClientMethod(env, client, "processApexExecute", paramFeed);
+    }
+
     public static Object getRecordByExtId(Environment env, BObject client, BString sObject, BString extIdField,
                                           BString extId, BTypedesc targetType) {
         RecordType recordType = (RecordType) targetType.getDescribingType();
