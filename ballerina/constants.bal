@@ -29,6 +29,9 @@ const string BASE_PATH = "/services/data";
 # Constant field `API_BASE_PATH`. Holds the value for the Salesforce API base path/URL.
 final string API_BASE_PATH = string `${BASE_PATH}/${API_VERSION}`;
 
+# Constant field `APEX_BASE_PATH`. Holds the value for the Salesforce Apex base path/URL.
+final string APEX_BASE_PATH = string `/services/apexrest`;
+
 # Constant field `QUICK_ACTIONS`. Holds the value quickActions for quick actions resource prefix.
 final string QUICK_ACTIONS = "quickActions";
 
