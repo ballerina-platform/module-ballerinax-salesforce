@@ -19,6 +19,8 @@ import ballerina/jballerina.java;
 import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
 import ballerina/time;
+import ballerina/io;
+import ballerina/lang.runtime;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
@@ -550,14 +552,14 @@ public isolated client class Client {
     # + payload - payload
     # + pathParameters - parameters to used with the API
     # + return - string|int|record{} type
-    isolated remote function apexRestExecute(string urlPath, MethodType methodType, 
+    isolated remote function apexRestExecute(string urlPath, http:Method methodType, 
         record{} payload, typedesc<record {}|string|int> returnType = <>) 
             returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "apexRestExecute"
     } external;
 
-    private isolated function processApexExecute(typedesc<record {}|string|int> returnType, string urlPath, MethodType methodType, record{} payload) returns record {}|string|int|error {
+    private isolated function processApexExecute(typedesc<record {}|string|int> returnType, string urlPath, http:Method methodType, record{} payload) returns record {}|string|int|error {
         string path = utils:prepareUrl([APEX_BASE_PATH, urlPath]);
         http:Response response  = new;
         match methodType {
@@ -589,4 +591,152 @@ public isolated client class Client {
         }
     }
 
+    // Bulk v2
+
+    # Creates a job representing a bulk operation
+    #
+    # + sObject - The object type for the data being processed
+    # + operation - The processing operation for the job
+    # + externalIdFieldName - The external ID field in the object being updated
+    #
+    # + returnType - BulkJob
+    isolated remote function createJob(string sObject, Operation operation, BulkCreatePayload payload) returns error|BulkJob {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]);
+        http:Response response = check self.salesforceClient->post(path, payload);
+        if response.statusCode == 200 {
+            json responsePayload = check response.getJsonPayload();
+            return check responsePayload.cloneWithType(BulkJob);
+        } else {
+            json responsePayload = check response.getJsonPayload();
+            return error("Error occurred while creating the bulk job. " + responsePayload.toString());
+        }
+    }
+
+    # Retrieves detailed information about a job.
+    #
+    # + bulkJobId - Id of the bulk job
+    #
+    # + returnType - BulkJobInfo
+    isolated remote function getJobInfo(string bulkJobId) returns error|BulkJobInfo {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+        http:Response response = check self.salesforceClient->get(path);
+        if response.statusCode == 200 {
+            json responsePayload = check response.getJsonPayload();
+            return check responsePayload.cloneWithType(BulkJobInfo);
+        } else {
+            json responsePayload = check response.getJsonPayload();
+            return error("Error occurred while retrieving the bulk job info. " + responsePayload.toString());
+        }
+    };
+
+    # Uploads data for a job using CSV data
+    #
+    # + BulkJob - Returned bulk Job info
+    # + content - CSV data to be added
+    # +
+    # + returnType - BulkJobInfo
+    isolated remote function addBatch(string bulkJobId, string|string[][]|stream<string[], error?>|io:ReadableByteChannel content) returns error? {
+        string payload = "";
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, BATCHES]);
+        if content is io:ReadableByteChannel {
+            payload = check convertToString(content);
+        } else if content is string[][]|stream<string[], error?> {
+                payload = check convertStringListToString(content);
+        } else {
+            payload = content;
+        }
+        http:Response response= check self.salesforceClient->put(path, payload, mediaType = "text/csv");
+    };
+
+    # Get details of all the jobs
+    #
+    # + returnType - AllJobs
+    #
+    isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) + 
+            ((jobType is ())? "" : string `?jobType=${jobType}`);
+        http:Response response = check self.salesforceClient->get(path);
+        return check (check response.getJsonPayload()).fromJsonWithType (AllJobs);
+    }
+
+    # Get job status information
+    # + status - completed / failed
+    # + BulkJob - Returned bulk Job info
+    #
+    # + returnType - AllJobs
+    #
+    isolated remote function getJobStatus(string bulkJobId, Status status, typedesc<record {}> returnType = <>) 
+            returns returnType|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+        name: "getJobStatus"
+    } external;
+
+    private isolated function processGetBulkJobStatus(typedesc<record {}> returnType, string bulkJobId, Status status) returns record {}|error {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, status]);
+        http:Response response = check self.salesforceClient->get(path);
+        return check (check response.getJsonPayload()).fromJsonWithType (returnType);
+    }
+
+    # + BulkJob - Returned bulk Job info
+    #
+    # + returnType - error?
+    isolated remote function abortJob(string bulkJobId) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+        record{} payload = {"state" : "Aborted"};
+        http:Response response = check self.salesforceClient->patch(path, payload);
+        if response.statusCode != 200 {
+            return error("Error occurred while aborting the bulk job. " + 
+                (check response.getJsonPayload()).toString());
+        }
+    }
+
+    # Delete a job.
+    #
+    # + BulkJob - Returned bulk Job info
+    #
+    # + returnType - error?
+    isolated remote function deleteJob(string bulkJobId) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+        http:Response response = check self.salesforceClient->delete(path);
+        if response.statusCode != 204 {
+            return error("Error occurred while deleting the bulk job. " + 
+                (check response.getJsonPayload()).toString());
+        }
+    }
+
+    # Notifies Salesforce servers that the upload of job data is complete
+    # + BulkJob - Returned bulk Job info
+    # + returnType - error?
+    isolated remote function closeJob(BulkJob bulkJob) returns error|future<BulkJobInfo|error> {
+        final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJob.id]);
+        record{} payload = {"state" : "UploadComplete"};
+        http:Response response = check self.salesforceClient->patch(path, payload);
+        if response.statusCode != 200 {
+            return error("Error occurred while closing the bulk job. " + 
+                (check response.getJsonPayload()).toString());
+        }
+        worker A returns BulkJobInfo|error {
+            while true {
+                runtime:sleep(2);
+                http:Response jobStatus = check self.salesforceClient->get(path);
+                if jobStatus.statusCode != 200 {
+                    return error("Error occurred while checking the status of the bulk job. " + 
+                        (check jobStatus.getJsonPayload()).toString());
+                } else {
+                    json responsePayload = check jobStatus.getJsonPayload();
+                    BulkJobInfo jobInfo = check responsePayload.cloneWithType(BulkJobInfo);
+                    if jobInfo.state == "JobComplete" || jobInfo.state == "Failed" || jobInfo.state == "Aborted" {
+                        return jobInfo;
+                    }
+                }
+            }
+        }
+        return A;
+    }
+
+
+
+
 }
+
+

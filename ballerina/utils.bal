@@ -17,12 +17,17 @@
 import ballerina/log;
 import ballerina/http;
 import ballerina/time;
+import ballerina/io;
+import ballerina/lang.'string as strings;
 
 # Check HTTP response and return JSON payload if succesful, else set errors and return Error.
 #
 # + httpResponse - HTTP respone or Error
 # + expectPayload - Payload is expected or not
 # + return - JSON result if successful, else Error occured
+# 
+isolated string csvContent = EMPTY_STRING;
+
 isolated function checkAndSetErrors(http:Response|error httpResponse, boolean expectPayload = true) 
                                     returns json|Error {
     if httpResponse is http:Response {
@@ -106,3 +111,66 @@ isolated function removeDecimalPlaces(time:Civil civilTime) returns time:Civil {
     result.second = ceiling;
     return result;
 } 
+
+
+# Convert ReadableByteChannel to string.
+#
+# + rbc - ReadableByteChannel
+# + return - converted string
+isolated function convertToString(io:ReadableByteChannel rbc) returns string|error {
+    byte[] readContent;
+    string textContent = EMPTY_STRING;
+    while (true) {
+        byte[]|io:Error result = rbc.read(1000);
+        if result is io:EofError {
+            break;
+        } else if result is io:Error {
+            string errMsg = "Error occurred while reading from Readable Byte Channel.";
+            log:printError(errMsg, 'error = result);
+            return error(errMsg, result);
+        } else {
+            readContent = result;
+            string|error readContentStr = strings:fromBytes(readContent);
+            if readContentStr is string {
+                textContent = textContent + readContentStr;
+            } else {
+                string errMsg = "Error occurred while converting readContent byte array to string.";
+                log:printError(errMsg, 'error = readContentStr);
+                return error(errMsg, readContentStr);
+            }
+        }
+    }
+    return textContent;
+}
+
+
+# Convert string[][] to string.
+#
+# + stringCsvInput - Multi dimentional array of strings
+# + return - converted string
+isolated function convertStringListToString(string[][]|stream<string[], error?> stringCsvInput) returns string|error {
+    lock {
+        csvContent = EMPTY_STRING;
+    }
+    if stringCsvInput is string[][] {
+        foreach var row in stringCsvInput {
+            lock {
+                csvContent += row.reduce(isolated function (string s, string t) returns string { 
+                    return s.concat(COMMA, t);
+                }, EMPTY_STRING).substring(1) + NEW_LINE;
+            }
+        }
+    } else {
+        check stringCsvInput.forEach(isolated function(string[] row) {
+            lock {
+                csvContent += row.reduce(isolated function (string s, string t) returns string { 
+                    return s.concat(COMMA, t);
+                }, EMPTY_STRING).substring(1) + NEW_LINE;
+
+            }
+        });
+    }
+    lock {
+        return csvContent;
+    }
+}

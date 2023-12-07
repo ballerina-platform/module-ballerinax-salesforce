@@ -50,6 +50,15 @@ const string COMPOSITE = "composite";
 # Constant field `BATCH`. Holds the value batch for batch resource prefix.
 const string BATCH = "batch";
 
+# Constant field `BATCHES`. Holds the value batches for bulk resource prefix.
+const string BATCHES = "batches";
+
+# Constant field `JOBS`. Holds the value jobs for bulk resource prefix.
+const string JOBS = "jobs";
+
+# Constant field `INGEST`. Holds the value ingest for bulk resource prefix.
+const string INGEST = "ingest";
+
 # Constant field `INSTANCES`. Holds the value instances for instances resource prefix.
 const string INSTANCES = "instances";
 
@@ -127,3 +136,6 @@ const string OPPORTUNITY = "Opportunity";
 
 # Constant field `PRODUCT`. Holds the value Product2 for product object.
 const string PRODUCT = "Product2";
+
+# Constant field `NEW_LINE`. Holds the value of "\n".
+const string NEW_LINE = "\n";

@@ -311,14 +311,112 @@ public type BatchResult record {
     SubRequestResult[] results;
 };
 
-# Represents the resource type of the APEX method
-public enum MethodType {
-    GET,
-    PATCH,
-    DELETE,
-    PUT,
-    CREATE
-}
+
+// Bulk API v2
+// // Data types for bulk API v2
+
+// public type BulkJob record {
+//     string lineEnding;
+//     string systemModstamp;
+//     string concurrencyMode;
+//     string contentUrl;
+//     string createdDate;
+//     int apiVersion;
+//     string id; string state;
+//     string operation;
+//     string contentType;
+//     string createdById;
+//     string 'object;
+//     string columnDelimiter;
+// };
+
+
+# Operation type of the bulk job.
+public enum Operation {
+    INSERT = "insert",
+    UPDATE = "update",
+    DELETE = "delete",
+    UPSERT = "upsert",
+    HARD_DELETE = "hardDelete" 
+}; 
+
+public enum LineEndingEnum {
+    LF = "LF",
+    CRLF = "CRLF"
+};
+
+public enum ColumnDelimiterEnum {
+    BACKQUOTE,
+    CARET,
+    COMMA,
+    PIPE,
+    SEMICOLON,
+    TAB
+};
+
+public type BulkCreatePayload record {
+    string 'object;
+    Operation operation;
+    ColumnDelimiterEnum columnDelimiter;
+    string contentType?;
+    LineEndingEnum lineEnding?;
+    string externalIdFieldName?;
+};
+
+public type BulkJob record {
+    *BulkJobCloseInfo;
+    string contentUrl;
+    string lineEnding;
+    string columnDelimiter;
+};
+
+# Represents bulk job related information.
+public type BulkJobInfo record {
+*BulkJob;
+    int retries;
+    int totalProcessingTime;
+    int apiActiveProcessingTime;
+    int apexProcessingTime;
+};
+
+
+# Represents bulk job related information when Closed.
+#
+public type BulkJobCloseInfo record {
+    string id;
+    string operation;
+    string 'object;
+    string createdById;
+    string createdDate;
+    string systemModstamp;
+    string state;
+    string concurrencyMode;
+    string contentType;
+    float apiVersion;
+};
+
+
+# Represents output for get all jobs request
+#
+public type AllJobs record {
+    boolean done;
+    BulkJobInfo[] records;
+    string nextRecordsUrl;
+};
+
+
+# Represents status of the bulk jobs
+public enum Status {
+    COMPLETED = "successfulResults",
+    FAILED = "failedResults"
+};
+
+public enum JobType {
+    BIG_OBJECT_INGEST = "BigObjectIngest",
+    CLASSIC = "Classic",
+    V2_INGEST = "V2Ingest"
+};
+
 
 
 
