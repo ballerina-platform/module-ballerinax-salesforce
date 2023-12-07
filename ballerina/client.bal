@@ -553,20 +553,20 @@ public isolated client class Client {
     # + pathParameters - parameters to used with the API
     # + return - string|int|record{} type
     isolated remote function apexRestExecute(string urlPath, http:Method methodType, 
-        record{} payload, typedesc<record {}|string|int> returnType = <>) 
+        record{} payload = {}, typedesc<record {}|string|int?> returnType = <>) 
             returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "apexRestExecute"
     } external;
 
-    private isolated function processApexExecute(typedesc<record {}|string|int> returnType, string urlPath, http:Method methodType, record{} payload) returns record {}|string|int|error {
+    private isolated function processApexExecute(typedesc<record {}|string|int?> returnType, string urlPath, http:Method methodType, record{} payload) returns record {}|string|int|error? {
         string path = utils:prepareUrl([APEX_BASE_PATH, urlPath]);
         http:Response response  = new;
         match methodType {
             "GET" => {
                 response = check self.salesforceClient->get(path);
             }
-            "CREATE" => {
+            "POST" => {
                 response = check self.salesforceClient->post(path, payload);
             }
             "DELETE" => {
@@ -583,6 +583,9 @@ public isolated client class Client {
             }
         }
         if response.statusCode == 200 {
+            if response.getContentType() == "" {
+                return;
+            }
             json responsePayload = check response.getJsonPayload();
             return check responsePayload.cloneWithType(returnType);
         } else {
