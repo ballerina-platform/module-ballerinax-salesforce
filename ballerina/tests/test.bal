@@ -18,6 +18,7 @@ import ballerina/log;
 import ballerina/os;
 import ballerina/test;
 import ballerina/time;
+import ballerina/lang.runtime;
 
 // Create Salesforce client configuration by reading from environemnt.
 configurable string clientId = os:getEnv("CLIENT_ID");
@@ -423,6 +424,7 @@ function testgetPasswordInfo() returns error? {
 }
 function testResetPassword() returns error? {
     log:printInfo("baseClient -> resetPassword()");
+    runtime:sleep(10);
     byte[]|error resettedPassword = baseClient->resetPassword("0055g00000J48In");
     if resettedPassword !is byte[] {
         test:assertFail(msg = resettedPassword.message());
@@ -460,11 +462,14 @@ function testBatchExecute() returns error? {
     log:printInfo("baseClient -> batch()");
     Subrequest[] subrequests = [{method: "GET", url: "/services/data/v48.0/sobjects/Account/describe"},
                                 {method: "GET", url: "/services/data/v48.0/sobjects/Contact/describe"}];
+    Subrequest[] subrequests = [{method: "GET", url: "/services/data/v59.0/sobjects/Account/describe"},
+                                {method: "GET", url: "/services/data/v59.0/sobjects/Contact/describe"}];
     BatchResult|error batchResult = baseClient->batch(subrequests, true);
     if batchResult !is BatchResult {
         test:assertFail(msg = batchResult.message());
     } else {
         test:assertTrue(batchResult.hasErrors, msg = "Batch result has errors");
+        test:assertFalse(batchResult.hasErrors, msg = "Batch result has errors");
     }
 }
 
@@ -494,11 +499,13 @@ function testDeleteByExternalId() returns error? {
     if creation is error {
         test:assertFail(msg = creation.message());
     }
+    runtime:sleep(10);
     error? response = baseClient->deleteRecordsUsingExtId("Asset", "assetExt_id__c", "asdfg");
     if response is error {
         test:assertFail(msg = response.message());
     }
 }
+
 
 @test:Config {
     enable: true
@@ -523,6 +530,33 @@ function testResources() {
         test:assertFail(msg = resources.message());
     }
 }
+
+@test:Config {
+    enable: true
+}
+function testApex() returns error? {
+    log:printInfo("baseClient -> executeApex()");
+    string|error caseId = baseClient->apexRestExecute("Cases", "POST", 
+        {"subject" : "Bigfoot Sighting9!",
+            "status" : "New",
+            "origin" : "Phone",
+            "priority" : "Low"});
+    if caseId is error {
+        test:assertFail(msg = caseId.message());
+    }
+    runtime:sleep(5);
+    record{}|error case = baseClient->apexRestExecute(string `Cases/${caseId}`, "GET", {});
+    if case is error {
+        test:assertFail(msg = case.message());
+    }
+    runtime:sleep(5);
+    error? deleteResponse = baseClient->apexRestExecute(string `Cases/${caseId}`, "DELETE", {});
+    if deleteResponse is error {
+        test:assertFail(msg = deleteResponse.message());
+    }
+}
+
+
 
 @test:AfterSuite {}
 function testDeleteRecordNew() returns error? {
