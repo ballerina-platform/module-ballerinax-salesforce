@@ -102,12 +102,6 @@ public class ReadOperationExecutor {
         return invokeClientMethod(env, client, "processSearchSOSLString", paramFeed);
     }
 
-    public static Object getJobStatus(Environment env, BObject client, BString bulkJobId, BString status,
-                                          BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, bulkJobId, true, status, true};
-        return invokeClientMethod(env, client, "processGetBulkJobStatus", paramFeed);
-    }
-
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, Object[] paramFeed) {
 
         Future balFuture = env.markAsync();

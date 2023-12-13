@@ -603,8 +603,8 @@ public isolated client class Client {
     # + externalIdFieldName - The external ID field in the object being updated
     #
     # + returnType - BulkJob
-    isolated remote function createJob(string sObject, Operation operation, BulkCreatePayload payload) returns error|BulkJob {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]);
+    isolated remote function createJob(BulkCreatePayload payload, BulkOperation bulkOperation) returns error|BulkJob {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation]);
         http:Response response = check self.salesforceClient->post(path, payload);
         if response.statusCode == 200 {
             json responsePayload = check response.getJsonPayload();
@@ -620,8 +620,8 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     #
     # + returnType - BulkJobInfo
-    isolated remote function getJobInfo(string bulkJobId) returns error|BulkJobInfo {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+    isolated remote function getJobInfo(string bulkJobId, BulkOperation bulkOperation) returns error|BulkJobInfo {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             json responsePayload = check response.getJsonPayload();
@@ -668,23 +668,53 @@ public isolated client class Client {
     #
     # + returnType - AllJobs
     #
-    isolated remote function getJobStatus(string bulkJobId, Status status, typedesc<record {}> returnType = <>) 
-            returns returnType|error = @java:Method {
-        'class: "io.ballerinax.salesforce.ReadOperationExecutor",
-        name: "getJobStatus"
-    } external;
-
-    private isolated function processGetBulkJobStatus(typedesc<record {}> returnType, string bulkJobId, Status status) returns record {}|error {
+    isolated remote function getJobStatus(string bulkJobId, Status status) 
+            returns string[][]|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, status]);
         http:Response response = check self.salesforceClient->get(path);
-        return check (check response.getJsonPayload()).fromJsonWithType (returnType);
+        if response.statusCode == 200 {
+            string textPayload = check response.getTextPayload();
+            if textPayload == "" {
+                return [];
+            }
+            string[][] result = check convertStringToStringList(textPayload);
+            return result;
+        } else {
+            json responsePayload = check response.getJsonPayload();
+            return error("Error occurred while retrieving the bulk job status. " + responsePayload.toString());
+        }
+
+    }
+
+    # Get query results
+    # + status - completed / failed
+    # + BulkJob - Returned bulk Job info
+    #
+    # + returnType - AllJobs
+    #
+    isolated remote function getqueryResult(string bulkJobId) 
+            returns string[][]|error {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
+        http:Response response = check self.salesforceClient->get(path);
+        if response.statusCode == 200 {
+            string textPayload = check response.getTextPayload();
+            if textPayload == "" {
+                return [];
+            }
+            string[][] result = check convertStringToStringList(textPayload);
+            return result;
+        } else {
+            json responsePayload = check response.getJsonPayload();
+            return error("Error occurred while retrieving the query job results. " + responsePayload.toString());
+        }
+
     }
 
     # + BulkJob - Returned bulk Job info
     #
     # + returnType - error?
-    isolated remote function abortJob(string bulkJobId) returns error? {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+    isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         record{} payload = {"state" : "Aborted"};
         http:Response response = check self.salesforceClient->patch(path, payload);
         if response.statusCode != 200 {
@@ -698,8 +728,8 @@ public isolated client class Client {
     # + BulkJob - Returned bulk Job info
     #
     # + returnType - error?
-    isolated remote function deleteJob(string bulkJobId) returns error? {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+    isolated remote function deleteJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         http:Response response = check self.salesforceClient->delete(path);
         if response.statusCode != 204 {
             return error("Error occurred while deleting the bulk job. " + 
@@ -710,8 +740,8 @@ public isolated client class Client {
     # Notifies Salesforce servers that the upload of job data is complete
     # + BulkJob - Returned bulk Job info
     # + returnType - error?
-    isolated remote function closeJob(BulkJob bulkJob) returns error|future<BulkJobInfo|error> {
-        final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJob.id]);
+    isolated remote function closeJob(string bulkJobId) returns error|future<BulkJobInfo|error> {
+        final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
         record{} payload = {"state" : "UploadComplete"};
         http:Response response = check self.salesforceClient->patch(path, payload);
         if response.statusCode != 200 {
@@ -736,9 +766,6 @@ public isolated client class Client {
         }
         return A;
     }
-
-
-
 
 }
 

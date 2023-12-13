@@ -174,3 +174,14 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
         return csvContent;
     }
 }
+
+isolated function convertStringToStringList(string content) returns string[][]|error {
+    string[][] result = [];
+    string[] lines = re `\n`.split(content);
+    foreach string item in lines {
+        string processedItem = re `"`.replaceAll(item, EMPTY_STRING);
+        string[] row = re `,`.split(processedItem);
+        result.push(row);
+    }
+    return result;
+};

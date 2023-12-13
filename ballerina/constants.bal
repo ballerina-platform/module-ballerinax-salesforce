@@ -95,6 +95,9 @@ const string PLATFORM_ACTION = "PlatformAction";
 // Query param names
 const string QUERY = "query";
 
+// Result param names
+const string RESULT = "results";
+
 # Constant field `FIELDS`. Holds the value fields for resource prefix.
 const string FIELDS = "fields";
 

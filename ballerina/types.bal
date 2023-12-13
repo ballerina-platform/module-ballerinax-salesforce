@@ -337,7 +337,8 @@ public enum Operation {
     UPDATE = "update",
     DELETE = "delete",
     UPSERT = "upsert",
-    HARD_DELETE = "hardDelete" 
+    HARD_DELETE = "hardDelete",
+    QUERY = "query"
 }; 
 
 public enum LineEndingEnum {
@@ -355,17 +356,18 @@ public enum ColumnDelimiterEnum {
 };
 
 public type BulkCreatePayload record {
-    string 'object;
+    string 'object?;
     Operation operation;
-    ColumnDelimiterEnum columnDelimiter;
+    ColumnDelimiterEnum columnDelimiter?;
     string contentType?;
     LineEndingEnum lineEnding?;
     string externalIdFieldName?;
+    string query?;
 };
 
 public type BulkJob record {
     *BulkJobCloseInfo;
-    string contentUrl;
+    string contentUrl?;
     string lineEnding;
     string columnDelimiter;
 };
@@ -375,8 +377,10 @@ public type BulkJobInfo record {
 *BulkJob;
     int retries;
     int totalProcessingTime;
-    int apiActiveProcessingTime;
-    int apexProcessingTime;
+    int apiActiveProcessingTime?;
+    int apexProcessingTime?;
+    int numberRecordsProcessed?;
+
 };
 
 
@@ -417,6 +421,10 @@ public enum JobType {
     V2_INGEST = "V2Ingest"
 };
 
+public enum BulkOperation {
+    QUERY = "query",
+    INGEST = "ingest"
+};
 
 
 
