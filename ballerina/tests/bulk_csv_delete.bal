@@ -21,14 +21,9 @@ import ballerina/lang.runtime;
 @test:AfterSuite {}
 function deleteCSV() returns error? {
     log:printInfo("baseClient -> deleteCsv");
-    string batchId = "id\n";
-    string[][] jobstatus = check baseClient->getJobStatus(insertJobId, "successfulResults");
-    foreach string[] item in jobstatus {
-        batchId += item[0] + "\n";
-    }
     //create job
     BulkCreatePayload payload = {
-        'object : "Account",
+        'object : "Contact",
         contentType : "CSV",
         operation : "delete",
         lineEnding : "LF"

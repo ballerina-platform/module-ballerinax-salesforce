@@ -107,8 +107,8 @@ isolated function checkAndSetErrorDetail(http:ClientError response) returns Erro
 isolated function removeDecimalPlaces(time:Civil civilTime) returns time:Civil {
     time:Civil result = civilTime;
     time:Seconds seconds= (result.second is ())? 0 : <time:Seconds>result.second;
-    decimal ceiling = decimal:ceiling(seconds);
-    result.second = ceiling;
+    decimal floor = decimal:floor(seconds);
+    result.second = floor;
     return result;
 } 
 
@@ -156,7 +156,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
         foreach var row in stringCsvInput {
             lock {
                 csvContent += row.reduce(isolated function (string s, string t) returns string { 
-                    return s.concat(COMMA, t);
+                    return s.concat(",", t);
                 }, EMPTY_STRING).substring(1) + NEW_LINE;
             }
         }
@@ -164,7 +164,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
         check stringCsvInput.forEach(isolated function(string[] row) {
             lock {
                 csvContent += row.reduce(isolated function (string s, string t) returns string { 
-                    return s.concat(COMMA, t);
+                    return s.concat(",", t);
                 }, EMPTY_STRING).substring(1) + NEW_LINE;
 
             }
@@ -180,6 +180,9 @@ isolated function convertStringToStringList(string content) returns string[][]|e
     string[] lines = re `\n`.split(content);
     foreach string item in lines {
         string processedItem = re `"`.replaceAll(item, EMPTY_STRING);
+        if item == "" {
+            continue;
+        }
         string[] row = re `,`.split(processedItem);
         result.push(row);
     }

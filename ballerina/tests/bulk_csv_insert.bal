@@ -21,27 +21,25 @@ import ballerina/lang.runtime;
 
 const int maxIterations = 5;
 const decimal delayInSecs = 5.0;
-public string insertJobId = "";
+string batchId = "id\n";
 
 @test:Config {
     enable: true
 }
 function insertCsv() returns error? {
     log:printInfo("baseClient -> insertCsv");
-    string batchId = "";
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n"
         + "Created_from_Ballerina_Sf_Bulk_API_V2,Cuthbert,Binns,Professor Level 02,0332236677,john434@gmail.com,845\n"
         + "Created_from_Ballerina_Sf_Bulk_API_V2,Burbage,Shane,Professor Level 02,0332211777,peter77@gmail.com,846";
 
     //create job
     BulkCreatePayload payload = {
-        'object : "Account",
+        'object : "Contact",
         contentType : "CSV",
         operation : "insert",
         lineEnding : "LF"
     };
     BulkJob insertJob = check baseClient->createJob(payload, INGEST);
-    insertJobId = insertJob.id;
 
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
@@ -87,6 +85,10 @@ function insertCsv() returns error? {
             test:assertFail(msg = closedJobInfo.message());
         }
     }
+    string[][] jobstatus = check baseClient->getJobStatus(insertJob.id, "successfulResults");
+    foreach string[] item in jobstatus {
+        batchId += item[0] + "\n";
+    }
 }
 
 @test:Config {
@@ -94,13 +96,11 @@ function insertCsv() returns error? {
 }
 function insertCsvFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvFromFile");
-    string batchId = "";
-
-    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts1.csv";
+    string csvContactsFilePath = "tests/resources/contacts1.csv";
 
     //create job
     BulkCreatePayload payload = {
-        'object : "Account",
+        'object : "Contact",
         contentType : "CSV",
         operation : "insert",
         lineEnding : "LF"
@@ -131,14 +131,19 @@ function insertCsvFromFile() returns error? {
                 }
             }
         }
-
+        runtime:sleep(10);
         //close job
         future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
+            io:println(closedJobInfo);
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJobInfo.message());
+        }
+        string[][] jobstatus = check baseClient->getJobStatus(insertJob.id, "successfulResults");
+        foreach string[] item in jobstatus {
+            batchId += item[0] + "\n";
         }
 
     } else {
@@ -151,13 +156,12 @@ function insertCsvFromFile() returns error? {
 }
 function insertCsvStringArrayFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
-    string batchId = "";
 
-    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts2.csv";
+    string csvContactsFilePath = "tests/resources/contacts2.csv";
 
     //create job
     BulkCreatePayload payload = {
-        'object : "Account",
+        'object : "Contact",
         contentType : "CSV",
         operation : "insert",
         lineEnding : "LF"
@@ -194,7 +198,7 @@ function insertCsvStringArrayFromFile() returns error? {
                 }
             }
         }
-
+        runtime:sleep(10);
         //close job
         future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
@@ -203,12 +207,14 @@ function insertCsvStringArrayFromFile() returns error? {
         } else {
             test:assertFail(msg = closedJobInfo.message());
         }
+        string[][] jobstatus = check baseClient->getJobStatus(insertJob.id, "successfulResults");
+        foreach string[] item in jobstatus {
+            batchId += item[0] + "\n";
+        }
 
     } else {
         test:assertFail(msg = insertJob.message());
-    }
-    //create job
-       
+    }       
 }
 
 @test:Config {
@@ -216,14 +222,13 @@ function insertCsvStringArrayFromFile() returns error? {
 }
 function insertCsvStreamFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStreamFromFile");
-    string batchId = "";
 
-    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts3.csv";
+    string csvContactsFilePath = "tests/resources/contacts3.csv";
 
     stream<string[], io:Error?> csvStream = check io:fileReadCsvAsStream(csvContactsFilePath);
     //create job
     BulkCreatePayload payload = {
-        'object : "Account",
+        'object : "Contact",
         contentType : "CSV",
         operation : "insert",
         lineEnding : "LF"
@@ -262,16 +267,21 @@ function insertCsvStreamFromFile() returns error? {
             }
         }
     }
-
+    runtime:sleep(10);
     //close job
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
+            io:println(closedJobInfo);
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");
             break;
         } else {
             test:assertFail(msg = closedJobInfo.message());
         }
+    }
+    string[][] jobstatus = check baseClient->getJobStatus(insertJob.id, "successfulResults");
+    foreach string[] item in jobstatus {
+        batchId += item[0] + "\n";
     }
 }
