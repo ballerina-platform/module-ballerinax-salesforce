@@ -662,6 +662,17 @@ public isolated client class Client {
         return check (check response.getJsonPayload()).fromJsonWithType (AllJobs);
     }
 
+    # Get details of all query jobs
+    #
+    # + returnType - AllJobs
+    #
+    isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) + 
+            ((jobType is ())? "" : string `?jobType=${jobType}`);
+        http:Response response = check self.salesforceClient->get(path);
+        return check (check response.getJsonPayload()).fromJsonWithType (AllJobs);
+    }
+
     # Get job status information
     # + status - completed / failed
     # + BulkJob - Returned bulk Job info
