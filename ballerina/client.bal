@@ -700,7 +700,7 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     #
     # + return - string[][] if successful else `error`
-    isolated remote function getqueryResult(string bulkJobId) 
+    isolated remote function getQueryResult(string bulkJobId) 
             returns string[][]|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
         http:Response response = check self.salesforceClient->get(path);

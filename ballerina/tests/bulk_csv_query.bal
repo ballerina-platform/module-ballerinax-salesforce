@@ -37,7 +37,7 @@ function queryCsv() returns error? {
 
     //get batch result
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        string[][]|error batchResult = baseClient->getqueryResult(queryJob.id);
+        string[][]|error batchResult = baseClient->getQueryResult(queryJob.id);
         if batchResult is string[][] {
             if batchResult.length() == 7 {
                 test:assertTrue(batchResult.length() == 7, msg = "Retrieving batch result failed.");
