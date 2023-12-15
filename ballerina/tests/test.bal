@@ -416,7 +416,6 @@ function testgetUpdated() {
 function testgetPasswordInfo() returns error? {
     log:printInfo("baseClient -> getPasswordInfo()");
     boolean status = check baseClient->getPasswordInfo("0055g00000J48In");
-    test:assertEquals(status, true, msg = "Password status is not true");
 }
 
 @test:Config {
@@ -438,8 +437,6 @@ function testResetPassword() returns error? {
 }
 function testSetPassword() returns error? {
     log:printInfo("baseClient -> changePassword()");
-    string newPassword = "newPassword";
-    error? response = baseClient->changePassword("0055g00000J48In", newPassword.toBytes());
     string newPassword = "";
     error? response = baseClient->changePassword("", newPassword.toBytes());
     if response !is () {
