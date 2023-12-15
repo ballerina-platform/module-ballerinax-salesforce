@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/log;
+import ballerina/regex;
 import ballerinax/salesforce.bulk;
 import ballerinax/salesforce;
 import ballerina/os;
@@ -90,7 +91,7 @@ public function main() returns error? {
         //get batch result
         var batchResult = bulkClient->getBatchResult(queryJob, batchId);
         if batchResult is string {
-            string[] records = re `\n`.split(batchResult);
+            string[] records = regex:split(batchResult, "\n");
             log:printInfo("Number of Records Received :" + (records.length() - 1).toString());
 
         } else if batchResult is error {

@@ -51,7 +51,7 @@ function queryCsv() returns error? {
                     test:assertFail(msg = batchResult.toString());
                 }
             }
-        } else {
+        } else if batchResult is error {
             if currentRetry != maxIterations {
                 log:printWarn("getBatchResult Operation Failed! Retrying...");
                 runtime:sleep(delayInSecs);
