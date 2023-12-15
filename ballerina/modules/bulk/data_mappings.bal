@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/log;
-import ballerina/regex;
 
 isolated function createJobRecordFromXml(xml jobDetails) returns JobInfo|error {
     xmlns "http://www.force.com/2009/06/asyncapi/dataload" as ns;
@@ -139,13 +138,16 @@ isolated function createBatchResultRecordFromJson(json payload) returns Result[]
 
 isolated function createBatchResultRecordFromCsv(string payload) returns Result[]|error {
     Result[] batchResArr = [];
-    string[] payloadArr = regex:split(payload, NEW_LINE);
+    string[] payloadArr = re `NEW_LINE`.split(payload);
     int arrLength = payloadArr.length();
     int counter = 1;
     while (counter < arrLength) {
         string? line = payloadArr[counter];
         if line is string {
-            string[] lineArr = regex:split(line, COMMA);
+            if line == EMPTY_STRING {
+                continue;
+            }
+            string[] lineArr = re `COMMA`.split(line);
             string? idStr = lineArr[0];
             string? successStr = lineArr[1];
             string? createdStr = lineArr[2];
@@ -153,8 +155,8 @@ isolated function createBatchResultRecordFromCsv(string payload) returns Result[
 
             // Remove quotes of "true" or "false".
             if successStr is string && createdStr is string {
-                successStr = regex:replaceAll(successStr, "\"", EMPTY_STRING);
-                createdStr = regex:replaceAll(createdStr, "\"", EMPTY_STRING);
+                successStr = re `"`.replaceAll(successStr, EMPTY_STRING);
+                createdStr = re `"`.replaceAll(createdStr, EMPTY_STRING);
             }
 
             if successStr is string && successStr.length() > 0 && createdStr is string && createdStr.length() > 0 {

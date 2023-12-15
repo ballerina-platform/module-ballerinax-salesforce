@@ -16,7 +16,6 @@
 
 import ballerina/http;
 import ballerina/lang.'boolean as booleanLib;
-import ballerina/regex;
 import ballerinax/salesforce;
 
 isolated function buildXMLPayload(string sessionId, LeadConvert convert) returns string|error {
@@ -132,11 +131,11 @@ isolated function createResponse(http:Response response) returns ConvertedLead|e
 
 isolated function formatPayload(http:Response response) returns xml|error {
     xml elements = check response.getXmlPayload();
-    string formattedXMLResponse = regex:replaceAll(elements.toString(), SOAP_ENV, SOAP_ENV_);
-    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS_SOAP, salesforce:EMPTY_STRING);
-    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS, salesforce:EMPTY_STRING);
-    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XMLNS_XSI, salesforce:EMPTY_STRING);
-    formattedXMLResponse = regex:replaceAll(formattedXMLResponse, XSI, XSI_);
+    string formattedXMLResponse = re `${SOAP_ENV}`.replaceAll(elements.toString(), SOAP_ENV_);
+    formattedXMLResponse = re `${XMLNS_SOAP}`.replaceAll(formattedXMLResponse, salesforce:EMPTY_STRING);
+    formattedXMLResponse = re `${XMLNS}`.replaceAll(formattedXMLResponse, salesforce:EMPTY_STRING);
+    formattedXMLResponse = re `${XMLNS_XSI}`.replaceAll(formattedXMLResponse, salesforce:EMPTY_STRING);
+    formattedXMLResponse = re `${XSI}`.replaceAll(formattedXMLResponse, XSI_);
     return check 'xml:fromString(formattedXMLResponse);
 }
 
@@ -161,5 +160,5 @@ isolated function getSessionId(http:ClientOAuth2Handler|http:ClientBearerTokenAu
     } else if clientHandler is http:ClientBearerTokenAuthHandler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     }
-    return (regex:split(<string>authorizationHeaderMap[AUTHORIZATION], " "))[1];
+    return (re ` `. split(<string>authorizationHeaderMap[AUTHORIZATION]))[1];
 }

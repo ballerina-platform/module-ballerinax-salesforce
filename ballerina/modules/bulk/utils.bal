@@ -21,7 +21,6 @@ import ballerina/lang.'int as ints;
 import ballerina/lang.'float as floats;
 import ballerina/lang.'string as strings;
 import ballerina/lang.'xml as xmllib;
-import ballerina/regex;
 
 isolated string csvContent = EMPTY_STRING;
 
@@ -363,7 +362,8 @@ isolated function getBulkApiHeaders(http:ClientOAuth2Handler|http:ClientBearerTo
     } else if clientHandler is http:ClientBearerTokenAuthHandler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     }
-    token = (regex:split(<string>authorizationHeaderMap["Authorization"], " "))[1];
+    
+    token = (re ` `.split(<string>authorizationHeaderMap["Authorization"]))[1];
     finalHeaderMap[X_SFDC_SESSION] = token;
     if contentType != () {
         finalHeaderMap[CONTENT_TYPE] = <string>contentType;

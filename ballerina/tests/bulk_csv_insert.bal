@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/log;
+import ballerina/io;
 import ballerina/test;
 import ballerina/lang.runtime;
 
@@ -138,7 +138,6 @@ function insertCsvFromFile() returns error? {
         future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
-            io:println(closedJobInfo);
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");
         } else {
             test:assertFail(msg = closedJobInfo.message());
@@ -277,7 +276,6 @@ function insertCsvStreamFromFile() returns error? {
         future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
-            io:println(closedJobInfo);
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");
             break;
         } else {
