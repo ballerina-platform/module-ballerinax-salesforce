@@ -415,7 +415,7 @@ function testgetUpdated() {
 }
 function testgetPasswordInfo() returns error? {
     log:printInfo("baseClient -> getPasswordInfo()");
-    boolean status = check baseClient->getPasswordInfo("0055g00000J48In");
+    boolean _ = check baseClient->getPasswordInfo("0055g00000J48In");
 }
 
 @test:Config {
