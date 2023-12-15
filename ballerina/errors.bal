@@ -19,13 +19,12 @@ public type Error error<ErrorDetails>;
 
 # Additional details extracted from the Http error.
 #
-# + statusCode - Http status code of the error 
-# + headers - Http headers in the error response
-# + body - Response body with extra information  
+# + errorCode - Error code from Salesforce
+# + message - Response body with extra information 
+#  
 public type ErrorDetails record {
-    int? statusCode?;
-    map<string[]>? headers?;
-    anydata? body?;
+    string? errorCode?;
+    string? message?;
 };
 
 // Error constants

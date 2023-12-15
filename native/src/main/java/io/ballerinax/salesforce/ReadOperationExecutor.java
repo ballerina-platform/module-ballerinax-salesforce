@@ -105,7 +105,7 @@ public class ReadOperationExecutor {
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, Object[] paramFeed) {
 
         Future balFuture = env.markAsync();
-        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(client.getType());
+        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(client));
         if (objectType.isIsolated() && objectType.isIsolated(methodName)) {
             env.getRuntime().invokeMethodAsyncConcurrently(client, methodName,
                     null, null, new Callback() {

@@ -62,15 +62,6 @@ class SOQLQueryResultStream {
     }
 }
 
-// isolated function covertToRecordsArray(map<json>[] queryResultArray) returns record {}[]|error {
-//     record {}[] resultRecordArray = [];
-//     foreach map<json> queryResult in queryResultArray {
-//         _ = check queryResult.removeIfHasKey(ATTRIBUTES).ensureType();
-//         resultRecordArray.push(check queryResult.cloneWithType(Record));
-//     }
-//     return resultRecordArray;
-// }
-
 class SOSLSearchResult {
     private record {}[] currentEntries = [];
     int index = 0;

@@ -37,6 +37,7 @@ public isolated function prepareUrl(string[] paths) returns string {
 # Returns the prepared URL with query parameters.
 #
 # + path - Resource URL
+# + queryParameters - A map of query parameters
 # + return - The prepared URL
 public isolated function addQueryParameters(string path, map<string> queryParameters) returns string {
     string url = path;
