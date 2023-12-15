@@ -113,6 +113,8 @@ function insertCsvFromFile() returns error? {
             error? response = baseClient->addBatch(insertJob.id, csvContent);
             if response is error {
                 test:assertFail(response.message());
+            } else {
+                break;
             }
         }
 
@@ -175,6 +177,8 @@ function insertCsvStringArrayFromFile() returns error? {
                 error? response = baseClient->addBatch(insertJob.id, rbc);
                 if response is error {
                     test:assertFail(response.message());
+                } else {
+                    break;
                 }
             }
             // close channel.

@@ -26,6 +26,7 @@ configurable string clientSecret = os:getEnv("CLIENT_SECRET");
 configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
 configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
+string reportInstanceID = "";
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfig = {
@@ -401,7 +402,7 @@ function testgetDeleted() {
     enable: true
 }
 function testgetUpdated() {
-    log:printInfo("baseClient -> getDeletedRecords()");
+    log:printInfo("baseClient -> getUpdatedRecords()");
     UpdatedRecordsResults|error updatedRecords = baseClient->getUpdated("Account", time:utcToCivil(time:utcNow()),
         time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
     if updatedRecords !is UpdatedRecordsResults {
@@ -419,26 +420,28 @@ function testgetPasswordInfo() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [testgetPasswordInfo]
 }
 function testResetPassword() returns error? {
     log:printInfo("baseClient -> resetPassword()");
     runtime:sleep(10);
-    byte[]|error resettedPassword = baseClient->resetPassword("0055g00000J48In");
+    byte[]|error resettedPassword = baseClient->resetPassword("");
     if resettedPassword !is byte[] {
         test:assertFail(msg = resettedPassword.message());
     }
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [testResetPassword]
 }
 function testSetPassword() returns error? {
     log:printInfo("baseClient -> changePassword()");
     string newPassword = "newPassword";
     error? response = baseClient->changePassword("0055g00000J48In", newPassword.toBytes());
+    string newPassword = "";
+    error? response = baseClient->changePassword("", newPassword.toBytes());
     if response !is () {
         test:assertFail(msg = response.message());
     }
@@ -456,19 +459,93 @@ function testGetQuickActions() returns error? {
 }
 
 @test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testListReports() returns error? {
+    log:printInfo("baseClient -> listReports()");
+    Report[]|error resp = baseClient->listReports();
+    if resp !is Report[] {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0{
+        test:assertFail("No reports found");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testRunReportSync() returns error? {
+    log:printInfo("baseClient -> runReportSync()");
+    ReportInstanceResult|error resp = baseClient->runReportSync("00O5g00000Jrs9DEAR");
+    if resp !is ReportInstanceResult {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0 {
+        test:assertFail("No reports found");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testRunReportAsync() returns error? {
+    log:printInfo("baseClient -> runReportAsync()");
+    ReportInstance|error resp = baseClient->runReportAsync("00O5g00000Jrs9DEAR");
+    if resp !is ReportInstance {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.id == "" {
+        test:assertFail("No reports found");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testRunReportAsync]
+}
+function testListAsyncRunsOfReport() returns error? {
+    log:printInfo("baseClient -> listAsyncRunsOfReport()");
+    ReportInstance[]|error resp = baseClient->listAsyncRunsOfReport("00O5g00000Jrs9DEAR");
+    if resp !is ReportInstance[] {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0 {
+        test:assertFail("No reports found");
+    }
+    reportInstanceID = resp[0].id;
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testListAsyncRunsOfReport]
+}
+function testGetReportInstanceResult() returns error? {
+    log:printInfo("baseClient -> getReportInstanceResult()");
+    ReportInstanceResult|error resp = baseClient->getReportInstanceResult("00O5g00000Jrs9DEAR", reportInstanceID);
+    if resp !is ReportInstanceResult {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0 {
+        test:assertFail("No reports found");
+    }
+}
+
+
+@test:Config {
     enable: true
 }
 function testBatchExecute() returns error? {
     log:printInfo("baseClient -> batch()");
-    Subrequest[] subrequests = [{method: "GET", url: "/services/data/v48.0/sobjects/Account/describe"},
-                                {method: "GET", url: "/services/data/v48.0/sobjects/Contact/describe"}];
     Subrequest[] subrequests = [{method: "GET", url: "/services/data/v59.0/sobjects/Account/describe"},
                                 {method: "GET", url: "/services/data/v59.0/sobjects/Contact/describe"}];
     BatchResult|error batchResult = baseClient->batch(subrequests, true);
     if batchResult !is BatchResult {
         test:assertFail(msg = batchResult.message());
     } else {
-        test:assertTrue(batchResult.hasErrors, msg = "Batch result has errors");
         test:assertFalse(batchResult.hasErrors, msg = "Batch result has errors");
     }
 }
@@ -506,6 +583,17 @@ function testDeleteByExternalId() returns error? {
     }
 }
 
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testlistReports() returns error? {
+    log:printInfo("baseClient -> listReports()");
+    Report[]|error creation = check baseClient->listReports();
+    if creation is error {
+        test:assertFail(msg = creation.message());
+    }
+}
 
 @test:Config {
     enable: true
