@@ -1,3 +1,4 @@
+import ballerina/lang.runtime;
 // Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
@@ -13,20 +14,18 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
 import ballerina/test;
-import ballerina/lang.runtime;
 
 @test:AfterSuite {}
 function deleteCSV() returns error? {
     log:printInfo("baseClient -> deleteCsv");
     //create job
     BulkCreatePayload payload = {
-        'object : "Contact",
-        contentType : "CSV",
-        operation : "delete",
-        lineEnding : "LF"
+        'object: "Contact",
+        contentType: "CSV",
+        operation: "delete",
+        lineEnding: "LF"
     };
     BulkJob insertJob = check baseClient->createJob(payload, INGEST);
 

@@ -21,7 +21,7 @@ import ballerina/lang.'string as strings;
 
 isolated string csvContent = EMPTY_STRING;
 
-# remove decimal places from a civil seconds value
+# Remove decimal places from a civil seconds value
 # 
 # + civilTime - a time:civil record
 # + return - a time:civil record with decimal places removed

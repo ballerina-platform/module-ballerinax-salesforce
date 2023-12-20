@@ -13,11 +13,10 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/io;
+import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/test;
-import ballerina/lang.runtime;
 
 const int maxIterations = 5;
 const decimal delayInSecs = 5.0;
@@ -34,10 +33,10 @@ function insertCsv() returns error? {
 
     //create job
     BulkCreatePayload payload = {
-        'object : "Contact",
-        contentType : "CSV",
-        operation : "insert",
-        lineEnding : "LF"
+        'object: "Contact",
+        contentType: "CSV",
+        operation: "insert",
+        lineEnding: "LF"
     };
     BulkJob insertJob = check baseClient->createJob(payload, INGEST);
 
@@ -100,10 +99,10 @@ function insertCsvFromFile() returns error? {
 
     //create job
     BulkCreatePayload payload = {
-        'object : "Contact",
-        contentType : "CSV",
-        operation : "insert",
-        lineEnding : "LF"
+        'object: "Contact",
+        contentType: "CSV",
+        operation: "insert",
+        lineEnding: "LF"
     };
     error|BulkJob insertJob = baseClient->createJob(payload, INGEST);
 
@@ -158,14 +157,14 @@ function insertCsvFromFile() returns error? {
 function insertCsvStringArrayFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
 
-    string csvContactsFilePath = "ballerina/tests/resources/contacts2.csv";
+    string csvContactsFilePath = "tests/resources/contacts2.csv";
 
     //create job
     BulkCreatePayload payload = {
-        'object : "Contact",
-        contentType : "CSV",
-        operation : "insert",
-        lineEnding : "LF"
+        'object: "Contact",
+        contentType: "CSV",
+        operation: "insert",
+        lineEnding: "LF"
     };
     error|BulkJob insertJob = baseClient->createJob(payload, INGEST);
 
@@ -181,7 +180,7 @@ function insertCsvStringArrayFromFile() returns error? {
                 }
             }
             // close channel.
-                _ = check rbc.close();
+            _ = check rbc.close();
         } else {
             test:assertFail(msg = rbc.message());
         }
@@ -217,7 +216,7 @@ function insertCsvStringArrayFromFile() returns error? {
 
     } else {
         test:assertFail(msg = insertJob.message());
-    }       
+    }
 }
 
 @test:Config {
@@ -226,15 +225,15 @@ function insertCsvStringArrayFromFile() returns error? {
 function insertCsvStreamFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStreamFromFile");
 
-    string csvContactsFilePath = "ballerina/tests/resources/contacts3.csv";
+    string csvContactsFilePath = "tests/resources/contacts3.csv";
 
     stream<string[], io:Error?> csvStream = check io:fileReadCsvAsStream(csvContactsFilePath);
     //create job
     BulkCreatePayload payload = {
-        'object : "Contact",
-        contentType : "CSV",
-        operation : "insert",
-        lineEnding : "LF"
+        'object: "Contact",
+        contentType: "CSV",
+        operation: "insert",
+        lineEnding: "LF"
     };
     BulkJob insertJob = check baseClient->createJob(payload, INGEST);
 

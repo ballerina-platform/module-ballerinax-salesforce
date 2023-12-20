@@ -21,8 +21,17 @@ import ballerinax/'client.config;
 
 # Represents status of the bulk jobs
 public enum Status {
-    COMPLETED = "successfulResults",
-    FAILED = "failedResults"
+    SUCCESSFUL_RESULTS = "successfulResults",
+    FAILED_RESULTS = "failedResults"
+};
+
+public enum JobStateEnum {
+    OPEN = "Open",
+    UPLOAD_COMPLETE = "UploadComplete",
+    IN_PROGRESS = "InProgress",
+    JOB_COMPLETE = "JobComplete",
+    ABORTED = "Aborted",
+    FAILED = "Failed"
 };
 
 public enum JobType {
@@ -350,18 +359,18 @@ public type BulkJob record {
     # The URL to use for uploading the CSV data for the job.
     string contentUrl?;
     # The line ending of the payload.
-    string lineEnding;
+    string lineEnding?;
     # The column delimiter of the payload.
-    string columnDelimiter;
+    string columnDelimiter?;
 };
 
 # Represents bulk job related information.
 public type BulkJobInfo record {
     *BulkJob;
     # The number of times that Salesforce attempted to process the job.
-    int retries;
+    int retries?;
     # The total time spent processing the job.
-    int totalProcessingTime;
+    int totalProcessingTime?;
     # The total time spent processing the job by API.
     int apiActiveProcessingTime?;
     # The total time spent to process triggers and other processes related to the job data;

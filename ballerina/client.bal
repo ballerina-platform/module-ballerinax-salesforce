@@ -13,14 +13,13 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/http;
+import ballerina/io;
 import ballerina/jballerina.java;
+import ballerina/lang.runtime;
+import ballerina/time;
 import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
-import ballerina/time;
-import ballerina/io;
-import ballerina/lang.runtime;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
@@ -56,7 +55,7 @@ public isolated client class Client {
     #
     # + return - `OrganizationMetadata` record if successful or else `error`
     @display {label: "Get Organization Metadata"}
-    isolated remote function getOrganizationMetaData() returns @display {label: "Organization Metadata"}
+    isolated remote function getOrganizationMetaData() returns
                                                     OrganizationMetadata|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS]);
         return check self.salesforceClient->get(path);
@@ -67,9 +66,8 @@ public isolated client class Client {
     # + sobjectName - sObject name
     # + return - `SObjectBasicInfo` record if successful or else `error`
     @display {label: "Get sObject Basic Information"}
-    isolated remote function getBasicInfo(@display {label: "sObject Name"} string sobjectName)
-                                                returns @display {label: "sObject Basic Information"}
-                                                SObjectBasicInfo|error {
+    isolated remote function getBasicInfo(string sobjectName)
+                                                returns SObjectBasicInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName]);
         return check self.salesforceClient->get(path);
     }
@@ -80,8 +78,8 @@ public isolated client class Client {
     # + sObjectName - sObject name value
     # + return - `SObjectMetaData` record if successful or else `error`
     @display {label: "Get sObject Description"}
-    isolated remote function describe(@display {label: "sObject Name"} string sObjectName)
-                                            returns @display {label: "sObject Metadata"} SObjectMetaData|error {
+    isolated remote function describe(string sObjectName)
+                                            returns SObjectMetaData|error {
 
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DESCRIBE]);
         return check self.salesforceClient->get(path);
@@ -91,8 +89,7 @@ public isolated client class Client {
     #
     # + return - `SObjectBasicInfo` record if successful or else `error`
     @display {label: "Get sObject Platform Action"}
-    isolated remote function getPlatformAction() returns @display {label: "sObject Basic Information"}
-                                                SObjectBasicInfo|error {
+    isolated remote function getPlatformAction() returns SObjectBasicInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, PLATFORM_ACTION]);
         return check self.salesforceClient->get(path);
     }
@@ -102,7 +99,7 @@ public isolated client class Client {
     #
     # + return - List of `Version` if successful. Else, the occured `error`.
     @display {label: "Get Available API Versions"}
-    isolated remote function getApiVersions() returns @display {label: "Versions"} Version[]|error {
+    isolated remote function getApiVersions() returns Version[]|error {
         string path = utils:prepareUrl([BASE_PATH]);
         return check self.salesforceClient->get(path);
     }
@@ -112,8 +109,8 @@ public isolated client class Client {
     # + apiVersion - API version (v37)
     # + return - `Resources` as map of strings if successful. Else, the occurred `error`.
     @display {label: "Get Resources by API Version"}
-    isolated remote function getResources(@display {label: "API Version"} string apiVersion)
-                                                    returns @display {label: "Resources"} map<string>|error {
+    isolated remote function getResources(string apiVersion)
+                                                    returns map<string>|error {
         string path = utils:prepareUrl([BASE_PATH, apiVersion]);
         json res = check self.salesforceClient->get(path);
         return toMapOfStrings(res);
@@ -123,8 +120,7 @@ public isolated client class Client {
     #
     # + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `error`.
     @display {label: "Get Organization Limits"}
-    isolated remote function getLimits() returns @display {label: "Organization Limits"}
-                                                    map<Limit>|error {
+    isolated remote function getLimits() returns map<Limit>|error {
         string path = utils:prepareUrl([API_BASE_PATH, LIMITS]);
         json res = check self.salesforceClient->get(path);
         return toMapOfLimits(res);
@@ -137,16 +133,14 @@ public isolated client class Client {
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - Record if successful or else `error`
     @display {label: "Get Record by ID"}
-    isolated remote function getById(@display {label: "sObject Name"} string sobject,
-                                    @display {label: "sObject ID"} string id, 
-                                    typedesc<record {}> returnType = <>)
-                                    returns @display {label: "Result"} returnType|error = @java:Method {
+    isolated remote function getById(string sobject, string id, typedesc<record {}> returnType = <>)
+                                    returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordById"
     } external;
 
     private isolated function processGetRecordById(typedesc<record {}> returnType, string sobject, string id,
-                                                    string[] fields) returns record {}|error {
+            string[] fields) returns record {}|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
@@ -163,17 +157,14 @@ public isolated client class Client {
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - Record if successful or else `error`
     @display {label: "Get Record by External ID"}
-    isolated remote function getByExternalId(@display {label: "sObject Name"} string sobject,
-                                            @display {label: "External ID Field Name"} string extIdField,
-                                            @display {label: "External ID"} string extId,
-                                            typedesc<record {}> returnType = <>)
-                                            returns @display {label: "Result"} returnType|error = @java:Method {
+    isolated remote function getByExternalId(string sobject, string extIdField, string extId,
+            typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordByExtId"
     } external;
 
     private isolated function processGetRecordByExtId(typedesc<record {}> returnType, string sobject, string extIdField,
-                                                        string extId, string[] fields) returns record {}|error {
+            string extId, string[] fields) returns record {}|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
@@ -188,9 +179,8 @@ public isolated client class Client {
     # + sObjectRecord - Record to be inserted
     # + return - Creation response if successful or else `error`
     @display {label: "Create Record"}
-    isolated remote function create(@display {label: "sObject Name"} string sObjectName,
-                                    @display {label: "sObject Data"} record {} sObjectRecord)
-                                    returns @display {label: "Created Entity ID"} CreationResponse|error {
+    isolated remote function create(string sObjectName, record {} sObjectRecord)
+                                    returns CreationResponse|error {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
         req.setJsonPayload(sObjectRecord.toJson());
@@ -204,10 +194,8 @@ public isolated client class Client {
     # + sObjectRecord - Record to be updated
     # + return - Empty response if successful `error`
     @display {label: "Update Record"}
-    isolated remote function update(@display {label: "sObject Name"} string sObjectName,
-                                    @display {label: "sObject ID"} string id,
-                                    @display {label: "Record Payload"} record {} sObjectRecord)
-                                    returns @display {label: "Result"} error? {
+    isolated remote function update(string sObjectName, string id, record {} sObjectRecord)
+                                    returns error? {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(sObjectRecord.toJson());
@@ -222,11 +210,8 @@ public isolated client class Client {
     # + sObjectRecord - Record to be upserted
     # + return - Empty response if successful or else `error`
     @display {label: "Upsert Record"}
-    isolated remote function upsert(@display {label: "sObject Name"} string sObjectName,
-                                    @display {label: "External ID Field"} string externalIdField,
-                                    @display {label: "External ID"} string externalId,
-                                    @display {label: "Record Payload"} record {} sObjectRecord)
-                                    returns @display {label: "Result"} error? {
+    isolated remote function upsert(string sObjectName, string externalIdField, string externalId,
+            record {} sObjectRecord) returns error? {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, externalIdField, externalId]);
         req.setJsonPayload(sObjectRecord.toJson());
@@ -239,9 +224,8 @@ public isolated client class Client {
     # + id - SObject ID
     # + return - Empty response if successful or else `error`
     @display {label: "Delete Record"}
-    isolated remote function delete(@display {label: "SObject Name"} string sObjectName,
-                                    @display {label: "SObject ID"} string id)
-                                    returns @display {label: "Result"} error? {
+    isolated remote function delete( string sObjectName, string id)
+                                    returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
         return check self.salesforceClient->delete(path);
     }
@@ -250,7 +234,7 @@ public isolated client class Client {
     #
     # + return - Array of Report if successful or else `error`
     @display {label: "List Reports"}
-    isolated remote function listReports() returns @display {label: "Reports"} Report[]|error {
+    isolated remote function listReports() returns Report[]|error {
         string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS]);
         return check self.salesforceClient->get(path);
     }
@@ -260,7 +244,7 @@ public isolated client class Client {
     # + reportId - Report Id
     # + return - `()` if the report deletion is successful or else an error
     @display {label: "Delete Report"}
-    isolated remote function deleteReport(@display {label: "Report Id"} string reportId) returns error? {
+    isolated remote function deleteReport(string reportId) returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId]);
         return check self.salesforceClient->delete(path);
     }
@@ -270,8 +254,8 @@ public isolated client class Client {
     # + reportId - Report Id
     # + return - ReportInstanceResult if successful or else `error`
     @display {label: "Run Report Synchronously"}
-    isolated remote function runReportSync(@display {label: "Report Id"} string reportId)
-            returns @display {label: "Report Instance Result"} ReportInstanceResult|error {
+    isolated remote function runReportSync(string reportId)
+            returns ReportInstanceResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId]);
         return check self.salesforceClient->get(path);
     }
@@ -281,8 +265,7 @@ public isolated client class Client {
     # + reportId - Report Id
     # + return - ReportInstance if successful or else `error`
     @display {label: "Run Report Asynchronously"}
-    isolated remote function runReportAsync(@display {label: "Report Id"} string reportId)
-            returns @display {label: "Report Instance"} ReportInstance|error {
+    isolated remote function runReportAsync(string reportId) returns ReportInstance|error {
         string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId, INSTANCES]);
         return check self.salesforceClient->post(path, {});
     }
@@ -292,8 +275,7 @@ public isolated client class Client {
     # + reportId - Report Id
     # + return - Array of ReportInstance if successful or else `error`
     @display {label: "List Async Report Runs"}
-    isolated remote function listAsyncRunsOfReport(@display {label: "Report Id"} string reportId)
-            returns @display {label: "Report Instances"} ReportInstance[]|error {
+    isolated remote function listAsyncRunsOfReport(string reportId) returns ReportInstance[]|error {
         string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId, INSTANCES]);
         return check self.salesforceClient->get(path);
     }
@@ -304,8 +286,7 @@ public isolated client class Client {
     # + instanceId - Instance Id
     # + return - ReportInstanceResult if successful or else `error`
     @display {label: "Get Report Instance Result"}
-    isolated remote function getReportInstanceResult(@display {label: "Report Id"} string reportId, 
-            @display {label: "Instance Id"} string instanceId) returns @display {label: "Report Instance Result"} 
+    isolated remote function getReportInstanceResult(string reportId, string instanceId) returns
             ReportInstanceResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, ANALYTICS, REPORTS, reportId, INSTANCES, instanceId]);
         return check self.salesforceClient->get(path);
@@ -317,8 +298,8 @@ public isolated client class Client {
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - `stream<{returnType}, error?>` if successful. Else, the occurred `error`.
     @display {label: "Get Query Result"}
-    isolated remote function query(@display {label: "SOQL Query"} string soql, typedesc<record {}> returnType = <>)
-                                    returns @display {label: "SOQL Result"} stream<returnType, error?>|error = @java:Method {
+    isolated remote function query(string soql, typedesc<record {}> returnType = <>)
+                                    returns stream<returnType, error?>|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getQueryResult"
     } external;
@@ -337,8 +318,8 @@ public isolated client class Client {
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - `stream<{returnType}, error?>` record if successful. Else, the occurred `error`.
     @display {label: "SOSL Search"}
-    isolated remote function search(@display {label: "SOSL Search Query"} string sosl, typedesc<record {}> returnType = <>)
-                                    returns @display {label: "SOSL Result"} stream<returnType, error?>|error = @java:Method {
+    isolated remote function search(string sosl, typedesc<record {}> returnType = <>)
+                                    returns stream<returnType, error?>|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "searchSOSLString"
     } external;
@@ -358,20 +339,22 @@ public isolated client class Client {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor"
     } external;
 
-
     // Added APIs
-    
+
     # Retrieves the list of individual records that have been deleted within the given timespan.
     #
     # + sObjectName - SObject reference
     # + startDate - Start date of the timespan.
     # + endDate - End date of the timespan.
     # + return - `DeletedRecordsResult` record if successful or else `error`
-    isolated remote function getDeleted(string sObjectName, time:Civil startDate, time:Civil endDate) 
+    @display {label: "Get Deleted Records"}
+    isolated remote function getDeletedRecords(string sObjectName, time:Civil startDate, time:Civil endDate)
         returns DeletedRecordsResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, DELETED]);
-        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(removeDecimalPlaces(startDate)), 
-            end: check time:civilToString(removeDecimalPlaces(endDate))});
+        string finalUrl = utils:addQueryParameters(path, {
+            'start: check time:civilToString(removeDecimalPlaces(startDate)),
+            end: check time:civilToString(removeDecimalPlaces(endDate))
+        });
         return check self.salesforceClient->get(finalUrl);
     }
 
@@ -381,11 +364,14 @@ public isolated client class Client {
     # + startDate - Start date of the timespan.
     # + endDate - End date of the timespan.
     # + return - `UpdatedRecordsResults` record if successful or else `error`
-    isolated remote function getUpdated(string sObjectName, time:Civil startDate, time:Civil endDate) 
+    @display {label: "Get Updated Records"}
+    isolated remote function getUpdatedRecords(string sObjectName, time:Civil startDate, time:Civil endDate)
         returns UpdatedRecordsResults|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, UPDATED]);
-        string finalUrl = utils:addQueryParameters(path,{'start: check time:civilToString(removeDecimalPlaces(startDate)), 
-            end: check time:civilToString(removeDecimalPlaces(endDate))});
+        string finalUrl = utils:addQueryParameters(path, {
+            'start: check time:civilToString(removeDecimalPlaces(startDate)),
+            end: check time:civilToString(removeDecimalPlaces(endDate))
+        });
         return check self.salesforceClient->get(finalUrl);
     }
 
@@ -393,7 +379,8 @@ public isolated client class Client {
     #
     # + userId - User ID
     # + return - `boolean` if successful or else `error`
-    isolated remote function getPasswordInfo(string userId) returns boolean|error {
+    @display {label: "Check Password Expiration"}
+    isolated remote function isPasswordExpired(string userId) returns boolean|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
         http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
@@ -403,10 +390,12 @@ public isolated client class Client {
             return isExpired;
         } else {
             json payload = check response.getJsonPayload();
-            json[] jsonArray= check payload.ensureType();
+            json[] jsonArray = check payload.ensureType();
             map<json> payloadMap = check jsonArray[0].ensureType();
             record {string message; string errorCode;} responseRecord = {message: check payloadMap.message, errorCode: check payloadMap.errorCode};
-            return error("Error occurred while resetting the password" + responseRecord.toString());
+            return error("Error occurred while checking the password status! ",
+                httpCode = response.statusCode, errorCode = responseRecord.errorCode,
+                errormessage = responseRecord.message);
         }
     }
 
@@ -414,27 +403,21 @@ public isolated client class Client {
     #
     # + userId - User ID
     # + return - `byte[]` if successful or else `error`
+    @display {label: "Reset Password"}
     isolated remote function resetPassword(string userId) returns byte[]|error {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
-        http:Response response = check self.salesforceClient->delete(path);
-        if response.statusCode == 200 {
-            json payload = check response.getJsonPayload();
-            map<json> payloadMap = check payload.ensureType();
-            string password = check payloadMap.NewPassword;
-            return password.toBytes();
-        } else {
-            return error("Error occurred while resetting the password");
-        }
+        return check self.salesforceClient->delete(path);
     }
 
     # Change user password
     #
     # + userId - User ID
-    # + newPassword - New user password as a byte[]
+    # + newPassword - New user password as a string
     # + return - `()` if successful or else `error`
-    isolated remote function changePassword(string userId, byte[] newPassword) returns error? {
+    @display {label: "Change Password"}
+    isolated remote function changePassword(string userId, string newPassword) returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, USER, userId, PASSWORD]);
-        record{} payload = {"NewPassword" : check string:fromBytes(newPassword)};
+        record {} payload = {"NewPassword": newPassword};
         return check self.salesforceClient->post(path, payload);
     }
 
@@ -442,17 +425,10 @@ public isolated client class Client {
     #
     # + sObjectName - SObject reference
     # + return - `QuickAction[]` if successful or else `error`
+    @display {label: "Get Quick Actions"}
     isolated remote function getQuickActions(string sObjectName) returns QuickAction[]|error {
         string path = utils:prepareUrl([API_BASE_PATH, QUICK_ACTIONS]);
-        http:Response response = check self.salesforceClient->get(path);
-        if response.statusCode == 200 {
-            json payload = check response.getJsonPayload();
-            QuickAction[] actions = check payload.fromJsonWithType();
-            return actions;
-        } else {
-            json payload = check response.getJsonPayload();
-            return error("Error occurred while retrieving the quick actions. " + payload.toString());
-        }
+        return check self.salesforceClient->get(path);
     }
 
     # Executes up to 25 subrequests in a single request.
@@ -460,17 +436,11 @@ public isolated client class Client {
     # + batchRequests - A record containing all the requests
     # + haltOnError - If true, the request halts when an error occurs on an individual subrequest.
     # + return - `BatchResult` if successful or else `error`
+    @display {label: "Batch Execute"}
     isolated remote function batch(Subrequest[] batchRequests, boolean haltOnError = false) returns BatchResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, COMPOSITE, BATCH]);
-        record{} payload = {"batchRequests" : batchRequests, "haltOnError" : haltOnError};
-        http:Response response = check self.salesforceClient->post(path, payload);
-        if response.statusCode == 200 {
-            json jsonPayload = check response.getJsonPayload();
-            return check jsonPayload.fromJsonWithType();
-        } else {
-            json jsonPayload = check response.getJsonPayload();
-            return error("Error occurred while executing the batch request. " + jsonPayload.toString());
-        }
+        record {} payload = {"batchRequests": batchRequests, "haltOnError": haltOnError};
+        return check self.salesforceClient->post(path, payload);
     }
 
     # Retrieves information about alternate named layouts for a given object.
@@ -479,8 +449,9 @@ public isolated client class Client {
     # + layoutName - Name of the layout.
     # + returnType - The payload type, which is expected to be returned after data binding
     # + return - record of `returnType` if successful or else `error`
-    isolated remote function getNamedLayouts(@display {label: "Name of the sObject"} string sObjectName, 
-                                @display {label: "Name of the layout"} string layoutName, typedesc<record {}> returnType = <>)
+    @display {label: "Get Named Layouts"}
+    isolated remote function getNamedLayouts(@display {label: "Name of the sObject"} string sObjectName,
+            @display {label: "Name of the layout"} string layoutName, typedesc<record {}> returnType = <>)
                                     returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getNamedLayouts"
@@ -498,7 +469,8 @@ public isolated client class Client {
     # + subContext - Sub context
     # + returnType - The payload type, which is expected to be returned after data binding
     # + return - record of `returnType` if successful or else `error`
-    isolated remote function getInvocableActions(string subContext, 
+    @display {label: "Get Invocable Actions"}
+    isolated remote function getInvocableActions(string subContext,
             typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getInvocableActions"
@@ -514,16 +486,16 @@ public isolated client class Client {
     #
     # + subContext - Sub context
     # + payload - payload for the action
-    # + returnType - The type of the returned variable.
+    # + returnType - The type of the returned variable
     # + return - record of `returnType` if successful or else `error`
-
-    isolated remote function invokeActions(string subContext, record{} payload, 
+    @display {label: "Invoke Actions"}
+    isolated remote function invokeActions(string subContext, record {} payload,
             typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "invokeActions"
     } external;
 
-    private isolated function processInvokeActions(typedesc<record {}> returnType, string subContext, record{} payload) returns record {}|error {
+    private isolated function processInvokeActions(typedesc<record {}> returnType, string subContext, record {} payload) returns record {}|error {
         string path = utils:prepareUrl([API_BASE_PATH, ACTIONS]) + subContext;
         json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
@@ -531,16 +503,15 @@ public isolated client class Client {
 
     # Delete record using external Id.
     #
-    # + sObject - Name of the sObject.
-    # + externalId - Name of the external id field.
-    # + value - value of the external id field.
-    # + return - `()` if successful or else `error`.
-
+    # + sObject - Name of the sObject
+    # + externalId - Name of the external id field
+    # + value - value of the external id field
+    # + return - `()` if successful or else `error`
+    @display {label: "Delete Record using External ID"}
     isolated remote function deleteRecordsUsingExtId(string sObject, string externalId, string value) returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObject, externalId, value]);
         return check self.salesforceClient->delete(path);
     }
-
 
     # Access Salesforce APEX resource.
     #
@@ -549,16 +520,17 @@ public isolated client class Client {
     # + payload - payload
     # + returnType - The payload type, which is expected to be returned after data binding
     # + return - `string|int|record{}` type if successful or else `error`
-    isolated remote function apexRestExecute(string urlPath, http:Method methodType, 
-        record{} payload = {}, typedesc<record {}|string|int?> returnType = <>) 
+    @display {label: "Execute APEX REST Resource"}
+    isolated remote function apexRestExecute(string urlPath, http:Method methodType,
+            record {} payload = {}, typedesc<record {}|string|int?> returnType = <>)
             returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "apexRestExecute"
     } external;
 
-    private isolated function processApexExecute(typedesc<record {}|string|int?> returnType, string urlPath, http:Method methodType, record{} payload) returns record {}|string|int|error? {
+    private isolated function processApexExecute(typedesc<record {}|string|int?> returnType, string urlPath, http:Method methodType, record {} payload) returns record {}|string|int|error? {
         string path = utils:prepareUrl([APEX_BASE_PATH, urlPath]);
-        http:Response response  = new;
+        http:Response response = new;
         match methodType {
             "GET" => {
                 response = check self.salesforceClient->get(path);
@@ -576,7 +548,7 @@ public isolated client class Client {
                 response = check self.salesforceClient->patch(path, payload);
             }
             _ => {
-                return error ("Invalid Method");
+                return error("Invalid Method");
             }
         }
         if response.statusCode == 200 {
@@ -587,7 +559,8 @@ public isolated client class Client {
             return check responsePayload.cloneWithType(returnType);
         } else {
             json responsePayload = check response.getJsonPayload();
-            return error("Error occurred while executing the apex request. " + responsePayload.toString());
+            return error("Error occurred while executing the apex request. ", 
+                httpCode = response.statusCode, details = responsePayload);
         }
     }
 
@@ -598,16 +571,10 @@ public isolated client class Client {
     # + payload - The payload for the bulk job
     # + bulkOperation - The processing operation for the job
     # + return - `BulkJob` if successful or else `error`
-    isolated remote function createJob(BulkCreatePayload payload, BulkOperation bulkOperation) returns error|BulkJob {
+    @display {label: "Create Bulk Job"}
+    isolated remote function createJob(BulkCreatePayload payload, BulkOperation bulkOperation) returns BulkJob|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation]);
-        http:Response response = check self.salesforceClient->post(path, payload);
-        if response.statusCode == 200 {
-            json responsePayload = check response.getJsonPayload();
-            return check responsePayload.cloneWithType(BulkJob);
-        } else {
-            json responsePayload = check response.getJsonPayload();
-            return error("Error occurred while creating the bulk job. " + responsePayload.toString());
-        }
+        return check self.salesforceClient->post(path, payload);
     }
 
     # Retrieves detailed information about a job.
@@ -615,16 +582,10 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job.
     # + bulkOperation - The processing operation for the job.
     # + return - `BulkJobInfo` if successful or else `error`
-    isolated remote function getJobInfo(string bulkJobId, BulkOperation bulkOperation) returns error|BulkJobInfo {
+    @display {label: "Get Job Info"}
+    isolated remote function getJobInfo(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
-        http:Response response = check self.salesforceClient->get(path);
-        if response.statusCode == 200 {
-            json responsePayload = check response.getJsonPayload();
-            return check responsePayload.cloneWithType(BulkJobInfo);
-        } else {
-            json responsePayload = check response.getJsonPayload();
-            return error("Error occurred while retrieving the bulk job info. " + responsePayload.toString());
-        }
+        return check self.salesforceClient->get(path);
     };
 
     # Uploads data for a job using CSV data.
@@ -632,20 +593,20 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + content - CSV data to be added
     # + return - `BulkJobInfo` record if successful or `error` if unsuccessful
+    @display {label: "Add Batch"}
     isolated remote function addBatch(string bulkJobId, string|string[][]|stream<string[], error?>|io:ReadableByteChannel content) returns error? {
         string payload = "";
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, BATCHES]);
         if content is io:ReadableByteChannel {
             payload = check convertToString(content);
         } else if content is string[][]|stream<string[], error?> {
-                payload = check convertStringListToString(content);
+            payload = check convertStringListToString(content);
         } else {
             payload = content;
         }
         http:Response response = check self.salesforceClient->put(path, payload, mediaType = "text/csv");
         if response.statusCode != 201 {
-            json responsePayload = check response.getJsonPayload();
-            return error("Error occurred while adding the batch. " + responsePayload.toString());
+            return error("Error occurred while adding the batch. ", httpCode = response.statusCode);
         }
     };
 
@@ -653,32 +614,31 @@ public isolated client class Client {
     #
     # + jobType - Type of the job
     # + return - `AllJobs` record if successful or `error` if unsuccessful
+    @display {label: "Get All Jobs"}
     isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) + 
-            ((jobType is ())? "" : string `?jobType=${jobType}`);
-        http:Response response = check self.salesforceClient->get(path);
-        return check (check response.getJsonPayload()).fromJsonWithType (AllJobs);
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
+            ((jobType is ()) ? "" : string `?jobType=${jobType}`);
+        return check self.salesforceClient->get(path);
     }
 
     # Get details of all query jobs
     #
     # + jobType - Type of the job
     # + return - `AllJobs` if successful else `error`
-    #
+    @display {label: "Get All Query Jobs"}
     isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) + 
-            ((jobType is ())? "" : string `?jobType=${jobType}`);
-        http:Response response = check self.salesforceClient->get(path);
-        return check (check response.getJsonPayload()).fromJsonWithType (AllJobs);
+        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
+            ((jobType is ()) ? "" : string `?jobType=${jobType}`);
+        return check self.salesforceClient->get(path);
     }
 
     # Get job status information
-    # 
+    #
     # + status - Status of the job
     # + bulkJobId - Id of the bulk job
     # + return - `string[][]` if successful else `error`
-    #
-    isolated remote function getJobStatus(string bulkJobId, Status status) 
+    @display {label: "Get Job Status"}
+    isolated remote function getJobStatus(string bulkJobId, Status status)
             returns string[][]|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, status]);
         http:Response response = check self.salesforceClient->get(path);
@@ -691,16 +651,17 @@ public isolated client class Client {
             return result;
         } else {
             json responsePayload = check response.getJsonPayload();
-            return error("Error occurred while retrieving the bulk job status. " + responsePayload.toString());
+            return error("Error occurred while retrieving the bulk job status. ", 
+                httpCode = response.statusCode, details = responsePayload);
         }
 
     }
 
     # Get query job results
     # + bulkJobId - Id of the bulk job
-    #
     # + return - string[][] if successful else `error`
-    isolated remote function getQueryResult(string bulkJobId) 
+    @display {label: "Get Query Job Results"}
+    isolated remote function getQueryResult(string bulkJobId)
             returns string[][]|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
         http:Response response = check self.salesforceClient->get(path);
@@ -713,7 +674,8 @@ public isolated client class Client {
             return result;
         } else {
             json responsePayload = check response.getJsonPayload();
-            return error("Error occurred while retrieving the query job results. " + responsePayload.toString());
+            return error("Error occurred while retrieving the query job results. ", 
+                httpCode = response.statusCode, details = responsePayload);
         }
 
     }
@@ -723,14 +685,11 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful else `error`
-    isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
+    @display {label: "Abort Job"}
+    isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
-        record{} payload = {"state" : "Aborted"};
-        http:Response response = check self.salesforceClient->patch(path, payload);
-        if response.statusCode != 200 {
-            return error("Error occurred while aborting the bulk job. " + 
-                (check response.getJsonPayload()).toString());
-        }
+        record {} payload = {"state": "Aborted"};
+        return check self.salesforceClient->patch(path, payload);
     }
 
     # Delete a bulkv2 job.
@@ -738,37 +697,34 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful else `error`
+    @display {label: "Delete Job"}
     isolated remote function deleteJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
-        http:Response response = check self.salesforceClient->delete(path);
-        if response.statusCode != 204 {
-            return error("Error occurred while deleting the bulk job. " + 
-                (check response.getJsonPayload()).toString());
-        }
+        return check self.salesforceClient->delete(path);
     }
 
     # Notifies Salesforce servers that the upload of job data is complete
     # + bulkJobId - Id of the bulk job
     # + return - error?
+    @display {label: "Close Job"}
     isolated remote function closeJob(string bulkJobId) returns error|future<BulkJobInfo|error> {
         final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
-        record{} payload = {"state" : "UploadComplete"};
+        record {} payload = {"state": "UploadComplete"};
         http:Response response = check self.salesforceClient->patch(path, payload);
         if response.statusCode != 200 {
-            return error("Error occurred while closing the bulk job. " + 
-                (check response.getJsonPayload()).toString());
+            return error("Error occurred while closing the bulk job. ", httpCode = response.statusCode);
         }
         worker A returns BulkJobInfo|error {
             while true {
                 runtime:sleep(2);
                 http:Response jobStatus = check self.salesforceClient->get(path);
                 if jobStatus.statusCode != 200 {
-                    return error("Error occurred while checking the status of the bulk job. " + 
-                        (check jobStatus.getJsonPayload()).toString());
+                    return error("Error occurred while checking the status of the bulk job. ",
+                        httpCode = jobStatus.statusCode);
                 } else {
                     json responsePayload = check jobStatus.getJsonPayload();
                     BulkJobInfo jobInfo = check responsePayload.cloneWithType(BulkJobInfo);
-                    if jobInfo.state == "JobComplete" || jobInfo.state == "Failed" || jobInfo.state == "Aborted" {
+                    if jobInfo.state == JOB_COMPLETE || jobInfo.state == FAILED || jobInfo.state == ABORTED {
                         return jobInfo;
                     }
                 }
@@ -778,5 +734,4 @@ public isolated client class Client {
     }
 
 }
-
 

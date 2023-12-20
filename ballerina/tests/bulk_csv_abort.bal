@@ -13,7 +13,6 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
 import ballerina/log;
 import ballerina/test;
 
@@ -24,22 +23,21 @@ function abortAndDeleteJob() returns error? {
     log:printInfo("baseClient -> deleteCsv");
     //create job
     BulkCreatePayload payload = {
-        'object : "Contact",
-        contentType : "CSV",
-        operation : "delete",
-        lineEnding : "LF"
+        'object: "Contact",
+        contentType: "CSV",
+        operation: "delete",
+        lineEnding: "LF"
     };
     BulkJob abortJob = check baseClient->createJob(payload, INGEST);
 
     log:printInfo("baseClient -> abortJob");
-    error? abortJobError = baseClient->abortJob(abortJob.id, INGEST);
-    if abortJobError is error {
-        test:assertFail(msg = abortJobError.message());
+    BulkJobInfo|error abortJobInfo = baseClient->abortJob(abortJob.id, INGEST);
+    if abortJobInfo is error {
+        test:assertFail(msg = abortJobInfo.message());
     }
     log:printInfo("baseClient -> deleteJob");
     error? deleteJobError = baseClient->deleteJob(abortJob.id, INGEST);
     if deleteJobError is error {
         test:assertFail(msg = deleteJobError.message());
     }
-
 }
