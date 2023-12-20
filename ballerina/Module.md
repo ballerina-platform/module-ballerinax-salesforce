@@ -87,7 +87,11 @@ The `salesforce` connector provides practical examples illustrating usage in var
 
 2. [SOAP API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/soap_api_usecases) - Contains examples for the salesforce SOAP API usescases.
 
-3. [BULK API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulk_api_usecases) - Contains examples for the salesforce BULK API usescases.
+3. [BULK API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulk_api_usecases) - Contains examples for the salesforce Bulk API usescases.
+
+4. [BULKV2 API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulkv2_api_usecases) - Contains examples for the salesforce Bulk V2 API usescases.
+
+5. [APEX REST API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/apex_rest_api_usecases) - Contains examples for the salesforce APEX REST API usescases.
 
 
 ## Report Issues
