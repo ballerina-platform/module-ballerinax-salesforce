@@ -7,10 +7,13 @@ This module supports [Salesforce v59.0 REST API](https://developer.salesforce.co
 
 1. Create a Salesforce account with the REST capability.
 2. Go to Setup --> Apps --> App Manager 
-  ![Setup Side Panel](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/side-panel.png)
+  ![Setup Side Panel](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/side-panel.png)
 3. Create a New Connected App
+![Create Connected Apps](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/create-connected-apps.png)
   - Here we will be using https://test.salesforce.com as we are using sandbox enviorenment. Users can use https://login.salesforce.com for normal usage
+  ![Create Connected Apps](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/create_connected%20_app.png)
 4. After the creation user can get consumer key and secret through clicking on the `Manage Consume Details` button.
+![Consumer Secrets](https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/crdentials.png)
 5. Next step would be to get the token.
   - Log in to salesforce in your prefered browser and enter the following url 
   `https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/authorize?response_type=code&client_id=<CONSUMER_KEY>&redirect_uri=<REDIRECT_URL>`
