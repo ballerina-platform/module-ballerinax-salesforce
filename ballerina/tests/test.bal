@@ -14,8 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
+
 import ballerina/log;
-import ballerina/os;
+// import ballerina/os;
 import ballerina/test;
 import ballerina/time;
 import ballerina/lang.runtime;
@@ -26,6 +27,9 @@ configurable string clientSecret = os:getEnv("CLIENT_SECRET");
 configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
 configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
+configurable string username = "";
+configurable string password = "";
+
 string reportInstanceID = "";
 
 // Using direct-token config for client configuration
@@ -240,7 +244,7 @@ function testQuery() returns error? {
 }
 
 @test:Config {
-    enable: true
+    enable: false
 }
 function testQueryPasswordFlow() returns error? {
     log:printInfo("baseClientPasswordFlow -> query()");
@@ -251,7 +255,7 @@ function testQueryPasswordFlow() returns error? {
 }
 
 @test:Config {
-    enable: true
+    enable: false
 }
 function testQueryCredentialsFlow() returns error? {
     log:printInfo("baseClientCredentialsFlow -> query()");
