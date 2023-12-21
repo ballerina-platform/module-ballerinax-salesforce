@@ -157,7 +157,7 @@ function insertCsvFromFile() returns error? {
 function insertCsvStringArrayFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
 
-    string csvContactsFilePath = "tests/resources/contacts2.csv";
+    string csvContactsFilePath = "ballerina/tests/resources/contacts2.csv";
 
     //create job
     BulkCreatePayload payload = {
@@ -225,7 +225,7 @@ function insertCsvStringArrayFromFile() returns error? {
 function insertCsvStreamFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStreamFromFile");
 
-    string csvContactsFilePath = "tests/resources/contacts3.csv";
+    string csvContactsFilePath = "ballerina/tests/resources/contacts3.csv";
 
     stream<string[], io:Error?> csvStream = check io:fileReadCsvAsStream(csvContactsFilePath);
     //create job
