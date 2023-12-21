@@ -401,7 +401,7 @@ function insertCsvStringArrayFromFile() returns error? {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|json|xml|string batchRequest = baseClient->getBatchRequest(insertJob, batchId);
             if batchRequest is string {
-                test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
+                test:assertTrue(checkCsvResult(batchRequest) == 3, msg = "Retrieving batch request failed.");
                 break;
             } else if batchRequest is error {
                 if currentRetry != maxIterations {
