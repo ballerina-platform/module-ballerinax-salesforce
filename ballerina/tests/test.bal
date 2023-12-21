@@ -65,8 +65,8 @@ ConnectionConfig sfConfigCredentialsFlow = {
 };
 
 Client baseClient = check new (sfConfigRefreshCodeFlow);
-Client baseClientPasswordFlow = check new (sfConfigPasswordFlow);
-Client baseClientCredentialsFlow = check new (sfConfigCredentialsFlow);
+// Client baseClientPasswordFlow = check new (sfConfigPasswordFlow);
+// Client baseClientCredentialsFlow = check new (sfConfigCredentialsFlow);
 
 public type Account record {
     string Id?;
@@ -243,27 +243,27 @@ function testQuery() returns error? {
     }
 }
 
-@test:Config {
-    enable: false
-}
-function testQueryPasswordFlow() returns error? {
-    log:printInfo("baseClientPasswordFlow -> query()");
-    stream<Account, error?> queryResult = 
-        check baseClientPasswordFlow->query("SELECT name FROM Account");
-    int count = check countStream(queryResult);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
-}
+// @test:Config {
+//     enable: false
+// }
+// function testQueryPasswordFlow() returns error? {
+//     log:printInfo("baseClientPasswordFlow -> query()");
+//     stream<Account, error?> queryResult = 
+//         check baseClientPasswordFlow->query("SELECT name FROM Account");
+//     int count = check countStream(queryResult);
+//     test:assertTrue(count > 0, msg = "Found 0 search records!");
+// }
 
-@test:Config {
-    enable: false
-}
-function testQueryCredentialsFlow() returns error? {
-    log:printInfo("baseClientCredentialsFlow -> query()");
-    stream<Account, error?> queryResult = 
-        check baseClientCredentialsFlow->query("SELECT name FROM Account");
-    int count = check countStream(queryResult);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
-}
+// @test:Config {
+//     enable: false
+// }
+// function testQueryCredentialsFlow() returns error? {
+//     log:printInfo("baseClientCredentialsFlow -> query()");
+//     stream<Account, error?> queryResult = 
+//         check baseClientCredentialsFlow->query("SELECT name FROM Account");
+//     int count = check countStream(queryResult);
+//     test:assertTrue(count > 0, msg = "Found 0 search records!");
+// }
 
 
 @test:Config {
