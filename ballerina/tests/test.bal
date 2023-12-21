@@ -16,7 +16,7 @@
 
 
 import ballerina/log;
-// import ballerina/os;
+import ballerina/os;
 import ballerina/test;
 import ballerina/time;
 import ballerina/lang.runtime;
