@@ -16,7 +16,6 @@
 
 import ballerina/io;
 import ballerina/log;
-import ballerina/regex;
 import ballerinax/salesforce.bulk;
 import ballerinax/salesforce;
 import ballerina/os;
@@ -97,7 +96,7 @@ public function main() returns error? {
         //get batch request
         var batchRequest = bulkClient->getBatchRequest(insertJob, batchId);
         if batchRequest is string {
-            string message = (regex:split(batchRequest, "\n")).length() > 0 ? "Batch Request Received Successfully" : "Failed to Retrieve Batch Request";
+            string message = (re `\n`.split(batchRequest)).length() > 0 ? "Batch Request Received Successfully" : "Failed to Retrieve Batch Request";
             log:printInfo(message);
 
         } else if batchRequest is error {

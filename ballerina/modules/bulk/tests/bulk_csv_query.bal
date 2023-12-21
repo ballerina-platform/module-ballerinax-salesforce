@@ -123,8 +123,8 @@ function queryCsv() returns error? {
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(queryJob, batchId);
         if batchResult is string {
-            if checkCsvResult(batchResult) == 6 {
-                test:assertTrue(checkCsvResult(batchResult) == 6, msg = "Retrieving batch result failed.");
+            if checkCsvResult(batchResult) == 7 {
+                test:assertTrue(checkCsvResult(batchResult) == 7, msg = "Retrieving batch result failed.");
                 break;
             } else {
                 if currentRetry != maxIterations {

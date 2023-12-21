@@ -1,6 +1,6 @@
-// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -390,7 +390,7 @@ function testApiVersions() {
 }
 function testgetDeleted() {
     log:printInfo("baseClient -> getDeletedRecords()");
-    DeletedRecordsResult|error deletedRecords = baseClient->getDeleted("Account", time:utcToCivil(time:utcNow()),
+    DeletedRecordsResult|error deletedRecords = baseClient->getDeletedRecords("Account", time:utcToCivil(time:utcNow()),
         time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
 
     if deletedRecords !is DeletedRecordsResult {
@@ -403,7 +403,7 @@ function testgetDeleted() {
 }
 function testgetUpdated() {
     log:printInfo("baseClient -> getUpdatedRecords()");
-    UpdatedRecordsResults|error updatedRecords = baseClient->getUpdated("Account", time:utcToCivil(time:utcNow()),
+    UpdatedRecordsResults|error updatedRecords = baseClient->getUpdatedRecords("Account", time:utcToCivil(time:utcNow()),
         time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
     if updatedRecords !is UpdatedRecordsResults {
         test:assertFail(msg = updatedRecords.message());
@@ -415,7 +415,7 @@ function testgetUpdated() {
 }
 function testgetPasswordInfo() returns error? {
     log:printInfo("baseClient -> getPasswordInfo()");
-    boolean _ = check baseClient->getPasswordInfo("0055g00000J48In");
+    boolean _ = check baseClient->isPasswordExpired("0055g00000J48In");
 }
 
 @test:Config {
@@ -438,7 +438,7 @@ function testResetPassword() returns error? {
 function testSetPassword() returns error? {
     log:printInfo("baseClient -> changePassword()");
     string newPassword = "";
-    error? response = baseClient->changePassword("", newPassword.toBytes());
+    error? response = baseClient->changePassword("", newPassword);
     if response !is () {
         test:assertFail(msg = response.message());
     }

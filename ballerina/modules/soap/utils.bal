@@ -16,7 +16,6 @@
 
 import ballerina/http;
 import ballerina/lang.'boolean as booleanLib;
-import ballerina/regex;
 import ballerinax/salesforce;
 
 isolated function buildXMLPayload(string sessionId, LeadConvert convert) returns string|error {
@@ -161,5 +160,5 @@ isolated function getSessionId(http:ClientOAuth2Handler|http:ClientBearerTokenAu
     } else if clientHandler is http:ClientBearerTokenAuthHandler {
         authorizationHeaderMap = check clientHandler.getSecurityHeaders();
     }
-    return (regex:split(<string>authorizationHeaderMap[AUTHORIZATION], " "))[1];
+    return (re ` `.split(<string>authorizationHeaderMap[AUTHORIZATION]))[1];
 }
