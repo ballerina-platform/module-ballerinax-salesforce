@@ -75,7 +75,8 @@ public type ConnectionConfig record {|
     # The Salesforce endpoint URL
     string baseUrl;
     # Configurations related to client authentication
-    http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig auth;
+    http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig|
+        config:OAuth2PasswordGrantConfig|config:OAuth2ClientCredentialsGrantConfig auth;
 |};
 
 # Defines the Salesforce version type.

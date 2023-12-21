@@ -16,8 +16,8 @@
 
 import ballerina/log;
 import ballerinax/salesforce.bulk;
-import ballerinax/salesforce;
 import ballerina/os;
+import ballerinax/salesforce;
 
 // Create Salesforce client configuration by reading from environemnt.
 configurable string clientId = os:getEnv("CLIENT_ID");
@@ -27,7 +27,7 @@ configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
 
 // Using direct-token config for client configuration
-salesforce:ConnectionConfig sfConfig = {
+bulk:ConnectionConfig bulkConfig = {
     baseUrl,
     auth: {
         clientId,
@@ -38,8 +38,8 @@ salesforce:ConnectionConfig sfConfig = {
 };
 
 // Create Salesforce client.
-salesforce:Client baseClient = check new (sfConfig);
-bulk:Client bulkClient = check new (sfConfig);
+salesforce:Client baseClient = check new (bulkConfig);
+bulk:Client bulkClient = check new (bulkConfig);
 
 public function main() returns error? {
 
