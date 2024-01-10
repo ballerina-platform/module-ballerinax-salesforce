@@ -49,7 +49,7 @@ public function main() returns error? {
         operation : "insert",
         lineEnding : "LF"
     };
-    error|salesforce:BulkJob insertJob = baseClient->createJob(payload, "ingest");
+    error|salesforce:BulkJob insertJob = baseClient->createIngestJob(payload);
 
     if insertJob is salesforce:BulkJob {
         string[][] csvContent = check io:fileReadCsv(csvContactsFilePath);
@@ -65,7 +65,7 @@ public function main() returns error? {
         }
         runtime:sleep(5);
         //close job
-        future<salesforce:BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
+        future<salesforce:BulkJobInfo|error> closedJob = check baseClient->closeIngestJobAndWait(insertJob.id);
         salesforce:BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is error {
             io:println("Error occurred while closing job: ", closedJobInfo.message());
