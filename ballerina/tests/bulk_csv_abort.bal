@@ -28,7 +28,7 @@ function abortAndDeleteJob() returns error? {
         operation: "delete",
         lineEnding: "LF"
     };
-    BulkJob abortJob = check baseClient->createJob(payload, INGEST);
+    BulkJob abortJob = check baseClient->createIngestJob(payload);
 
     log:printInfo("baseClient -> abortJob");
     BulkJobInfo|error abortJobInfo = baseClient->abortJob(abortJob.id, INGEST);

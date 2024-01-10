@@ -38,7 +38,7 @@ function insertCsv() returns error? {
         operation: "insert",
         lineEnding: "LF"
     };
-    BulkJob insertJob = check baseClient->createJob(payload, INGEST);
+    BulkJob insertJob = check baseClient->createIngestJob(payload);
 
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
@@ -75,7 +75,7 @@ function insertCsv() returns error? {
 
     //close job
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
+        future<BulkJobInfo|error> closedJob = check baseClient->closeIngestJobAndWait(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");
@@ -104,7 +104,7 @@ function insertCsvFromFile() returns error? {
         operation: "insert",
         lineEnding: "LF"
     };
-    error|BulkJob insertJob = baseClient->createJob(payload, INGEST);
+    error|BulkJob insertJob = baseClient->createIngestJob(payload);
 
     if insertJob is BulkJob {
         string[][] csvContent = check io:fileReadCsv(csvContactsFilePath);
@@ -134,8 +134,9 @@ function insertCsvFromFile() returns error? {
         }
         runtime:sleep(10);
         //close job
-        future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
-        BulkJobInfo|error closedJobInfo = wait closedJob;
+        BulkJobCloseInfo closedJob = check baseClient->closeIngestJob(insertJob.id);
+        runtime:sleep(15);
+        BulkJobInfo|error closedJobInfo = baseClient->getJobInfo(insertJob.id, INGEST);
         if closedJobInfo is BulkJobInfo {
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");
         } else {
@@ -166,7 +167,7 @@ function insertCsvStringArrayFromFile() returns error? {
         operation: "insert",
         lineEnding: "LF"
     };
-    error|BulkJob insertJob = baseClient->createJob(payload, INGEST);
+    error|BulkJob insertJob = baseClient->createIngestJob(payload);
 
     if insertJob is BulkJob {
         io:ReadableByteChannel|io:Error rbc = io:openReadableFile(csvContactsFilePath);
@@ -202,7 +203,7 @@ function insertCsvStringArrayFromFile() returns error? {
         }
         runtime:sleep(10);
         //close job
-        future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
+        future<BulkJobInfo|error> closedJob = check baseClient->closeIngestJobAndWait(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");
@@ -235,7 +236,7 @@ function insertCsvStreamFromFile() returns error? {
         operation: "insert",
         lineEnding: "LF"
     };
-    BulkJob insertJob = check baseClient->createJob(payload, INGEST);
+    BulkJob insertJob = check baseClient->createIngestJob(payload);
 
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
@@ -272,7 +273,7 @@ function insertCsvStreamFromFile() returns error? {
     runtime:sleep(10);
     //close job
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
+        future<BulkJobInfo|error> closedJob = check baseClient->closeIngestJobAndWait(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");

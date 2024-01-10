@@ -27,7 +27,7 @@ function deleteCSV() returns error? {
         operation: "delete",
         lineEnding: "LF"
     };
-    BulkJob insertJob = check baseClient->createJob(payload, INGEST);
+    BulkJob insertJob = check baseClient->createIngestJob(payload);
 
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
@@ -64,7 +64,7 @@ function deleteCSV() returns error? {
 
     //close job
     foreach int currentRetry in 1 ..< maxIterations + 1 {
-        future<BulkJobInfo|error> closedJob = check baseClient->closeJob(insertJob.id);
+        future<BulkJobInfo|error> closedJob = check baseClient->closeIngestJobAndWait(insertJob.id);
         BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is BulkJobInfo {
             test:assertTrue(closedJobInfo.state == "JobComplete", msg = "Closing job failed.");

@@ -33,7 +33,7 @@ function queryCsv() returns error? {
     };
 
     //create job
-    BulkJob queryJob = check baseClient->createJob(payloadq, QUERY);
+    BulkJob queryJob = check baseClient->createQueryJob(payloadq);
 
     //get batch result
     foreach int currentRetry in 1 ..< maxIterations + 1 {
@@ -61,5 +61,37 @@ function queryCsv() returns error? {
             }
         }
     }
+
+}
+
+
+@test:Config {
+    enable: true,
+    dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
+}
+function queryAndWaitCsv() returns error? {
+    runtime:sleep(delayInSecs);
+    log:printInfo("baseClient -> queryCsvWithWait");
+    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 03'";
+
+    BulkCreatePayload payloadq = {
+        operation : "query",
+        query : queryStr
+    };
+
+    //create job
+    future<BulkJobInfo|error> queryJob = check baseClient->createQueryJobAndWait(payloadq);
+    BulkJobInfo bulkJobInfo = check wait queryJob;
+
+    //get batch result
+    string[][]|error batchResult = baseClient->getQueryResult(bulkJobInfo.id);
+    if batchResult is string[][] {
+        if batchResult.length() == 7 {
+            test:assertTrue(batchResult.length() == 7, msg = "Retrieving batch result failed.");
+        }
+    } else if batchResult is error {
+        log:printWarn("getBatchResult Operation Failed!");
+        test:assertFail(msg = batchResult.message());
+    }    
 
 }
