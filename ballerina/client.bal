@@ -169,8 +169,7 @@ public isolated client class Client {
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
         }
-        json response = check self.salesforceClient->get(path);
-        return check response.fromJsonWithType(returnType);
+        return check self.salesforceClient->get(path);
     }
 
     # Creates records based on relevant object type sent with json record.
@@ -497,8 +496,7 @@ public isolated client class Client {
 
     private isolated function processInvokeActions(typedesc<record {}> returnType, string subContext, record {} payload) returns record {}|error {
         string path = utils:prepareUrl([API_BASE_PATH, ACTIONS]) + subContext;
-        json response = check self.salesforceClient->get(path);
-        return check response.cloneWithType(returnType);
+        return check self.salesforceClient->get(path);
     }
 
     # Delete record using external Id.
@@ -551,7 +549,7 @@ public isolated client class Client {
                 return error("Invalid Method");
             }
         }
-        if response.statusCode == 200 {
+        if response.statusCode == 200 || response.statusCode == 201 {
             if response.getContentType() == "" {
                 return;
             }
