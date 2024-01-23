@@ -1,6 +1,6 @@
-// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 LLC. licenses this file to you under the Apache License,
+// WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -128,20 +128,20 @@ public isolated client class Client {
 
     # Gets an object record by ID.
     #
-    # + sobject - sObject name 
+    # + sobjectName - sObject name 
     # + id - sObject ID
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - Record if successful or else `error`
     @display {label: "Get Record by ID"}
-    isolated remote function getById(string sobject, string id, typedesc<record {}> returnType = <>)
+    isolated remote function getById(string sobjectName, string id, typedesc<record {}> returnType = <>)
                                     returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordById"
     } external;
 
-    private isolated function processGetRecordById(typedesc<record {}> returnType, string sobject, string id,
+    private isolated function processGetRecordById(typedesc<record {}> returnType, string sobjectName, string id,
             string[] fields) returns record {}|error {
-        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, id]);
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName, id]);
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
         }
@@ -151,21 +151,21 @@ public isolated client class Client {
 
     # Gets an object record by external ID.
     #
-    # + sobject - sObject name 
+    # + sobjectName - sObject name 
     # + extIdField - External ID field name 
     # + extId - External ID value 
     # + returnType - The payload, which is expected to be returned after data binding.
     # + return - Record if successful or else `error`
     @display {label: "Get Record by External ID"}
-    isolated remote function getByExternalId(string sobject, string extIdField, string extId,
+    isolated remote function getByExternalId(string sobjectName, string extIdField, string extId,
             typedesc<record {}> returnType = <>) returns returnType|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor",
         name: "getRecordByExtId"
     } external;
 
-    private isolated function processGetRecordByExtId(typedesc<record {}> returnType, string sobject, string extIdField,
+    private isolated function processGetRecordByExtId(typedesc<record {}> returnType, string sobjectName, string extIdField,
             string extId, string[] fields) returns record {}|error {
-        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, extIdField, extId]);
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName, extIdField, extId]);
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
         }
@@ -175,14 +175,14 @@ public isolated client class Client {
     # Creates records based on relevant object type sent with json record.
     #
     # + sObjectName - sObject name value
-    # + sObjectRecord - Record to be inserted
+    # + sObject - Record to be inserted
     # + return - Creation response if successful or else `error`
     @display {label: "Create Record"}
-    isolated remote function create(string sObjectName, record {} sObjectRecord)
+    isolated remote function create(string sObjectName, record {} sObject)
                                     returns CreationResponse|error {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName]);
-        req.setJsonPayload(sObjectRecord.toJson());
+        req.setJsonPayload(sObject.toJson());
         return check self.salesforceClient->post(path, req);
     }
 
@@ -190,14 +190,14 @@ public isolated client class Client {
     #
     # + sObjectName - sObject name value
     # + id - sObject ID
-    # + sObjectRecord - Record to be updated
+    # + sObject - Record to be updated
     # + return - Empty response if successful `error`
     @display {label: "Update Record"}
-    isolated remote function update(string sObjectName, string id, record {} sObjectRecord)
+    isolated remote function update(string sObjectName, string id, record {} sObject)
                                     returns error? {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, id]);
-        req.setJsonPayload(sObjectRecord.toJson());
+        req.setJsonPayload(sObject.toJson());
         return check self.salesforceClient->patch(path, req);
     }
 
@@ -206,14 +206,14 @@ public isolated client class Client {
     # + sObjectName - sObject name value
     # + externalIdField - External ID field of an object
     # + externalId - External ID
-    # + sObjectRecord - Record to be upserted
+    # + sObject - Record to be upserted
     # + return - Empty response if successful or else `error`
     @display {label: "Upsert Record"}
     isolated remote function upsert(string sObjectName, string externalIdField, string externalId,
-            record {} sObjectRecord) returns error? {
+            record {} sObject) returns error? {
         http:Request req = new;
         string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, externalIdField, externalId]);
-        req.setJsonPayload(sObjectRecord.toJson());
+        req.setJsonPayload(sObject.toJson());
         return check self.salesforceClient->patch(path, req);
     }
 
@@ -456,9 +456,9 @@ public isolated client class Client {
         name: "getNamedLayouts"
     } external;
 
-    private isolated function processGetNamedLayouts(typedesc<record {}> returnType, string sobject, string layoutName
+    private isolated function processGetNamedLayouts(typedesc<record {}> returnType, string sobjectName, string layoutName
                                                     ) returns record {}|error {
-        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobject, DESCRIBE, NAMED_LAYOUTS, layoutName]);
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sobjectName, DESCRIBE, NAMED_LAYOUTS, layoutName]);
         json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
     }
@@ -501,13 +501,13 @@ public isolated client class Client {
 
     # Delete record using external Id.
     #
-    # + sObject - Name of the sObject
+    # + sObjectName - Name of the sObject
     # + externalId - Name of the external id field
     # + value - value of the external id field
     # + return - `()` if successful or else `error`
     @display {label: "Delete Record using External ID"}
-    isolated remote function deleteRecordsUsingExtId(string sObject, string externalId, string value) returns error? {
-        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObject, externalId, value]);
+    isolated remote function deleteRecordsUsingExtId(string sObjectName, string externalId, string value) returns error? {
+        string path = utils:prepareUrl([API_BASE_PATH, SOBJECTS, sObjectName, externalId, value]);
         return check self.salesforceClient->delete(path);
     }
 
