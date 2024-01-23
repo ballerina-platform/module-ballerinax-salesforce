@@ -29,7 +29,7 @@ Ballerina Salesforce connector supports [Salesforce v59.0 REST API](https://deve
 6. Get Access and Refresh tokens
  - following request can be sent to obtain the tokens
  ```curl -X POST https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/token?code=<CODE>&grant_type=authorization_code&client_id=<CONSUMER_KEY>&client_secret=<CONSUMER_SECRET>&redirect_uri=https://test.salesforce.com/``` 
- - tokens can be obtaind from the response
+ - tokens can be obtained from the response
 
 ## Prerequisites
 
