@@ -91,17 +91,17 @@ Following is an example on how to create a record using the connector.
 
 ## Examples
 
-The `salesforce` connector provides practical examples illustrating usage in various scenarios. Explore these [examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples), covering use cases like creation of  record, retrieving records, and managing describe sObjects.
+The `salesforce` integration samples illustrate its usage in various integration scenarios. Explore these examples below, covering the use of salesforce APIs in integrations.
 
-1. [REST API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/rest_api_usecases) - Contains examples for the salesforce REST API usescases.
+1. [Google Sheets new row to Salesforce contact](https://github.com/ballerina-guides/integration-samples/tree/main/gsheet-new-row-to-salesforce-new-contact) - This example creates new contacts in Salesforce using Google Sheets and Salesforce integration.
 
-2. [SOAP API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/soap_api_usecases) - Contains examples for the salesforce SOAP API usescases.
+2. [Salesforce new contact to Twilio SMS](https://github.com/ballerina-guides/integration-samples/tree/main/salesforce-new-contact-to-twilio-sms) - This example sends a Twilio SMS for every new Salesforce contact.
 
-3. [BULK API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulk_api_usecases) - Contains examples for the salesforce Bulk API usescases.
+3. [FTP B2B EDI message to Salesforce opportunity](https://github.com/ballerina-guides/integration-samples/tree/main/ftp-edi-message-to-salesforce-opportunity) - This sample reads EDI files from a given FTP location, converts those EDI messages to Ballerina records and creates a Salesforce opportunity for each EDI message.
 
-4. [BULKV2 API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulkv2_api_usecases) - Contains examples for the salesforce Bulk V2 API usescases.
+4. [Email Lead info into Salesforce using OpenAI](https://github.com/ballerina-guides/integration-samples/tree/main/gmail-to-salesforce-lead) - This sample creates a lead on Salesforce for each email marked with a specific label on Gmail using the OpenAI chat API to infer customer details.
 
-5. [APEX REST API examples](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/apex_rest_api_usecases) - Contains examples for the salesforce APEX REST API usescases.
+5. [Kafka message to Salesforce price book update](https://github.com/ballerina-guides/integration-samples/tree/main/kafka_salesforce_integration) - This example updates the product price in the Salesforce price book through Kafka and Salesforce integration.
 
 ## Report Issues
 
