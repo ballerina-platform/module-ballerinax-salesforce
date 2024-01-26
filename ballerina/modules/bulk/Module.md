@@ -21,7 +21,6 @@ import ballerinax/salesforce.bulk;
 ### Step 2: Create a new connector instance
 Create a `ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 ```ballerina
-
 configurable string clientId = ?;
 configurable string clientSecret = ?;
 configurable string refreshToken = ?;
@@ -47,7 +46,6 @@ bulk:Client bulkClient = new (sfConfig);
 Following is an example on how to insert bulk contacts using the connector.
 
 ```ballerina
-
 json contacts = [
     {
         description: "Created_from_Ballerina_Sf_Bulk_API",
