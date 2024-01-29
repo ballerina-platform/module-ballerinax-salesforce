@@ -46,16 +46,6 @@ For more information about configuration and operations, go to the module(s).
  ```curl -X POST https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/token?code=<CODE>&grant_type=authorization_code&client_id=<CONSUMER_KEY>&client_secret=<CONSUMER_SECRET>&redirect_uri=https://test.salesforce.com/``` 
  - tokens can be obtained from the response
 
-## Prerequisites
-
-Before using this connector in your Ballerina application, complete the following:
-
-1. Create [Salesforce account](https://developer.salesforce.com/signup)
-
-2. Obtain tokens  
-   - Client tokens - Follow the steps listed under [OAuth 2.0 Web Server Flow for Web App Integration](https://help.salesforce.com/articleView?id=sf.remoteaccess_oauth_web_server_flow.htm&type=5).
-   - Listener tokens - Follow the steps listed under [Reset Your Security Token](https://help.salesforce.com/articleView?id=sf.user_security_token.htm&type=5) generate secret key and follow the steps listed under [Subscription Channels](https://developer.salesforce.com/docs/atlas.en-us.224.0.change_data_capture.meta/change_data_capture/cdc_subscribe_channels.htm) to subscribe channels. 
-
 ## Quickstart
 
 To use the Salesforce connector in your Ballerina application, modify the .bal file as follows:
