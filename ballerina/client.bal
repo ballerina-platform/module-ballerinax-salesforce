@@ -776,7 +776,7 @@ public isolated client class Client {
     # Notifies Salesforce servers that the upload of job data is complete
     # 
     # + bulkJobId - Id of the bulk job
-    # + return - future<BulkJobInfo> if successful else `error`
+    # + return - BulkJobInfo if successful else `error`
     @display {label: "Close Job"}
     isolated remote function closeIngestJob(string bulkJobId) returns error|BulkJobCloseInfo {
         final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
