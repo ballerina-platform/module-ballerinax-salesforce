@@ -1,6 +1,6 @@
-// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 
 //Latest API Version
 # Constant field `API_VERSION`. Holds the value for the Salesforce API version.
-public const string API_VERSION = "v48.0";
+public const string API_VERSION = "v59.0";
 
 // For URL encoding
 # Constant field `ENCODING_CHARSET`. Holds the value for the encoding charset.
@@ -29,8 +29,35 @@ const string BASE_PATH = "/services/data";
 # Constant field `API_BASE_PATH`. Holds the value for the Salesforce API base path/URL.
 final string API_BASE_PATH = string `${BASE_PATH}/${API_VERSION}`;
 
+# Constant field `APEX_BASE_PATH`. Holds the value for the Salesforce Apex base path/URL.
+final string APEX_BASE_PATH = string `/services/apexrest`;
+
+# Constant field `QUICK_ACTIONS`. Holds the value quickActions for quick actions resource prefix.
+final string QUICK_ACTIONS = "quickActions";
+
 # Constant field `ANALYTICS`. Holds the value analytics for analytics resource prefix.
 const string ANALYTICS = "analytics";
+
+# Constant field `ACTIONS`. Holds the value actions for actions resource prefix.
+const string ACTIONS = "actions";
+
+# Constant field `NAMED_LAYOUTS`. Holds the value namedlayouts for layout resource prefix.
+const string NAMED_LAYOUTS = "namedLayouts";
+
+# Constant field `COMPOSITE`. Holds the value composite for composite resource prefix.
+const string COMPOSITE = "composite";
+
+# Constant field `BATCH`. Holds the value batch for batch resource prefix.
+const string BATCH = "batch";
+
+# Constant field `BATCHES`. Holds the value batches for bulk resource prefix.
+const string BATCHES = "batches";
+
+# Constant field `JOBS`. Holds the value jobs for bulk resource prefix.
+const string JOBS = "jobs";
+
+# Constant field `INGEST`. Holds the value ingest for bulk resource prefix.
+const string INGEST = "ingest";
 
 # Constant field `INSTANCES`. Holds the value instances for instances resource prefix.
 const string INSTANCES = "instances";
@@ -40,6 +67,18 @@ const string REPORTS = "reports";
 
 # Constant field `SOBJECTS`. Holds the value sobjects for get sobject resource prefix.
 const string SOBJECTS = "sobjects";
+
+# Constant field `PASSWORD`. Holds the value sobjects for get password resource prefix.
+const string PASSWORD = "password";
+
+# Constant field `USER`. Holds the value sobjects for get USER resource prefix.
+const string USER = "User";
+
+# Constant field `DELETED` Holds the value deleted for get deleted resource prefix.
+const string DELETED = "deleted";
+
+# Constant field `UPDATED` Holds the value updated for get updated resource prefix.
+const string UPDATED = "updated";
 
 # Constant field `LIMITS`. Holds the value limits for get limits resource prefix.
 const string LIMITS = "limits";
@@ -55,6 +94,9 @@ const string PLATFORM_ACTION = "PlatformAction";
 
 // Query param names
 const string QUERY = "query";
+
+// Result param names
+const string RESULT = "results";
 
 # Constant field `FIELDS`. Holds the value fields for resource prefix.
 const string FIELDS = "fields";
@@ -97,3 +139,6 @@ const string OPPORTUNITY = "Opportunity";
 
 # Constant field `PRODUCT`. Holds the value Product2 for product object.
 const string PRODUCT = "Product2";
+
+# Constant field `NEW_LINE`. Holds the value of "\n".
+const string NEW_LINE = "\n";

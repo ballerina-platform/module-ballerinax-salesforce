@@ -1,7 +1,7 @@
 // ************************************ Salesforce bulk client constants ***********************************************
 
 # Constant field `BULK_API_VERSION`. Holds the value for the Salesforce Bulk API version.
-const string BULK_API_VERSION = "48.0";
+const string BULK_API_VERSION = "59.0";
 
 # Constant field `SERVICES`. Holds the value of "services".
 const string SERVICES = "services";

@@ -1,6 +1,6 @@
-// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 import ballerina/log;
 import ballerinax/salesforce;
 import ballerina/os;
+import ballerina/lang.runtime;
 
 // Create Salesforce client configuration by reading from environemnt.
 configurable string clientId = os:getEnv("CLIENT_ID");
@@ -37,15 +38,22 @@ salesforce:ConnectionConfig sfConfig = {
 };
 
 public function main() returns error? {
-    // Create Salesforce client.
+    // Create Case using user defined APEX method
     salesforce:Client baseClient = check new (sfConfig);
 
-    record {}|error res = baseClient->getByExternalId("Contact", "My_External_Id__c", "102");
-
-    if res is record {} {
-        anydata recName = res["FirstName"];
-        log:printInfo("Account data received successfully. Account Name : " + recName.toString());
-    } else {
-        log:printError(msg = res.message());
+    string|error caseId = baseClient->apexRestExecute("Cases", "POST", 
+        {"subject" : "Bigfoot Sighting9!",
+            "status" : "New",
+            "origin" : "Phone",
+            "priority" : "Low"});
+    if caseId is error {
+        log:printError("Error occurred while creating the case. ");
+        return;
+    }
+    runtime:sleep(5);
+    record{}|error case = baseClient->apexRestExecute(string `Cases/${caseId}`, "GET", {});
+    if case is error {
+        log:printError("Error occurred while retrieving the case. ");
+        return;
     }
 }

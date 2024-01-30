@@ -17,7 +17,6 @@
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
-import ballerina/regex;
 import ballerina/os;
 import ballerinax/salesforce;
 
@@ -61,7 +60,7 @@ isolated function checkBatchResults(Result result) returns boolean {
 }
 
 isolated function checkCsvResult(string result) returns int {
-    string[] lineArray = regex:split(result, "\n");
+    string[] lineArray = re `\n`.split(result);
     int arrLength = lineArray.length();
     return arrLength - 1;
 }

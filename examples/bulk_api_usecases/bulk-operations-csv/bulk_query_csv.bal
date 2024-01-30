@@ -15,9 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerina/regex;
 import ballerinax/salesforce.bulk;
-import ballerinax/salesforce;
 import ballerina/os;
 
 // Create Salesforce client configuration by reading from environemnt.
@@ -28,7 +26,7 @@ configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
 
 // Using direct-token config for client configuration
-salesforce:ConnectionConfig sfConfig = {
+bulk:ConnectionConfig sfConfig = {
     baseUrl,
     auth: {
         clientId,
@@ -91,7 +89,7 @@ public function main() returns error? {
         //get batch result
         var batchResult = bulkClient->getBatchResult(queryJob, batchId);
         if batchResult is string {
-            string[] records = regex:split(batchResult, "\n");
+            string[] records = re `\n`.split(batchResult);
             log:printInfo("Number of Records Received :" + (records.length() - 1).toString());
 
         } else if batchResult is error {

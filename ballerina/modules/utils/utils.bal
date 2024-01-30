@@ -34,6 +34,31 @@ public isolated function prepareUrl(string[] paths) returns string {
     return url;
 }
 
+# Returns the prepared URL with query parameters.
+#
+# + path - Resource URL
+# + queryParameters - A map of query parameters
+# + return - The prepared URL
+public isolated function addQueryParameters(string path, map<string> queryParameters) returns string {
+    string url = path;
+    string queryUrl = EMPTY_STRING;
+
+    if queryParameters.keys().length() > 0 {
+        foreach string 'key in queryParameters.keys() {
+            if queryParameters['key] !is () {
+                if queryUrl != EMPTY_STRING {
+                    queryUrl = queryUrl + AMPERSAND;
+                }
+                queryUrl = queryUrl + 'key + "=" + <string>queryParameters['key];
+            }
+        }
+    }
+    if queryUrl != EMPTY_STRING {
+        url = url + QUESTION_MARK + queryUrl;
+    }
+    return url;
+}
+
 # Returns the prepared URL with encoded query.
 #
 # + paths - An array of paths prefixes
