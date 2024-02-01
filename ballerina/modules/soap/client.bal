@@ -25,10 +25,6 @@ import ballerinax/salesforce.utils;
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
 # + clientConfig - Configurations required to initialize the `Client`
-@display {
-    label: "Salesforce SOAP API Client",
-    iconPath: "resources/sfdc.svg"
-}
 public isolated client class Client {
     private final http:Client salesforceClient;
     private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
@@ -72,7 +68,7 @@ public isolated client class Client {
     # Convert lead to to account and contact
     #
     # + payload - Record represent convertLead paramaters
-    # + return - `ConvertedLead` or error
+    # + return - `ConvertedLead` or `error`
     isolated remote function convertLead(LeadConvert payload) returns ConvertedLead|error {
         string sessionId = check getSessionId(self.clientHandler);
         string xmlPayload = check buildXMLPayload(sessionId, payload);
