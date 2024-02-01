@@ -160,7 +160,7 @@ Used to list the resources available for the specified API version.
 # Lists the resources available for the specified API version.
 #
 # + apiVersion - API version (v37)
-# + return - `Resources` as map of strings if successful. Else, the occurred `error`.
+# + return - `Resources` as a map of string if successful. Else, the occurred `error`
 isolated remote function getResources(string apiVersion) returns map<string>|error 
 ```
 
