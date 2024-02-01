@@ -357,7 +357,7 @@ public isolated client class Client {
         return check self.salesforceClient->get(finalUrl);
     }
 
-    # Retrieves the list of individual records that have been deleted within the given timespan.
+    # Retrieves the list of individual records that have been updated within the given timespan.
     #
     # + sObjectName - SObject reference
     # + startDate - Start date of the timespan.
