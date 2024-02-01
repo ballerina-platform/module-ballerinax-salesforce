@@ -171,7 +171,7 @@ Used to list the Limits information for your organization.
 ``` ballerina
 # Lists the Limits information for your organization.
 #
-# + return - `OrganizationLimits` as map of `Limit` if successful. Else, the occurred `error`.
+# + return - `OrganizationLimits` as a map of `Limit` if successful. Else, the occurred `error`
 isolated remote function getLimits() returns map<Limit>|error
 ```
 
