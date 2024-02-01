@@ -231,7 +231,7 @@ Used to update records based on relevant object ID.
 # + sObjectName - sObject name value
 # + id - sObject ID
 # + sObject - Record to be updated
-# + return - Empty response if successful `error`
+# + return - Nil on success, else returns an error
 isolated remote function update(string sObjectName, string id, record {} sObject)
                                     returns error?
 ```
@@ -263,7 +263,7 @@ Used to delete existing records based on relevant object ID.
 # + sObjectName - SObject name value
 # + id - SObject ID
 # + return - Empty response if successful or else `error`
-isolated remote function delete( string sObjectName, string id) returns error? 
+isolated remote function delete(string sObjectName, string id) returns error? 
 ```
 
 #### [listReports](#listReports)
@@ -273,7 +273,7 @@ Used to list reports
 ``` ballerina
 # Lists reports.
 #
-# + return - Array of Report if successful or else `error`
+# + return - Array of `Report` if successful or else `error`
 isolated remote function listReports() returns Report[]|error
 ```
 
@@ -298,7 +298,7 @@ Used to delete existing report based on relevant report ID.
 # Deletes a report.
 #
 # + reportId - Report Id
-# + return - `()` if the report deletion is successful or else an error
+# + return - `Nil` if the report deletion is successful or else an error
 isolated remote function deleteReport(string reportId) returns error?
 ```
 
@@ -357,7 +357,7 @@ isolated remote function query(string soql, typedesc<record {}> returnType = <>)
 
 #### [search](#search)
 
-Used to executes the specified SOSL query.
+Used to execute the specified SOSL query.
 
 ``` ballerina
 # Executes the specified SOSL search.
@@ -499,7 +499,7 @@ Used to invoke actions.
 # Invoke Actions.
 #
 # + subContext - Sub context
-# + payload - payload for the action
+# + payload - Payload for the action
 # + returnType - The type of the returned variable
 # + return - record of `returnType` if successful or else `error`
 isolated remote function invokeActions(string subContext, record {} payload,
@@ -520,7 +520,7 @@ Used to delete record using external Id.
 isolated remote function deleteRecordsUsingExtId(string sObjectName, string externalId, string value) returns error?
 ```
 
-#### [deleteRecordsUsingExtId](#deleteRecordsUsingExtId)
+#### [apexRestExecute](#apexRestExecute)
 
 Used to access Salesforce APEX resources.
 
@@ -608,7 +608,7 @@ Used to get details of all the jobs.
 #
 # + jobType - Type of the job
 # + return - `AllJobs` record if successful or `error` if unsuccessful
-isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs
+isolated remote function getAllJobs(JobType? jobType = ()) returns AllJobs|error
 ```
 
 #### [getAllQueryJobs](#getAllQueryJobs)
