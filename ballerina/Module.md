@@ -10,19 +10,19 @@ Ballerina Salesforce connector supports [Salesforce v59.0 REST API](https://deve
 
 2. Go to Setup --> Apps --> App Manager 
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/setup/resources/side-panel.png alt="Setup Side Panel" width="50%">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/side-panel.png alt="Setup Side Panel" width="50%">
 
 3. Create a New Connected App
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" width="50%">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" width="50%">
 
   - Here we will be using https://test.salesforce.com as we are using sandbox enviorenment. Users can use https://login.salesforce.com for normal usage.
   
-      <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" width="50%">
+      <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" width="50%">
 
 4. After the creation user can get consumer key and secret through clicking on the `Manage Consume Details` button.
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/revamp-2023/docs/setup/resources/crdentials.png alt="Consumer Secrets" width="50%">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/crdentials.png alt="Consumer Secrets" width="50%">
 
 5. Next step would be to get the token.
   - Log in to salesforce in your prefered browser and enter the following url 
