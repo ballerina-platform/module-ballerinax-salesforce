@@ -70,10 +70,10 @@ public isolated client class Client {
     # Creates a bulk job.
     #
     # + operation - Type of operation like insert, delete, etc.
-    # + sobj - Type of sobject.
-    # + contentType - Content type of the job.
-    # + extIdFieldName - Field name of the external ID incase of an Upsert operation.
-    # + return - returns `BulkJob` record or `error`.
+    # + sobj - Type of sobject
+    # + contentType - Content type of the job
+    # + extIdFieldName - Field name of the external ID incase of an Upsert operation
+    # + return - returns `BulkJob` record or `error`
     isolated remote function createJob(Operation operation, string sobj, JobType contentType, string extIdFieldName = "")
                                         returns error|BulkJob {
         json jobPayload = {
@@ -104,8 +104,8 @@ public isolated client class Client {
 
     # Gets information about a job.
     #
-    # + bulkJob - `BulkJob` record of which the info is required.
-    # + return - `JobInfo` record or `error`.
+    # + bulkJob - `BulkJob` record of which the info is required
+    # + return - `JobInfo` record or `error`
     isolated remote function getJobInfo(BulkJob bulkJob)returns error|JobInfo {
         string jobId = bulkJob.jobId;
         JobType jobDataType = bulkJob.jobDataType;
@@ -125,8 +125,8 @@ public isolated client class Client {
 
     # Closes a job.
     #
-    # + bulkJob - `BulkJob` record to be closed.
-    # + return - `JobInfo` after the state change of the job.
+    # + bulkJob - `BulkJob` record to be closed
+    # + return - `JobInfo` after the state change of the job
     remote function closeJob(BulkJob bulkJob) returns error|JobInfo {
         string jobId = bulkJob.jobId;
         string path = utils:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, jobId]);
@@ -153,8 +153,8 @@ public isolated client class Client {
 
     # Adds batch to the job.
     #
-    # + bulkJob - `BulkJob` record.
-    # + content - Batch content.
+    # + bulkJob - `BulkJob` record
+    # + content - Batch content
     # + return - Batch info or `error`
     isolated remote function addBatch(BulkJob bulkJob,
                                     json|string|xml|string[][]|stream<string[], error?>|io:ReadableByteChannel content)
@@ -236,8 +236,8 @@ public isolated client class Client {
 
     # Gets all batches of the job.
     #
-    # + bulkJob - `BulkJob` record.
-    # + return - `BatchInfo[]` if success, else `error`.
+    # + bulkJob - `BulkJob` record
+    # + return - `BatchInfo[]` if success, else `error`
     isolated remote function getAllBatches(BulkJob bulkJob) returns error|BatchInfo[] {
         string path = utils:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
@@ -263,9 +263,9 @@ public isolated client class Client {
 
     # Gets the request payload of a batch.
     #
-    # + bulkJob - `BulkJob` record.
-    # + batchId - ID of the batch of which the request is required.
-    # + return - Batch content.
+    # + bulkJob - `BulkJob` record
+    # + batchId - ID of the batch of which the request is required
+    # + return - Batch content
     isolated remote function getBatchRequest(BulkJob bulkJob, string batchId) returns error|json|xml|string {
         string path = utils:prepareUrl([SERVICES, ASYNC, BULK_API_VERSION, JOB, bulkJob.jobId, BATCH, batchId, REQUEST]);
         map<string> headerMap = check getBulkApiHeaders(self.clientHandler);
@@ -292,7 +292,7 @@ public isolated client class Client {
 
     # Gets result of the records processed in a batch.
     #
-    # + bulkJob - `BulkJob` record.
+    # + bulkJob - `BulkJob` record
     # + batchId - Batch ID
     # + return - Result list
     isolated remote function getBatchResult(BulkJob bulkJob, string batchId)
