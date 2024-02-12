@@ -1,0 +1,8 @@
+[package]
+org = "integration_samples"
+name = "kafka_message_producer"
+version = "0.1.0"
+distribution = "2201.7.0"
+
+[build-options]
+observabilityIncluded = true

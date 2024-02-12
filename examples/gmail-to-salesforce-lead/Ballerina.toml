@@ -1,0 +1,8 @@
+[package]
+org = "integration_samples"
+name = "gmail_to_salesforce_lead"
+version = "0.1.0"
+distribution = "2201.7.0"
+
+[build-options]
+observabilityIncluded = true

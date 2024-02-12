@@ -19,7 +19,7 @@
 
 apply plugin: 'java-library'
 
-description = 'Ballerina - Salesforce Examples'
+description = 'Ballerina - Salesforce Test samples'
 
 def filePath = project.fileTree("${project.projectDir}")
 def examples = filePath.matching {

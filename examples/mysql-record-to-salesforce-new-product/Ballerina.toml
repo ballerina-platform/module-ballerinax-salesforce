@@ -1,0 +1,12 @@
+[package]
+org = "integration_samples"
+name = "mysql_record_to_sfdc_new_product"
+distribution = "2201.7.0"
+version = "0.1.0"
+[build-options]
+observabilityIncluded = true
+
+[[platform.java11.dependency]]
+groupId = "mysql"
+artifactId = "mysql-connector-java"
+version = "8.0.20"
