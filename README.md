@@ -25,31 +25,32 @@ For more information about configuration and operations, go to the module(s).
 
 2. Go to Setup --> Apps --> App Manager 
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/side-panel.png alt="Setup Side Panel" width="50%">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/side-panel.png alt="Setup Side Panel" width="40%" style="border:1px solid #000000">
 
-3. Create a New Connected App
+3. Create a New Connected App.
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" width="50%">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" width="50%" style="border:1px solid #000000">
 
-  - Here we will be using https://test.salesforce.com as we are using sandbox enviorenment. Users can use https://login.salesforce.com for normal usage.
-  
-      <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" width="50%">
+    - Here we will be using https://test.salesforce.com as we are using sandbox enviorenment. Users can use https://login.salesforce.com for normal usage.
+
+    <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" width="100%" style="border:1px solid #000000">
 
 4. After the creation user can get consumer key and secret through clicking on the `Manage Consume Details` button.
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/crdentials.png alt="Consumer Secrets" width="50%">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/crdentials.png alt="Consumer Secrets" width="100%" style="border:1px solid #000000">
 
 5. Next step would be to get the token.
-  - Log in to salesforce in your prefered browser and enter the following url 
+    - Log in to salesforce in your prefered browser and enter the following url.
   `https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/authorize?response_type=code&client_id=<CONSUMER_KEY>&redirect_uri=<REDIRECT_URL>`
-  - Allow access if an alert pops up and the browser will be redirected to a Url like follows.
+   - Allow access if an alert pops up and the browser will be redirected to a Url like follows.
   `https://login.salesforce.com/?code=<ENCODED_CODE>`
-  - the code can be obtained after decoding the encoded code
+  
+   - The code can be obtained after decoding the encoded code
 
 6. Get Access and Refresh tokens
- - following request can be sent to obtain the tokens
+   - Following request can be sent to obtain the tokens
  ```curl -X POST https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/token?code=<CODE>&grant_type=authorization_code&client_id=<CONSUMER_KEY>&client_secret=<CONSUMER_SECRET>&redirect_uri=https://test.salesforce.com/``` 
- - tokens can be obtained from the response
+   - Tokens can be obtained from the response.
 
 ## Quickstart
 
@@ -67,7 +68,7 @@ import ballerinax/salesforce;
 
 Create a `salesforce:ConnectionConfig` with the obtained OAuth2 tokens and initialize the connector with it.
 ```ballerina
-salesforce:ConnectionConfig sfConfig = {
+salesforce:ConnectionConfig config = {
     baseUrl: baseUrl,
     auth: {
         clientId: clientId,
@@ -77,7 +78,7 @@ salesforce:ConnectionConfig sfConfig = {
     }
 };
 
-salesforce:Client baseClient = new(sfConfig);
+salesforce:Client salesforce = new(config);
 ```
 
 #### Step 3: Invoke connector operation
@@ -87,31 +88,31 @@ salesforce:Client baseClient = new(sfConfig);
 Following is an example on how to create a record using the connector.
 
   ```ballerina
-  record{} accountRecord = {
-      "Name": "IT World",
-      "BillingCity": "Colombo 1"
-  };
-
-    salesforce:CreationResponse res = check 
-      baseClient->create("Account", accountRecord);
+  salesforce:CreationResponse res = check 
+      baseClient->create("Account", {
+                          "Name": "IT World",
+                          "BillingCity": "New York"
+                          });
 
   ```
 
-2. Use `bal run` command to compile and run the Ballerina program.
+2. Use following command to compile and run the Ballerina program.
+
+```
+bal run
+````
 
 ## Examples
 
 The `salesforce` integration samples illustrate its usage in various integration scenarios. Explore these examples below, covering the use of salesforce APIs in integrations.
 
-1. [Google Sheets new row to Salesforce contact](https://github.com/ballerina-guides/integration-samples/tree/main/gsheet-new-row-to-salesforce-new-contact) - This example creates new contacts in Salesforce using Google Sheets and Salesforce integration.
+1. [FTP B2B EDI message to Salesforce opportunity](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/ftp-edi-message-to-salesforce-opportunity) - This example reads EDI files from a given FTP location, converts those EDI messages to Ballerina records and creates a Salesforce opportunity for each EDI message.
 
-2. [Salesforce new contact to Twilio SMS](https://github.com/ballerina-guides/integration-samples/tree/main/salesforce-new-contact-to-twilio-sms) - This example sends a Twilio SMS for every new Salesforce contact.
+2. [Salesforce new contact to Twilio SMS](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/salesforce-new-contact-to-twilio-sms) - This example sends a Twilio SMS for every new Salesforce contact.
 
-3. [FTP B2B EDI message to Salesforce opportunity](https://github.com/ballerina-guides/integration-samples/tree/main/ftp-edi-message-to-salesforce-opportunity) - This sample reads EDI files from a given FTP location, converts those EDI messages to Ballerina records and creates a Salesforce opportunity for each EDI message.
+3. [Kafka message to Salesforce new Contact](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/kafka_salesforce_integration/kafka-salesforce-pricebook_update) - This example updates the product price in the Salesforce price book through Kafka and Salesforce integration.
 
-4. [Email Lead info into Salesforce using OpenAI](https://github.com/ballerina-guides/integration-samples/tree/main/gmail-to-salesforce-lead) - This sample creates a lead on Salesforce for each email marked with a specific label on Gmail using the OpenAI chat API to infer customer details.
-
-5. [Kafka message to Salesforce price book update](https://github.com/ballerina-guides/integration-samples/tree/main/kafka_salesforce_integration) - This example updates the product price in the Salesforce price book through Kafka and Salesforce integration.
+4. [Email Lead info into Salesforce using OpenAI](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/gmail-to-salesforce-lead) - This example creates a lead on Salesforce for each email marked with a specific label on Gmail using the OpenAI chat API to infer customer details.
 
 ## Report Issues
 
@@ -134,13 +135,13 @@ Execute the commands below to build from the source.
    ./gradlew build
    ```
 2. * To build the package:
-      ```   
-      bal build ./ballerina
-      ```
+    ```   
+   bal build ./ballerina
+   ```
    * To run tests after build:
-      ```
-      bal test ./ballerina
-      ```
+   ```
+   bal test ./ballerina
+   ```
 
 ### Build options
 
