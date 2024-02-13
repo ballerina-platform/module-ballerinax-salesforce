@@ -1,5 +1,5 @@
 [package]
-org = "integration_samples"
+org = "salesforce_examples"
 name = "ftp_edi_message_to_salesforce_opportunity"
 version = "0.1.0"
 distribution = "2201.7.0"

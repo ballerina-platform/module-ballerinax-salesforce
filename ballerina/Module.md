@@ -26,15 +26,17 @@ Ballerina Salesforce connector supports [Salesforce v59.0 REST API](https://deve
 
 5. Next step would be to get the token.
     - Log in to salesforce in your prefered browser and enter the following url.
-  `https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/authorize?response_type=code&client_id=<CONSUMER_KEY>&redirect_uri=<REDIRECT_URL>`
+  ```https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/authorize?response_type=code&client_id=<CONSUMER_KEY>&redirect_uri=<REDIRECT_URL>```
    - Allow access if an alert pops up and the browser will be redirected to a Url like follows.
-  `https://login.salesforce.com/?code=<ENCODED_CODE>`
+  
+      `https://login.salesforce.com/?code=<ENCODED_CODE>`
   
    - The code can be obtained after decoding the encoded code
 
 6. Get Access and Refresh tokens
-   - Following request can be sent to obtain the tokens
- ```curl -X POST https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/token?code=<CODE>&grant_type=authorization_code&client_id=<CONSUMER_KEY>&client_secret=<CONSUMER_SECRET>&redirect_uri=https://test.salesforce.com/``` 
+   - Following request can be sent to obtain the tokens.
+   
+      ```curl -X POST https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/token?code=<CODE>&grant_type=authorization_code&client_id=<CONSUMER_KEY>&client_secret=<CONSUMER_SECRET>&redirect_uri=https://test.salesforce.com/``` 
    - Tokens can be obtained from the response.
 
 ## Quickstart
