@@ -1,7 +1,7 @@
 # Specification: Ballerina Salesforce package
-_Owners_: @sahanHe \
-_Reviewers_: @daneshk \
-_Updated_: 2024/01/31 \
+_Authors_: @sahanHe \
+_Reviewers_: @daneshk, @Bhashinee \
+_Updated_: 2024/02/12 \
 _Edition_: Swan Lake  
 
 ## Introduction
