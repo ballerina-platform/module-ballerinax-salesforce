@@ -81,7 +81,7 @@ salesforce:Client salesforce = new(config);
 Following is an example on how to create a record using the connector.
 
   ```ballerina
-  salesforce:CreationResponse res = check 
+  salesforce:CreationResponse response = check 
       baseClient->create("Account", {
                           "Name": "IT World",
                           "BillingCity": "New York"
