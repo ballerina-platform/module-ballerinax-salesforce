@@ -17,14 +17,13 @@
 import ballerina/log;
 import ballerinax/salesforce.bulk;
 import ballerinax/salesforce;
-import ballerina/os;
 
 // Create Salesforce client configuration by reading from environemnt.
-configurable string clientId = os:getEnv("CLIENT_ID");
-configurable string clientSecret = os:getEnv("CLIENT_SECRET");
-configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
-configurable string refreshUrl = os:getEnv("REFRESH_URL");
-configurable string baseUrl = os:getEnv("EP_URL");
+configurable string clientId = ?;
+configurable string clientSecret = ?;
+configurable string refreshToken = ?;
+configurable string refreshUrl = ?;
+configurable string baseUrl = ?;
 
 // Using direct-token config for client configuration
 bulk:ConnectionConfig sfConfig = {
