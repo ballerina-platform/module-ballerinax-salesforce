@@ -16,6 +16,7 @@
  * under the License.
  */
 
+import org.apache.tools.ant.taskdefs.condition.Os
 
 apply plugin: 'java-library'
 
