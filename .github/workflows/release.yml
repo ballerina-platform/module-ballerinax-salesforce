@@ -17,3 +17,4 @@ jobs:
       additional-build-flags: "-x :salesforce-examples:build"
       additional-release-flags: "-x :salesforce-examples:build"
       additional-publish-flags: "-x :salesforce-examples:build"
+      
