@@ -1,6 +1,6 @@
 # Use REST API 
 
-This example demonstrates how to invoke REST API of Salesforce to create sObjects.
+This example demonstrates how to invoke REST API of Salesforce to update sObjects.
 
 ## Prerequisites
 

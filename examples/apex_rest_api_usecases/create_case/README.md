@@ -5,7 +5,7 @@ This example demonstrates how to invoke Bulk v2 API of Salesforce.
 ## Prerequisites
 
 ### 1. Set up
-Refer to the setup guide in [ReadMe](../../README.md) for necessary credentials.
+Refer to the setup guide in [ReadMe](../../../README.md) for necessary credentials.
 
 ### 2. Configuration
 
