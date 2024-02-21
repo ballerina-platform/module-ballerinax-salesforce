@@ -16,5 +16,5 @@ jobs:
     uses: ballerina-platform/ballerina-standard-library/.github/workflows/build-with-bal-test-graalvm-connector-template.yml@main
     secrets: inherit
     with:
-      additional-build-flags: "-x :salesforce-examples:build"\
+      additional-build-flags: "-x :salesforce-examples:build"
       
