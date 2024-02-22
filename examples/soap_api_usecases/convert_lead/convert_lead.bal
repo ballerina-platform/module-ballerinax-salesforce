@@ -17,7 +17,7 @@
 import ballerinax/salesforce.soap;
 import ballerina/log;
 
-// Create Salesforce client configuration by reading from environemnt.
+// Create Salesforce client configuration by reading from environment.
 configurable string clientId = ?;
 configurable string clientSecret = ?;
 configurable string refreshToken = ?;

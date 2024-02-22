@@ -12,14 +12,14 @@ Refer to the setup guide in [ReadMe](../../../README.md) for necessary credentia
 Configure Salesforce API credentials in Config.toml in the example directory:
 
 ```toml
-clientId = "<BASE_URL>"
+clientId = "<CLIENT_ID>"
 clientSecret = "<CLIENT_SECRET>"
 refreshToken = "<REFRESH_TOKEN>"
 refreshUrl = "<REFRESH_URL>"
 baseUrl = "<BASE_URL>"
 ```
 
-## Run the Example
+## Run the example
 
 Execute the following command to run the example:
 
