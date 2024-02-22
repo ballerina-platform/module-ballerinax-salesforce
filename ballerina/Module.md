@@ -82,7 +82,7 @@ Following is an example on how to create a record using the connector.
 
   ```ballerina
   salesforce:CreationResponse response = check 
-      baseClient->create("Account", {
+      salesforce->create("Account", {
                           "Name": "IT World",
                           "BillingCity": "New York"
                           });
