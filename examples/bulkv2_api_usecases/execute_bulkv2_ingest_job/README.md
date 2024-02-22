@@ -1,6 +1,6 @@
 # Use Bulk V2 API 
 
-This example demonstrates how to invoke APEX REST API of Salesforce.
+This example demonstrates how to invoke Bulk API v2 of Salesforce.
 
 ## Prerequisites
 
