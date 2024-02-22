@@ -1,5 +1,5 @@
 [package]
-org = "salsforce_exsamples"
+org = "salsforce_examples"
 name = "use_soap_api"
 version = "0.1.0"
 distribution = "2201.8.2"
