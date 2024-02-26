@@ -1,5 +1,5 @@
 [package]
-org = "salsforce_examples"
+org = "salesforce_examples"
 name = "use_bulk_delete"
 version = "0.1.0"
 distribution = "2201.8.2"
