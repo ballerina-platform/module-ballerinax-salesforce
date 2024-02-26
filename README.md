@@ -112,15 +112,15 @@ bal run
 
 ## Examples
 
-The `salesforce` integration samples illustrate its usage in various integration scenarios. Explore these examples below, covering the use of salesforce APIs in integrations.
+The `salesforce` connector provides practical examples illustrating usage in various scenarios. Explore these examples below, covering use cases like creating sObjects, retrieving records, and executing bulk operations.
 
-1. [FTP B2B EDI message to Salesforce opportunity](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/ftp-edi-message-to-salesforce-opportunity) - This example reads EDI files from a given FTP location, converts those EDI messages to Ballerina records and creates a Salesforce opportunity for each EDI message.
+1. [Salesforce REST API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/rest_api_usecases) - How to employ REST API of Salesforce to carryout varies tasks.
 
-2. [Salesforce new contact to Twilio SMS](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/salesforce-new-contact-to-twilio-sms) - This example sends a Twilio SMS for every new Salesforce contact.
+2. [Salesforce Bulk API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/bulk_api_usecases) - How to employ Bulk API of Salesforce to execute Bulk jobs.
 
-3. [Kafka message to Salesforce new Contact](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/kafka_salesforce_integration/kafka-salesforce-pricebook_update) - This example updates the product price in the Salesforce price book through Kafka and Salesforce integration.
+3. [Salesforce Bulk v2 API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/bulkv2_api_usecases) - How to employ Bulk v2 API to execute an ingest job.
 
-4. [Email Lead info into Salesforce using OpenAI](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/gmail-to-salesforce-lead) - This example creates a lead on Salesforce for each email marked with a specific label on Gmail using the OpenAI chat API to infer customer details.
+4. [Salesforce APEX REST API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/main/examples/apex_rest_api_usecases) - How to employ APEX REST API to create a case in Salesforce.
 
 ## Report Issues
 

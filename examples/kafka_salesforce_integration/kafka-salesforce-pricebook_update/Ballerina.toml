@@ -1,8 +1,0 @@
-[package]
-org = "salesforce_examples"
-name = "kafka_salesforce_pricebook_update"
-version = "0.1.0"
-distribution = "2201.7.0"
-
-[build-options]
-observabilityIncluded = true
