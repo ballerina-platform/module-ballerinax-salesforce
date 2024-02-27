@@ -16,10 +16,16 @@
  * under the License.
  */
 
+import org.apache.tools.ant.taskdefs.condition.Os
+
+plugins {
+    id 'io.ballerina.plugin'
+}
+
 description = 'Ballerina - Salesforce Ballerina Connector'
 
+def packageOrg = "ballerinax"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
-
 def ballerinaTomlFilePlaceHolder = new File("${project.rootDir}/build-config/resources/Ballerina.toml")
 def ballerinaTomlFile = new File("$project.projectDir/Ballerina.toml")
 
@@ -37,6 +43,14 @@ def stripBallerinaExtensionVersion(String extVersion) {
     }
 }
 
+ballerina {
+    packageOrganization = packageOrg
+    module = project.packageName
+    testCoverageParam = "--code-coverage --coverage-format=xml"
+    isConnector = true
+    platform = "any"
+}
+
 task updateTomlFiles {
     doLast {
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace('@project.version@', project.version.toString())
@@ -45,33 +59,44 @@ task updateTomlFiles {
     }
 }
 
-task build {
-    dependsOn ":${packageName}-native:build"
-    dependsOn updateTomlFiles
+task commitTomlFiles {
     doLast {
-        executeBalCommand ("build", "${project.projectDir}")
-        executeBalCommand ("pack", "${project.projectDir}")
-        executeBalCommand ("push --repository=local", "${project.projectDir}")
-
-        def centralDir = file("${System.getProperty('user.home')}/.ballerina/repositories/central.ballerina.io/")
-        def cacheDirs = centralDir.listFiles().findAll { it.isDirectory() && it.name.startsWith('cache-') }
-        delete cacheDirs
-
-        def destinationDir = new File("${System.getProperty('user.home')}/.ballerina/repositories/central.ballerina.io/bala/ballerinax/${project.packageName}")
-        if (destinationDir.exists()) {
-            delete destinationDir;
-        }
-
-        copy {
-            from "${System.getProperty('user.home')}/.ballerina/repositories/local/bala/ballerinax/${project.packageName}"
-            into destinationDir
+        project.exec {
+            ignoreExitValue true
+            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files\" Ballerina.toml Dependencies.toml"
+            } else {
+                commandLine 'sh', '-c', "git commit -m '[Automated] Update the toml files' Ballerina.toml Dependencies.toml"
+            }
         }
     }
 }
-task test {
-    dependsOn ":${packageName}-native:build"
-    dependsOn updateTomlFiles
-    doLast {
-        executeBalCommand ("test", "${project.projectDir}")
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact source: createArtifactZip, extension: 'zip'
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ballerina-platform/module-${packageOrg}-${project.packageName}")
+            credentials {
+                username = System.getenv("publishUser")
+                password = System.getenv("publishPAT")
+            }
+        }
     }
 }
+
+clean {
+    delete 'build'
+}
+
+
+build.dependsOn ":${project.packageName}-native:build"
+build.dependsOn "generatePomFileForMavenPublication"
+publishToMavenLocal.dependsOn build
+test.dependsOn ":${project.packageName}-native:build"
+publish.dependsOn build
