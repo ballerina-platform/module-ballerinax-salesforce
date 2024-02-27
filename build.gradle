@@ -79,3 +79,14 @@ task build {
     dependsOn("${project.packageName}-native:build")
     dependsOn("${project.packageName}-ballerina:build")
 }
+
+release {
+    buildTasks = ['build']
+    failOnSnapshotDependencies = true
+    versionPropertyFile = 'gradle.properties'
+    tagTemplate = 'v${version}'
+    git {
+        requireBranch = "release-${moduleVersion}"
+        pushToRemote = 'origin'
+    }
+}
