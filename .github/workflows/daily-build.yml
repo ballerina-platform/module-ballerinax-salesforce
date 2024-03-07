@@ -11,6 +11,6 @@ jobs:
     uses: ballerina-platform/ballerina-standard-library/.github/workflows/daily-build-connector-template.yml@main
     secrets: inherit
     with:
-      repo-name: module-ballerinax-sfdc
+      repo-name: module-ballerinax-salesforce
       
       
