@@ -61,7 +61,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.10.7"
+version = "2.10.8"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -377,7 +377,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "8.0.0"
+version = "8.0.1"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
