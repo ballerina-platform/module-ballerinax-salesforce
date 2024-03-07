@@ -16,4 +16,3 @@ jobs:
     secrets: inherit
     with:
       repo-name: module-ballerinax-salesforce
-      
