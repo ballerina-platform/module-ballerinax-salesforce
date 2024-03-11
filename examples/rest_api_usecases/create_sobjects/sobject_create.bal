@@ -15,8 +15,9 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce;
 import ballerina/os;
+import ballerinax/salesforce;
+import ballerinax/salesforce.types;
 
 // Create Salesforce client configuration by reading from environment.
 configurable string clientId = os:getEnv("CLIENT_ID");
@@ -40,9 +41,9 @@ public function main() returns error? {
     // Create Salesforce client.
     salesforce:Client baseClient = check new (sfConfig);
 
-    record{} accountRecord = {
-        "Name": "IT World",
-        "BillingCity": "Colombo 1"
+    types:AccountSObject accountRecord = {
+        Name: "Using types package",
+        BillingCity: "New York"
     };
 
     salesforce:CreationResponse|error res = baseClient->create("Account", accountRecord);
