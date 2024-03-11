@@ -8,7 +8,7 @@ license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["Sales & CRM/Customer Relationship Management", "Cost/Freemium"]
 icon = "icon.png"
-repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
+repository = "https://github.com/ballerina-platform/module-ballerinax-salesforce"
 
 [build-options]
 observabilityIncluded = true
