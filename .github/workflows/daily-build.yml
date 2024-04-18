@@ -12,3 +12,4 @@ jobs:
     secrets: inherit
     with:
       repo-name: module-ballerinax-salesforce
+      additional-build-flags: "-x :salesforce-examples:build"
