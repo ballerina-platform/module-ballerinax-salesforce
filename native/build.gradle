@@ -20,6 +20,7 @@ plugins {
     id 'com.github.spotbugs'
     id 'checkstyle'
     id 'jacoco'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 description = 'Ballerina - Salesforce Native'
@@ -30,7 +31,14 @@ configurations {
 
 dependencies {
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime"
-
+    shadow group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.8'
+    shadow group: 'org.cometd.java', name: 'cometd-java-client', version: '4.0.4'
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.9'
+    shadow group: 'org.json', name: 'json', version: '20210307'
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: project.ballerinaLangVersion
+    implementation(group: 'org.ballerinalang', name: 'ballerina-runtime', version: project.ballerinaLangVersion) {
+        transitive = false
+    }
     checkstyle project(":checkstyle")
     checkstyle "com.puppycrawl.tools:checkstyle:${checkstylePluginVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
@@ -75,6 +83,10 @@ spotbugsMain {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 spotbugsTest {
     enabled = false
 }
@@ -105,11 +117,8 @@ tasks.withType(Checkstyle) {
 spotbugsMain.finalizedBy validateSpotbugs
 checkstyleMain.dependsOn ':checkstyle:downloadCheckstyleRuleFiles'
 
-compileJava {
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
-    }
+shadowJar {
+    configurations = [project.configurations.shadow]
 }
+
+build.dependsOn(shadowJar)

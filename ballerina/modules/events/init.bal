@@ -21,5 +21,5 @@ function init() {
 }
 
 function setModule() = @java:Method {
-    'class: "io.ballerina.sfdc.ModuleUtils"
+    'class: "io.ballerinax.salesforce.ModuleUtils"
 } external;

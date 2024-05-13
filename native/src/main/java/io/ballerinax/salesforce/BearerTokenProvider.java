@@ -5,14 +5,14 @@
  * For full license text, see LICENSE.TXT file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Container for io.ballerina.sfdc.BayeuxParameters and the bearerToken.
- * Calls io.ballerina.sfdc.BayeuxParameters supplier in re-authentication scenarios.
+ * Container for io.ballerinax.salesforce.BayeuxParameters and the bearerToken.
+ * Calls io.ballerinax.salesforce.BayeuxParameters supplier in re-authentication scenarios.
  *
  * @author pbn-sfdc
  */

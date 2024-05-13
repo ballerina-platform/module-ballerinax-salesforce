@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ErrorCreator;
@@ -29,10 +29,10 @@ import java.util.function.Consumer;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.internal.values.ObjectValue;
 
-import static io.ballerina.sfdc.Constants.CHANNEL_NAME;
-import static io.ballerina.sfdc.Constants.CONSUMER_SERVICES;
-import static io.ballerina.sfdc.Constants.REPLAY_FROM;
-import static io.ballerina.sfdc.Constants.ENVIRONMENT;
+import static io.ballerinax.salesforce.Constants.CHANNEL_NAME;
+import static io.ballerinax.salesforce.Constants.CONSUMER_SERVICES;
+import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
+import static io.ballerinax.salesforce.Constants.ENVIRONMENT;
 import static org.cometd.bayeux.Channel.META_CONNECT;
 import static org.cometd.bayeux.Channel.META_DISCONNECT;
 import static org.cometd.bayeux.Channel.META_HANDSHAKE;

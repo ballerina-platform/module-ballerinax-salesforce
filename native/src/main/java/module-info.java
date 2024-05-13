@@ -16,7 +16,16 @@
  * under the License.
  */
 
- module io.ballerinax.salesforce {
+module io.ballerinax.salesforce {
+    requires java.xml;
     requires io.ballerina.runtime;
+    requires org.eclipse.jetty.util;
+    requires org.eclipse.jetty.client;
+    requires org.json;
+    requires com.google.gson;
+    requires com.fasterxml.jackson.databind;
+    requires org.cometd.bayeux;
+    requires org.cometd.client;
+    requires slf4j.api;
     exports io.ballerinax.salesforce;
 }

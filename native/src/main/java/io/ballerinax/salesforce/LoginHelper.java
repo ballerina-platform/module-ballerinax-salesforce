@@ -2,7 +2,7 @@
  * Copyright (c) 2016, salesforce.com, inc. All rights reserved. Licensed under the BSD 3-Clause license. For full
  * license text, see LICENSE.TXT file in the repo root or https://opensource.org/licenses/BSD-3-Clause
  */
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
@@ -21,8 +21,8 @@ import java.net.ConnectException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
-import static io.ballerina.sfdc.Constants.ENVIRONMENT;
-import static io.ballerina.sfdc.Constants.SANDBOX;
+import static io.ballerinax.salesforce.Constants.ENVIRONMENT;
+import static io.ballerinax.salesforce.Constants.SANDBOX;
 
 /**
  * A helper to obtain the Authentication bearer token via login
@@ -93,16 +93,16 @@ public class LoginHelper {
     // The enterprise SOAP API endpoint used for the login call
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT = "/services/Soap/u/44.0/";
 
-    public static io.ballerina.sfdc.BayeuxParameters login(String username, String password, ObjectValue listener) throws Exception {
+    public static BayeuxParameters login(String username, String password, ObjectValue listener) throws Exception {
         return login(new URL(getLoginEndpoint(listener.getNativeData(ENVIRONMENT).toString())), username, password);
     }
 
-    public static io.ballerina.sfdc.BayeuxParameters login(String username, String password, io.ballerina.sfdc.BayeuxParameters params) throws Exception {
+    public static BayeuxParameters login(String username, String password, BayeuxParameters params) throws Exception {
         return login(new URL(LOGIN_ENDPOINT), username, password, params);
     }
 
-    public static io.ballerina.sfdc.BayeuxParameters login(URL loginEndpoint, String username, String password) throws Exception {
-        return login(loginEndpoint, username, password, new io.ballerina.sfdc.BayeuxParameters() {
+    public static BayeuxParameters login(URL loginEndpoint, String username, String password) throws Exception {
+        return login(loginEndpoint, username, password, new BayeuxParameters() {
             @Override
             public String bearerToken() {
                 throw new IllegalStateException("Have not authenticated");
@@ -115,8 +115,8 @@ public class LoginHelper {
         });
     }
 
-    public static io.ballerina.sfdc.BayeuxParameters login(URL loginEndpoint, String username, String password,
-                                                           io.ballerina.sfdc.BayeuxParameters parameters) throws Exception {
+    public static BayeuxParameters login(URL loginEndpoint, String username, String password,
+                                         BayeuxParameters parameters) throws Exception {
         HttpClient client = new HttpClient(parameters.sslContextFactory());
         try {
             client.getProxyConfiguration().getProxies().addAll(parameters.proxies());
@@ -146,7 +146,7 @@ public class LoginHelper {
             String cometdEndpoint = Float.parseFloat(parameters.version()) < 37 ? COMETD_REPLAY_OLD : COMETD_REPLAY;
             URL replayEndpoint = new URL(soapEndpoint.getProtocol(), soapEndpoint.getHost(), soapEndpoint.getPort(),
                     new StringBuilder().append(cometdEndpoint).append(parameters.version()).toString());
-            return new io.ballerina.sfdc.DelegatingBayeuxParameters(parameters) {
+            return new DelegatingBayeuxParameters(parameters) {
                 @Override
                 public String bearerToken() {
                     return sessionId;

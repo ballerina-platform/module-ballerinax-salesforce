@@ -17,7 +17,7 @@
  *
  */
 
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 /**
  * Constants for sfdc trigger implementation

@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.TXT file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
@@ -37,7 +37,7 @@ public class EmpConnector {
     private static final String ERROR = "error";
     private static final String FAILURE = "failure";
 
-    private class SubscriptionImpl implements io.ballerina.sfdc.TopicSubscription {
+    private class SubscriptionImpl implements TopicSubscription {
         private final String topic;
         private final Consumer<Map<String, Object>> consumer;
 
@@ -83,10 +83,10 @@ public class EmpConnector {
             return String.format("Subscription [%s:%s]", getTopic(), getReplayFrom());
         }
 
-        Future<io.ballerina.sfdc.TopicSubscription> subscribe() {
+        Future<TopicSubscription> subscribe() {
             long replayFrom = getReplayFrom();
             ClientSessionChannel channel = client.getChannel(topic);
-            CompletableFuture<io.ballerina.sfdc.TopicSubscription> future = new CompletableFuture<>();
+            CompletableFuture<TopicSubscription> future = new CompletableFuture<>();
             channel.subscribe((c, message) -> consumer.accept(message.getDataAsMap()), (message) -> {
                 if (message.isSuccessful()) {
                     future.complete(this);
@@ -96,7 +96,7 @@ public class EmpConnector {
                         error = message.get(FAILURE);
                     }
                     future.completeExceptionally(
-                            new io.ballerina.sfdc.CannotSubscribe(parameters.endpoint(), topic, replayFrom, error != null ? error : message));
+                            new CannotSubscribe(parameters.endpoint(), topic, replayFrom, error != null ? error : message));
                 }
             });
             return future;
@@ -111,7 +111,7 @@ public class EmpConnector {
 
     private volatile BayeuxClient client;
     private final HttpClient httpClient;
-    private final io.ballerina.sfdc.BayeuxParameters parameters;
+    private final BayeuxParameters parameters;
     private final ConcurrentMap<String, Long> replay = new ConcurrentHashMap<>();
     private final AtomicBoolean running = new AtomicBoolean();
 
@@ -121,7 +121,7 @@ public class EmpConnector {
     private Function<Boolean, String> bearerTokenProvider;
     private AtomicBoolean reauthenticate = new AtomicBoolean(false);
 
-    public EmpConnector(io.ballerina.sfdc.BayeuxParameters parameters) {
+    public EmpConnector(BayeuxParameters parameters) {
         this.parameters = parameters;
         httpClient = new HttpClient(parameters.sslContextFactory());
         httpClient.getProxyConfiguration().getProxies().addAll(parameters.proxies());
@@ -151,7 +151,7 @@ public class EmpConnector {
             return;
         }
         if (client != null) {
-            log.info("Disconnecting Bayeux Client in io.ballerina.sfdc.EmpConnector");
+            log.info("Disconnecting Bayeux Client in io.ballerinax.salesforce.EmpConnector");
             client.disconnect();
             client = null;
         }
@@ -192,10 +192,10 @@ public class EmpConnector {
      *            - the replayFrom position in the event stream
      * @param consumer
      *            - the consumer of the events
-     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerina.sfdc.CannotSubscribe
+     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
      *         exception
      */
-    public Future<io.ballerina.sfdc.TopicSubscription> subscribe(String topic, long replayFrom, Consumer<Map<String, Object>> consumer) {
+    public Future<TopicSubscription> subscribe(String topic, long replayFrom, Consumer<Map<String, Object>> consumer) {
         if (!running.get()) {
             throw new IllegalStateException(String.format("Connector[%s} has not been started",
                     parameters.endpoint()));
@@ -233,10 +233,10 @@ public class EmpConnector {
      *            - the topic to subscribe to
      * @param consumer
      *            - the consumer of the events
-     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerina.sfdc.CannotSubscribe
+     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
      *         exception
      */
-    public Future<io.ballerina.sfdc.TopicSubscription> subscribeEarliest(String topic, Consumer<Map<String, Object>> consumer) {
+    public Future<TopicSubscription> subscribeEarliest(String topic, Consumer<Map<String, Object>> consumer) {
         return subscribe(topic, REPLAY_FROM_EARLIEST, consumer);
     }
 
@@ -247,10 +247,10 @@ public class EmpConnector {
      *            - the topic to subscribe to
      * @param consumer
      *            - the consumer of the events
-     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerina.sfdc.CannotSubscribe
+     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
      *         exception
      */
-    public Future<io.ballerina.sfdc.TopicSubscription> subscribeTip(String topic, Consumer<Map<String, Object>> consumer) {
+    public Future<TopicSubscription> subscribeTip(String topic, Consumer<Map<String, Object>> consumer) {
         return subscribe(topic, REPLAY_FROM_TIP, consumer);
     }
 
@@ -280,7 +280,7 @@ public class EmpConnector {
     }
 
     private Future<Boolean> connect() {
-        log.info("io.ballerina.sfdc.EmpConnector connecting");
+        log.info("io.ballerinax.salesforce.EmpConnector connecting");
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
         try {
@@ -305,7 +305,7 @@ public class EmpConnector {
 
         client = new BayeuxClient(parameters.endpoint().toExternalForm(), httpTransport);
 
-        client.addExtension(new io.ballerina.sfdc.ReplayExtension(replay));
+        client.addExtension(new ReplayExtension(replay));
 
         addListeners(client);
 

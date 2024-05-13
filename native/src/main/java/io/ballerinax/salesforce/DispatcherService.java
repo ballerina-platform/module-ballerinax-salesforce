@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -30,27 +30,27 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
-import static io.ballerina.sfdc.Constants.CHANGE_ORIGIN;
-import static io.ballerina.sfdc.Constants.COMMIT_NUMBER;
-import static io.ballerina.sfdc.Constants.COMMIT_TIME_STAMP;
-import static io.ballerina.sfdc.Constants.COMMIT_USER;
-import static io.ballerina.sfdc.Constants.CREATE;
-import static io.ballerina.sfdc.Constants.DELETE;
-import static io.ballerina.sfdc.Constants.ENTITY_NAME;
-import static io.ballerina.sfdc.Constants.EVENT_CHANGE_TYPE;
-import static io.ballerina.sfdc.Constants.EVENT_DATA_RECORD;
-import static io.ballerina.sfdc.Constants.EVENT_HEADER;
-import static io.ballerina.sfdc.Constants.EVENT_METADATA_RECORD;
-import static io.ballerina.sfdc.Constants.EVENT_PAYLOAD;
-import static io.ballerina.sfdc.Constants.ON_CREATE;
-import static io.ballerina.sfdc.Constants.ON_DELETE;
-import static io.ballerina.sfdc.Constants.ON_RESTORE;
-import static io.ballerina.sfdc.Constants.ON_UPDATE;
-import static io.ballerina.sfdc.Constants.RECORD_IDS;
-import static io.ballerina.sfdc.Constants.SEQUENCE_NUMBER;
-import static io.ballerina.sfdc.Constants.TRANSACTION_KEY;
-import static io.ballerina.sfdc.Constants.UNDELETE;
-import static io.ballerina.sfdc.Constants.UPDATE;
+import static io.ballerinax.salesforce.Constants.CHANGE_ORIGIN;
+import static io.ballerinax.salesforce.Constants.COMMIT_NUMBER;
+import static io.ballerinax.salesforce.Constants.COMMIT_TIME_STAMP;
+import static io.ballerinax.salesforce.Constants.COMMIT_USER;
+import static io.ballerinax.salesforce.Constants.CREATE;
+import static io.ballerinax.salesforce.Constants.DELETE;
+import static io.ballerinax.salesforce.Constants.ENTITY_NAME;
+import static io.ballerinax.salesforce.Constants.EVENT_CHANGE_TYPE;
+import static io.ballerinax.salesforce.Constants.EVENT_DATA_RECORD;
+import static io.ballerinax.salesforce.Constants.EVENT_HEADER;
+import static io.ballerinax.salesforce.Constants.EVENT_METADATA_RECORD;
+import static io.ballerinax.salesforce.Constants.EVENT_PAYLOAD;
+import static io.ballerinax.salesforce.Constants.ON_CREATE;
+import static io.ballerinax.salesforce.Constants.ON_DELETE;
+import static io.ballerinax.salesforce.Constants.ON_RESTORE;
+import static io.ballerinax.salesforce.Constants.ON_UPDATE;
+import static io.ballerinax.salesforce.Constants.RECORD_IDS;
+import static io.ballerinax.salesforce.Constants.SEQUENCE_NUMBER;
+import static io.ballerinax.salesforce.Constants.TRANSACTION_KEY;
+import static io.ballerinax.salesforce.Constants.UNDELETE;
+import static io.ballerinax.salesforce.Constants.UPDATE;
 
 /**
  * Dispatcher Service class to dispatch the event data obtained through the streaming API

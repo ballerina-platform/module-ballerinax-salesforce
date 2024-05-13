@@ -82,25 +82,25 @@ public class Listener {
 
 function initListener(Listener instance, handle replayFrom, handle channelName, handle environment) = 
 @java:Method {
-    'class: "io.ballerina.sfdc.ListenerUtil"
+    'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
 function attachService(Listener instance, RecordService s) returns error? =
 @java:Method {
-    'class: "io.ballerina.sfdc.ListenerUtil"
+    'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
 function startListener(handle username, handle password, Listener instance) returns error? =
 @java:Method {
-    'class: "io.ballerina.sfdc.ListenerUtil"
+    'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
 function detachService(Listener instance, RecordService s) returns error? =
 @java:Method {
-    'class: "io.ballerina.sfdc.ListenerUtil"
+    'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
 function stopListener() returns error? =
 @java:Method {
-    'class: "io.ballerina.sfdc.ListenerUtil"
+    'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;

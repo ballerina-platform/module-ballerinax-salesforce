@@ -5,7 +5,7 @@
  * For full license text, see LICENSE.TXT file in the repo root  or https://opensource.org/licenses/BSD-3-Clause
  */
 
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.util.ssl.SslContextFactory;

@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package io.ballerina.sfdc;
+package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Module;
