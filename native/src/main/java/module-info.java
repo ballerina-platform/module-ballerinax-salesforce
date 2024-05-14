@@ -26,6 +26,6 @@ module io.ballerinax.salesforce {
     requires com.fasterxml.jackson.databind;
     requires org.cometd.bayeux;
     requires org.cometd.client;
-    requires slf4j.api;
+    requires org.slf4j;
     exports io.ballerinax.salesforce;
 }

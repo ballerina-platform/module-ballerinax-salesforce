@@ -30,6 +30,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
+ * Connector utils class.
+ *
  * @author hal.hildebrand
  * @since API v37.0
  */
@@ -66,7 +68,7 @@ public class EmpConnector {
          */
         @Override
         public long getReplayFrom() {
-            return replay.getOrDefault(topicWithoutQueryString(topic), REPLAY_FROM_EARLIEST);
+            return replay.getOrDefault(topicWithoutQueryString(topic), replayFromEarliest);
         }
 
         /*
@@ -96,17 +98,18 @@ public class EmpConnector {
                         error = message.get(FAILURE);
                     }
                     future.completeExceptionally(
-                            new CannotSubscribe(parameters.endpoint(), topic, replayFrom, error != null ? error : message));
+                            new CannotSubscribe(parameters.endpoint(), topic, replayFrom,
+                                    error != null ? error : message));
                 }
             });
             return future;
         }
     }
 
-    public static long REPLAY_FROM_EARLIEST = -2L;
-    public static long REPLAY_FROM_TIP = -1L;
+    public static long replayFromEarliest = -2L;
+    public static long replayFromTip = -1L;
 
-    private static String AUTHORIZATION = "Authorization";
+    private static String authorization = "Authorization";
     private static final Logger log = LoggerFactory.getLogger(EmpConnector.class);
 
     private volatile BayeuxClient client;
@@ -129,6 +132,7 @@ public class EmpConnector {
 
     /**
      * Start the connector.
+     *
      * @return true if connection was established, false otherwise
      */
     public Future<Boolean> start() {
@@ -144,7 +148,7 @@ public class EmpConnector {
     }
 
     /**
-     * Disconnecting Bayeux Client in Emp Connector
+     * Disconnecting Bayeux Client in Emp Connector.
      */
     private void disconnect() {
         if (!running.compareAndSet(true, false)) {
@@ -158,7 +162,7 @@ public class EmpConnector {
     }
 
     /**
-     * Stop the connector
+     * Stop the connector.
      */
     public void stop() {
         disconnect();
@@ -184,16 +188,14 @@ public class EmpConnector {
     }
 
     /**
-     * Subscribe to a topic, receiving events after the replayFrom position
+     * Subscribe to a topic, receiving events after the replayFrom position.
      *
-     * @param topic
-     *            - the topic to subscribe to
-     * @param replayFrom
-     *            - the replayFrom position in the event stream
-     * @param consumer
-     *            - the consumer of the events
-     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
-     *         exception
+     * @param topic      - the topic to subscribe to
+     * @param replayFrom - the replayFrom position in the event stream
+     * @param consumer   - the consumer of the events
+     * @return a Future returning the Subscription -
+     * on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
+     * exception
      */
     public Future<TopicSubscription> subscribe(String topic, long replayFrom, Consumer<Map<String, Object>> consumer) {
         if (!running.get()) {
@@ -214,10 +216,9 @@ public class EmpConnector {
     }
 
     /**
-     * Unsubscribe to a topic subscription
+     * Unsubscribe to a topic subscription.
      *
-     * @param topic
-     *            - the topic subscribed
+     * @param topic - the topic subscribed
      */
     public void unsubscribe(String topic) {
         subscriptions.stream()
@@ -227,31 +228,29 @@ public class EmpConnector {
     }
 
     /**
-     * Subscribe to a topic, receiving events from the earliest event position in the stream
+     * Subscribe to a topic, receiving events from the earliest event position in the stream.
      *
-     * @param topic
-     *            - the topic to subscribe to
-     * @param consumer
-     *            - the consumer of the events
-     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
-     *         exception
+     * @param topic    - the topic to subscribe to
+     * @param consumer - the consumer of the events
+     * @return a Future returning the Subscription -
+     * on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
+     * exception
      */
     public Future<TopicSubscription> subscribeEarliest(String topic, Consumer<Map<String, Object>> consumer) {
-        return subscribe(topic, REPLAY_FROM_EARLIEST, consumer);
+        return subscribe(topic, replayFromEarliest, consumer);
     }
 
     /**
-     * Subscribe to a topic, receiving events from the latest event position in the stream
+     * Subscribe to a topic, receiving events from the latest event position in the stream.
      *
-     * @param topic
-     *            - the topic to subscribe to
-     * @param consumer
-     *            - the consumer of the events
-     * @return a Future returning the Subscription - on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
-     *         exception
+     * @param topic    - the topic to subscribe to
+     * @param consumer - the consumer of the events
+     * @return a Future returning the Subscription -
+     * on completion returns a Subscription or throws a io.ballerinax.salesforce.CannotSubscribe
+     * exception
      */
     public Future<TopicSubscription> subscribeTip(String topic, Consumer<Map<String, Object>> consumer) {
-        return subscribe(topic, REPLAY_FROM_TIP, consumer);
+        return subscribe(topic, replayFromTip, consumer);
     }
 
     public EmpConnector addListener(String channel, ClientSessionChannel.MessageListener messageListener) {
@@ -299,7 +298,7 @@ public class EmpConnector {
         LongPollingTransport httpTransport = new LongPollingTransport(parameters.longPollingOptions(), httpClient) {
             @Override
             protected void customize(Request request) {
-                request.header(AUTHORIZATION, bearerToken);
+                request.header(authorization, bearerToken);
             }
         };
 
@@ -354,7 +353,7 @@ public class EmpConnector {
 
     /**
      * Listens to /meta/connect channel messages and handles 401 errors, where client needs
-     * to reauthenticate.
+     * to re-authenticate.
      */
     private class AuthFailureListener implements ClientSessionChannel.MessageListener {
         private static final String ERROR_401 = "401";
@@ -372,7 +371,7 @@ public class EmpConnector {
         }
 
         private boolean isError(Message message, String errorCode) {
-            String error = (String)message.get(Message.ERROR_FIELD);
+            String error = (String) message.get(Message.ERROR_FIELD);
             String failureReason = getFailureReason(message);
 
             return (error != null && error.startsWith(errorCode)) ||
@@ -383,9 +382,9 @@ public class EmpConnector {
             String failureReason = null;
             Map<String, Object> ext = message.getExt();
             if (ext != null) {
-                Map<String, Object> sfdc = (Map<String, Object>)ext.get("sfdc");
+                Map<String, Object> sfdc = (Map<String, Object>) ext.get("sfdc");
                 if (sfdc != null) {
-                    failureReason = (String)sfdc.get("failureReason");
+                    failureReason = (String) sfdc.get("failureReason");
                 }
             }
             return failureReason;

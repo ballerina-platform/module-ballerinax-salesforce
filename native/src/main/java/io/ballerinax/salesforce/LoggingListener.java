@@ -10,16 +10,17 @@ package io.ballerinax.salesforce;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSessionChannel;
 
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Commandline logger for Long polling
+ * Commandline logger for Long polling.
  */
 public class LoggingListener implements ClientSessionChannel.MessageListener {
-
-    private boolean logSuccess;
-    private boolean logFailure;
+    private static final PrintStream console;
+    private final boolean logSuccess;
+    private final boolean logFailure;
 
     public LoggingListener() {
         this.logSuccess = true;
@@ -34,29 +35,32 @@ public class LoggingListener implements ClientSessionChannel.MessageListener {
     @Override
     public void onMessage(ClientSessionChannel clientSessionChannel, Message message) {
         if (logSuccess && message.isSuccessful()) {
-            System.out.println(">>>>");
+            console.println(">>>>");
             printPrefix();
-            System.out.println("Success:[" + clientSessionChannel.getId() + "]");
-            System.out.println(message);
-            System.out.println("<<<<");
+            console.println("Success:[" + clientSessionChannel.getId() + "]");
+            console.println(message);
+            console.println("<<<<");
         }
 
         if (logFailure && !message.isSuccessful()) {
-            System.out.println(">>>>");
+            console.println(">>>>");
             printPrefix();
-            System.out.println("Failure:[" + clientSessionChannel.getId() + "]");
-            System.out.println(message);
-            System.out.println("<<<<");
+            console.println("Failure:[" + clientSessionChannel.getId() + "]");
+            console.println(message);
+            console.println("<<<<");
         }
     }
 
     private void printPrefix() {
-        System.out.print("[" + timeNow() + "] ");
+        console.print("[" + timeNow() + "] ");
     }
 
     private String timeNow() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         Date now = new Date();
         return dateFormat.format(now);
+    }
+    static {
+        console = System.out;
     }
 }

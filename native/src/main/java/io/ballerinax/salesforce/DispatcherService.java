@@ -24,8 +24,8 @@ import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.runtime.internal.values.ObjectValue;
 import org.json.JSONObject;
 
 import java.util.Map;
@@ -53,13 +53,13 @@ import static io.ballerinax.salesforce.Constants.UNDELETE;
 import static io.ballerinax.salesforce.Constants.UPDATE;
 
 /**
- * Dispatcher Service class to dispatch the event data obtained through the streaming API
+ * Dispatcher Service class to dispatch the event data obtained through the streaming API.
  */
 public class DispatcherService {
-    private final ObjectValue service;
+    private final BObject service;
     private final Runtime runtime;
 
-    public DispatcherService(ObjectValue service, Runtime runtime) {
+    public DispatcherService(BObject service, Runtime runtime) {
         this.service = service;
         this.runtime = runtime;
     }
@@ -72,19 +72,19 @@ public class DispatcherService {
                 .getJSONObject(EVENT_HEADER)
                 .get(EVENT_CHANGE_TYPE).toString();
         BMap<BString, Object> eventDataRecord = getEventDataRecord(eventData);
-        for (MethodType function:attachedFunctions) {
+        for (MethodType function : attachedFunctions) {
             if (ON_CREATE.equals(function.getName()) && eventType.equals(CREATE)) {
                 executeResourceOnEvent(eventDataRecord, ON_CREATE);
-            } 
+            }
             if (ON_UPDATE.equals(function.getName()) && eventType.equals(UPDATE)) {
                 executeResourceOnEvent(eventDataRecord, ON_UPDATE);
-            } 
+            }
             if (ON_DELETE.equals(function.getName()) && eventType.equals(DELETE)) {
                 executeResourceOnEvent(eventDataRecord, ON_DELETE);
-            } 
+            }
             if (ON_RESTORE.equals(function.getName()) && eventType.equals(UNDELETE)) {
                 executeResourceOnEvent(eventDataRecord, ON_RESTORE);
-            } 
+            }
         }
     }
 
@@ -105,7 +105,7 @@ public class DispatcherService {
      * @param map Input Map used to convert to BMap.
      * @return Converted BMap object.
      */
-    public static BMap<BString, Object> toBMap(Map<? ,?> map) {
+    public static BMap<BString, Object> toBMap(Map<?, ?> map) {
         BMap<BString, Object> returnMap = ValueCreator.createMapValue();
         if (map != null) {
             for (Object aKey : map.keySet().toArray()) {
@@ -117,19 +117,19 @@ public class DispatcherService {
     }
 
     /**
-     * Convert Map to Ballerina record tpe
+     * Convert Map to Ballerina record tpe.
      *
      * @param event Input Map used to convert to BMap.
      * @return Converted BMap object.
      */
-    private static BMap<BString, Object> getEventDataRecord(Map<String, Object> event)  {
+    private static BMap<BString, Object> getEventDataRecord(Map<String, Object> event) {
         Gson gson = new Gson();
         ObjectMapper oMapper = new ObjectMapper();
         Object[] eventData = new Object[2];
         Object[] metadata = new Object[9];
 
         Object eventPayload = event.get(EVENT_PAYLOAD);
-        Map<?,?> map = oMapper.convertValue(eventPayload, Map.class);
+        Map<?, ?> map = oMapper.convertValue(eventPayload, Map.class);
         BMap<BString, Object> eventDataRecord =
                 ValueCreator.createRecordValue(ModuleUtils.getModule(), EVENT_DATA_RECORD);
         eventData[0] = toBMap(map);

@@ -17,48 +17,48 @@
 package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BObject;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.internal.values.ObjectValue;
-
 import static io.ballerinax.salesforce.Constants.CHANNEL_NAME;
 import static io.ballerinax.salesforce.Constants.CONSUMER_SERVICES;
-import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
 import static io.ballerinax.salesforce.Constants.ENVIRONMENT;
+import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
 import static org.cometd.bayeux.Channel.META_CONNECT;
 import static org.cometd.bayeux.Channel.META_DISCONNECT;
 import static org.cometd.bayeux.Channel.META_HANDSHAKE;
 import static org.cometd.bayeux.Channel.META_SUBSCRIBE;
 import static org.cometd.bayeux.Channel.META_UNSUBSCRIBE;
 
+
 /**
- * Util class containing the java external functions for Salesforce Ballerina trigger
+ * Util class containing the java external functions for Salesforce Ballerina trigger.
  */
 public class ListenerUtil {
-    private static final ArrayList<ObjectValue> services = new ArrayList<>();
+    private static final ArrayList<BObject> services = new ArrayList<>();
     private static Runtime runtime;
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
-    public static void initListener(ObjectValue listener, String replayFrom, String channelName, String environment) {
+    public static void initListener(BObject listener, String replayFrom, String channelName, String environment) {
         listener.addNativeData(CONSUMER_SERVICES, services);
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(CHANNEL_NAME, channelName);
         listener.addNativeData(ENVIRONMENT, environment);
     }
 
-    public static Object attachService(ObjectValue listener, ObjectValue service) {
+    public static Object attachService(BObject listener, BObject service) {
         @SuppressWarnings("unchecked")
-        ArrayList<ObjectValue> services =
-                (ArrayList<ObjectValue>) listener.getNativeData(CONSUMER_SERVICES);
+        ArrayList<BObject> services =
+                (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         if (service == null) {
             return null;
         }
@@ -66,7 +66,7 @@ public class ListenerUtil {
         return null;
     }
 
-    public static Object startListener(Environment environment, String username, String password, ObjectValue listener) {
+    public static Object startListener(Environment environment, String username, String password, BObject listener) {
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
             try {
                 return LoginHelper.login(username, password, listener);
@@ -94,9 +94,9 @@ public class ListenerUtil {
         }
         runtime = environment.getRuntime();
         @SuppressWarnings("unchecked")
-        ArrayList<ObjectValue> services =
-                (ArrayList<ObjectValue>) listener.getNativeData(CONSUMER_SERVICES);
-        for (ObjectValue service : services) {
+        ArrayList<BObject> services =
+                (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
+        for (BObject service : services) {
             String channelName = listener.getNativeData(CHANNEL_NAME).toString();
             long replayFrom =  Long.parseLong(listener.getNativeData(REPLAY_FROM).toString());
             Consumer<Map<String, Object>> consumer = event -> injectEvent(service, runtime, event);
@@ -109,12 +109,12 @@ public class ListenerUtil {
         return null;
     }
 
-    public static Object detachService(ObjectValue listener, ObjectValue service) {
+    public static Object detachService(BObject listener, BObject service) {
         String channel = listener.getNativeData(CHANNEL_NAME).toString();
         connector.unsubscribe(channel);
         @SuppressWarnings("unchecked")
-        ArrayList<ObjectValue> services =
-                (ArrayList<ObjectValue>) listener.getNativeData(CONSUMER_SERVICES);
+        ArrayList<BObject> services =
+                (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         services.remove(service);
         return null;
     }
@@ -127,7 +127,7 @@ public class ListenerUtil {
         return null;
     }
 
-    private static void injectEvent(ObjectValue serviceObject, Runtime runtime, Map<String, Object> eventData) {
+    private static void injectEvent(BObject serviceObject, Runtime runtime, Map<String, Object> eventData) {
         DispatcherService dispatcherService = new DispatcherService(serviceObject, runtime);
         dispatcherService.handleDispatch(eventData);
     }

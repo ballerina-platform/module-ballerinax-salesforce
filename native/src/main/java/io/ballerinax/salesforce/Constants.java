@@ -20,7 +20,7 @@
 package io.ballerinax.salesforce;
 
 /**
- * Constants for sfdc trigger implementation
+ * Constants for sfdc trigger implementation.
  */
 public class Constants {
     public static final String CONSUMER_SERVICES = "consumer_services";

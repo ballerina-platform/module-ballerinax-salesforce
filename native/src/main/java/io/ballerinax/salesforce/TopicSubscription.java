@@ -8,7 +8,7 @@
 package io.ballerinax.salesforce;
 
 /**
- * A subscription to a topic
+ * A subscription to a topic.
  *
  * @author hal.hildebrand
  * @since API v37.0
@@ -16,7 +16,7 @@ package io.ballerinax.salesforce;
 public interface TopicSubscription {
 
     /**
-     * Cancel the subscription
+     * Cancel the subscription.
      */
     void cancel();
 

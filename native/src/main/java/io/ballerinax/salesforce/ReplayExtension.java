@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
- * The Bayeux extension for replay
+ * The Bayeux extension for replay.
  *
  * @author hal.hildebrand
  * @since API v37.0
@@ -53,9 +53,9 @@ public class ReplayExtension extends Adapter {
     @Override
     public boolean rcvMeta(ClientSession session, Message.Mutable message) {
         switch (message.getChannel()) {
-        case Channel.META_HANDSHAKE:
-            Map<String, Object> ext = message.getExt(false);
-            this.supported.set(ext != null && Boolean.TRUE.equals(ext.get(EXTENSION_NAME)));
+            case Channel.META_HANDSHAKE:
+                Map<String, Object> ext = message.getExt(false);
+                this.supported.set(ext != null && Boolean.TRUE.equals(ext.get(EXTENSION_NAME)));
         }
         return true;
     }
@@ -63,14 +63,14 @@ public class ReplayExtension extends Adapter {
     @Override
     public boolean sendMeta(ClientSession session, Message.Mutable message) {
         switch (message.getChannel()) {
-        case Channel.META_HANDSHAKE:
-            message.getExt(true).put(EXTENSION_NAME, Boolean.TRUE);
-            break;
-        case Channel.META_SUBSCRIBE:
-            if (supported.get()) {
-                message.getExt(true).put(EXTENSION_NAME, dataMap);
-            }
-            break;
+            case Channel.META_HANDSHAKE:
+                message.getExt(true).put(EXTENSION_NAME, Boolean.TRUE);
+                break;
+            case Channel.META_SUBSCRIBE:
+                if (supported.get()) {
+                    message.getExt(true).put(EXTENSION_NAME, dataMap);
+                }
+                break;
         }
         return true;
     }
@@ -78,7 +78,7 @@ public class ReplayExtension extends Adapter {
     private static Long getReplayId(Message.Mutable message) {
         Map<String, Object> data = message.getDataAsMap();
         @SuppressWarnings("unchecked")
-        Optional<Long> optional = resolve(() -> (Long)((Map<String, Object>)data.get(EVENT_KEY)).get(REPLAY_ID_KEY));
+        Optional<Long> optional = resolve(() -> (Long) ((Map<String, Object>) data.get(EVENT_KEY)).get(REPLAY_ID_KEY));
         return optional.orElse(null);
     }
 
@@ -86,8 +86,7 @@ public class ReplayExtension extends Adapter {
         try {
             T result = resolver.get();
             return Optional.ofNullable(result);
-        }
-        catch (NullPointerException e) {
+        } catch (NullPointerException e) {
             return Optional.empty();
         }
     }

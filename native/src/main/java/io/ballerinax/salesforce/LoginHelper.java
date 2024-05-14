@@ -4,6 +4,7 @@
  */
 package io.ballerinax.salesforce;
 
+import io.ballerina.runtime.api.values.BObject;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
@@ -11,21 +12,20 @@ import org.eclipse.jetty.client.util.ByteBufferContentProvider;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
-import io.ballerina.runtime.internal.values.ObjectValue;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import static io.ballerinax.salesforce.Constants.ENVIRONMENT;
 import static io.ballerinax.salesforce.Constants.SANDBOX;
 
 /**
- * A helper to obtain the Authentication bearer token via login
+ * A helper to obtain the Authentication bearer token via login.
  *
  * @author hal.hildebrand
  * @since API v37.0
@@ -43,23 +43,25 @@ public class LoginHelper {
 
         @Override
         public void characters(char[] ch, int start, int length) {
-            if (reading) buffer = new String(ch, start, length);
+            if (reading) {
+                buffer = new String(ch, start, length);
+            }
         }
 
         @Override
         public void endElement(String uri, String localName, String qName) {
             reading = false;
             switch (localName) {
-            case "sessionId":
-                sessionId = buffer;
-                break;
-            case "serverUrl":
-                serverUrl = buffer;
-                break;
-            case "faultstring":
-                faultstring = buffer;
-                break;
-            default:
+                case "sessionId":
+                    sessionId = buffer;
+                    break;
+                case "serverUrl":
+                    serverUrl = buffer;
+                    break;
+                case "faultstring":
+                    faultstring = buffer;
+                    break;
+                default:
             }
             buffer = null;
         }
@@ -67,16 +69,16 @@ public class LoginHelper {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             switch (localName) {
-            case "sessionId":
-                reading = true;
-                break;
-            case "serverUrl":
-                reading = true;
-                break;
-            case "faultstring":
-                reading = true;
-                break;
-            default:
+                case "sessionId":
+                    reading = true;
+                    break;
+                case "serverUrl":
+                    reading = true;
+                    break;
+                case "faultstring":
+                    reading = true;
+                    break;
+                default:
             }
         }
     }
@@ -86,14 +88,15 @@ public class LoginHelper {
     static final String LOGIN_ENDPOINT = "https://login.salesforce.com";
     static final String TEST_LOGIN_ENDPOINT = "https://test.salesforce.com";
     private static final String ENV_END = "</soapenv:Body></soapenv:Envelope>";
-    private static final String ENV_START = "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' "
+    private static final String ENV_START =
+            "<soapenv:Envelope xmlns:soapenv='http://schemas.xmlsoap.org/soap/envelope/' "
             + "xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' "
             + "xmlns:urn='urn:partner.soap.sforce.com'><soapenv:Body>";
 
     // The enterprise SOAP API endpoint used for the login call
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT = "/services/Soap/u/44.0/";
 
-    public static BayeuxParameters login(String username, String password, ObjectValue listener) throws Exception {
+    public static BayeuxParameters login(String username, String password, BObject listener) throws Exception {
         return login(new URL(getLoginEndpoint(listener.getNativeData(ENVIRONMENT).toString())), username, password);
     }
 
@@ -123,7 +126,8 @@ public class LoginHelper {
             client.start();
             URL endpoint = new URL(loginEndpoint, getSoapUri());
             Request post = client.POST(endpoint.toURI());
-            post.content(new ByteBufferContentProvider("text/xml", ByteBuffer.wrap(soapXmlForLogin(username, password))));
+            post.content(new ByteBufferContentProvider("text/xml",
+                    ByteBuffer.wrap(soapXmlForLogin(username, password))));
             post.header("SOAPAction", "''");
             post.header("PrettyPrint", "Yes");
             ContentResponse response = post.send();
@@ -139,8 +143,10 @@ public class LoginHelper {
             saxParser.parse(new ByteArrayInputStream(response.getContent()), parser);
 
             String sessionId = parser.sessionId;
-            if (sessionId == null || parser.serverUrl == null) { throw new ConnectException(
-                    String.format("Unable to login: %s", parser.faultstring)); }
+            if (sessionId == null || parser.serverUrl == null) {
+                throw new ConnectException(
+                        String.format("Unable to login: %s", parser.faultstring));
+            }
 
             URL soapEndpoint = new URL(parser.serverUrl);
             String cometdEndpoint = Float.parseFloat(parameters.version()) < 37 ? COMETD_REPLAY_OLD : COMETD_REPLAY;
@@ -171,7 +177,7 @@ public class LoginHelper {
         return (ENV_START + "  <urn:login>" + "    <urn:username>" + username + "</urn:username>" + "    <urn:password>"
                 + password + "</urn:password>" + "  </urn:login>" + ENV_END).getBytes("UTF-8");
     }
-    
+
     private static String getLoginEndpoint(String environment) {
         if (SANDBOX.equals(environment)) {
             return TEST_LOGIN_ENDPOINT;
