@@ -16,7 +16,7 @@
 
 # Triggers when a new event related to Salesforce records is received.
 # Available actions: onCreate, onUpdate, onDelete, and onRestore
-public type RecordService service object {
+public type Service service object {
     # Triggers on a new record create event.
     #
     # + payload - The information about the triggered event

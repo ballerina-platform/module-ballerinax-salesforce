@@ -19,10 +19,6 @@
 // import ballerina/log;
 // import ballerina/os;
 // import ballerina/test;
-// import ballerinax/salesforce as sfdc;
-
-// configurable string & readonly username = os:getEnv("SF_USERNAME");
-// configurable string & readonly password = os:getEnv("SF_PASSWORD");
 
 // ListenerConfig listenerConfig = {
 //     username: username,
@@ -36,7 +32,7 @@
 // isolated boolean isDeleted = false;
 // isolated boolean isRestored = false;
 
-// service RecordService on eventListener {
+// service Service on eventListener {
 //     remote function onCreate(EventData payload) {
 //         string? eventType = payload.metadata?.changeType;
 //         if (eventType is string && eventType == "CREATE") {
@@ -86,37 +82,21 @@
 //     }
 // }
 
-// // Create Salesforce client configuration by reading from environemnt.
-// configurable string & readonly clientId = os:getEnv("CLIENT_ID");
-// configurable string & readonly clientSecret = os:getEnv("CLIENT_SECRET");
-// configurable string & readonly refreshToken = os:getEnv("REFRESH_TOKEN");
-// configurable string & readonly refreshUrl = os:getEnv("REFRESH_URL");
-// configurable string & readonly baseUrl = os:getEnv("EP_URL");
 
 // // Using direct-token config for client configuration
-// sfdc:ConnectionConfig sfConfig = {
-//     baseUrl: baseUrl,
-//     auth: {
-//         clientId: clientId,
-//         clientSecret: clientSecret,
-//         refreshToken: refreshToken,
-//         refreshUrl: refreshUrl
-//     }
-// };
-
-// sfdc:Client baseClient = check new (sfConfig);
+// Client lisbaseClient = check new (sfConfigRefreshCodeFlow);
 // string testRecordId = "";
 
 // @test:Config {
 //     enable: true
 // }
 // function testCreateRecord() {
-//     log:printInfo("baseClient -> createRecord()");
-//     json accountRecord = {
+//     log:printInfo("lisbaseClient -> createRecord()");
+//     record{} accountRecord = {
 //         Name: "John Keells Holdings",
 //         BillingCity: "Colombo 3"
 //     };
-//     string|error stringResponse = baseClient->createRecord("Account", accountRecord);
+//     CreationResponse|error stringResponse = lisbaseClient->create("Account", accountRecord);
 
 //     if (stringResponse is string) {
 //         test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
@@ -131,13 +111,13 @@
 //     dependsOn: [testCreateRecord]
 // }
 // function testUpdateRecord() {
-//     log:printInfo("baseClient -> updateRecord()");
+//     log:printInfo("lisbaseClient -> updateRecord()");
 //     json account = {
 //         Name: "WSO2 Inc",
 //         BillingCity: "Jaffna",
 //         Phone: "+94110000000"
 //     };
-//     error? response = baseClient->updateRecord("Account", testRecordId, account);
+//     error? response = lisbaseClient->update("Account", testRecordId, account);
 
 //     if (response is error) {
 //         test:assertFail(msg = response.message());
@@ -149,9 +129,9 @@
 //     dependsOn: [testUpdateRecord]
 // }
 // function testDeleteRecord() {
-//     log:printInfo("baseClient -> deleteRecord()");
+//     log:printInfo("lisbaseClient -> deleteRecord()");
 
-//     error? response = baseClient->deleteRecord("Account", testRecordId);
+//     error? response = lisbaseClient->deleteRecord("Account", testRecordId);
 
 //     if (response is error) {
 //         test:assertFail(msg = response.message());

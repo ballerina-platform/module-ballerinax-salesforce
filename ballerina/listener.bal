@@ -46,7 +46,7 @@ public class Listener {
     # + s - Type descriptor of the service
     # + name - Name of the service
     # + return - `()` or else a `error` upon failure to register the service
-    public function attach(RecordService s, string[]|string? name) returns error? {
+    public function attach(Service s, string[]|string? name) returns error? {
         return attachService(self, s);
     }
 
@@ -61,7 +61,7 @@ public class Listener {
     #
     # + s - Type descriptor of the service
     # + return - `()` or else a `error` upon failure to detach the service
-    public function detach(RecordService s) returns error? {
+    public function detach(Service s) returns error? {
         return detachService(self, s);
     }
 
@@ -85,7 +85,7 @@ function initListener(Listener instance, handle replayFrom, handle channelName, 
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-function attachService(Listener instance, RecordService s) returns error? =
+function attachService(Listener instance, Service s) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
@@ -95,7 +95,7 @@ function startListener(handle username, handle password, Listener instance) retu
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-function detachService(Listener instance, RecordService s) returns error? =
+function detachService(Listener instance, Service s) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
