@@ -21,3 +21,12 @@ path = "../native/build/libs/salesforce-native-@project.version@.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
 version = "@project.version@"
+
+[[platform.java17.dependency]]
+path = "./lib/bayeux-api-4.0.4.jar"
+
+[[platform.java17.dependency]]
+path = "./lib/cometd-java-client-4.0.4.jar"
+
+[[platform.java17.dependency]]
+path = "./lib/cometd-java-common-4.0.4.jar"
