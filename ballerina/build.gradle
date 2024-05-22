@@ -58,6 +58,14 @@ task updateTomlFiles {
     }
 }
 
+configurations {
+    externalJars
+}
+
+dependencies {
+    externalJars(group: 'com.opencsv', name: 'opencsv', version: '5.9')
+}
+
 task commitTomlFiles {
     doLast {
         project.exec {
@@ -93,6 +101,7 @@ clean {
     delete 'build'
 }
 
+updateTomlFiles.dependsOn copyStdlibs
 build.dependsOn ":${project.packageName}-native:build"
 build.dependsOn "generatePomFileForMavenPublication"
 publishToMavenLocal.dependsOn build

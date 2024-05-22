@@ -18,5 +18,6 @@
 
  module io.ballerinax.salesforce {
     requires io.ballerina.runtime;
+    requires com.opencsv;
     exports io.ballerinax.salesforce;
 }

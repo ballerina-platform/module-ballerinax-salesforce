@@ -18,15 +18,20 @@
 
 package io.ballerinax.salesforce;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.StreamType;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -35,6 +40,10 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
 
 import static io.ballerinax.salesforce.Utils.getMetadata;
 
@@ -50,14 +59,14 @@ public class ReadOperationExecutor {
         return invokeClientMethod(env, client, "processGetRecord", paramFeed);
     }
 
-    public static Object getInvocableActions(Environment env, BObject client, BString subContext, 
-        BTypedesc targetType) {
+    public static Object getInvocableActions(Environment env, BObject client, BString subContext,
+                                             BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, subContext, true};
         return invokeClientMethod(env, client, "processGetInvocableActions", paramFeed);
     }
 
     public static Object invokeActions(Environment env, BObject client, BString subContext, BMap<BString, ?> payload,
-        BTypedesc targetType) {
+                                       BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, subContext, true, payload, true};
         return invokeClientMethod(env, client, "processInvokeActions", paramFeed);
     }
@@ -71,14 +80,14 @@ public class ReadOperationExecutor {
     }
 
     public static Object getNamedLayouts(Environment env, BObject client, BString sObject, BString name,
-                                       BTypedesc targetType) {
+                                         BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, sObject, true, name, true};
         return invokeClientMethod(env, client, "processGetNamedLayouts", paramFeed);
     }
 
-    public static Object apexRestExecute(Environment env, BObject client, BString urlPath, 
-                        BString methodType,  BMap<BString, ?> payload,
-                                       BTypedesc targetType) {
+    public static Object apexRestExecute(Environment env, BObject client, BString urlPath,
+                                         BString methodType, BMap<BString, ?> payload,
+                                         BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, urlPath, true, methodType, true, payload, true};
         return invokeClientMethod(env, client, "processApexExecute", paramFeed);
     }
@@ -145,5 +154,24 @@ public class ReadOperationExecutor {
         RecordType recordType = (RecordType) returnType.getDescribingType();
         StreamType bStream = TypeCreator.createStreamType(recordType, PredefinedTypes.TYPE_NULL);
         return ValueCreator.createStreamValue(bStream, data.getIteratorObj());
+    }
+
+    public static Object parseCSVToStringArray(BString csvData) {
+        try (CSVReader reader = new CSVReader(new StringReader(csvData.getValue()))) {
+            List<String[]> records = reader.readAll();
+
+            // Convert each row in records to BArray
+            BArray[] bArrayData = new BArray[records.size()];
+            for (int i = 0; i < records.size(); i++) {
+                String[] row = records.get(i);
+                BArray bArrayRow = StringUtils.fromStringArray(row);
+                bArrayData[i] = bArrayRow;
+            }
+
+            ArrayType stringArrayType = TypeCreator.createArrayType(PredefinedTypes.TYPE_STRING);
+            return ValueCreator.createArrayValue(bArrayData, stringArrayType);
+        } catch (IOException | CsvException e) {
+            return ErrorCreator.createError(StringUtils.fromString(e.getMessage()));
+        }
     }
 }
