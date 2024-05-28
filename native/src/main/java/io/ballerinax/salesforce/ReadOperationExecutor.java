@@ -167,9 +167,9 @@ public class ReadOperationExecutor {
                 BArray bArrayRow = StringUtils.fromStringArray(row);
                 bArrayData[i] = bArrayRow;
             }
-
-            ArrayType stringArrayType = TypeCreator.createArrayType(PredefinedTypes.TYPE_STRING);
-            return ValueCreator.createArrayValue(bArrayData, stringArrayType);
+            BArray bArrayType = StringUtils.fromStringArray(new String[0]);
+            ArrayType stringArrayType = TypeCreator.createArrayType(bArrayType.getType());
+            return ValueCreator.createArrayValue(bArrayData, stringArrayType); // string[][]
         } catch (IOException | CsvException e) {
             return ErrorCreator.createError(StringUtils.fromString(e.getMessage()));
         }
