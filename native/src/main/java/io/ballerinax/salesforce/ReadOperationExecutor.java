@@ -18,20 +18,15 @@
 
 package io.ballerinax.salesforce;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.async.Callback;
-import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.StreamType;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
@@ -40,10 +35,6 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.List;
 
 import static io.ballerinax.salesforce.Utils.getMetadata;
 
@@ -154,24 +145,5 @@ public class ReadOperationExecutor {
         RecordType recordType = (RecordType) returnType.getDescribingType();
         StreamType bStream = TypeCreator.createStreamType(recordType, PredefinedTypes.TYPE_NULL);
         return ValueCreator.createStreamValue(bStream, data.getIteratorObj());
-    }
-
-    public static Object parseCSVToStringArray(BString csvData) {
-        try (CSVReader reader = new CSVReader(new StringReader(csvData.getValue()))) {
-            List<String[]> records = reader.readAll();
-
-            // Convert each row in records to BArray
-            BArray[] bArrayData = new BArray[records.size()];
-            for (int i = 0; i < records.size(); i++) {
-                String[] row = records.get(i);
-                BArray bArrayRow = StringUtils.fromStringArray(row);
-                bArrayData[i] = bArrayRow;
-            }
-            BArray bArrayType = StringUtils.fromStringArray(new String[0]);
-            ArrayType stringArrayType = TypeCreator.createArrayType(bArrayType.getType());
-            return ValueCreator.createArrayValue(bArrayData, stringArrayType); // string[][]
-        } catch (IOException | CsvException e) {
-            return ErrorCreator.createError(StringUtils.fromString(e.getMessage()));
-        }
     }
 }

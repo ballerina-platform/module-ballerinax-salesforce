@@ -1,5 +1,3 @@
-import ballerina/io;
-import ballerina/lang.'string as strings;
 // Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
@@ -15,9 +13,11 @@ import ballerina/lang.'string as strings;
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+import ballerina/io;
 import ballerina/log;
 import ballerina/time;
 import ballerina/jballerina.java;
+import ballerina/lang.'string as strings;
 
 isolated string csvContent = EMPTY_STRING;
 
@@ -95,7 +95,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
     }
 }
 
-isolated function convertStringToStringList(string stringContent) returns string[][]|error = @java:Method {
-   'class: "io.ballerinax.salesforce.ReadOperationExecutor",
+isolated function parseCsvString(string stringContent) returns string[][]|error = @java:Method {
+   'class: "io.ballerinax.salesforce.CSVParserUtil",
    name: "parseCSVToStringArray"
 } external;

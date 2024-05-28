@@ -641,7 +641,7 @@ public isolated client class Client {
             if textPayload == "" {
                 return [];
             }
-            string[][] result = check convertStringToStringList(textPayload);
+            string[][] result = check parseCsvString(textPayload);
             return result;
         } else {
             json responsePayload = check response.getJsonPayload();
@@ -663,7 +663,7 @@ public isolated client class Client {
             if textPayload == "" {
                 return [];
             }
-            string[][] result = check convertStringToStringList(textPayload);
+            string[][] result = check parseCsvString(textPayload);
             return result;
         } else {
             json responsePayload = check response.getJsonPayload();
