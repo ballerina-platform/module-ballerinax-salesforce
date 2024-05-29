@@ -23,4 +23,7 @@ artifactId = "salesforce"
 version = "8.0.1-SNAPSHOT"
 
 [[platform.java17.dependency]]
+groupId = "com.opencsv"
+artifactId = "opencsv"
+version = "5.9"
 path = "./lib/opencsv-5.9.jar"
