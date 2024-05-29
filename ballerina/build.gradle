@@ -54,8 +54,17 @@ task updateTomlFiles {
     doLast {
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace('@project.version@', project.version.toString())
         newConfig = newConfig.replace('@toml.version@', tomlVersion)
+        newConfig = newConfig.replace("@opencsv.version@", openCsvVersion)
         ballerinaTomlFile.text = newConfig
     }
+}
+
+configurations {
+    externalJars
+}
+
+dependencies {
+    externalJars(group: 'com.opencsv', name: 'opencsv', version: '5.9')
 }
 
 task commitTomlFiles {
@@ -93,6 +102,7 @@ clean {
     delete 'build'
 }
 
+updateTomlFiles.dependsOn copyStdlibs
 build.dependsOn ":${project.packageName}-native:build"
 build.dependsOn "generatePomFileForMavenPublication"
 publishToMavenLocal.dependsOn build

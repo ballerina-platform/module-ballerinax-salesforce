@@ -13,27 +13,26 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-
+import ballerina/io;
 import ballerina/log;
 import ballerina/time;
-import ballerina/io;
+import ballerina/jballerina.java;
 import ballerina/lang.'string as strings;
 
 isolated string csvContent = EMPTY_STRING;
 
 # Remove decimal places from a civil seconds value
-# 
+#
 # + civilTime - a time:civil record
 # + return - a time:civil record with decimal places removed
-# 
+#
 isolated function removeDecimalPlaces(time:Civil civilTime) returns time:Civil {
     time:Civil result = civilTime;
-    time:Seconds seconds= (result.second is ())? 0 : <time:Seconds>result.second;
+    time:Seconds seconds = (result.second is ()) ? 0 : <time:Seconds>result.second;
     decimal floor = decimal:floor(seconds);
     result.second = floor;
     return result;
-} 
-
+}
 
 # Convert ReadableByteChannel to string.
 #
@@ -65,7 +64,6 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns string|err
     return textContent;
 }
 
-
 # Convert string[][] to string.
 #
 # + stringCsvInput - Multi dimentional array of strings
@@ -77,7 +75,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
     if stringCsvInput is string[][] {
         foreach var row in stringCsvInput {
             lock {
-                csvContent += row.reduce(isolated function (string s, string t) returns string { 
+                csvContent += row.reduce(isolated function(string s, string t) returns string {
                     return s.concat(",", t);
                 }, EMPTY_STRING).substring(1) + NEW_LINE;
             }
@@ -85,7 +83,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
     } else {
         check stringCsvInput.forEach(isolated function(string[] row) {
             lock {
-                csvContent += row.reduce(isolated function (string s, string t) returns string { 
+                csvContent += row.reduce(isolated function(string s, string t) returns string {
                     return s.concat(",", t);
                 }, EMPTY_STRING).substring(1) + NEW_LINE;
 
@@ -97,16 +95,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
     }
 }
 
-isolated function convertStringToStringList(string content) returns string[][]|error {
-    string[][] result = [];
-    string[] lines = re `\n`.split(content);
-    foreach string item in lines {
-        string processedItem = re `"`.replaceAll(item, EMPTY_STRING);
-        if item == "" {
-            continue;
-        }
-        string[] row = re `,`.split(processedItem);
-        result.push(row);
-    }
-    return result;
-};
+isolated function parseCsvString(string stringContent) returns string[][]|error = @java:Method {
+   'class: "io.ballerinax.salesforce.CsvParserUtils",
+   name: "parseCsvToStringArray"
+} external;

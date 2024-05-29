@@ -21,3 +21,9 @@ path = "../native/build/libs/salesforce-native-@project.version@.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
 version = "@project.version@"
+
+[[platform.java17.dependency]]
+groupId = "com.opencsv"
+artifactId = "opencsv"
+version = "@opencsv.version@"
+path = "./lib/opencsv-@opencsv.version@.jar"

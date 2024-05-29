@@ -50,14 +50,14 @@ public class ReadOperationExecutor {
         return invokeClientMethod(env, client, "processGetRecord", paramFeed);
     }
 
-    public static Object getInvocableActions(Environment env, BObject client, BString subContext, 
-        BTypedesc targetType) {
+    public static Object getInvocableActions(Environment env, BObject client, BString subContext,
+                                             BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, subContext, true};
         return invokeClientMethod(env, client, "processGetInvocableActions", paramFeed);
     }
 
     public static Object invokeActions(Environment env, BObject client, BString subContext, BMap<BString, ?> payload,
-        BTypedesc targetType) {
+                                       BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, subContext, true, payload, true};
         return invokeClientMethod(env, client, "processInvokeActions", paramFeed);
     }
@@ -71,14 +71,14 @@ public class ReadOperationExecutor {
     }
 
     public static Object getNamedLayouts(Environment env, BObject client, BString sObject, BString name,
-                                       BTypedesc targetType) {
+                                         BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, sObject, true, name, true};
         return invokeClientMethod(env, client, "processGetNamedLayouts", paramFeed);
     }
 
-    public static Object apexRestExecute(Environment env, BObject client, BString urlPath, 
-                        BString methodType,  BMap<BString, ?> payload,
-                                       BTypedesc targetType) {
+    public static Object apexRestExecute(Environment env, BObject client, BString urlPath,
+                                         BString methodType, BMap<BString, ?> payload,
+                                         BTypedesc targetType) {
         Object[] paramFeed = {targetType, true, urlPath, true, methodType, true, payload, true};
         return invokeClientMethod(env, client, "processApexExecute", paramFeed);
     }
