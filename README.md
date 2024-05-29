@@ -4,7 +4,7 @@ Ballerina Salesforce Connector
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-sfdc/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-sfdc)
 [![Trivy](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/trivy-scan.yml)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerinax-sfdc.svg)](https://github.com/ballerina-platformmodule-ballerinax-sfdc/commits/master)
-[![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-native.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-native.yml)
+[![GraalVM Check](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-graalvm.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions/workflows/build-with-bal-test-graalvm.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Salesforce Sales Cloud is a widely used CRM software provided by Salesforce Inc. Sales Cloud offers various APIs that enable developers to extend and integrate the platform with other applications, services, and systems.
