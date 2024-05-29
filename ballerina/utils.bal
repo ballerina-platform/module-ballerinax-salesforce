@@ -96,6 +96,6 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
 }
 
 isolated function parseCsvString(string stringContent) returns string[][]|error = @java:Method {
-   'class: "io.ballerinax.salesforce.CSVParserUtil",
-   name: "parseCSVToStringArray"
+   'class: "io.ballerinax.salesforce.CsvParserUtils",
+   name: "parseCsvToStringArray"
 } external;

@@ -37,8 +37,8 @@ import java.util.List;
  *
  * @since 8.0.1
  */
-public class CSVParserUtil {
-    public static Object parseCSVToStringArray(BString csvData) {
+public class CsvParserUtils {
+    public static Object parseCsvToStringArray(BString csvData) {
         try (CSVReader reader = new CSVReader(new StringReader(csvData.getValue()))) {
             List<String[]> records = reader.readAll();
 
@@ -49,8 +49,8 @@ public class CSVParserUtil {
                 BArray bArrayRow = StringUtils.fromStringArray(row);
                 bArrayData[i] = bArrayRow;
             }
-            BArray bArrayType = StringUtils.fromStringArray(new String[0]);
-            ArrayType stringArrayType = TypeCreator.createArrayType(bArrayType.getType());
+            BArray emptyBArray = StringUtils.fromStringArray(new String[0]);
+            ArrayType stringArrayType = TypeCreator.createArrayType(emptyBArray.getType());
             return ValueCreator.createArrayValue(bArrayData, stringArrayType); // string[][]
         } catch (IOException | CsvException e) {
             return ErrorCreator.createError(StringUtils.fromString(e.getMessage()));
