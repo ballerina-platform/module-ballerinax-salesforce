@@ -27,6 +27,7 @@ import ballerinax/salesforce.utils;
 
 public isolated client class Client {
     private final http:Client salesforceClient;
+    private map<string> sfLocators = {};
 
     # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
@@ -651,17 +652,54 @@ public isolated client class Client {
 
     }
 
-    # Get query job results
+    # Get bulk query job results
+    # 
     # + bulkJobId - Id of the bulk job
-    # + return - string[][] if successful else `error`
-    isolated remote function getQueryResult(string bulkJobId)
+    # + maxRecords - The maximum number of records to retrieve per set of results for the query
+    # + return - The resulting string[][] if successful else `error`
+    isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ())
             returns string[][]|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
+                
+        string path = "";
+        string batchingParams = "";
+
+        // Max records value is user given
+        if maxRecords != () {
+            lock {
+                if self.sfLocators.hasKey(bulkJobId) {
+                    string locator = self.sfLocators.get(bulkJobId);
+                    if locator is "null" {
+                        return [];
+                    } 
+                    batchingParams = string `results?maxRecords=${maxRecords}&locator=${locator}`;
+                } else {
+                    batchingParams = string `results?maxRecords=${maxRecords}`;
+                }
+            }
+            path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
+            // Max records value default, we might not know when the locator comes
+        } else if maxRecords == () {
+            lock {
+                if self.sfLocators.hasKey(bulkJobId) {
+                    string locator = self.sfLocators.get(bulkJobId);
+                    if locator is "null" {
+                        return [];
+                    } 
+                    batchingParams = string `results?locator=${locator}`;
+                } else {
+                    path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
+                }
+            }
+        } 
+        
         http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             string textPayload = check response.getTextPayload();
             if textPayload == "" {
                 return [];
+            }
+            lock {
+                self.sfLocators[bulkJobId] = check response.getHeader("sforce-locator");
             }
             string[][] result = check parseCsvString(textPayload);
             return result;
