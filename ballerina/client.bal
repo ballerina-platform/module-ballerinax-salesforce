@@ -663,7 +663,6 @@ public isolated client class Client {
         string path = "";
         string batchingParams = "";
 
-        // Max records value is user given
         if maxRecords != () {
             lock {
                 if self.sfLocators.hasKey(bulkJobId) {
