@@ -15,16 +15,16 @@ This module supports [Salesforce v48.0 SOAP API Enterprise WDSL](https://develop
 
    <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" width="50%" style="border:1px solid #000000">
 
-    - Here we will be using https://test.salesforce.com as we are using sandbox enviorenment. Users can use https://login.salesforce.com for normal usage.
+    - Here we will be using https://test.salesforce.com as we are using sandbox environment. Users can use https://login.salesforce.com for normal usage.
 
     <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" width="100%" style="border:1px solid #000000">
 
-4. After the creation user can get consumer key and secret through clicking on the `Manage Consume Details` button.
+4. After the creation user can get consumer key and secret through clicking on the `Manage Consumer Details` button.
 
    <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/crdentials.png alt="Consumer Secrets" width="100%" style="border:1px solid #000000">
 
 5. Next step would be to get the token.
-    - Log in to salesforce in your prefered browser and enter the following url.
+    - Log in to salesforce in your preferred browser and enter the following url.
   `https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/authorize?response_type=code&client_id=<CONSUMER_KEY>&redirect_uri=<REDIRECT_URL>`
    - Allow access if an alert pops up and the browser will be redirected to a Url like follows.
   `https://login.salesforce.com/?code=<ENCODED_CODE>`
@@ -61,7 +61,7 @@ soap:ConnectionConfig config = {
     }
 };
 
-soap:Client salesforce = new(sfConfig);
+soap:Client salesforce = check new (config);
 ```
 
 ### Step 3: Invoke connector operation

@@ -91,7 +91,7 @@ public isolated client class Client {
     //Describe Organization
     # Lists summary details about each REST API version available.
     #
-    # + return - List of `Version` if successful. Else, the occured `error`
+    # + return - List of `Version` if successful. Else, the occurred `error`
     isolated remote function getApiVersions() returns Version[]|error {
         string path = utils:prepareUrl([BASE_PATH]);
         return check self.salesforceClient->get(path);
@@ -401,10 +401,10 @@ public isolated client class Client {
         return check self.salesforceClient->get(path);
     }
 
-    # Executes up to 25 subrequests in a single request.
+    # Executes up to 25 sub-requests in a single request.
     #
     # + batchRequests - A record containing all the requests
-    # + haltOnError - If true, the request halts when an error occurs on an individual subrequest
+    # + haltOnError - If true, the request halts when an error occurs on an individual sub-request
     # + return - `BatchResult` if successful or else `error`
     isolated remote function batch(Subrequest[] batchRequests, boolean haltOnError = false) returns BatchResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, COMPOSITE, BATCH]);
