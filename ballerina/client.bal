@@ -685,6 +685,7 @@ public isolated client class Client {
                         return [];
                     } 
                     batchingParams = string `results?locator=${locator}`;
+                    path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
                 } else {
                     path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
                 }
@@ -698,7 +699,10 @@ public isolated client class Client {
                 return [];
             }
             lock {
-                self.sfLocators[bulkJobId] = check response.getHeader("sforce-locator");
+                string|http:HeaderNotFoundError locatorValue = response.getHeader("sforce-locator");
+                if locatorValue is string {
+                    self.sfLocators[bulkJobId] = locatorValue;
+                } // header not found error ignored 
             }
             string[][] result = check parseCsvString(textPayload);
             return result;
