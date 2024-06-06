@@ -69,6 +69,63 @@ function queryCsv() returns error? {
     enable: true,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
+function queryCsvWithMaxRecords() returns error? {
+    runtime:sleep(delayInSecs);
+    log:printInfo("baseClient -> queryCsv");
+    string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
+
+    BulkCreatePayload payloadq = {
+        operation : "query",
+        query : queryStr
+    };
+
+    //create job
+    BulkJob queryJob = check baseClient->createQueryJob(payloadq);
+    int totalRecordsReceived = 0;
+    int totalIterationsOfGetResult = 0;
+    string[][]|error batchResult = [];
+
+    //get batch result
+    foreach int currentRetry in 1 ..< maxIterations + 1 {
+        while true {
+            batchResult = baseClient->getQueryResult(queryJob.id, 5);
+            if batchResult is error || batchResult.length() == 0 {
+                break;
+            } else {
+                totalRecordsReceived += batchResult.length();
+                totalIterationsOfGetResult += 1;
+            }
+        }
+        
+        if totalIterationsOfGetResult != 0 {
+            if totalRecordsReceived == 7 {
+                test:assertTrue(totalRecordsReceived == 7, msg = "Retrieving batch result failed.");
+                break;
+            } else {
+                if currentRetry != maxIterations {
+                    log:printWarn("getBatchResult Operation Failed! Retrying...");
+                    runtime:sleep(delayInSecs);
+                } else {
+                    log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
+                }
+            }
+        } else if batchResult is error {
+            if currentRetry != maxIterations {
+                log:printWarn("getBatchResult Operation Failed! Retrying...");
+                runtime:sleep(delayInSecs);
+            } else {
+                log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
+                test:assertFail(msg = batchResult.message());
+            }
+        }
+    }
+}
+
+
+@test:Config {
+    enable: true,
+    dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
+}
 function queryAndWaitCsv() returns error? {
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryCsvWithWait");
