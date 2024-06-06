@@ -657,8 +657,7 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + maxRecords - The maximum number of records to retrieve per set of results for the query
     # + return - The resulting string[][] if successful else `error`
-    isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ())
-            returns string[][]|error {
+    isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ()) returns string[][]|error {
                 
         string path = "";
         string batchingParams = "";
