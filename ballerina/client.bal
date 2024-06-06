@@ -677,7 +677,7 @@ public isolated client class Client {
             }
             path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
             // Max records value default, we might not know when the locator comes
-        } else if maxRecords == () {
+        } else {
             lock {
                 if self.sfLocators.hasKey(bulkJobId) {
                     string locator = self.sfLocators.get(bulkJobId);
