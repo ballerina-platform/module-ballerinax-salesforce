@@ -100,6 +100,7 @@ function queryCsvWithMaxRecords() returns error? {
         if totalIterationsOfGetResult != 0 {
             if totalRecordsReceived == 7 {
                 test:assertTrue(totalRecordsReceived == 7, msg = "Retrieving batch result failed.");
+                test:assertTrue(totalIterationsOfGetResult == 2, msg = "Retrieving batch result failed.");
                 break;
             } else {
                 if currentRetry != maxIterations {
