@@ -98,7 +98,6 @@ function queryWithLowerMaxRecordsValue() returns error? {
         
         if totalIterationsOfGetResult != 0 {
             if totalRecordsReceived == 7 {
-                test:assertTrue(totalRecordsReceived == 7, msg = "Retrieving batch result failed.");
                 test:assertTrue(totalIterationsOfGetResult == 2, msg = "Retrieving batch result failed.");
                 break;
             } else {
@@ -156,7 +155,6 @@ function queryWithHigherMaxRecordsValue() returns error? {
         
         if totalIterationsOfGetResult != 0 {
             if totalRecordsReceived == 7 {
-                test:assertTrue(totalRecordsReceived == 7, msg = "Retrieving batch result failed.");
                 test:assertTrue(totalIterationsOfGetResult == 1, msg = "Retrieving batch result failed.");
                 break;
             } else {
