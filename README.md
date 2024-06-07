@@ -114,7 +114,7 @@ bal run
 
 The `salesforce` connector provides practical examples illustrating usage in various scenarios. Explore these examples below, covering use cases like creating sObjects, retrieving records, and executing bulk operations.
 
-1. [Salesforce REST API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/rest_api_usecases) - How to employ REST API of Salesforce to carryout varies tasks.
+1. [Salesforce REST API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/rest_api_usecases) - How to employ REST API of Salesforce to carryout various tasks.
 
 2. [Salesforce Bulk API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulk_api_usecases) - How to employ Bulk API of Salesforce to execute Bulk jobs.
 

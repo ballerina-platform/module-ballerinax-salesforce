@@ -16,16 +16,16 @@ Ballerina Salesforce connector supports [Salesforce v59.0 REST API](https://deve
 
    <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" style="border:1px solid #000000; width:50%">
 
-    - Here we will be using https://test.salesforce.com as we are using sandbox enviorenment. Users can use https://login.salesforce.com for normal usage.
+    - Here we will be using https://test.salesforce.com as we are using sandbox environment. Users can use https://login.salesforce.com for normal usage.
 
     <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" style="border:1px solid #000000; width:100%">
 
-4. After the creation user can get consumer key and secret through clicking on the `Manage Consume Details` button.
+4. After the creation user can get consumer key and secret through clicking on the `Manage Consumer Details` button.
 
    <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/crdentials.png alt="Consumer Secrets" style="border:1px solid #000000; width:100%">
 
 5. Next step would be to get the token.
-    - Log in to salesforce in your prefered browser and enter the following url.
+    - Log in to salesforce in your preferred browser and enter the following url.
   ```
   https://<YOUR_INSTANCE>.salesforce.com/services/oauth2/authorize?response_type=code&client_id=<CONSUMER_KEY>&redirect_uri=<REDIRECT_URL>
   ```
@@ -71,7 +71,7 @@ salesforce:ConnectionConfig config = {
     }
 };
 
-salesforce:Client salesforce = new(config);
+salesforce:Client salesforce = check new (config);
 ```
 
 #### Step 3: Invoke connector operation
@@ -99,7 +99,7 @@ bal run
 
 The `salesforce` connector provides practical examples illustrating usage in various scenarios. Explore these examples below, covering use cases like creating sObjects, retrieving records, and executing bulk operations.
 
-1. [Salesforce REST API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/rest_api_usecases) - How to employ REST API of Salesforce to carryout varies tasks.
+1. [Salesforce REST API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/rest_api_usecases) - How to employ REST API of Salesforce to carryout various tasks.
 
 2. [Salesforce Bulk API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulk_api_usecases) - How to employ Bulk API of Salesforce to execute Bulk jobs.
 

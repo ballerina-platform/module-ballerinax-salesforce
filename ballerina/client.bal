@@ -27,6 +27,7 @@ import ballerinax/salesforce.utils;
 
 public isolated client class Client {
     private final http:Client salesforceClient;
+    private map<string> sfLocators = {};
 
     # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
@@ -90,7 +91,7 @@ public isolated client class Client {
     //Describe Organization
     # Lists summary details about each REST API version available.
     #
-    # + return - List of `Version` if successful. Else, the occured `error`
+    # + return - List of `Version` if successful. Else, the occurred `error`
     isolated remote function getApiVersions() returns Version[]|error {
         string path = utils:prepareUrl([BASE_PATH]);
         return check self.salesforceClient->get(path);
@@ -400,10 +401,10 @@ public isolated client class Client {
         return check self.salesforceClient->get(path);
     }
 
-    # Executes up to 25 subrequests in a single request.
+    # Executes up to 25 sub-requests in a single request.
     #
     # + batchRequests - A record containing all the requests
-    # + haltOnError - If true, the request halts when an error occurs on an individual subrequest
+    # + haltOnError - If true, the request halts when an error occurs on an individual sub-request
     # + return - `BatchResult` if successful or else `error`
     isolated remote function batch(Subrequest[] batchRequests, boolean haltOnError = false) returns BatchResult|error {
         string path = utils:prepareUrl([API_BASE_PATH, COMPOSITE, BATCH]);
@@ -651,17 +652,56 @@ public isolated client class Client {
 
     }
 
-    # Get query job results
+    # Get bulk query job results
+    # 
     # + bulkJobId - Id of the bulk job
-    # + return - string[][] if successful else `error`
-    isolated remote function getQueryResult(string bulkJobId)
-            returns string[][]|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
+    # + maxRecords - The maximum number of records to retrieve per set of results for the query
+    # + return - The resulting string[][] if successful else `error`
+    isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ()) returns string[][]|error {
+                
+        string path = "";
+        string batchingParams = "";
+
+        if maxRecords != () {
+            lock {
+                if self.sfLocators.hasKey(bulkJobId) {
+                    string locator = self.sfLocators.get(bulkJobId);
+                    if locator is "null" {
+                        return [];
+                    } 
+                    batchingParams = string `results?maxRecords=${maxRecords}&locator=${locator}`;
+                } else {
+                    batchingParams = string `results?maxRecords=${maxRecords}`;
+                }
+            }
+            path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
+            // Max records value default, we might not know when the locator comes
+        } else {
+            lock {
+                if self.sfLocators.hasKey(bulkJobId) {
+                    string locator = self.sfLocators.get(bulkJobId);
+                    if locator is "null" {
+                        return [];
+                    } 
+                    batchingParams = string `results?locator=${locator}`;
+                    path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
+                } else {
+                    path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
+                }
+            }
+        } 
+        
         http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             string textPayload = check response.getTextPayload();
             if textPayload == "" {
                 return [];
+            }
+            lock {
+                string|http:HeaderNotFoundError locatorValue = response.getHeader("sforce-locator");
+                if locatorValue is string {
+                    self.sfLocators[bulkJobId] = locatorValue;
+                } // header not found error ignored 
             }
             string[][] result = check parseCsvString(textPayload);
             return result;
