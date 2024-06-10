@@ -18,8 +18,9 @@
 
 package io.ballerinax.salesforce;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReaderHeaderAware;
+import com.opencsv.exceptions.CsvValidationException;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Future;
 import io.ballerina.runtime.api.PredefinedTypes;
@@ -39,7 +40,7 @@ import io.ballerina.runtime.api.values.BTypedesc;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,25 @@ public class BulkJobResultProcessor {
                                                  BTypedesc bTypedesc) {
         return invokeClientMethod(env, client, "processGetBulkJobResults", bTypedesc,
                 bulkJobId, true, maxRecords, true);
+    }
+
+    private static String[] convertCsvToJsonStrings(String csvContent) throws IOException {
+        List<String> jsonStrings = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+
+        try (StringReader reader = new StringReader(csvContent);
+             CSVReaderHeaderAware csvReader = new CSVReaderHeaderAware(reader)) {
+
+            Map<String, String> record;
+            while ((record = csvReader.readMap()) != null) {
+                String jsonString = mapper.writeValueAsString(record);
+                jsonStrings.add(jsonString);
+            }
+        } catch (CsvValidationException e) {
+            throw new RuntimeException(e);
+        }
+
+        return jsonStrings.toArray(new String[0]);
     }
 
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, BTypedesc bTypedesc,
@@ -80,51 +100,20 @@ public class BulkJobResultProcessor {
                     "Unsupported data type for data binding query results"));
         }
 
-        try (CSVReader reader = new CSVReader(new StringReader(csvData.getValue()))) {
-            List<String[]> records = reader.readAll();
-
+        try {
+            String[] jsonStrings = convertCsvToJsonStrings(csvData.getValue());
             // Convert each row in records to BArray
-            Object[] bArrayData = new Object[records.size() - 1];
-            for (int i = 1; i < records.size(); i++) {
-                String[] row = records.get(i);
-                bArrayData[i - 1] = createRecordValue(row, records.get(0), ((ArrayType) type).getElementType());
+            Object[] bArrayData = new Object[jsonStrings.length];
+            for (int i = 0; i < jsonStrings.length; i++) {
+                bArrayData[i] = createRecordValue(jsonStrings[i], ((ArrayType) type).getElementType());
             }
-
             return ValueCreator.createArrayValue(bArrayData, (ArrayType) type); // string[][]
-        } catch (IOException | CsvException e) {
+        } catch (IOException e) {
             return ErrorCreator.createError(StringUtils.fromString(e.getMessage()));
         }
     }
 
-    private static Object createRecordValue(String[] row, String[] headings, Type type) {
-        String jsonString = convertToString(headings, row);
+    private static Object createRecordValue(String jsonString, Type type) {
         return ValueUtils.convert(JsonUtils.parse(jsonString), type);
-    }
-
-    public static String convertToString(String[] headings, String[] values) {
-        if (headings.length != values.length) {
-            throw new IllegalArgumentException("Headings and values arrays must have the same length");
-        }
-
-        Map<String, String> keyValuePairs = new HashMap<>();
-        for (int i = 0; i < headings.length; i++) {
-            keyValuePairs.put(headings[i], values[i]);
-        }
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("{");
-        for (Map.Entry<String, String> entry : keyValuePairs.entrySet()) {
-            builder.append("\"").append(entry.getKey()).append("\"")
-                    .append(" : ")
-                    .append("\"").append(entry.getValue()).append("\"")
-                    .append(",");
-        }
-        // Remove the trailing comma
-        if (!keyValuePairs.isEmpty()) {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-        builder.append("}");
-
-        return builder.toString();
     }
 }

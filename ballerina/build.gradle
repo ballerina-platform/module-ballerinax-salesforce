@@ -65,6 +65,9 @@ configurations {
 
 dependencies {
     externalJars(group: 'com.opencsv', name: 'opencsv', version: '5.9')
+    externalJars(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.3')
+    externalJars(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.12.3')
+    externalJars(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.3')
 }
 
 task commitTomlFiles {

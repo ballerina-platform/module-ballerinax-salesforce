@@ -19,5 +19,6 @@
  module io.ballerinax.salesforce {
     requires io.ballerina.runtime;
     requires com.opencsv;
-    exports io.ballerinax.salesforce;
+     requires com.fasterxml.jackson.databind;
+     exports io.ballerinax.salesforce;
 }
