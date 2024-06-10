@@ -27,3 +27,9 @@ groupId = "com.opencsv"
 artifactId = "opencsv"
 version = "5.9"
 path = "./lib/opencsv-5.9.jar"
+
+[[platform.java17.dependency]]
+groupId = "com.fasterxml.jackson.core"
+artifactId = "jackson-databind"
+version = "2.12.3"
+path = "./lib/jackson-databind-2.12.3.jar"
