@@ -722,8 +722,8 @@ public isolated client class Client {
     # + maxRecords - The maximum number of records to retrieve per set of results for the query
     # + T - Type description of the required data type
     # + return - The resulting data in the given format if successful else `error`
-    isolated remote function getQueryResultWithType(string bulkJobId, int? maxRecords = ())
-        returns string|error =
+    isolated remote function getQueryResultWithType(string bulkJobId, int? maxRecords = (), typedesc<record {}[]> T = <>)
+        returns T|error =
     @java:Method {
         'class: "io.ballerinax.salesforce.BulkJobResultProcessor",
         name: "parseResultsToInputType"
