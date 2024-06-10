@@ -653,12 +653,20 @@ public isolated client class Client {
     }
 
     # Get bulk query job results
-    # 
+    #
     # + bulkJobId - Id of the bulk job
     # + maxRecords - The maximum number of records to retrieve per set of results for the query
     # + return - The resulting string[][] if successful else `error`
     isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ()) returns string[][]|error {
-                
+        string result = check self.processGetBulkJobResults(bulkJobId, maxRecords);
+        if result == "" {
+            return [];
+        } else {
+            return check parseCsvString(result);
+        }
+    }
+
+    private isolated function processGetBulkJobResults(string bulkJobId, int? maxRecords = ()) returns string|error {
         string path = "";
         string batchingParams = "";
 
@@ -667,8 +675,8 @@ public isolated client class Client {
                 if self.sfLocators.hasKey(bulkJobId) {
                     string locator = self.sfLocators.get(bulkJobId);
                     if locator is "null" {
-                        return [];
-                    } 
+                        return "";
+                    }
                     batchingParams = string `results?maxRecords=${maxRecords}&locator=${locator}`;
                 } else {
                     batchingParams = string `results?maxRecords=${maxRecords}`;
@@ -681,37 +689,44 @@ public isolated client class Client {
                 if self.sfLocators.hasKey(bulkJobId) {
                     string locator = self.sfLocators.get(bulkJobId);
                     if locator is "null" {
-                        return [];
-                    } 
+                        return "";
+                    }
                     batchingParams = string `results?locator=${locator}`;
                     path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
                 } else {
                     path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
                 }
             }
-        } 
-        
+        }
+
         http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             string textPayload = check response.getTextPayload();
-            if textPayload == "" {
-                return [];
-            }
             lock {
                 string|http:HeaderNotFoundError locatorValue = response.getHeader("sforce-locator");
                 if locatorValue is string {
                     self.sfLocators[bulkJobId] = locatorValue;
                 } // header not found error ignored 
             }
-            string[][] result = check parseCsvString(textPayload);
-            return result;
+            return textPayload;
         } else {
             json responsePayload = check response.getJsonPayload();
             return error("Error occurred while retrieving the query job results. ",
                 httpCode = response.statusCode, details = responsePayload);
         }
-
     }
+
+    // # Get bulk query job results
+    // #
+    // # + bulkJobId - Id of the bulk job
+    // # + maxRecords - The maximum number of records to retrieve per set of results for the query
+    // # + return - The resulting string[][] if successful else `error`
+    // isolated remote function getQueryResultWithType(string bulkJobId, int? maxRecords = (), typedesc<record {}> T = <>)
+    //     returns T|Error =
+    // @java:Method {
+    //     'class: "io.ballerinax.salesforce.CsvParserUtils",
+    //     name: "parseCsvToStringArray"
+    // } external;
 
     # Abort the bulkv2 job.
     #
