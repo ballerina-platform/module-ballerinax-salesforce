@@ -17,8 +17,6 @@
 import ballerina/http;
 import ballerinax/'client.config;
 
-
-
 # Represents status of the bulk jobs
 public enum Status {
     SUCCESSFUL_RESULTS = "successfulResults",

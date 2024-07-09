@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/time;
@@ -21,11 +22,10 @@ import ballerina/lang.'string as strings;
 
 isolated string csvContent = EMPTY_STRING;
 
-# Remove decimal places from a civil seconds value
+# Remove decimal places from a civil seconds value.
 #
 # + civilTime - a time:civil record
 # + return - a time:civil record with decimal places removed
-#
 isolated function removeDecimalPlaces(time:Civil civilTime) returns time:Civil {
     time:Civil result = civilTime;
     time:Seconds seconds = (result.second is ()) ? 0 : <time:Seconds>result.second;
@@ -34,7 +34,7 @@ isolated function removeDecimalPlaces(time:Civil civilTime) returns time:Civil {
     return result;
 }
 
-# Convert ReadableByteChannel to string.
+# Converts ReadableByteChannel to string.
 #
 # + rbc - ReadableByteChannel
 # + return - converted string
@@ -66,7 +66,7 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns string|err
 
 # Convert string[][] to string.
 #
-# + stringCsvInput - Multi dimentional array of strings
+# + stringCsvInput - Multi dimensional array of strings
 # + return - converted string
 isolated function convertStringListToString(string[][]|stream<string[], error?> stringCsvInput) returns string|error {
     lock {
