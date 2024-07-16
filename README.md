@@ -1,4 +1,4 @@
-Ballerina Salesforce Connector Checking Build
+Ballerina Salesforce Connector
 ===================
 [![Build](https://github.com/ballerina-platform/module-ballerinax-sfdc/workflows/CI/badge.svg)](https://github.com/ballerina-platform/module-ballerinax-sfdc/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerinax-sfdc/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerinax-sfdc)
