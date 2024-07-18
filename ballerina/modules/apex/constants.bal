@@ -14,15 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//Latest API Version
-# Constant field `API_VERSION`. Holds the value for the Salesforce API version.
-public const string API_VERSION = "v59.0";
+# Error message for invalid client configuration parameters. (not public)
+final string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";
 
-public const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";
-
-//Salesforce endpoints
-# Constant field `BASE_PATH`. Holds the value for the Salesforce base path/URL.
-const string BASE_PATH = "/services/data";
-
-# Constant field `APEX_BASE_PATH`. Holds the value for the Salesforce Apex base path/URL.
+# Holds the value for the Salesforce Apex base path/URL.
 final string APEX_BASE_PATH = string `/services/apexrest`;

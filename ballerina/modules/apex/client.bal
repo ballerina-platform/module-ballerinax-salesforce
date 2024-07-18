@@ -19,20 +19,20 @@ import ballerina/jballerina.java;
 import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
 
-# Ballerina Salesforce connector provides the capability to access Salesforce REST API.
-# This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
-# and organizational data.
+# Ballerina Salesforce Apex Client provides the capability to access Salesforce Apex REST API.
+# This client allows you to perform operations for custom Apex REST endpoints, execute HTTP methods on these endpoints,
+# and handle responses appropriately.
 public isolated client class Client {
     private final http:Client salesforceClient;
     private map<string> sfLocators = {};
 
-    # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
-    # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
+    # Initializes the Salesforce Apex Client. During initialization, you can pass either `http:BearerTokenConfig`
+    # if you have a bearer token or `http:OAuth2RefreshTokenGrantConfig` if you have OAuth tokens.
     # Create a Salesforce account and obtain tokens following 
-    # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm). 
+    # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
     #
-    # + salesforceConfig - Salesforce Connector configuration
-    # + return - `sfdc:Error` on failure of initialization or else `()`
+    # + config - Salesforce connector configuration
+    # + return - `error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
@@ -45,12 +45,12 @@ public isolated client class Client {
         }
     }
 
-    # Access Salesforce APEX resource.
+    # Executes an HTTP request on a Salesforce Apex resource.
     #
-    # + urlPath - URI path
-    # + methodType - HTTP method type
-    # + payload - Payload
-    # + returnType - The payload type, which is expected to be returned after data binding
+    # + urlPath - URI path of the Apex resource
+    # + methodType - HTTP method type (GET, POST, DELETE, PUT, PATCH)
+    # + payload - Payload to be sent with the request
+    # + returnType - The type of data expected to be returned after data binding
     # + return - `string|int|record{}` type if successful or else `error`
     isolated remote function apexRestExecute(string urlPath, http:Method methodType,
             record {} payload = {}, typedesc<record {}|string|int?> returnType = <>)

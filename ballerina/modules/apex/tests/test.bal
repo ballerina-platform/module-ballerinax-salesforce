@@ -1,4 +1,4 @@
-// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2024 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 import ballerina/log;
 import ballerina/os;
 import ballerina/test;
@@ -26,10 +25,6 @@ configurable string clientSecret = os:getEnv("CLIENT_SECRET");
 configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
 configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
-configurable string username = "";
-configurable string password = "";
-
-string reportInstanceID = "";
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfigRefreshCodeFlow = {
@@ -39,27 +34,6 @@ ConnectionConfig sfConfigRefreshCodeFlow = {
         clientSecret: clientSecret,
         refreshToken: refreshToken,
         refreshUrl: refreshUrl
-    }
-};
-
-ConnectionConfig sfConfigPasswordFlow = {
-    baseUrl: baseUrl,
-    auth: {
-        password,
-        username,
-        tokenUrl: refreshUrl,
-        clientId: clientId,
-        clientSecret: clientSecret,
-        credentialBearer: "POST_BODY_BEARER"
-    }
-};
-
-ConnectionConfig sfConfigCredentialsFlow = {
-    baseUrl: baseUrl,
-    auth: {
-        clientId: clientId,
-        clientSecret: clientSecret,
-        tokenUrl: refreshUrl
     }
 };
 
@@ -89,4 +63,3 @@ function testApex() returns error? {
         test:assertFail(msg = deleteResponse.message());
     }
 }
-
