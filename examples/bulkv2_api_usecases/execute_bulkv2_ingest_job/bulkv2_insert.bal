@@ -14,11 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerinax/salesforce;
+import ballerinax/salesforce.bulkv2;
 import ballerina/lang.runtime;
 import ballerina/io;
 
-// Create Salesforce client configuration by reading from environment.
+// Create Salesforce bulkv2 client configuration by reading from environment.
 configurable string clientId = ?;
 configurable string clientSecret = ?;
 configurable string refreshToken = ?;
@@ -26,7 +26,7 @@ configurable string refreshUrl = ?;
 configurable string baseUrl = ?;
 
 // Using direct-token config for client configuration
-salesforce:ConnectionConfig sfConfig = {
+bulkv2:ConnectionConfig sfConfig = {
     baseUrl,
     auth: {
         clientId,
@@ -38,19 +38,19 @@ salesforce:ConnectionConfig sfConfig = {
 
 public function main() returns error? {
     // Insert contacts using a CSV file
-    salesforce:Client baseClient = check new (sfConfig);
+    bulkv2:Client baseClient = check new (sfConfig);
     string csvContactsFilePath = "contacts1.csv";
 
     //create job
-    salesforce:BulkCreatePayload payload = {
+    bulkv2:BulkCreatePayload payload = {
         'object : "Contact",
         contentType : "CSV",
         operation : "insert",
         lineEnding : "LF"
     };
-    error|salesforce:BulkJob insertJob = baseClient->createIngestJob(payload);
+    error|bulkv2:BulkJob insertJob = baseClient->createIngestJob(payload);
 
-    if insertJob is salesforce:BulkJob {
+    if insertJob is bulkv2:BulkJob {
         string[][] csvContent = check io:fileReadCsv(csvContactsFilePath);
         error? response = baseClient->addBatch(insertJob.id, csvContent);
         if response is error {
@@ -58,14 +58,14 @@ public function main() returns error? {
         }
         runtime:sleep(5);
         //get job info
-        error|salesforce:BulkJobInfo jobInfo = baseClient->getJobInfo(insertJob.id, "ingest");
+        error|bulkv2:BulkJobInfo jobInfo = baseClient->getJobInfo(insertJob.id, "ingest");
         if jobInfo is error {
             io:println("Error occurred while getting job info: ", jobInfo.message());
         }
         runtime:sleep(5);
         //close job
-        future<salesforce:BulkJobInfo|error> closedJob = check baseClient->closeIngestJobAndWait(insertJob.id);
-        salesforce:BulkJobInfo|error closedJobInfo = wait closedJob;
+        future<bulkv2:BulkJobInfo|error> closedJob = check baseClient->closeIngestJobAndWait(insertJob.id);
+        bulkv2:BulkJobInfo|error closedJobInfo = wait closedJob;
         if closedJobInfo is error {
             io:println("Error occurred while closing job: ", closedJobInfo.message());
         }
