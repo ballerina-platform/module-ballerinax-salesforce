@@ -17,12 +17,23 @@
 import ballerina/http;
 import ballerinax/'client.config;
 
-# Represents status of the bulk jobs
+# Represents the status of the bulk jobs.
+#
+# + SUCCESSFUL_RESULTS - Indicates successful results
+# + FAILED_RESULTS - Indicates failed results
 public enum Status {
     SUCCESSFUL_RESULTS = "successfulResults",
     FAILED_RESULTS = "failedResults"
 };
 
+# Represents the state of the job.
+#
+# + OPEN - The job is open
+# + UPLOAD_COMPLETE - The upload is complete
+# + IN_PROGRESS - The job is in progress
+# + JOB_COMPLETE - The job is complete
+# + ABORTED - The job is aborted
+# + FAILED - The job has failed
 public enum JobStateEnum {
     OPEN = "Open",
     UPLOAD_COMPLETE = "UploadComplete",
@@ -32,18 +43,34 @@ public enum JobStateEnum {
     FAILED = "Failed"
 };
 
+# Represents the type of job.
+#
+# + BIG_OBJECT_INGEST - Big object ingest job type
+# + CLASSIC - Classic job type
+# + V2_INGEST - V2 ingest job type
 public enum JobType {
     BIG_OBJECT_INGEST = "BigObjectIngest",
     CLASSIC = "Classic",
     V2_INGEST = "V2Ingest"
 };
 
+# Represents the bulk operation type.
+#
+# + QUERY - Query operation
+# + INGEST - Ingest operation
 public enum BulkOperation {
     QUERY = "query",
     INGEST = "ingest"
 };
 
-# Operation type of the bulk job.
+# Represents the operation type of the bulk job.
+#
+# + INSERT - Insert operation
+# + UPDATE - Update operation
+# + DELETE - Delete operation
+# + UPSERT - Upsert operation
+# + HARD_DELETE - Hard delete operation
+# + QUERY - Query operation
 public enum Operation {
     INSERT = "insert",
     UPDATE = "update",
@@ -51,13 +78,25 @@ public enum Operation {
     UPSERT = "upsert",
     HARD_DELETE = "hardDelete",
     QUERY = "query"
-}; 
+};
 
+# Represents the line ending type.
+#
+# + LF - Line feed
+# + CRLF - Carriage return and line feed
 public enum LineEndingEnum {
     LF = "LF",
     CRLF = "CRLF"
 };
 
+# Represents the column delimiter type.
+#
+# + BACKQUOTE - Backquote delimiter
+# + CARET - Caret delimiter
+# + COMMA - Comma delimiter
+# + PIPE - Pipe delimiter
+# + SEMICOLON - Semicolon delimiter
+# + TAB - Tab delimiter
 public enum ColumnDelimiterEnum {
     BACKQUOTE,
     CARET,
@@ -68,110 +107,114 @@ public enum ColumnDelimiterEnum {
 };
 
 # Represents the Salesforce client configuration.
+#
+# + baseUrl - The Salesforce endpoint URL
+# + auth - Configurations related to client authentication
 public type ConnectionConfig record {|
     *config:ConnectionConfig;
-    # The Salesforce endpoint URL
     string baseUrl;
-    # Configurations related to client authentication
     http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig|
         config:OAuth2PasswordGrantConfig|config:OAuth2ClientCredentialsGrantConfig auth;
 |};
 
 # Defines the Salesforce version type.
+#
+# + label - Label of the Salesforce version
+# + url - URL of the Salesforce version
+# + version - Salesforce version number
 public type Version record {
-    # Label of the Salesforce version
     string label;
-    # URL of the Salesforce version
     string url;
-    # Salesforce version number
     string 'version;
 };
 
 # Defines the Limit type to list limits information for your org.
+#
+# + Max - The limit total for the org
+# + Remaining - The total number of calls or events left for the org
 public type Limit record {|
-    # The limit total for the org
     int Max;
-    # The total number of calls or events left for the org
     int Remaining;
     json...;
 |};
 
 # Represents the bulk job creation request payload. 
+#
+# + object - The sObject type of the bulk job
+# + operation - The operation type of the bulk job
+# + columnDelimiter - The column delimiter of the payload
+# + contentType - The content type of the payload
+# + lineEnding - The line ending of the payload
+# + externalIdFieldName - The external ID field name for upsert operations
+# + query - The SOQL query for query operations
 public type BulkCreatePayload record {
-    # the sObject type of the bulk job
     string 'object?;
-    # the operation type of the bulk job
     Operation operation;
-    # the column delimiter of the payload
     ColumnDelimiterEnum columnDelimiter?;
-    # the content type of the payload
     string contentType?;
-    # the line ending of the payload
     LineEndingEnum lineEnding?;
-    # the external ID field name for upsert operations
     string externalIdFieldName?;
-    # the SOQL query for query operations
     string query?;
 };
 
 # Represents the bulk job creation response.
+#
+# + contentUrl - The URL to use for uploading the CSV data for the job
+# + lineEnding - The line ending of the payload
+# + columnDelimiter - The column delimiter of the payload
 public type BulkJob record {
     *BulkJobCloseInfo;
-    # The URL to use for uploading the CSV data for the job.
     string contentUrl?;
-    # The line ending of the payload.
     string lineEnding?;
-    # The column delimiter of the payload.
     string columnDelimiter?;
 };
 
 # Represents bulk job related information.
+#
+# + retries - The number of times that Salesforce attempted to process the job
+# + totalProcessingTime - The total time spent processing the job
+# + apiActiveProcessingTime - The total time spent processing the job by API
+# + apexProcessingTime - The total time spent to process triggers and other processes related to the job data
+# + numberRecordsProcessed - The number of records already processed by the job
 public type BulkJobInfo record {
     *BulkJob;
-    # The number of times that Salesforce attempted to process the job.
     int retries?;
-    # The total time spent processing the job.
     int totalProcessingTime?;
-    # The total time spent processing the job by API.
     int apiActiveProcessingTime?;
-    # The total time spent to process triggers and other processes related to the job data;
     int apexProcessingTime?;
-    # The number of records already processed by the job.
     int numberRecordsProcessed?;
 };
 
-
 # Represents bulk job related information when Closed. 
+# 
+# + id - The ID of the job
+# + operation - The operation type of the job
+# + object - The sObject type of the job
+# + createdById - The ID of the user who created the job 
+# + createdDate - The date and time when the job was created
+# + systemModstamp - The date and time when the job was finished 
+# + state - The state of the job
+# + concurrencyMode - The concurrency mode of the job
+# + contentType - The content type of the payload
+# + apiVersion - The API version
 public type BulkJobCloseInfo record {
-    # The ID of the job.
     string id;
-    # The operation type of the job.
     string operation;
-    # The sObject type of the job.
     string 'object;
-    # The ID of the user who created the job.
     string createdById;
-    # The date and time when the job was created.
     string createdDate;
-    # The date and time when the job was finished.
     string systemModstamp;
-    # The state of the job.
     string state;
-    # The concurrency mode of the job.
     string concurrencyMode;
-    # The content type of the payload.
-    string contentType;
-    # The API version.
-    float apiVersion;
 };
 
-
-# Represents output for get all jobs request
+# Represents the output of the get all jobs request.
+# 
+# + done - Indicates whether there are more records to retrieve
+# + records - Array of job records
+# + nextRecordsUrl - URL to retrieve the next set of records
 public type AllJobs record {
-    # Indicates whether there are more records to retrieve.
     boolean done;
-    # Array of job records.
     BulkJobInfo[] records;
-    # URL to retrieve the next set of records.
     string nextRecordsUrl;
 };

@@ -21,7 +21,7 @@ import ballerina/lang.'string as strings;
 
 isolated string csvContent = EMPTY_STRING;
 
-# Convert ReadableByteChannel to string.
+# Util method to convert ReadableByteChannel to string.
 #
 # + rbc - ReadableByteChannel
 # + return - converted string
@@ -51,9 +51,9 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns string|err
     return textContent;
 }
 
-# Convert string[][] to string.
+# Util method to convert string[][] to string.
 #
-# + stringCsvInput - Multi dimentional array of strings
+# + stringCsvInput - Multi-dimensional array of strings
 # + return - converted string
 isolated function convertStringListToString(string[][]|stream<string[], error?> stringCsvInput) returns string|error {
     lock {

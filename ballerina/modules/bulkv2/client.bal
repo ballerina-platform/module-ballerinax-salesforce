@@ -20,15 +20,15 @@ import ballerina/lang.runtime;
 import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
 
-# Ballerina Salesforce connector provides the capability to access Salesforce REST API.
-# This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
-# and organizational data.
+# Ballerina Salesforce Bulk v2 Client provides the capability to access Salesforce Bulk API v2.
+# This client allows you to perform bulk data operations such as creating, querying, updating, and deleting large volumes of data. 
+# You can create and manage bulk jobs, upload data, check job status, and retrieve job results efficiently.
 public isolated client class Client {
 
     private final http:Client salesforceClient;
     private map<string> sfLocators = {};
 
-    # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
+    # Initializes the Bulk V2 client. During initialization you can pass either http:BearerTokenConfig if you have a bearer
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
     # Create a Salesforce account and obtain tokens following 
     # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm). 
@@ -109,8 +109,8 @@ public isolated client class Client {
     # Uploads data for a job using CSV data.
     #
     # + bulkJobId - Id of the bulk job
-    # + content - CSV data to be added
-    # + return - `Nil` record if successful or `error` if unsuccessful
+    # + content - CSV data to be uploaded
+    # + return - `()` if successful or else `error`
     isolated remote function addBatch(string bulkJobId, string|string[][]|stream<string[], error?>|io:ReadableByteChannel content) returns error? {
         string payload = "";
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, BATCHES]);
@@ -130,7 +130,7 @@ public isolated client class Client {
     # Get details of all the jobs.
     #
     # + jobType - Type of the job
-    # + return - `AllJobs` record if successful or `error` if unsuccessful
+    # + return - `AllJobs` record if successful or else `error`
     isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
@@ -140,7 +140,7 @@ public isolated client class Client {
     # Get details of all query jobs.
     #
     # + jobType - Type of the job
-    # + return - `AllJobs` if successful else `error`
+    # + return - `AllJobs` if successful or else `error`
     isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
@@ -151,7 +151,7 @@ public isolated client class Client {
     #
     # + status - Status of the job
     # + bulkJobId - Id of the bulk job
-    # + return - `string[][]` if successful else `error`
+    # + return - `string[][]` if successful or else `error`
     isolated remote function getJobStatus(string bulkJobId, Status status)
             returns string[][]|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, status]);
@@ -171,11 +171,11 @@ public isolated client class Client {
 
     }
 
-    # Get bulk query job results
+    # Get bulk query job results.
     # 
     # + bulkJobId - Id of the bulk job
     # + maxRecords - The maximum number of records to retrieve per set of results for the query
-    # + return - The resulting string[][] if successful else `error`
+    # + return - The resulting string[][] if successful or else `error`
     isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ()) returns string[][]|error {
                 
         string path = "";
@@ -236,7 +236,7 @@ public isolated client class Client {
     #
     # + bulkJobId - Id of the bulk job
     # + bulkOperation - The processing operation for the job
-    # + return - `()` if successful else `error`
+    # + return - `()` if successful or else `error`
     isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         record {} payload = {"state": "Aborted"};
@@ -247,7 +247,7 @@ public isolated client class Client {
     #
     # + bulkJobId - Id of the bulk job
     # + bulkOperation - The processing operation for the job
-    # + return - `()` if successful else `error`
+    # + return - `()` if successful or else `error`
     isolated remote function deleteJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         return check self.salesforceClient->delete(path);
@@ -256,7 +256,7 @@ public isolated client class Client {
     # Notifies Salesforce servers that the upload of job data is complete.
     #
     # + bulkJobId - Id of the bulk job
-    # + return - future<BulkJobInfo> if successful else `error`
+    # + return - future<BulkJobInfo> if successful or else `error`
     isolated remote function closeIngestJobAndWait(string bulkJobId) returns error|future<BulkJobInfo|error> {
         final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};
@@ -286,7 +286,7 @@ public isolated client class Client {
     # Notifies Salesforce servers that the upload of job data is complete.
     #
     # + bulkJobId - Id of the bulk job
-    # + return - BulkJobInfo if successful else `error`
+    # + return - BulkJobInfo if successful or else `error`
     isolated remote function closeIngestJob(string bulkJobId) returns error|BulkJobCloseInfo {
         final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};

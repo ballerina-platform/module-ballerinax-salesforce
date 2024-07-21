@@ -93,4 +93,6 @@ public function main() returns error? {
 
 2. Use `bal run` command to compile and run the Ballerina program. 
 
-**[You can find a list of samples here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/apex_rest_api_usecases/create_case)**
+## Examples
+
+1. [Salesforce APEX REST API use cases](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/apex_rest_api_usecases) - How to employ APEX REST API to create a case in Salesforce.

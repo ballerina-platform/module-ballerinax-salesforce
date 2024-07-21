@@ -16,6 +16,9 @@
 
 //Latest API Version
 # Constant field `API_VERSION`. Holds the value for the Salesforce API version.
+# # Deprecated 
+# This will be removed with the 9.0.0 release.
+@deprecated
 public const string API_VERSION = "v59.0";
 
 // For URL encoding
@@ -111,6 +114,9 @@ const string QUESTION_MARK = "?";
 const string EQUAL_SIGN = "=";
 
 # Constant field `EMPTY_STRING`. Holds the value of "".
+# # Deprecated 
+# This will be removed with the 9.0.0 release.
+@deprecated
 public const string EMPTY_STRING = "";
 
 # Constant field `AMPERSAND`. Holds the value of "&".
