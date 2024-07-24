@@ -74,12 +74,12 @@ Following is an example of how to create a bulk job using the connector.
 
 ```ballerina
 bulkv2:BulkCreatePayload payload = {
-    'object : "Contact",
-    contentType : "CSV",
-    operation : "insert",
-    lineEnding : "LF"
+    'object: "Contact",
+    contentType: "CSV",
+    operation: "insert",
+    lineEnding: "LF"
 };
-error|bulkv2:BulkJob insertJob = baseClient->createIngestJob(payload);
+bulkv2:BulkJob insertJob = check baseClient->createIngestJob(payload);
 ```
 
 2. Use following command to compile and run the Ballerina program.

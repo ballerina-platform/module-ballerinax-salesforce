@@ -186,7 +186,7 @@ public type BulkJobInfo record {
 };
 
 # Represents bulk job related information when Closed. 
-# 
+#
 # + id - The ID of the job
 # + operation - The operation type of the job
 # + object - The sObject type of the job
@@ -209,7 +209,7 @@ public type BulkJobCloseInfo record {
 };
 
 # Represents the output of the get all jobs request.
-# 
+#
 # + done - Indicates whether there are more records to retrieve
 # + records - Array of job records
 # + nextRecordsUrl - URL to retrieve the next set of records

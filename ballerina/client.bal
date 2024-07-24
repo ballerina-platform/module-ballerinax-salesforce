@@ -484,7 +484,7 @@ public isolated client class Client {
     # + returnType - The payload type, which is expected to be returned after data binding
     # + return - `string|int|record{}` type if successful or else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.apex, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.apex, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function apexRestExecute(string urlPath, http:Method methodType,
@@ -537,7 +537,7 @@ public isolated client class Client {
     # + payload - The payload for the bulk job
     # + return - `BulkJob` if successful or else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function createIngestJob(BulkCreatePayload payload) returns BulkJob|error {
@@ -550,7 +550,7 @@ public isolated client class Client {
     # + payload - The payload for the bulk job
     # + return - `BulkJob` if successful or else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function createQueryJob(BulkCreatePayload payload) returns BulkJob|error {
@@ -563,7 +563,7 @@ public isolated client class Client {
     # + payload - The payload for the bulk job
     # + return - `future<BulkJobInfo>` if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function createQueryJobAndWait(BulkCreatePayload payload) returns future<BulkJobInfo|error>|error {
@@ -599,7 +599,7 @@ public isolated client class Client {
     # + bulkOperation - The processing operation for the job
     # + return - `BulkJobInfo` if successful or else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function getJobInfo(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
@@ -613,7 +613,7 @@ public isolated client class Client {
     # + content - CSV data to be added
     # + return - `Nil` record if successful or `error` if unsuccessful
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function addBatch(string bulkJobId, string|string[][]|stream<string[], error?>|io:ReadableByteChannel content) returns error? {
@@ -637,7 +637,7 @@ public isolated client class Client {
     # + jobType - Type of the job
     # + return - `AllJobs` record if successful or `error` if unsuccessful
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs {
@@ -651,7 +651,7 @@ public isolated client class Client {
     # + jobType - Type of the job
     # + return - `AllJobs` if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
@@ -666,7 +666,7 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + return - `string[][]` if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function getJobStatus(string bulkJobId, Status status)
@@ -694,7 +694,7 @@ public isolated client class Client {
     # + maxRecords - The maximum number of records to retrieve per set of results for the query
     # + return - The resulting string[][] if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ()) returns string[][]|error {
@@ -759,7 +759,7 @@ public isolated client class Client {
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
@@ -774,7 +774,7 @@ public isolated client class Client {
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function deleteJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
@@ -787,7 +787,7 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + return - future<BulkJobInfo> if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function closeIngestJobAndWait(string bulkJobId) returns error|future<BulkJobInfo|error> {
@@ -821,7 +821,7 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + return - BulkJobInfo if successful else `error`
     # # Deprecated
-    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports this API. 
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
     # This API will be removed with the 9.0.0 release.
     @deprecated
     isolated remote function closeIngestJob(string bulkJobId) returns error|BulkJobCloseInfo {

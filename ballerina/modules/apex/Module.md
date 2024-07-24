@@ -1,7 +1,9 @@
 ## Overview
 
 Salesforce Apex REST API enables you to expose your Apex classes and methods as RESTful web services. This module provides operations for executing custom Apex REST endpoints, allowing you to perform various HTTP operations on these endpoints and handle responses accordingly.
- 
+
+Ballerina Salesforce Apex REST API client supports the [Salesforce v59.0 APEX REST API](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_intro.htm).
+
 ## Setup guide
 
 1. Create a Salesforce account with the REST capability.
@@ -53,12 +55,6 @@ import ballerinax/salesforce.apex;
 
 Create a `ConnectionConfig` with the OAuth2 tokens obtained, and initialize the connector with it.
 ```ballerina
-configurable string clientId = ?;
-configurable string clientSecret = ?;
-configurable string refreshToken = ?;
-configurable string refreshUrl = ?;
-configurable string baseUrl = ?;
-
 apex:ConnectionConfig sfConfig = {
     baseUrl: baseUrl,
     auth: {
@@ -79,14 +75,12 @@ Following is an example of how to execute a custom Apex REST endpoint using the 
 
 ```ballerina
 public function main() returns error? {
-    string|error caseId = apexClient->apexRestExecute("Cases", "POST", 
-        {"subject" : "Item Fault!",
-            "status" : "New",
-            "priority" : "High"});
-    if caseId is error {
-        log:printError("Error occurred while creating the case.");
-        return caseId;
-    }
+    string caseId = check apexClient->apexRestExecute("Cases", "POST",
+        {
+        "subject": "Item Fault!",
+        "status": "New",
+        "priority": "High"
+    });
     return;
 }
 ```
