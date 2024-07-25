@@ -15,7 +15,7 @@
 // under the License.
 
 import ballerina/log;
-import ballerinax/salesforce;
+import ballerinax/salesforce.apex;
 import ballerina/lang.runtime;
 
 // Create Salesforce client configuration by reading from environment.
@@ -26,7 +26,7 @@ configurable string refreshUrl = ?;
 configurable string baseUrl = ?;
 
 // Using direct-token config for client configuration
-salesforce:ConnectionConfig sfConfig = {
+apex:ConnectionConfig sfConfig = {
     baseUrl,
     auth: {
         clientId,
@@ -38,7 +38,7 @@ salesforce:ConnectionConfig sfConfig = {
 
 public function main() returns error? {
     // Create Case using user defined APEX method
-    salesforce:Client baseClient = check new (sfConfig);
+    apex:Client baseClient = check new (sfConfig);
 
     string|error caseId = baseClient->apexRestExecute("Cases", "POST", 
         {"subject" : "Item Fault!",

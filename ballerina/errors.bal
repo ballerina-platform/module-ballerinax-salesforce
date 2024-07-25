@@ -32,11 +32,19 @@ const string JSON_ACCESSING_ERROR_MSG = "Error occurred while accessing the JSON
 const string XML_ACCESSING_ERROR_MSG = "Error occurred while accessing the XML payload of the response.";
 const string TEXT_ACCESSING_ERROR_MSG = "Error occurred while accessing the Text payload of the response.";
 const string HTTP_CLIENT_ERROR = "Failed to establish the communication with the upstream server or a data binding failure. Refer error.cause() for more details";
+# # Deprecated 
+# This will be removed with the 9.0.0 release.
+@deprecated
 public const string HTTP_ERROR_MSG = "Error occurred while getting the HTTP response.";
 const STATUS_CODE = "statusCode";
 const HEADERS = "headers";
 const BODY = "body";
 
-
+# # Deprecated 
+# This will be removed with the 9.0.0 release.
+@deprecated
 public const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
+# # Deprecated 
+# This will be removed with the 9.0.0 release.
+@deprecated
 public const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";

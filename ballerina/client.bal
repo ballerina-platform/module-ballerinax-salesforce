@@ -13,6 +13,7 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
+
 import ballerina/http;
 import ballerina/io;
 import ballerina/jballerina.java;
@@ -24,7 +25,6 @@ import ballerinax/salesforce.utils;
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
 # and organizational data.
-
 public isolated client class Client {
     private final http:Client salesforceClient;
     private map<string> sfLocators = {};
@@ -483,6 +483,10 @@ public isolated client class Client {
     # + payload - Payload
     # + returnType - The payload type, which is expected to be returned after data binding
     # + return - `string|int|record{}` type if successful or else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.apex, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function apexRestExecute(string urlPath, http:Method methodType,
             record {} payload = {}, typedesc<record {}|string|int?> returnType = <>)
             returns returnType|error = @java:Method {
@@ -532,6 +536,10 @@ public isolated client class Client {
     #
     # + payload - The payload for the bulk job
     # + return - `BulkJob` if successful or else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function createIngestJob(BulkCreatePayload payload) returns BulkJob|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]);
         return check self.salesforceClient->post(path, payload);
@@ -541,6 +549,10 @@ public isolated client class Client {
     #
     # + payload - The payload for the bulk job
     # + return - `BulkJob` if successful or else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function createQueryJob(BulkCreatePayload payload) returns BulkJob|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY]);
         return check self.salesforceClient->post(path, payload);
@@ -550,6 +562,10 @@ public isolated client class Client {
     #
     # + payload - The payload for the bulk job
     # + return - `future<BulkJobInfo>` if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function createQueryJobAndWait(BulkCreatePayload payload) returns future<BulkJobInfo|error>|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY]);
         http:Response response = check self.salesforceClient->post(path, payload);
@@ -582,6 +598,10 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + bulkOperation - The processing operation for the job
     # + return - `BulkJobInfo` if successful or else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function getJobInfo(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         return check self.salesforceClient->get(path);
@@ -592,6 +612,10 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + content - CSV data to be added
     # + return - `Nil` record if successful or `error` if unsuccessful
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function addBatch(string bulkJobId, string|string[][]|stream<string[], error?>|io:ReadableByteChannel content) returns error? {
         string payload = "";
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, BATCHES]);
@@ -612,6 +636,10 @@ public isolated client class Client {
     #
     # + jobType - Type of the job
     # + return - `AllJobs` record if successful or `error` if unsuccessful
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
@@ -622,6 +650,10 @@ public isolated client class Client {
     #
     # + jobType - Type of the job
     # + return - `AllJobs` if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
@@ -633,6 +665,10 @@ public isolated client class Client {
     # + status - Status of the job
     # + bulkJobId - Id of the bulk job
     # + return - `string[][]` if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function getJobStatus(string bulkJobId, Status status)
             returns string[][]|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, status]);
@@ -657,6 +693,10 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + maxRecords - The maximum number of records to retrieve per set of results for the query
     # + return - The resulting string[][] if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function getQueryResult(string bulkJobId, int? maxRecords = ()) returns string[][]|error {
                 
         string path = "";
@@ -718,6 +758,10 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         record {} payload = {"state": "Aborted"};
@@ -729,6 +773,10 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function deleteJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
         string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
         return check self.salesforceClient->delete(path);
@@ -738,6 +786,10 @@ public isolated client class Client {
     #
     # + bulkJobId - Id of the bulk job
     # + return - future<BulkJobInfo> if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function closeIngestJobAndWait(string bulkJobId) returns error|future<BulkJobInfo|error> {
         final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};
@@ -768,6 +820,10 @@ public isolated client class Client {
     #
     # + bulkJobId - Id of the bulk job
     # + return - BulkJobInfo if successful else `error`
+    # # Deprecated
+    # This function is deprecated due to the introduction of the new submodule salesforce.bulkv2, which supports the same functionality.
+    # This API will be removed with the 9.0.0 release.
+    @deprecated
     isolated remote function closeIngestJob(string bulkJobId) returns error|BulkJobCloseInfo {
         final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};

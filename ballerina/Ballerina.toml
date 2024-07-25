@@ -2,8 +2,8 @@
 distribution = "2201.8.0"
 org = "ballerinax"
 name = "salesforce"
-version = "8.0.2"
-export = ["salesforce", "salesforce.bulk", "salesforce.soap"]
+version = "8.1.0"
+export = ["salesforce", "salesforce.bulk", "salesforce.soap","salesforce.bulkv2", "salesforce.apex"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["Sales & CRM/Customer Relationship Management", "Cost/Freemium"]
@@ -17,10 +17,10 @@ observabilityIncluded = true
 graalvmCompatible = true
 
 [[platform.java17.dependency]]
-path = "../native/build/libs/salesforce-native-8.0.2.jar"
+path = "../native/build/libs/salesforce-native-8.1.0-SNAPSHOT.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "8.0.2"
+version = "8.1.0-SNAPSHOT"
 
 [[platform.java17.dependency]]
 groupId = "com.opencsv"
