@@ -22,6 +22,7 @@ import ballerinax/salesforce.utils;
 # Ballerina Salesforce Apex Client provides the capability to access Salesforce Apex REST API.
 # This client allows you to perform operations for custom Apex REST endpoints, execute HTTP methods on these endpoints,
 # and handle responses appropriately.
+@display {label: "Salesforce Apex", iconPath: "icon.png"}
 public isolated client class Client {
     private final http:Client salesforceClient;
     private map<string> sfLocators = {};

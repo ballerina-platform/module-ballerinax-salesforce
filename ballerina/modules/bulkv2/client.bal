@@ -23,6 +23,7 @@ import ballerinax/salesforce.utils;
 # Ballerina Salesforce Bulk v2 Client provides the capability to access Salesforce Bulk API v2.
 # This client allows you to perform bulk data operations such as creating, querying, updating, and deleting large volumes of data. 
 # You can create and manage bulk jobs, upload data, check job status, and retrieve job results efficiently.
+@display {label: "Salesforce Bulk v2", iconPath: "icon.png"}
 public isolated client class Client {
 
     private final http:Client salesforceClient;

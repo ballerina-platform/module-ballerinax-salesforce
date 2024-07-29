@@ -25,6 +25,7 @@ import ballerinax/salesforce.utils;
 # + salesforceClient - OAuth2 client endpoint
 # + clientHandler - http:ClientOAuth2Handler class instance 
 # + clientConfig - Configurations required to initialize the `Client`
+@display {label: "Salesforce Bulk", iconPath: "icon.png"}
 public isolated client class Client {
     private final http:Client salesforceClient;
     private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;

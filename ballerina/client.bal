@@ -25,6 +25,7 @@ import ballerinax/salesforce.utils;
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
 # This connector lets you to perform operations for SObjects, query using SOQL, search using SOSL, and describe SObjects
 # and organizational data.
+@display {label: "Salesforce", iconPath: "icon.png"}
 public isolated client class Client {
     private final http:Client salesforceClient;
     private map<string> sfLocators = {};
