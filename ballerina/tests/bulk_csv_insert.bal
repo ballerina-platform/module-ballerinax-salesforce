@@ -134,7 +134,7 @@ function insertCsvFromFile() returns error? {
         }
         runtime:sleep(10);
         //close job
-        BulkJobCloseInfo closedJob = check baseClient->closeIngestJob(insertJob.id);
+        _ = check baseClient->closeIngestJob(insertJob.id);
         runtime:sleep(15);
         BulkJobInfo|error closedJobInfo = baseClient->getJobInfo(insertJob.id, INGEST);
         if closedJobInfo is BulkJobInfo {

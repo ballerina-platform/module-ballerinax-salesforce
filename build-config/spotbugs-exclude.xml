@@ -16,4 +16,49 @@
   ~ under the License.
   -->
 <FindBugsFilter>
+    <Match>
+        <Bug code="EI2" />
+        <Class name="io.ballerinax.salesforce.DispatcherService" />
+    </Match>
+
+    <Match>
+        <Bug code="MS" />
+        <Class name="io.ballerinax.salesforce.EmpConnector" />
+    </Match>
+
+    <Match>
+        <Bug code="SIC" />
+        <Package name="io.ballerinax.salesforce" />
+    </Match>
+
+    <Match>
+        <Bug code="MC" />
+        <Class name="io.ballerinax.salesforce.EmpConnector$SubscriptionImpl" />
+    </Match>
+
+    <Match>
+        <Bug code="DB" />
+        <Class name="io.ballerinax.salesforce.LoginHelper$LoginResponseParser" />
+    </Match>
+
+    <Match>
+        <Bug code="DCN" />
+        <Class name="io.ballerinax.salesforce.ReplayExtension" />
+    </Match>
+
+    <Match>
+        <Bug code="EI2" />
+        <Class name="io.ballerinax.salesforce.ReplayExtension" />
+    </Match>
+
+    <Match>
+        <Bug code="SF" />
+        <Class name="io.ballerinax.salesforce.ReplayExtension" />
+    </Match>
+
+    <Match>
+        <Bug code="SIC" />
+        <Package name="io.ballerinax.salesforce" />
+    </Match>
 </FindBugsFilter>
+

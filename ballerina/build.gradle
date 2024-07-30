@@ -55,6 +55,13 @@ task updateTomlFiles {
         def newConfig = ballerinaTomlFilePlaceHolder.text.replace('@project.version@', project.version.toString())
         newConfig = newConfig.replace('@toml.version@', tomlVersion)
         newConfig = newConfig.replace("@opencsv.version@", openCsvVersion)
+        newConfig = newConfig.replace('@jackson.databind.version@', jacksonDatabindVersion)
+        newConfig = newConfig.replace('@jackson.annotations.version@', jacksonAnnotationsVersion)
+        newConfig = newConfig.replace('@jackson.core.version@', jacksonCoreVersion)
+        newConfig = newConfig.replace('@cometd.java.client.version@', cometdJavaClientVersion)
+        newConfig = newConfig.replace('@jetty.version@', jettyVersion)
+        newConfig = newConfig.replace('@json.version@', jsonVersion)
+
         ballerinaTomlFile.text = newConfig
     }
 }
@@ -64,7 +71,15 @@ configurations {
 }
 
 dependencies {
-    externalJars(group: 'com.opencsv', name: 'opencsv', version: '5.9')
+    externalJars(group: 'com.opencsv', name: 'opencsv', version: openCsvVersion)
+    externalJars(group: 'org.cometd.java', name: 'cometd-java-client', version: cometdJavaClientVersion)
+    externalJars(group: 'org.json', name: 'json', version: jsonVersion)
+    externalJars(group: 'org.eclipse.jetty', name: 'jetty-client', version: jettyVersion)
+    externalJars(group: 'org.eclipse.jetty', name: 'jetty-http', version: jettyVersion)
+    externalJars(group: 'org.eclipse.jetty', name: 'jetty-io', version: jettyVersion)
+    externalJars(group: 'org.eclipse.jetty', name: 'jetty-util', version: jettyVersion)
+    externalJars(group: 'org.eclipse.jetty', name: 'jetty-util-ajax', version: jettyVersion)
+    externalJars(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonDatabindVersion)
 }
 
 task commitTomlFiles {

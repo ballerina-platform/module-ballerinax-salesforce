@@ -17,8 +17,6 @@
 import ballerina/http;
 import ballerinax/'client.config;
 
-
-
 # Represents status of the bulk jobs
 public enum Status {
     SUCCESSFUL_RESULTS = "successfulResults",
@@ -137,7 +135,6 @@ public type SObjectMetaData record {|
     json...;
 |};
 
-
 # Basic info of a SObject.
 public type SObjectBasicInfo record {|
     # Metadata related to the SObject
@@ -152,7 +149,6 @@ public type Attributes record {
     # URL of the resultant record
     string url;
 };
-
 
 # Response of object creation.
 public type CreationResponse record {
@@ -303,7 +299,6 @@ public type QuickAction record {
     record{string defaultValues?; string quickAction?; string describe?; string defaultValuesTemplate?;} urls;
 };
 
-
 # Represent a batch execution result.
 public type SubRequestResult record {
     # Status code of the batch execution
@@ -333,8 +328,6 @@ public type BatchResult record {
     # Results of the batch request
     SubRequestResult[] results;
 };
-
-
 
 # Represents the bulk job creation request payload. 
 public type BulkCreatePayload record {
@@ -380,7 +373,6 @@ public type BulkJobInfo record {
     int numberRecordsProcessed?;
 };
 
-
 # Represents bulk job related information when Closed. 
 public type BulkJobCloseInfo record {
     # The ID of the job.
@@ -404,7 +396,6 @@ public type BulkJobCloseInfo record {
     # The API version.
     float apiVersion;
 };
-
 
 # Represents output for get all jobs request
 public type AllJobs record {
