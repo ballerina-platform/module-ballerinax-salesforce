@@ -104,7 +104,56 @@ Following is an example on how to create a record using the connector.
 
   ```
 
-2. Use following command to compile and run the Ballerina program.
+2. To integrate the Salesforce listener into your Ballerina application, update the .bal file as follows:
+
+Create an instance of `salesforce:Listener` using your Salesforce username, password, security token, and subscribe channel name.
+
+```ballerina
+import ballerinax/salesforce;
+
+salesforce:ListenerConfig listenerConfig = {
+    auth: {
+        username: "username",
+        password: "password" + "security token"
+    }
+};
+listener salesforce:Listener eventListener = new (listenerConfig);
+```
+
+Implement the listener’s remote functions and specify the channel name to be subscribed to as the service name.
+
+```ballerina
+import ballerina/io;
+import ballerinax/salesforce;
+
+salesforce:ListenerConfig listenerConfig = {
+    auth: {
+        username: "username",
+        password: "password" + "security token"
+    }
+};
+listener salesforce:Listener eventListener = new (listenerConfig);
+
+service "/data/ChangeEvents" on eventListener {
+    remote function onCreate(salesforce:EventData payload) {
+        io:println("Created " + payload.toString());
+    }
+
+    remote isolated function onUpdate(salesforce:EventData payload) {
+        io:println("Updated " + payload.toString());
+    }
+
+    remote function onDelete(salesforce:EventData payload) {
+        io:println("Deleted " + payload.toString());
+    }
+
+    remote function onRestore(salesforce:EventData payload) {
+        io:println("Restored " + payload.toString());
+    }
+}
+```
+
+3. Use following command to compile and run the Ballerina program.
 
 ```
 bal run
