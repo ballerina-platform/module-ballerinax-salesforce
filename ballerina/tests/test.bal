@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-
 import ballerina/log;
 import ballerina/os;
 import ballerina/test;
@@ -27,8 +26,6 @@ configurable string clientSecret = os:getEnv("CLIENT_SECRET");
 configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
 configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
-configurable string username = "";
-configurable string password = "";
 
 string reportInstanceID = "";
 
