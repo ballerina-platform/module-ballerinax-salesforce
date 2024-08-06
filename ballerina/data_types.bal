@@ -15,63 +15,57 @@
 // under the License.
 
 # Configurations related to authentication.
-#
-# + username - Salesforce login username
-# + password - Salesforce login password appended with the security token (<password><security token>)
 public type CredentialsConfig record {|
+    # Salesforce login username
     string username;
+    # Salesforce login password appended with the security token (<password><security token>)
     string password;
 |};
 
 # Salesforce listener configuration.
-# 
-# + auth - Configurations related to username/password authentication
-# + replayFrom - The replay ID to change the point in time when events are read
-# + isSandBox - The type of salesforce environment, if sandbox environment or not
 public type ListenerConfig record {|
+    # Configurations related to username/password authentication
     CredentialsConfig auth;
+    # The replay ID to change the point in time when events are read
     int|ReplayOptions replayFrom = REPLAY_FROM_TIP;
+    # The type of salesforce environment, if sandbox environment or not
     boolean isSandBox = false;
 |};
 
 # The replay options representing the point in time when events are read.
-#
-# + REPLAY_FROM_TIP - To get all new events sent after subscription. This option is the default
-# + REPLAY_FROM_EARLIEST - To get all new events sent after subscription and all past events within the retention window
 public enum ReplayOptions {
-   REPLAY_FROM_TIP,
-   REPLAY_FROM_EARLIEST
+    # To get all new events sent after subscription. This option is the default
+    REPLAY_FROM_TIP,
+    # To get all new events sent after subscription and all past events within the retention window
+    REPLAY_FROM_EARLIEST
 }
 
-#  Contains data returned from a Change Data Event.
-#
-# + changedData - A JSON map which contains the changed data
-# + metadata - Header fields that contain information about the event
+# Contains data returned from a Change Data Event.
 public type EventData record {
+    # A JSON map which contains the changed data
     map<json> changedData;
+    # Header fields that contain information about the event
     ChangeEventMetadata metadata?;
 };
 
 # Header fields that contain information about the event.
-#
-# + commitTimestamp - The date and time when the change occurred, represented as the number of milliseconds 
-#                     since January 1, 1970 00:00:00 GMT
-# + transactionKey - Uniquely identifies the transaction that the change is part of
-# + changeOrigin - Origin of the change. Use this field to find out what caused the change.  
-# + changeType - The operation that caused the change  
-# + entityName - The name of the standard or custom object for this record change
-# + sequenceNumber - Identifies the sequence of the change within a transaction
-# + commitUser - The ID of the user that ran the change operation
-# + commitNumber - The system change number (SCN) of a committed transaction
-# + recordId - The record ID for the changed record
 public type ChangeEventMetadata record {
+    # The date and time when the change occurred, represented as the number of milliseconds since January 1, 1970 00:00:00 GMT
     int commitTimestamp?;
+    # Uniquely identifies the transaction that the change is part of
     string transactionKey?;
+    # Origin of the change. Use this field to find out what caused the change.
     string changeOrigin?;
+    # The operation that caused the change
     string changeType?;
+    # The name of the standard or custom object for this record change
     string entityName?;
+    # Identifies the sequence of the change within a transaction
     int sequenceNumber?;
+    # The ID of the user that ran the change operation
     string commitUser?;
+    # The system change number (SCN) of a committed transaction
     int commitNumber?;
+    # The record ID for the changed record
     string recordId?;
 };

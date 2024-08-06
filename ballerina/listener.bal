@@ -16,34 +16,31 @@
 
 import ballerina/jballerina.java;
 
-handle JAVA_NULL = java:createNull();
-
 # Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.  
 @display {label: "Salesforce", iconPath: "icon.png"}
-public class Listener {
-    private string username;
-    private string password;
+public isolated class Listener {
+    private final string username;
+    private final string password;
     private string? channelName = ();
-    private int replayFrom;
-    private boolean isSandBox;
-
+    private final int replayFrom;
+    private final boolean isSandBox;
 
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
     #
     # + listenerConfig - Salesforce Listener configuration
-    public function init(*ListenerConfig listenerConfig) {
+    public isolated function init(*ListenerConfig listenerConfig) {
+        // set these in java code 
         self.username = listenerConfig.auth.username;
         self.password = listenerConfig.auth.password;
         if listenerConfig.replayFrom is REPLAY_FROM_TIP {
-            // internal detail (-1 and -2)
             self.replayFrom = -1;
         } else {
             self.replayFrom = -2;
         }
-        
+
         self.isSandBox = listenerConfig.isSandBox;
-        initListener(self, self.replayFrom, self.isSandBox);    
+        initListener(self, self.replayFrom, self.isSandBox);
     }
 
     # Attaches the service to the `salesforce:Listener` endpoint.
@@ -51,22 +48,18 @@ public class Listener {
     # + s - Type descriptor of the service
     # + name - Name of the service
     # + return - `()` or else a `error` upon failure to register the service
-    public function attach(Service s, string[]|string? name) returns error? {
+    public isolated function attach(Service s, string[]|string? name) returns error? {
         if name is string {
-            self.channelName = name;
-        } else if name is string[] {
-            self.channelName = name[0];
+            return attachService(self, s, name);
         } else {
-            return error("Invalid channel name."); 
+            return error("Invalid channel name.");
         }
-        
-        return attachService(self, s, self.channelName);
     }
 
     # Starts the subscription and listen to events on all the attached services.
     #
     # + return - `()` or else a `error` upon failure to start
-    public function 'start() returns error? {
+    public isolated function 'start() returns error? {
         return startListener(self.username, self.password, self);
     }
 
@@ -74,14 +67,14 @@ public class Listener {
     #
     # + s - Type descriptor of the service
     # + return - `()` or else a `error` upon failure to detach the service
-    public function detach(Service s) returns error? {
+    public isolated function detach(Service s) returns error? {
         return detachService(self, s);
     }
 
     # Stops subscription through all consumer services by terminating the connection and all its channels.
     #
     # + return - `()` or else a `error` upon failure to close the `sfdc:Listener`
-    public function gracefulStop() returns error? {
+    public isolated function gracefulStop() returns error? {
         return stopListener();
     }
 
@@ -93,27 +86,27 @@ public class Listener {
     }
 }
 
-function initListener(Listener instance, int replayFrom, boolean isSandBox) = 
+isolated function initListener(Listener instance, int replayFrom, boolean isSandBox) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-function attachService(Listener instance, Service s, string? channelName) returns error? =
+isolated function attachService(Listener instance, Service s, string? channelName) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-function startListener(string username, string password, Listener instance) returns error? =
+isolated function startListener(string username, string password, Listener instance) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-function detachService(Listener instance, Service s) returns error? =
+isolated function detachService(Listener instance, Service s) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-function stopListener() returns error? =
+isolated function stopListener() returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
