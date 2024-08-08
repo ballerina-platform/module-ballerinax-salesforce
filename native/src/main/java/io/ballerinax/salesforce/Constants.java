@@ -24,6 +24,7 @@ package io.ballerinax.salesforce;
  */
 public class Constants {
     public static final String CONSUMER_SERVICES = "consumer_services";
+    public static final String DISPATCHERS = "dispatchers";
     public static final String REPLAY_FROM = "replay_from";
     public static final String CHANNEL_NAME = "channel_name";
 

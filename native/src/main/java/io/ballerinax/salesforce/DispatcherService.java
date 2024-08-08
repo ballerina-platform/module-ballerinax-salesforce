@@ -21,11 +21,14 @@ package io.ballerinax.salesforce;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -99,7 +102,15 @@ public class DispatcherService {
 
     private void executeResource(String functionName, StrandMetadata metaData,
                                  BMap<BString, Object> eventRecord) {
-        runtime.invokeMethodAsync(service, functionName, null, metaData, null, eventRecord, true);
+
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
+        if (serviceType.isIsolated() && serviceType.isIsolated(functionName)) {
+            runtime.invokeMethodAsyncConcurrently(service, functionName, null, metaData, null, null,
+                    PredefinedTypes.TYPE_NULL, eventRecord, true);
+        } else {
+            runtime.invokeMethodAsyncSequentially(service, functionName, null, metaData, null, null,
+                    PredefinedTypes.TYPE_NULL, eventRecord, true);
+        }
     }
 
     /**
