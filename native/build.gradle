@@ -20,6 +20,7 @@ plugins {
     id 'com.github.spotbugs'
     id 'checkstyle'
     id 'jacoco'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 description = 'Ballerina - Salesforce Native'
@@ -29,13 +30,19 @@ configurations {
 }
 
 dependencies {
-    jacocoRuntime "org.jacoco:org.jacoco.agent:${jacoco.toolVersion}:runtime"
-
+    jacocoRuntime "org.jacoco:org.jacoco.agent:${jacocoToolVersion}:runtime"
+    shadow group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${jacksonDatabindVersion}"
+    shadow group: 'org.cometd.java', name: 'cometd-java-client', version: "${cometdJavaClientVersion}"
+    implementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
+    shadow group: 'org.json', name: 'json', version: "${jsonVersion}"
+    implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
+    implementation(group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}") {
+        transitive = false
+    }
     checkstyle project(":checkstyle")
     checkstyle "com.puppycrawl.tools:checkstyle:${checkstylePluginVersion}"
     implementation "com.opencsv:opencsv:${openCsvVersion}"
-    implementation group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
-
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
 }
 
 tasks.withType(JavaCompile) {
@@ -76,6 +83,10 @@ spotbugsMain {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 spotbugsTest {
     enabled = false
 }
@@ -106,11 +117,11 @@ tasks.withType(Checkstyle) {
 spotbugsMain.finalizedBy validateSpotbugs
 checkstyleMain.dependsOn ':checkstyle:downloadCheckstyleRuleFiles'
 
-compileJava {
-    doFirst {
-        options.compilerArgs = [
-                '--module-path', classpath.asPath,
-        ]
-        classpath = files()
+shadowJar {
+    configurations = [project.configurations.shadow]
+    dependencies {
+        exclude(dependency('org.slf4j:.*:.*'))
     }
 }
+
+build.dependsOn(shadowJar)

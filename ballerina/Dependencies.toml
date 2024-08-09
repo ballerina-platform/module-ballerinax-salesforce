@@ -5,7 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
-distribution-version = "2201.8.4"
+distribution-version = "2201.8.6"
 
 [[package]]
 org = "ballerina"
@@ -61,7 +61,7 @@ dependencies = [
 [[package]]
 org = "ballerina"
 name = "http"
-version = "2.10.13"
+version = "2.10.15"
 dependencies = [
 	{org = "ballerina", name = "auth"},
 	{org = "ballerina", name = "cache"},
@@ -377,7 +377,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "8.0.2"
+version = "8.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
@@ -398,7 +398,9 @@ dependencies = [
 ]
 modules = [
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce"},
+	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.apex"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulk"},
+	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulkv2"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.soap"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.utils"}
 ]
