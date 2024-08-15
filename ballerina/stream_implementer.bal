@@ -22,11 +22,13 @@ class SOQLQueryResultStream {
     int index = 0;
     private final http:Client httpClient;
     private final string path;
+    private final typedesc<record {}> returnType;
 
-    isolated function init(http:Client httpClient, string path) returns error? {
+    isolated function init(http:Client httpClient, string path, typedesc<record {}> returnType) returns error? {
         self.httpClient = httpClient;
         self.path = path;
         self.nextRecordsUrl = EMPTY_STRING;
+        self.returnType = returnType;
         self.currentEntries = check self.fetchQueryResult();
     }
 
@@ -57,8 +59,12 @@ class SOQLQueryResultStream {
         self.nextRecordsUrl = response.hasKey(NEXT_RECORDS_URL) ? check response.get(NEXT_RECORDS_URL).ensureType() :
             EMPTY_STRING;
 
-        record{}[] array = response.records;
-        return array;
+        record {}[] returnData = [];
+
+        foreach int i in 0 ... (response.records.length() - 1) {
+            returnData[i] = check response.records[i].cloneWithType(self.returnType);
+        }
+        return returnData;
     }
 }
 
@@ -108,15 +114,7 @@ type Record record {};
 type SoqlQueryResult record {|
     boolean done;
     int totalSize;
-    SoqlRecordData[] records;
-    json...;
-|};
-
-# Defines the SOQL query result record type. 
-#
-# + attributes - Attribute record
-type SoqlRecordData record {|
-    Attribute attributes?;
+    record {}[] records;
     json...;
 |};
 
@@ -127,7 +125,6 @@ type SoslSearchResult record {|
     SoslRecordData[] searchRecords;
     json...;
 |};
-
 
 # Defines SOSL query result.
 #

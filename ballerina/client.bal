@@ -284,7 +284,7 @@ public isolated client class Client {
     private isolated function processGetQueryResult(typedesc<record {}> returnType, string receivedQuery)
                                                     returns stream<record {}, error?>|error {
         string path = utils:prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
-        SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path);
+        SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path, returnType);
         stream<record {}, error?> finalStream = new (objectInstance);
         return self.streamConverter(finalStream, returnType);
     }
