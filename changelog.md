@@ -3,6 +3,10 @@ This file contains all the notable changes done to the Ballerina Salesforce pack
 
 ## [Unreleased]
 
+### Fixed
+
+- [[#6727] Fixed data-binding error in Salesforce query](https://github.com/ballerina-platform/ballerina-library/issues/6727)
+
 ### Changed 
 
 - [[#6697] Re-organize modules in ballerinax/salesforce package structure](https://github.com/ballerina-platform/ballerina-library/issues/6697)
