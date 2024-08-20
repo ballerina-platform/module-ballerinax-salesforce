@@ -11,5 +11,9 @@ jobs:
     name: Run PR Build Workflow
     if: ${{ github.repository_owner == 'ballerina-platform' }}
     uses: ballerina-platform/ballerina-library/.github/workflows/pr-build-connector-template.yml@main
+    with:
+      some-input: value
+    env:
+      JAVA_OPTS: ${{ secrets.JAVA_OPTS }} -DmaxYamlCodePoints=99999999
     secrets: inherit
     
