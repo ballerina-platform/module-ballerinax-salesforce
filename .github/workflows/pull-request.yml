@@ -5,13 +5,13 @@ concurrency:
   cancel-in-progress: true
 
 on: pull_request
+env:
+  JAVA_OPTS: ${{ secrets.JAVA_OPTS }} -DmaxYamlCodePoints=99999999
 
 jobs:
   call_workflow:
     name: Run PR Build Workflow
     if: ${{ github.repository_owner == 'ballerina-platform' }}
     uses: ballerina-platform/ballerina-library/.github/workflows/pr-build-connector-template.yml@main
-    env:
-      JAVA_OPTS: ${{ secrets.JAVA_OPTS }} -DmaxYamlCodePoints=99999999
     secrets: inherit
     
