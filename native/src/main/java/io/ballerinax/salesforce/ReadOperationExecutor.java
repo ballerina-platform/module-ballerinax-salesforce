@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.StreamType;
@@ -37,6 +38,7 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
 
 import static io.ballerinax.salesforce.Utils.getMetadata;
+
 
 /**
  * This class holds the utility methods involved with executing the read operations.
@@ -92,7 +94,9 @@ public class ReadOperationExecutor {
     }
 
     public static Object getQueryResult(Environment env, BObject client, BString receivedQuery, BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, receivedQuery, true};
+        ArrayType bArrayType = TypeCreator.createArrayType(targetType.getDescribingType());
+        BTypedesc typedesc = ValueCreator.createTypedescValue(bArrayType);
+        Object[] paramFeed = {typedesc, true, receivedQuery, true};
         return invokeClientMethod(env, client, "processGetQueryResult", paramFeed);
     }
 
@@ -144,6 +148,13 @@ public class ReadOperationExecutor {
 
         RecordType recordType = (RecordType) returnType.getDescribingType();
         StreamType bStream = TypeCreator.createStreamType(recordType, PredefinedTypes.TYPE_NULL);
+        return ValueCreator.createStreamValue(bStream, data.getIteratorObj());
+    }
+
+
+    public static BStream streamQueryConverter(Environment env, BObject client, BStream data, BTypedesc returnType) {
+        ArrayType recordType = (ArrayType) returnType.getDescribingType();
+        StreamType bStream = TypeCreator.createStreamType(recordType.getElementType(), PredefinedTypes.TYPE_NULL);
         return ValueCreator.createStreamValue(bStream, data.getIteratorObj());
     }
 }

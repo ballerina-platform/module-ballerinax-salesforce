@@ -281,12 +281,12 @@ public isolated client class Client {
         name: "getQueryResult"
     } external;
 
-    private isolated function processGetQueryResult(typedesc<record {}> returnType, string receivedQuery)
+    private isolated function processGetQueryResult(typedesc<record {}[]> returnType, string receivedQuery)
                                                     returns stream<record {}, error?>|error {
         string path = utils:prepareQueryUrl([API_BASE_PATH, QUERY], [Q], [receivedQuery]);
         SOQLQueryResultStream objectInstance = check new (self.salesforceClient, path, returnType);
         stream<record {}, error?> finalStream = new (objectInstance);
-        return self.streamConverter(finalStream, returnType);
+        return self.streamQueryConverter(finalStream, returnType);
     }
 
     # Executes the specified SOSL search.
@@ -311,6 +311,11 @@ public isolated client class Client {
 
     // External function for the conversion of stream
     isolated function streamConverter(stream<record {}, error?> data, typedesc<record {}> returnType) returns
+    stream<record {}, error?>|error = @java:Method {
+        'class: "io.ballerinax.salesforce.ReadOperationExecutor"
+    } external;
+
+    isolated function streamQueryConverter(stream<record {}, error?> data, typedesc<record {}[]> returnType) returns
     stream<record {}, error?>|error = @java:Method {
         'class: "io.ballerinax.salesforce.ReadOperationExecutor"
     } external;
