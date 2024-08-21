@@ -5,6 +5,8 @@ concurrency:
   cancel-in-progress: true
 
 on: pull_request
+env:
+  JAVA_OPTS: ${{ secrets.JAVA_OPTS }} -DmaxYamlCodePoints=99999999
 
 jobs:
   call_workflow:

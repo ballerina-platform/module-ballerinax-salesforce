@@ -93,7 +93,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "io"
-version = "1.6.0"
+version = "1.6.1"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.value"}
@@ -402,6 +402,7 @@ modules = [
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulk"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulkv2"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.soap"},
+	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.types"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.utils"}
 ]
 

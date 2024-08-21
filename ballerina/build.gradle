@@ -46,7 +46,7 @@ def stripBallerinaExtensionVersion(String extVersion) {
 ballerina {
     packageOrganization = packageOrg
     module = project.packageName
-    testCoverageParam = "--code-coverage --coverage-format=xml"
+    testCoverageParam = "--code-coverage --coverage-format=xml --excludes='./modules/types/*.bal'"
     isConnector = true
 }
 
