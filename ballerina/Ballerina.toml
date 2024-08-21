@@ -2,7 +2,7 @@
 distribution = "2201.8.0"
 org = "ballerinax"
 name = "salesforce"
-version = "8.1.33"
+version = "8.1.0"
 export = ["salesforce", "salesforce.bulk", "salesforce.soap","salesforce.bulkv2", "salesforce.apex"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
@@ -17,10 +17,10 @@ observabilityIncluded = true
 graalvmCompatible = true
 
 [[platform.java17.dependency]]
-path = "../native/build/libs/salesforce-native-8.1.33-SNAPSHOT.jar"
+path = "../native/build/libs/salesforce-native-8.1.0-SNAPSHOT.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "8.1.33-SNAPSHOT"
+version = "8.1.0-SNAPSHOT"
 
 [[platform.java17.dependency]]
 groupId = "com.opencsv"
