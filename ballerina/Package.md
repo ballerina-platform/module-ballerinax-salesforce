@@ -141,7 +141,7 @@ import ballerinax/salesforce.types;
 
 public function main() returns error? {
     types:AccountSObject accountRecord = {
-        Name: "Using types package",
+        Name: "IT World",
         BillingCity: "New York"
     };
 

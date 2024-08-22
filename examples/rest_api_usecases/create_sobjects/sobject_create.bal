@@ -42,7 +42,7 @@ public function main() returns error? {
     salesforce:Client baseClient = check new (sfConfig);
 
     types:AccountSObject accountRecord = {
-        Name: "Using types package",
+        Name: "IT World",
         BillingCity: "New York"
     };
 
