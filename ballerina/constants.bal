@@ -119,6 +119,8 @@ const string EQUAL_SIGN = "=";
 @deprecated
 public const string EMPTY_STRING = "";
 
+const string PRIVATE_EMPTY_STRING = "";
+
 # Constant field `AMPERSAND`. Holds the value of "&".
 const string AMPERSAND = "&";
 

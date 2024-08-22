@@ -27,8 +27,8 @@ class SOQLQueryResultStream {
     isolated function init(http:Client httpClient, string path, typedesc<record {}[]> returnType) returns error? {
         self.httpClient = httpClient;
         self.path = path;
-        self.nextRecordsUrl = EMPTY_STRING;
         self.returnType = returnType;
+        self.nextRecordsUrl = PRIVATE_EMPTY_STRING;
         self.currentEntries = check self.fetchQueryResult();
     }
 
@@ -39,7 +39,7 @@ class SOQLQueryResultStream {
             return singleRecord;
         }
         // This code block is for retrieving the next batch of records when the initial batch is finished.
-        if (self.nextRecordsUrl.trim() != EMPTY_STRING) {
+        if (self.nextRecordsUrl.trim() != PRIVATE_EMPTY_STRING) {
             self.index = 0;
             self.currentEntries = check self.fetchQueryResult();
             record {|record {} value;|} singleRecord = {value: self.currentEntries[self.index]};
@@ -51,13 +51,13 @@ class SOQLQueryResultStream {
 
     isolated function fetchQueryResult() returns record {}[]|error {
         SoqlQueryResult response;
-        if (self.nextRecordsUrl.trim() != EMPTY_STRING) {
+        if (self.nextRecordsUrl.trim() != PRIVATE_EMPTY_STRING) {
             response = check self.httpClient->get(self.nextRecordsUrl);
         } else {
             response = check self.httpClient->get(self.path);
         }
         self.nextRecordsUrl = response.hasKey(NEXT_RECORDS_URL) ? check response.get(NEXT_RECORDS_URL).ensureType() :
-            EMPTY_STRING;
+            PRIVATE_EMPTY_STRING;
 
         record {}[] returnData = check response.records.cloneWithType(self.returnType);
         return returnData;
