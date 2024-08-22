@@ -153,7 +153,24 @@ service "/data/ChangeEvents" on eventListener {
 }
 ```
 
-3. Use following command to compile and run the Ballerina program.
+3. Integrate custom SObject types
+
+To seamlessly integrate custom SObject types into your Ballerina project, you have the option to either generate a package using the Ballerina Open API tool or utilize the `ballerinax/salesforce.types` module. Follow the steps given [here](https://github.com/ballerina-platform/module-ballerinax-salesforce/blob/master/ballerina/modules/types/Module.md) based on your preferred approach.
+
+```ballerina
+import ballerinax/salesforce.types;
+
+public function main() returns error? {
+    types:AccountSObject accountRecord = {
+        Name: "Using types package",
+        BillingCity: "New York"
+    };
+
+    salesforce:CreationResponse res = check salesforce->create("Account", accountRecord);
+}
+```
+
+4. Use following command to compile and run the Ballerina program.
 
 ```
 bal run
