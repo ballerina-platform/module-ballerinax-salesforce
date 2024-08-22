@@ -20,7 +20,7 @@ import ballerina/time;
 import ballerina/jballerina.java;
 import ballerina/lang.'string as strings;
 
-isolated string csvContent = EMPTY_STRING;
+isolated string csvContent = PRIVATE_EMPTY_STRING;
 
 # Remove decimal places from a civil seconds value
 #
@@ -41,7 +41,7 @@ isolated function removeDecimalPlaces(time:Civil civilTime) returns time:Civil {
 # + return - converted string
 isolated function convertToString(io:ReadableByteChannel rbc) returns string|error {
     byte[] readContent;
-    string textContent = EMPTY_STRING;
+    string textContent = PRIVATE_EMPTY_STRING;
     while (true) {
         byte[]|io:Error result = rbc.read(1000);
         if result is io:EofError {
@@ -71,14 +71,14 @@ isolated function convertToString(io:ReadableByteChannel rbc) returns string|err
 # + return - converted string
 isolated function convertStringListToString(string[][]|stream<string[], error?> stringCsvInput) returns string|error {
     lock {
-        csvContent = EMPTY_STRING;
+        csvContent = PRIVATE_EMPTY_STRING;
     }
     if stringCsvInput is string[][] {
         foreach var row in stringCsvInput {
             lock {
                 csvContent += row.reduce(isolated function(string s, string t) returns string {
                     return s.concat(",", t);
-                }, EMPTY_STRING).substring(1) + NEW_LINE;
+                }, PRIVATE_EMPTY_STRING).substring(1) + NEW_LINE;
             }
         }
     } else {
@@ -86,7 +86,7 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
             lock {
                 csvContent += row.reduce(isolated function(string s, string t) returns string {
                     return s.concat(",", t);
-                }, EMPTY_STRING).substring(1) + NEW_LINE;
+                }, PRIVATE_EMPTY_STRING).substring(1) + NEW_LINE;
 
             }
         });
