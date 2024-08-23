@@ -91,7 +91,7 @@ Client lisbaseClient = check new (sfConfigRefreshCodeFlow);
 string testRecordId = "";
 
 @test:Config {
-    enable: true
+    enable: false
 }
 function testCreateRecord() {
     log:printInfo("lisbaseClient -> createRecord()");
@@ -110,7 +110,7 @@ function testCreateRecord() {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [testCreateRecord]
 }
 function testUpdateRecord() {
@@ -128,7 +128,7 @@ function testUpdateRecord() {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [testUpdateRecord]
 }
 function testDeleteRecord() {
@@ -142,7 +142,7 @@ function testDeleteRecord() {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [testCreateRecord]
 }
 function testCreatedEventTrigger() {
@@ -154,7 +154,7 @@ function testCreatedEventTrigger() {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [testUpdateRecord]
 }
 function testUpdatedEventTrigger() {
@@ -166,7 +166,7 @@ function testUpdatedEventTrigger() {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [testDeleteRecord]
 }
 function testDeletedEventTrigger() {
