@@ -34,7 +34,7 @@ public isolated client class Client {
     # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm). 
     #
     # + salesforceConfig - Salesforce Connector configuration
-    # + return - `sfdc:Error` on failure of initialization or else `()`
+    # + return - `salesforce:Error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);

@@ -73,7 +73,7 @@ public isolated class Listener {
 
     # Stops subscription through all consumer services by terminating the connection and all its channels.
     #
-    # + return - `()` or else a `error` upon failure to close the `sfdc:Listener`
+    # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
         return stopListener();
     }

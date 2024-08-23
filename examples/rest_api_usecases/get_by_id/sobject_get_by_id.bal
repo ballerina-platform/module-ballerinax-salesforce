@@ -15,6 +15,7 @@
 // under the License.
 import ballerina/log;
 import ballerinax/salesforce;
+import ballerinax/salesforce.types;
 import ballerina/os;
 
 // Create Salesforce client configuration by reading from environment.
@@ -41,12 +42,10 @@ public function main() returns error? {
 
     string accountId = "0015Y00002adeBWQAY";
 
-    record{}|error res = baseClient->getById("Account", accountId);
+    types:AccountSObject|error res = baseClient->getById("Account", accountId);
 
-    if res is record{} {
-        anydata recName = res["Name"];
-        log:printInfo("Record data received successfully. Record Name : " + recName.toString());
-        
+    if res is types:AccountSObject {
+        log:printInfo("Record data received successfully. Record Name : " + res.Name.toString());
     } else {
         log:printError(msg = res.message());
     }

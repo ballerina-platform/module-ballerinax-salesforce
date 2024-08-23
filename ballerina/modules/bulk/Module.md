@@ -9,19 +9,19 @@ This module supports [Salesforce Bulk API v1](https://developer.salesforce.com/d
 
 2. Go to Setup --> Apps --> App Manager 
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/side-panel.png alt="Setup Side Panel" width="40%" style="border:1px solid #000000">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-salesforce/master/docs/setup/resources/side-panel.png alt="Setup Side Panel" width="40%" style="border:1px solid #000000">
 
 3. Create a New Connected App.
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" width="50%" style="border:1px solid #000000">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-salesforce/master/docs/setup/resources/create-connected-apps.png alt="Create Connected Apps" width="50%" style="border:1px solid #000000">
 
     - Here we will be using https://test.salesforce.com as we are using sandbox environment. Users can use https://login.salesforce.com for normal usage.
 
-    <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" width="100%" style="border:1px solid #000000">
+    <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-salesforce/master/docs/setup/resources/create_connected%20_app.png alt="Create Connected Apps" width="100%" style="border:1px solid #000000">
 
 4. After the creation user can get consumer key and secret through clicking on the `Manage Consumer Details` button.
 
-   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-sfdc/master/docs/setup/resources/crdentials.png alt="Consumer Secrets" width="100%" style="border:1px solid #000000">
+   <img src=https://raw.githubusercontent.com/ballerina-platform/module-ballerinax-salesforce/master/docs/setup/resources/crdentials.png alt="Consumer Secrets" width="100%" style="border:1px solid #000000">
 
 5. Next step would be to get the token.
     - Log in to salesforce in your preferred browser and enter the following url.
@@ -93,4 +93,4 @@ public function main() returns error? {
 
 2. Use `bal run` command to compile and run the Ballerina program. 
 
-**[You can find a list of samples here](https://github.com/ballerina-platform/module-ballerinax-sfdc/tree/master/examples/bulk_api_usecases)**
+**[You can find a list of samples here](https://github.com/ballerina-platform/module-ballerinax-salesforce/tree/master/examples/bulk_api_usecases)**

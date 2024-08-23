@@ -19,6 +19,10 @@ refreshUrl = "<REFRESH_URL>"
 baseUrl = "<BASE_URL>"
 ```
 
+### 3. Integrate custom SObject types
+
+To seamlessly integrate custom SObject types into your Ballerina project, you have the option to either generate a package using the Ballerina Open API tool or utilize the `ballerinax/salesforce.types` module. Follow the steps given [here](https://github.com/ballerina-platform/module-ballerinax-salesforce/blob/master/ballerina/modules/types/Module.md) based on your preferred approach.
+
 ## Run the example
 
 Execute the following command to run the example:
