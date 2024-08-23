@@ -40,18 +40,6 @@ ConnectionConfig sfConfigRefreshCodeFlow = {
     }
 };
 
-ConnectionConfig sfConfigPasswordFlow = {
-    baseUrl: baseUrl,
-    auth: {
-        password,
-        username,
-        tokenUrl: refreshUrl,
-        clientId: clientId,
-        clientSecret: clientSecret,
-        credentialBearer: "POST_BODY_BEARER"
-    }
-};
-
 ConnectionConfig sfConfigCredentialsFlow = {
     baseUrl: baseUrl,
     auth: {
@@ -140,14 +128,14 @@ public type Layout record {
     boolean[] recordTypeSelectorRequired;
 };
 
-type AccountResultWithAlias record {|
+type AccountResultWithAlias record {
     string Name;
     int NumAccounts;
-|};
+};
 
-type AccountResultWithoutAlias record {|
+type AccountResultWithoutAlias record {
     int expr0;
-|};
+};
 
 Account accountRecordNew = {
     Name: "CSK Holdings",
