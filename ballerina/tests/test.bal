@@ -128,14 +128,14 @@ public type Layout record {
     boolean[] recordTypeSelectorRequired;
 };
 
-type AccountResultWithAlias record {|
+type AccountResultWithAlias record {
     string Name;
     int NumAccounts;
-|};
+};
 
-type AccountResultWithoutAlias record {|
+type AccountResultWithoutAlias record {
     int expr0;
-|};
+};
 
 Account accountRecordNew = {
     Name: "CSK Holdings",
