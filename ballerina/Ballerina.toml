@@ -31,20 +31,20 @@ path = "./lib/opencsv-5.9.jar"
 [[platform.java17.dependency]]
 groupId = "org.cometd.java"
 artifactId = "bayeux-api"
-version = "4.0.6"
-path = "./lib/bayeux-api-4.0.6.jar"
+version = "4.0.9"
+path = "./lib/bayeux-api-4.0.9.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.cometd.java"
 artifactId = "cometd-java-client"
-version = "4.0.6"
-path = "./lib/cometd-java-client-4.0.6.jar"
+version = "4.0.9"
+path = "./lib/cometd-java-client-4.0.9.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.cometd.java"
 artifactId = "cometd-java-common"
-version = "4.0.6"
-path = "./lib/cometd-java-common-4.0.6.jar"
+version = "4.0.9"
+path = "./lib/cometd-java-common-4.0.9.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.eclipse.jetty"
