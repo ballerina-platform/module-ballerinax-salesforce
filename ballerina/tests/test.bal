@@ -40,18 +40,6 @@ ConnectionConfig sfConfigRefreshCodeFlow = {
     }
 };
 
-ConnectionConfig sfConfigPasswordFlow = {
-    baseUrl: baseUrl,
-    auth: {
-        password,
-        username,
-        tokenUrl: refreshUrl,
-        clientId: clientId,
-        clientSecret: clientSecret,
-        credentialBearer: "POST_BODY_BEARER"
-    }
-};
-
 ConnectionConfig sfConfigCredentialsFlow = {
     baseUrl: baseUrl,
     auth: {

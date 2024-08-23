@@ -14,77 +14,75 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/log;
-import ballerina/os;
 import ballerina/test;
 
-configurable string username = os:getEnv("USERNAME");
-configurable string password = os:getEnv("PASSWORD");
+// configurable string username = os:getEnv("USERNAME");
+// configurable string password = os:getEnv("PASSWORD");
 
-ListenerConfig listenerConfig = {
-    auth: {
-        username: username,
-        password: password
-    }
-};
-listener Listener eventListener = new (listenerConfig);
+// ListenerConfig listenerConfig = {
+//     auth: {
+//         username: username,
+//         password: password
+//     }
+// };
+// listener Listener eventListener = new (listenerConfig);
 
 isolated boolean isUpdated = false;
 isolated boolean isCreated = false;
 isolated boolean isDeleted = false;
 isolated boolean isRestored = false;
 
-service "/data/ChangeEvents" on eventListener {
-    remote function onCreate(EventData payload) {
-        string? eventType = payload.metadata?.changeType;
-        if (eventType is string && eventType == "CREATE") {
-            lock {
-                isCreated = true;
-            }
-            io:println("Created " + payload.toString());
-        } else {
-            io:println(payload.toString());
-        }
-    }
+// service "/data/ChangeEvents" on eventListener {
+//     remote function onCreate(EventData payload) {
+//         string? eventType = payload.metadata?.changeType;
+//         if (eventType is string && eventType == "CREATE") {
+//             lock {
+//                 isCreated = true;
+//             }
+//             io:println("Created " + payload.toString());
+//         } else {
+//             io:println(payload.toString());
+//         }
+//     }
 
-    remote isolated function onUpdate(EventData payload) {
-        json accountName = payload.changedData.get("Name");
-        if (accountName.toString() == "WSO2 Inc") {
-            lock {
-                isUpdated = true;
-            }
-            io:println("Updated " + payload.toString());
-        } else {
-            io:println(payload.toString());
-        }
-    }
+//     remote isolated function onUpdate(EventData payload) {
+//         json accountName = payload.changedData.get("Name");
+//         if (accountName.toString() == "WSO2 Inc") {
+//             lock {
+//                 isUpdated = true;
+//             }
+//             io:println("Updated " + payload.toString());
+//         } else {
+//             io:println(payload.toString());
+//         }
+//     }
 
-    remote function onDelete(EventData payload) {
-        string? eventType = payload.metadata?.changeType;
-        if (eventType is string && eventType == "DELETE") {
-            lock {
-                isDeleted = true;
-            }
-            io:println("Deleted " + payload.toString());
-        } else {
-            io:println(payload.toString());
-        }
-    }
+//     remote function onDelete(EventData payload) {
+//         string? eventType = payload.metadata?.changeType;
+//         if (eventType is string && eventType == "DELETE") {
+//             lock {
+//                 isDeleted = true;
+//             }
+//             io:println("Deleted " + payload.toString());
+//         } else {
+//             io:println(payload.toString());
+//         }
+//     }
 
-    remote function onRestore(EventData payload) {
-        string? eventType = payload.metadata?.changeType;
-        if (eventType is string && eventType == "UNDELETE") {
-            lock {
-                isRestored = true;
-            }
-            io:println("Restored " + payload.toString());
-        } else {
-            io:println(payload.toString());
-        }
-    }
-}
+//     remote function onRestore(EventData payload) {
+//         string? eventType = payload.metadata?.changeType;
+//         if (eventType is string && eventType == "UNDELETE") {
+//             lock {
+//                 isRestored = true;
+//             }
+//             io:println("Restored " + payload.toString());
+//         } else {
+//             io:println(payload.toString());
+//         }
+//     }
+// }
 
 // Using direct-token config for client configuration
 Client lisbaseClient = check new (sfConfigRefreshCodeFlow);
