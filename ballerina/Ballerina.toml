@@ -49,53 +49,53 @@ path = "./lib/cometd-java-common-4.0.6.jar"
 [[platform.java17.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-client"
-version = "9.4.48.v20220622"
-path = "./lib/jetty-client-9.4.48.v20220622.jar"
+version = "9.4.55.v20240627"
+path = "./lib/jetty-client-9.4.55.v20240627.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-http"
-version = "9.4.48.v20220622"
-path = "./lib/jetty-http-9.4.48.v20220622.jar"
+version = "9.4.55.v20240627"
+path = "./lib/jetty-http-9.4.55.v20240627.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-io"
-version = "9.4.48.v20220622"
-path = "./lib/jetty-io-9.4.48.v20220622.jar"
+version = "9.4.55.v20240627"
+path = "./lib/jetty-io-9.4.55.v20240627.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util"
-version = "9.4.48.v20220622"
-path = "./lib/jetty-util-9.4.48.v20220622.jar"
+version = "9.4.55.v20240627"
+path = "./lib/jetty-util-9.4.55.v20240627.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util-ajax"
-version = "9.4.48.v20220622"
-path = "./lib/jetty-util-ajax-9.4.48.v20220622.jar"
+version = "9.4.55.v20240627"
+path = "./lib/jetty-util-ajax-9.4.55.v20240627.jar"
 
 [[platform.java17.dependency]]
 groupId = "org.json"
 artifactId = "json"
-version = "20211205"
-path = "./lib/json-20211205.jar"
+version = "20240303"
+path = "./lib/json-20240303.jar"
 
 [[platform.java17.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-databind"
-version = "2.13.4"
-path = "./lib/jackson-databind-2.13.4.jar"
+version = "2.13.5"
+path = "./lib/jackson-databind-2.13.5.jar"
 
 [[platform.java17.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-annotations"
-version = "2.13.4"
-path = "./lib/jackson-annotations-2.13.4.jar"
+version = "2.13.5"
+path = "./lib/jackson-annotations-2.13.5.jar"
 
 [[platform.java17.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-core"
-version = "2.13.4"
-path = "./lib/jackson-core-2.13.4.jar"
+version = "2.13.5"
+path = "./lib/jackson-core-2.13.5.jar"
