@@ -20,7 +20,6 @@
 package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
@@ -45,7 +44,6 @@ import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
 public class ListenerUtil {
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
-    private static Runtime runtime;
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
@@ -56,7 +54,7 @@ public class ListenerUtil {
         listener.addNativeData(IS_SAND_BOX, isSandBox);
     }
 
-    public static Object attachService(BObject listener, BObject service, Object channelName) {
+    public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
         listener.addNativeData(CHANNEL_NAME, ((BString) channelName).getValue());
 
         @SuppressWarnings("unchecked")
@@ -69,14 +67,14 @@ public class ListenerUtil {
             return null;
         }
 
-        DispatcherService dispatcherService = new DispatcherService(service, runtime);
+        DispatcherService dispatcherService = new DispatcherService(service, environment.getRuntime());
         services.add(service);
         serviceDispatcherMap.put(service, dispatcherService);
 
         return null;
     }
 
-    public static Object startListener(Environment environment, BString username, BString password, BObject listener) {
+    public static Object startListener(BString username, BString password, BObject listener) {
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
             try {
                 return LoginHelper.login(username.getValue(), password.getValue(), listener);
@@ -96,7 +94,6 @@ public class ListenerUtil {
         } catch (Exception e) {
             return sfdcError(e.getMessage());
         }
-        runtime = environment.getRuntime();
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         @SuppressWarnings("unchecked")
