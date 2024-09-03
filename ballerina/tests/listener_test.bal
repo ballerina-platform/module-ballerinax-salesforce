@@ -14,19 +14,19 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/io;
 import ballerina/lang.runtime;
 import ballerina/log;
-import ballerina/test;
 import ballerina/os;
-import ballerina/io;
+import ballerina/test;
 
 configurable string username = os:getEnv("LISTENER_USERNAME");
 configurable string password = os:getEnv("LISTENER_PASSWORD");
 
 ListenerConfig listenerConfig = {
     auth: {
-        username: username,
-        password: password
+        username,
+        password
     }
 };
 listener Listener eventListener = new (listenerConfig);
@@ -37,9 +37,10 @@ isolated boolean isDeleted = false;
 isolated boolean isRestored = false;
 
 service "/data/ChangeEvents" on eventListener {
+
     remote function onCreate(EventData payload) {
         string? eventType = payload.metadata?.changeType;
-        if (eventType is string && eventType == "CREATE") {
+        if eventType is "CREATE" {
             lock {
                 isCreated = true;
             }
@@ -49,9 +50,9 @@ service "/data/ChangeEvents" on eventListener {
         }
     }
 
-    remote isolated function onUpdate(EventData payload) {
-        json accountName = payload.changedData.get("Name");
-        if (accountName.toString() == "WSO2 Inc") {
+    remote isolated function onUpdate(EventData payload) returns error? {
+        string accountName = check payload.changedData.get("Name").ensureType();
+        if accountName is "WSO2 Inc" {
             lock {
                 isUpdated = true;
             }
@@ -63,7 +64,7 @@ service "/data/ChangeEvents" on eventListener {
 
     remote function onDelete(EventData payload) {
         string? eventType = payload.metadata?.changeType;
-        if (eventType is string && eventType == "DELETE") {
+        if eventType is "DELETE" {
             lock {
                 isDeleted = true;
             }
@@ -75,7 +76,7 @@ service "/data/ChangeEvents" on eventListener {
 
     remote function onRestore(EventData payload) {
         string? eventType = payload.metadata?.changeType;
-        if (eventType is string && eventType == "UNDELETE") {
+        if eventType is "UNDELETE" {
             lock {
                 isRestored = true;
             }
@@ -90,9 +91,7 @@ service "/data/ChangeEvents" on eventListener {
 Client lisbaseClient = check new (sfConfigRefreshCodeFlow);
 string testRecordId = "";
 
-@test:Config {
-    enable: true
-}
+@test:Config {}
 function testCreateRecord() {
     log:printInfo("lisbaseClient -> createRecord()");
     Account account = {
@@ -110,7 +109,6 @@ function testCreateRecord() {
 }
 
 @test:Config {
-    enable: true,
     dependsOn: [testCreateRecord]
 }
 function testUpdateRecord() {
@@ -128,7 +126,6 @@ function testUpdateRecord() {
 }
 
 @test:Config {
-    enable: true,
     dependsOn: [testUpdateRecord]
 }
 function testDeleteRecord() {
@@ -142,7 +139,6 @@ function testDeleteRecord() {
 }
 
 @test:Config {
-    enable: true,
     dependsOn: [testCreateRecord]
 }
 function testCreatedEventTrigger() {
@@ -154,7 +150,6 @@ function testCreatedEventTrigger() {
 }
 
 @test:Config {
-    enable: true,
     dependsOn: [testUpdateRecord]
 }
 function testUpdatedEventTrigger() {
@@ -166,7 +161,6 @@ function testUpdatedEventTrigger() {
 }
 
 @test:Config {
-    enable: true,
     dependsOn: [testDeleteRecord]
 }
 function testDeletedEventTrigger() {
