@@ -113,6 +113,11 @@ public type ClientHttp1Settings record {|
     ProxyConfig proxy?;
 |};
 
+# Defines the authentication configurations.
+public type AuthConfig http:CredentialsConfig|http:BearerTokenConfig|http:JwtIssuerConfig|
+config:OAuth2ClientCredentialsGrantConfig|config:OAuth2PasswordGrantConfig|config:OAuth2RefreshTokenGrantConfig|
+config:OAuth2JwtBearerGrantConfig;
+
 # Proxy server configurations to be used with the HTTP client endpoint.
 public type ProxyConfig record {|
     # Host name of the proxy server
