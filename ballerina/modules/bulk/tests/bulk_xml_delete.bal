@@ -18,7 +18,10 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:AfterSuite {}
+@test:Config {
+    enable: true,
+    dependsOn: [queryXml]
+}
 function deleteXml() returns error? {
     log:printInfo("baseClient -> deleteXml");
     string batchId = "";
@@ -131,5 +134,4 @@ function deleteXml() returns error? {
     //close job
     JobInfo closedJob = check baseClient->closeJob(deleteJob);
     test:assertTrue(closedJob.state == "Closed", msg = "Closing job failed.");
-
 }

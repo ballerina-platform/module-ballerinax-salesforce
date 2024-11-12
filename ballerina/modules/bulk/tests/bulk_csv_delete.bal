@@ -18,7 +18,10 @@ import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
 
-@test:AfterSuite {}
+@test:Config {
+    enable: true,
+    dependsOn: [queryXml]
+}
 function deleteCsv() returns error? {
     log:printInfo("baseClient -> deleteCsv");
     string batchId = "";
