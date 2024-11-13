@@ -19,7 +19,6 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true,
     dependsOn: [insertJson, upsertJson]
 }
 function updateJson() returns error? {

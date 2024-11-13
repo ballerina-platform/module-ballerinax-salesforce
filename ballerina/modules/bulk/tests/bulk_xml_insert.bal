@@ -20,7 +20,7 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true
+    dependsOn: [queryJson]
 }
 function insertXml() returns error? {
     log:printInfo("baseClient -> insertXml");
@@ -161,7 +161,7 @@ function insertXml() returns error? {
 }
 
 @test:Config {
-    enable: true
+    dependsOn: [queryJson]
 }
 function insertXmlFromFile() returns error? {
     log:printInfo("baseClient -> insertXmlFromFile");
@@ -299,5 +299,4 @@ function insertXmlFromFile() returns error? {
     } else {
         test:assertFail(msg = closedJob.message());
     }
-
 }

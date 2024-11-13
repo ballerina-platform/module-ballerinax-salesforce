@@ -20,7 +20,7 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true
+    dependsOn: [queryCsv]
 }
 function insertJson() returns error? {
     log:printInfo("baseClient -> insertJson");
@@ -183,7 +183,9 @@ function insertJson() returns error? {
     }
 }
 
-@test:Config {enable: true}
+@test:Config {
+    dependsOn: [insertJson, queryCsv]
+}
 function insertJsonFromFile() returns error? {
     log:printInfo("baseClient -> insertJsonFromFile");
     string jsonBatchId = "";
