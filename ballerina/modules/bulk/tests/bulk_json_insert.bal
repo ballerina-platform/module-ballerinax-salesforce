@@ -20,7 +20,6 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true,
     dependsOn: [queryCsv]
 }
 function insertJson() returns error? {
@@ -185,7 +184,6 @@ function insertJson() returns error? {
 }
 
 @test:Config {
-    enable: true,
     dependsOn: [insertJson, queryCsv]
 }
 function insertJsonFromFile() returns error? {

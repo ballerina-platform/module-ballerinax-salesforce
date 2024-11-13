@@ -19,7 +19,6 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true,
     dependsOn: [updateXml, insertXmlFromFile]
 }
 function queryXml() returns error? {

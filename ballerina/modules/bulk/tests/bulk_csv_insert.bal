@@ -22,9 +22,7 @@ import ballerina/lang.runtime;
 const int maxIterations = 5;
 const decimal delayInSecs = 5.0;
 
-@test:Config {
-    enable: true
-}
+@test:Config {}
 function insertCsv() returns error? {
     log:printInfo("baseClient -> insertCsv");
     string batchId = "";
@@ -169,9 +167,7 @@ function insertCsv() returns error? {
     }
 }
 
-@test:Config {
-    enable: true
-}
+@test:Config {}
 function insertCsvFromFile() {
     log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";
@@ -316,9 +312,7 @@ function insertCsvFromFile() {
     }
 }
 
-@test:Config {
-    enable: true
-}
+@test:Config {}
 function insertCsvStringArrayFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
     string batchId = "";
@@ -457,9 +451,7 @@ function insertCsvStringArrayFromFile() returns error? {
     }
 }
 
-@test:Config {
-    enable: true
-}
+@test:Config {}
 function insertCsvStreamFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStreamFromFile");
     string batchId = "";

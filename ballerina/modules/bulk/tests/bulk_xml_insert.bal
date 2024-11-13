@@ -20,7 +20,6 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true,
     dependsOn: [queryJson]
 }
 function insertXml() returns error? {
@@ -162,7 +161,6 @@ function insertXml() returns error? {
 }
 
 @test:Config {
-    enable: true,
     dependsOn: [queryJson]
 }
 function insertXmlFromFile() returns error? {
