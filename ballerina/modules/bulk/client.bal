@@ -39,30 +39,26 @@ public isolated client class Client {
     # + return - An error on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
-        http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig auth = let var authConfig = config.auth in 
-                (authConfig is http:BearerTokenConfig ?  authConfig : {...authConfig});
+        http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig auth = let var authConfig = config.auth in
+                (authConfig is http:BearerTokenConfig ? authConfig : {...authConfig});
         self.clientConfig = auth.cloneReadOnly();
 
-        http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
+        http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler httpHandlerResult;
+
         if auth is http:OAuth2RefreshTokenGrantConfig {
-            httpHandlerResult = trap new http:ClientOAuth2Handler(auth);
+            httpHandlerResult = new http:ClientOAuth2Handler(auth);
         } else {
-            httpHandlerResult = trap new http:ClientBearerTokenAuthHandler(auth);
+            httpHandlerResult = new http:ClientBearerTokenAuthHandler(auth);
         }
+        self.clientHandler = httpHandlerResult;
 
-        if httpHandlerResult is http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler {
-            self.clientHandler = httpHandlerResult;
-        } else {
-            return error(INVALID_CLIENT_CONFIG);
-        }
-
-        http:Client|http:ClientError|error httpClientResult;
-        httpClientResult = trap new (config.baseUrl, httpClientConfig);
+        http:Client|http:ClientError httpClientResult;
+        httpClientResult = new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
-            return error(INVALID_CLIENT_CONFIG);
+            return error(utils:CLIENT_INIT_ERROR_MSG + httpClientResult.message(), httpClientResult);
         }
     }
 
