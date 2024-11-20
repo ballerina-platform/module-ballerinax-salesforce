@@ -37,14 +37,14 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - `sfdc:Error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
-        http:Client|http:ClientError|error httpClientResult;
+        http:Client|http:ClientError httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
-        httpClientResult = trap new (config.baseUrl, httpClientConfig);
+        httpClientResult = new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
         } else {
-            return error(INVALID_CLIENT_CONFIG);
+            return error(CLIENT_INIT_ERROR_MSG + httpClientResult.message(), httpClientResult);
         }
     }
 

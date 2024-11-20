@@ -55,5 +55,4 @@ const string FORWARD_SLASH = "/";
 # Constant field `JSON_STATE_CLOSED_PAYLOAD`. Holds the value of JSON body which needs to close the job.
 final json JSON_STATE_CLOSED_PAYLOAD = {state: "Closed"};
 
-public const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
-public const INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";
+public const string ERR_EXTRACTING_ERROR_MSG = "Error occurred while extracting errors from payload.";
