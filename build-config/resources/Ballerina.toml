@@ -13,11 +13,17 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
 [build-options]
 observabilityIncluded = true
 
-[platform.java11]
+[platform.java17]
 graalvmCompatible = true
 
-[[platform.java11.dependency]]
+[[platform.java17.dependency]]
 path = "../native/build/libs/salesforce-native-@project.version@.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
 version = "@project.version@"
+
+[[platform.java17.dependency]]
+groupId = "com.opencsv"
+artifactId = "opencsv"
+version = "@opencsv.version@"
+path = "./lib/opencsv-@opencsv.version@.jar"

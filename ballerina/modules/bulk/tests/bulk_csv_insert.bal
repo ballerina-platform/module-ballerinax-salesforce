@@ -176,7 +176,7 @@ function insertCsvFromFile() {
     log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts1.csv";
+    string csvContactsFilePath = "modules/bulk/tests/resources/contacts1.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
@@ -323,7 +323,7 @@ function insertCsvStringArrayFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts2.csv";
+    string csvContactsFilePath = "modules/bulk/tests/resources/contacts2.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
@@ -401,7 +401,7 @@ function insertCsvStringArrayFromFile() returns error? {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|json|xml|string batchRequest = baseClient->getBatchRequest(insertJob, batchId);
             if batchRequest is string {
-                test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
+                test:assertTrue(checkCsvResult(batchRequest) == 3, msg = "Retrieving batch request failed.");
                 break;
             } else if batchRequest is error {
                 if currentRetry != maxIterations {
@@ -464,7 +464,7 @@ function insertCsvStreamFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStreamFromFile");
     string batchId = "";
 
-    string csvContactsFilePath = "ballerina/modules/bulk/tests/resources/contacts3.csv";
+    string csvContactsFilePath = "modules/bulk/tests/resources/contacts3.csv";
 
     //create job
     error|BulkJob insertJob = baseClient->createJob("insert", "Contact", "CSV");
@@ -542,7 +542,7 @@ function insertCsvStreamFromFile() returns error? {
         foreach int currentRetry in 1 ..< maxIterations + 1 {
             error|json|xml|string batchRequest = baseClient->getBatchRequest(insertJob, batchId);
             if batchRequest is string {
-                test:assertTrue(checkCsvResult(batchRequest) == 2, msg = "Retrieving batch request failed.");
+                test:assertTrue(checkCsvResult(batchRequest) == 3, msg = "Retrieving batch request failed.");
                 break;
             } else if batchRequest is error {
                 if currentRetry != maxIterations {

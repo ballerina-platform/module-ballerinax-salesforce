@@ -2,7 +2,7 @@
 distribution = "2201.8.0"
 org = "ballerinax"
 name = "salesforce"
-version = "7.6.0"
+version = "8.0.2"
 export = ["salesforce", "salesforce.bulk", "salesforce.soap"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
@@ -13,11 +13,17 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-sfdc"
 [build-options]
 observabilityIncluded = true
 
-[platform.java11]
+[platform.java17]
 graalvmCompatible = true
 
-[[platform.java11.dependency]]
-path = "../native/build/libs/salesforce-native-7.6.0.jar"
+[[platform.java17.dependency]]
+path = "../native/build/libs/salesforce-native-8.0.2.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "7.6.0"
+version = "8.0.2"
+
+[[platform.java17.dependency]]
+groupId = "com.opencsv"
+artifactId = "opencsv"
+version = "5.9"
+path = "./lib/opencsv-5.9.jar"

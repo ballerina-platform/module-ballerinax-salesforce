@@ -1,6 +1,6 @@
-// Copyright (c) 2020 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2023 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
 //
-// WSO2 Inc. licenses this file to you under the Apache License,
+// WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
 // in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,9 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
+
 import ballerina/log;
 import ballerina/os;
 import ballerina/test;
+import ballerina/time;
+import ballerina/lang.runtime;
 
 // Create Salesforce client configuration by reading from environemnt.
 configurable string clientId = os:getEnv("CLIENT_ID");
@@ -24,9 +27,13 @@ configurable string clientSecret = os:getEnv("CLIENT_SECRET");
 configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
 configurable string refreshUrl = os:getEnv("REFRESH_URL");
 configurable string baseUrl = os:getEnv("EP_URL");
+configurable string username = "";
+configurable string password = "";
+
+string reportInstanceID = "";
 
 // Using direct-token config for client configuration
-ConnectionConfig sfConfig = {
+ConnectionConfig sfConfigRefreshCodeFlow = {
     baseUrl: baseUrl,
     auth: {
         clientId: clientId,
@@ -36,7 +43,30 @@ ConnectionConfig sfConfig = {
     }
 };
 
-Client baseClient = check new (sfConfig);
+ConnectionConfig sfConfigPasswordFlow = {
+    baseUrl: baseUrl,
+    auth: {
+        password,
+        username,
+        tokenUrl: refreshUrl,
+        clientId: clientId,
+        clientSecret: clientSecret,
+        credentialBearer: "POST_BODY_BEARER"
+    }
+};
+
+ConnectionConfig sfConfigCredentialsFlow = {
+    baseUrl: baseUrl,
+    auth: {
+        clientId: clientId,
+        clientSecret: clientSecret,
+        tokenUrl: refreshUrl
+    }
+};
+
+Client baseClient = check new (sfConfigRefreshCodeFlow);
+// Client baseClientPasswordFlow = check new (sfConfigPasswordFlow);
+// Client baseClientCredentialsFlow = check new (sfConfigCredentialsFlow);
 
 public type Account record {
     string Id?;
@@ -105,6 +135,12 @@ public type Account record {
     anydata UpsellOpportunity__c = ();
     string? SLASerialNumber__c = ();
     string? SLAExpirationDate__c = ();
+};
+
+public type Layout record {
+    record{}[] layouts;
+    json recordTypeMappings;
+    boolean[] recordTypeSelectorRequired;
 };
 
 type AccountResultWithAlias record {|
@@ -176,7 +212,7 @@ function testGetByExternalId() {
 
 @test:Config {
     enable: true,
-    dependsOn: [testCreateRecord, testGetById]
+    dependsOn: [testCreate, testGetById]
 }
 function testUpdate() {
     log:printInfo("baseClient -> update()");
@@ -206,6 +242,29 @@ function testQuery() returns error? {
         test:assertTrue(count > 0, msg = "Found 0 search records!");
     }
 }
+
+// @test:Config {
+//     enable: false
+// }
+// function testQueryPasswordFlow() returns error? {
+//     log:printInfo("baseClientPasswordFlow -> query()");
+//     stream<Account, error?> queryResult = 
+//         check baseClientPasswordFlow->query("SELECT name FROM Account");
+//     int count = check countStream(queryResult);
+//     test:assertTrue(count > 0, msg = "Found 0 search records!");
+// }
+
+// @test:Config {
+//     enable: false
+// }
+// function testQueryCredentialsFlow() returns error? {
+//     log:printInfo("baseClientCredentialsFlow -> query()");
+//     stream<Account, error?> queryResult = 
+//         check baseClientCredentialsFlow->query("SELECT name FROM Account");
+//     int count = check countStream(queryResult);
+//     test:assertTrue(count > 0, msg = "Found 0 search records!");
+// }
+
 
 @test:Config {
     enable: true
@@ -313,7 +372,7 @@ function testOrganizationMetaData() {
     log:printInfo("baseClient -> getOrganizationMetaData()");
     OrganizationMetadata|error description = baseClient->getOrganizationMetaData();
 
-    if description is OrgMetadata {
+    if description is OrganizationMetadata {
         test:assertTrue(description.length() > 0, msg = "Found empty descriptions");
     } else {
         test:assertFail(msg = description.message());
@@ -379,6 +438,213 @@ function testApiVersions() {
 @test:Config {
     enable: true
 }
+function testgetDeleted() {
+    log:printInfo("baseClient -> getDeletedRecords()");
+    DeletedRecordsResult|error deletedRecords = baseClient->getDeletedRecords("Account", time:utcToCivil(time:utcNow()),
+        time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
+
+    if deletedRecords !is DeletedRecordsResult {
+        test:assertFail(msg = deletedRecords.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
+function testgetUpdated() {
+    log:printInfo("baseClient -> getUpdatedRecords()");
+    UpdatedRecordsResults|error updatedRecords = baseClient->getUpdatedRecords("Account", time:utcToCivil(time:utcNow()),
+        time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
+    if updatedRecords !is UpdatedRecordsResults {
+        test:assertFail(msg = updatedRecords.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
+function testgetPasswordInfo() returns error? {
+    log:printInfo("baseClient -> getPasswordInfo()");
+    boolean _ = check baseClient->isPasswordExpired("0055g00000J48In");
+}
+
+@test:Config {
+    enable: false,
+    dependsOn: [testgetPasswordInfo]
+}
+function testResetPassword() returns error? {
+    log:printInfo("baseClient -> resetPassword()");
+    runtime:sleep(10);
+    byte[]|error resettedPassword = baseClient->resetPassword("");
+    if resettedPassword !is byte[] {
+        test:assertFail(msg = resettedPassword.message());
+    }
+}
+
+@test:Config {
+    enable: false,
+    dependsOn: [testResetPassword]
+}
+function testSetPassword() returns error? {
+    log:printInfo("baseClient -> changePassword()");
+    string newPassword = "";
+    error? response = baseClient->changePassword("", newPassword);
+    if response !is () {
+        test:assertFail(msg = response.message());
+    }
+}
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testGetQuickActions() returns error? {
+    log:printInfo("baseClient -> getQuickActions()");
+    QuickAction[]|error resp = baseClient->getQuickActions("Contact");
+    if resp !is QuickAction[] {
+        test:assertFail(msg = resp.message());
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testListReports() returns error? {
+    log:printInfo("baseClient -> listReports()");
+    Report[]|error resp = baseClient->listReports();
+    if resp !is Report[] {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0{
+        test:assertFail("No reports found");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testRunReportSync() returns error? {
+    log:printInfo("baseClient -> runReportSync()");
+    ReportInstanceResult|error resp = baseClient->runReportSync("00O5g00000Jrs9DEAR");
+    if resp !is ReportInstanceResult {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0 {
+        test:assertFail("No reports found");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testRunReportAsync() returns error? {
+    log:printInfo("baseClient -> runReportAsync()");
+    ReportInstance|error resp = baseClient->runReportAsync("00O5g00000Jrs9DEAR");
+    if resp !is ReportInstance {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.id == "" {
+        test:assertFail("No reports found");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testRunReportAsync]
+}
+function testListAsyncRunsOfReport() returns error? {
+    log:printInfo("baseClient -> listAsyncRunsOfReport()");
+    ReportInstance[]|error resp = baseClient->listAsyncRunsOfReport("00O5g00000Jrs9DEAR");
+    if resp !is ReportInstance[] {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0 {
+        test:assertFail("No reports found");
+    }
+    reportInstanceID = resp[0].id;
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: [testListAsyncRunsOfReport]
+}
+function testGetReportInstanceResult() returns error? {
+    log:printInfo("baseClient -> getReportInstanceResult()");
+    ReportInstanceResult|error resp = baseClient->getReportInstanceResult("00O5g00000Jrs9DEAR", reportInstanceID);
+    if resp !is ReportInstanceResult {
+        test:assertFail(msg = resp.message());
+    }
+    if resp.length() == 0 {
+        test:assertFail("No reports found");
+    }
+}
+
+
+@test:Config {
+    enable: true
+}
+function testBatchExecute() returns error? {
+    log:printInfo("baseClient -> batch()");
+    Subrequest[] subrequests = [{method: "GET", url: "/services/data/v59.0/sobjects/Account/describe"},
+                                {method: "GET", url: "/services/data/v59.0/sobjects/Contact/describe"}];
+    BatchResult|error batchResult = baseClient->batch(subrequests, true);
+    if batchResult !is BatchResult {
+        test:assertFail(msg = batchResult.message());
+    } else {
+        test:assertFalse(batchResult.hasErrors, msg = "Batch result has errors");
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testGeNamedLayouts() returns error? {
+    log:printInfo("baseClient -> getNamedLayouts()");
+    Layout|error resp = baseClient->getNamedLayouts("User", "UserAlt");
+    if resp !is Layout {
+        test:assertFail(msg = resp.message());
+    } else {
+        if (resp.layouts.length() > 0) {
+            test:assertTrue(resp.layouts.length() > 0, msg = "Layout is empty");
+        }
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testDeleteByExternalId() returns error? {
+    log:printInfo("baseClient -> deleteRecordsUsingExtId()");
+    CreationResponse|error creation = check baseClient->create("Asset", {"Name": "testAsset", "assetExt_id__c": "asdfg", "AccountId":"0015g00001Per6rAAB"});
+    if creation is error {
+        test:assertFail(msg = creation.message());
+    }
+    runtime:sleep(10);
+    error? response = baseClient->deleteRecordsUsingExtId("Asset", "assetExt_id__c", "asdfg");
+    if response is error {
+        test:assertFail(msg = response.message());
+    }
+}
+
+@test:Config {
+    enable: true,
+    dependsOn: []
+}
+function testlistReports() returns error? {
+    log:printInfo("baseClient -> listReports()");
+    Report[]|error creation = check baseClient->listReports();
+    if creation is error {
+        test:assertFail(msg = creation.message());
+    }
+}
+
+@test:Config {
+    enable: true
+}
 function testResources() {
     log:printInfo("baseClient -> getResources()");
     map<string>|error resources = baseClient->getResources(API_VERSION);
@@ -400,6 +666,33 @@ function testResources() {
     }
 }
 
+@test:Config {
+    enable: true
+}
+function testApex() returns error? {
+    log:printInfo("baseClient -> executeApex()");
+    string|error caseId = baseClient->apexRestExecute("Cases", "POST", 
+        {"subject" : "Bigfoot Sighting9!",
+            "status" : "New",
+            "origin" : "Phone",
+            "priority" : "Low"});
+    if caseId is error {
+        test:assertFail(msg = caseId.message());
+    }
+    runtime:sleep(5);
+    record{}|error case = baseClient->apexRestExecute(string `Cases/${caseId}`, "GET", {});
+    if case is error {
+        test:assertFail(msg = case.message());
+    }
+    runtime:sleep(5);
+    error? deleteResponse = baseClient->apexRestExecute(string `Cases/${caseId}`, "DELETE", {});
+    if deleteResponse is error {
+        test:assertFail(msg = deleteResponse.message());
+    }
+}
+
+
+
 @test:AfterSuite {}
 function testDeleteRecordNew() returns error? {
     log:printInfo("baseClient -> delete()");
@@ -409,183 +702,7 @@ function testDeleteRecordNew() returns error? {
     }
 }
 
-//////////////////////////////////////////// DEPRECATED ////////////////////////////////////////////////////////////////
-
-json accountRecordJson = {
-    Name: "John Keells Holdings",
-    BillingCity: "Colombo 3"
-};
-
-string testRecordIdJson = "";
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testCreateRecord() {
-    log:printInfo("baseClient -> createRecord()");
-    string|Error stringResponse = baseClient->createRecord(ACCOUNT, accountRecordJson);
-
-    if stringResponse is string {
-        test:assertNotEquals(stringResponse, "", msg = "Found empty response!");
-        testRecordIdJson = stringResponse;
-    } else {
-        test:assertFail(msg = stringResponse.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testCreateRecord],
-    groups: ["deprecated"]
-}
-function testGetRecord() {
-    json|Error response;
-    log:printInfo("baseClient -> getRecord()");
-    string path = "/services/data/v48.0/sobjects/Account/" + testRecordIdJson;
-    response = baseClient->getRecord(path);
-
-    if response is json {
-        test:assertNotEquals(response, (), msg = "Found null JSON response!");
-        test:assertEquals(response.Name, "John Keells Holdings", msg = "Name key mismatched in response");
-        test:assertEquals(response.BillingCity, "Colombo 3", msg = "BillingCity key mismatched in response");
-    } else {
-        test:assertFail(msg = response.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testCreateRecord, testGetRecord],
-    groups: ["deprecated"]
-}
-function testUpdateRecord() {
-    log:printInfo("baseClient -> updateRecord()");
-    json account = {
-        Name: "WSO2 Inc",
-        BillingCity: "Jaffna",
-        Phone: "+94110000000"
-    };
-    Error? response = baseClient->updateRecord(ACCOUNT, testRecordIdJson, account);
-
-    if response is Error {
-        test:assertFail(msg = response.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testSearchSOSLString],
-    groups: ["deprecated"]
-}
-function testDeleteRecord() {
-    log:printInfo("baseClient -> deleteRecord()");
-    Error? response = baseClient->deleteRecord(ACCOUNT, testRecordIdJson);
-
-    if response is Error {
-        test:assertFail(msg = response.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testGetQueryResult() returns error? {
-    log:printInfo("baseClient -> getQueryResult()");
-    string sampleQuery = "SELECT name FROM Account";
-    SoqlResult res = check baseClient->getQueryResult(sampleQuery);
-    assertSoqlResult(res);
-    string nextRecordsUrl = res["nextRecordsUrl"].toString();
-
-    while (nextRecordsUrl.trim() != EMPTY_STRING) {
-        // log:printInfo("Found new query result set! nextRecordsUrl:" + nextRecordsUrl);
-        SoqlResult resp = check baseClient->getNextQueryResult(nextRecordsUrl);
-        assertSoqlResult(resp);
-        res = resp;
-    }
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testUpdateRecord],
-    groups: ["deprecated"]
-}
-function testSearchSOSLString() {
-    log:printInfo("baseClient -> searchSOSLString()");
-    string searchString = "FIND {WSO2 Inc}";
-    SoslResult|Error res = baseClient->searchSOSLString(searchString);
-
-    if res is SoslResult {
-        test:assertTrue(res.searchRecords.length() > 0, msg = "Found 0 search records!");
-        test:assertTrue(res.searchRecords[0].attributes.'type == ACCOUNT,
-        msg = "Matched search record is not an Account type!");
-    } else {
-        test:assertFail(msg = res.message());
-    }
-}
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testGetQueryResultStream() returns error? {
-    log:printInfo("baseClient -> getQueryResultStream()");
-    string sampleQuery = "SELECT Name,Industry FROM Account";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
-    int count = check countStream(resultStream);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
-}
-
-@test:Config {
-    enable: true,
-    groups: ["deprecated"]
-}
-function testGetQueryResultWithLimit() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithLimit()");
-    string sampleQuery = "SELECT Name,Industry FROM Account LIMIT 3";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
-    int count = check countStream(resultStream);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
-}
-
-@test:Config {
-    enable: false,
-    groups: ["deprecated"]
-}
-function testGetQueryResultWithPagination() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithPagination()");
-    string sampleQuery = "SELECT Name FROM Contact";
-    stream<record {}, error?> resultStream = check baseClient->getQueryResultStream(sampleQuery);
-    int count = check countStream(resultStream);
-    log:printInfo("Number of records", count = count);
-    test:assertTrue(count > 2000, msg = "Found less than or exactly 2000 search records!");
-}
-
-@test:Config {
-    enable: true,
-    dependsOn: [testUpdateRecord],
-    groups: ["deprecated"]
-}
-function testSearchSOSLStringStream() returns error? {
-    log:printInfo("baseClient -> searchSOSLStringStream()");
-    string searchString = "FIND {WSO2 Inc}";
-    stream<record {}, error?> resultStream = check baseClient->searchSOSLStringStream(searchString);
-    int count = check countStream(resultStream);
-    test:assertTrue(count > 0, msg = "Found 0 search records!");
-}
-
 /////////////////////////////////////////// Helper Functions ///////////////////////////////////////////////////////////
-
-isolated function assertSoqlResult(SoqlResult|Error res) {
-    if res is SoqlResult {
-        test:assertTrue(res.totalSize > 0, "Total number result records is 0");
-        test:assertTrue(res.'done, "Query is not completed");
-        test:assertTrue(res.records.length() == res.totalSize, "Query result records not equal to totalSize");
-    } else {
-        test:assertFail(msg = res.message());
-    }
-}
 
 isolated function countStream(stream<record {}, error?> resultStream) returns int|error {
     int nLines = 0;

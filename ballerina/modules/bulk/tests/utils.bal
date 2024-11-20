@@ -17,7 +17,6 @@
 import ballerina/io;
 import ballerina/log;
 import ballerina/test;
-import ballerina/regex;
 import ballerina/os;
 import ballerinax/salesforce;
 
@@ -25,7 +24,7 @@ json[] jsonInsertResult = [];
 xml xmlInsertResult = xml ``;
 string csvInputResult = "Id";
 
-// Create Salesforce client configuration by reading from environemnt.
+// Create Salesforce client configuration by reading from environment.
 configurable string clientId = os:getEnv("CLIENT_ID");
 configurable string clientSecret = os:getEnv("CLIENT_SECRET");
 configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
@@ -61,7 +60,7 @@ isolated function checkBatchResults(Result result) returns boolean {
 }
 
 isolated function checkCsvResult(string result) returns int {
-    string[] lineArray = regex:split(result, "\n");
+    string[] lineArray = re `\n`.split(result);
     int arrLength = lineArray.length();
     return arrLength - 1;
 }

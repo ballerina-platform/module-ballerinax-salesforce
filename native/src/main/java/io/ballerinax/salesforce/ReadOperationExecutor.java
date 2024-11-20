@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2022, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2023, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,10 +30,13 @@ import io.ballerina.runtime.api.types.StreamType;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BStream;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.runtime.api.values.BTypedesc;
+
+import static io.ballerinax.salesforce.Utils.getMetadata;
 
 /**
  * This class holds the utility methods involved with executing the read operations.
@@ -43,99 +46,66 @@ import io.ballerina.runtime.api.values.BTypedesc;
 public class ReadOperationExecutor {
 
     public static Object getRecord(Environment env, BObject client, BString path, BTypedesc targetType) {
+        Object[] paramFeed = {targetType, true, path, true};
+        return invokeClientMethod(env, client, "processGetRecord", paramFeed);
+    }
 
-        return invokeClientMethod(env, client, path, targetType,
-                "processGetRecord");
+    public static Object getInvocableActions(Environment env, BObject client, BString subContext,
+                                             BTypedesc targetType) {
+        Object[] paramFeed = {targetType, true, subContext, true};
+        return invokeClientMethod(env, client, "processGetInvocableActions", paramFeed);
+    }
+
+    public static Object invokeActions(Environment env, BObject client, BString subContext, BMap<BString, ?> payload,
+                                       BTypedesc targetType) {
+        Object[] paramFeed = {targetType, true, subContext, true, payload, true};
+        return invokeClientMethod(env, client, "processInvokeActions", paramFeed);
     }
 
     public static Object getRecordById(Environment env, BObject client, BString sobject, BString id,
-                                       BArray fields, BTypedesc targetType) {
-
-        return invokeClientMethodForId(env, client, sobject, id, fields, targetType,
-                "processGetRecordById");
+                                       BTypedesc targetType) {
+        RecordType recordType = (RecordType) targetType.getDescribingType();
+        BArray fields = getMetadata(recordType);
+        Object[] paramFeed = {targetType, true, sobject, true, id, true, fields, true};
+        return invokeClientMethod(env, client, "processGetRecordById", paramFeed);
     }
 
-    public static Object getRecordByExtId(Environment env, BObject client, BString sobject, BString extIdField,
-                                          BString extId, BArray fields, BTypedesc targetType) {
+    public static Object getNamedLayouts(Environment env, BObject client, BString sObject, BString name,
+                                         BTypedesc targetType) {
+        Object[] paramFeed = {targetType, true, sObject, true, name, true};
+        return invokeClientMethod(env, client, "processGetNamedLayouts", paramFeed);
+    }
 
-        return invokeClientMethodForExtId(env, client, sobject, extIdField, extId, fields, targetType,
-                "processGetRecordByExtId");
+    public static Object apexRestExecute(Environment env, BObject client, BString urlPath,
+                                         BString methodType, BMap<BString, ?> payload,
+                                         BTypedesc targetType) {
+        Object[] paramFeed = {targetType, true, urlPath, true, methodType, true, payload, true};
+        return invokeClientMethod(env, client, "processApexExecute", paramFeed);
+    }
+
+    public static Object getRecordByExtId(Environment env, BObject client, BString sObject, BString extIdField,
+                                          BString extId, BTypedesc targetType) {
+        RecordType recordType = (RecordType) targetType.getDescribingType();
+        BArray fields = getMetadata(recordType);
+        Object[] paramFeed = {targetType, true, sObject, true, extIdField, true, extId, true, fields, true};
+        return invokeClientMethod(env, client, "processGetRecordByExtId", paramFeed);
     }
 
     public static Object getQueryResult(Environment env, BObject client, BString receivedQuery, BTypedesc targetType) {
-
-        return invokeClientMethodForQuery(env, client, receivedQuery, targetType,
-                "processGetQueryResult");
+        Object[] paramFeed = {targetType, true, receivedQuery, true};
+        return invokeClientMethod(env, client, "processGetQueryResult", paramFeed);
     }
 
     public static Object searchSOSLString(Environment env, BObject client, BString searchString,
                                           BTypedesc targetType) {
-
-        return invokeClientMethodForQuery(env, client, searchString, targetType,
-                "processSearchSOSLString");
-    }
-
-    private static Object invokeClientMethod(Environment env, BObject client, BString path, BTypedesc targetType,
-                                             String methodName) {
-
-        Object[] paramFeed = new Object[4];
-        paramFeed[0] = targetType;
-        paramFeed[1] = true;
-        paramFeed[2] = path;
-        paramFeed[3] = true;
-        return invokeClientMethod(env, client, methodName, paramFeed);
-    }
-
-    private static Object invokeClientMethodForId(Environment env, BObject client, BString sobject, BString id,
-                                                  BArray fields, BTypedesc targetType,
-                                                  String methodName) {
-
-        Object[] paramFeed = new Object[8];
-        paramFeed[0] = targetType;
-        paramFeed[1] = true;
-        paramFeed[2] = sobject;
-        paramFeed[3] = true;
-        paramFeed[4] = id;
-        paramFeed[5] = true;
-        paramFeed[6] = fields;
-        paramFeed[7] = true;
-        return invokeClientMethod(env, client, methodName, paramFeed);
-    }
-
-    private static Object invokeClientMethodForExtId(Environment env, BObject client, BString sobject,
-                                                     BString extIdField, BString extId, BArray fields,
-                                                     BTypedesc targetType, String methodName) {
-
-        Object[] paramFeed = new Object[10];
-        paramFeed[0] = targetType;
-        paramFeed[1] = true;
-        paramFeed[2] = sobject;
-        paramFeed[3] = true;
-        paramFeed[4] = extIdField;
-        paramFeed[5] = true;
-        paramFeed[8] = extId;
-        paramFeed[9] = true;
-        paramFeed[6] = fields;
-        paramFeed[7] = true;
-        return invokeClientMethod(env, client, methodName, paramFeed);
-    }
-
-    private static Object invokeClientMethodForQuery(Environment env, BObject client,
-                                                     BString receivedQuery, BTypedesc targetType,
-                                                     String methodName) {
-
-        Object[] paramFeed = new Object[4];
-        paramFeed[0] = targetType;
-        paramFeed[1] = true;
-        paramFeed[2] = receivedQuery;
-        paramFeed[3] = true;
-        return invokeClientMethod(env, client, methodName, paramFeed);
+        Object[] paramFeed = {targetType, true, searchString, true};
+        return invokeClientMethod(env, client, "processSearchSOSLString", paramFeed);
     }
 
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, Object[] paramFeed) {
 
         Future balFuture = env.markAsync();
-        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(client.getType());
+        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(client));
         if (objectType.isIsolated() && objectType.isIsolated(methodName)) {
             env.getRuntime().invokeMethodAsyncConcurrently(client, methodName,
                     null, null, new Callback() {

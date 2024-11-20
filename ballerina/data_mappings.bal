@@ -1,4 +1,4 @@
-// Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+// Copyright (c) 2020, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 //
 // WSO2 Inc. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -73,30 +73,6 @@ isolated function toMapOfLimits(json payload) returns map<Limit>|Error {
     return limits;
 }
 
-isolated function toSoqlResult(json payload) returns SoqlResult|Error {
-    SoqlResult|error res = payload.cloneWithType(SoqlResult);
-
-    if res is SoqlResult {
-        return res;
-
-    } else {
-        string errMsg = "Error occurred while constructing SoqlResult record.";
-        log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
-        return error Error(errMsg, res);
-    }
-}
-
-isolated function toSoslResult(json payload) returns SoslResult|Error {
-    SoslResult|error res = payload.cloneWithType(SoslResult);
-
-    if res is SoslResult {
-        return res;
-    } else {
-        string errMsg = "Error occurred while constructing SoslResult record.";
-        log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
-        return error Error(errMsg, res);
-    }
-}
 
 isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error {
     SObjectMetaData|error res = payload.cloneWithType(SObjectMetaData);
@@ -110,13 +86,13 @@ isolated function toSObjectMetaData(json payload) returns SObjectMetaData|Error 
     }
 }
 
-isolated function toOrgMetadata(json payload) returns OrgMetadata|Error {
-    OrgMetadata|error res = payload.cloneWithType(OrgMetadata);
+isolated function toOrganizationMetadata(json payload) returns OrganizationMetadata|Error {
+    OrganizationMetadata|error res = payload.cloneWithType(OrganizationMetadata);
 
-    if res is OrgMetadata {
+    if res is OrganizationMetadata {
         return res;
     } else {
-        string errMsg = "Error occurred while constructing OrgMetadata record.";
+        string errMsg = "Error occurred while constructing OrganizationMetadata record.";
         log:printError(errMsg + " payload:" + payload.toJsonString(), 'error = res);
         return error Error(errMsg, res);
     }

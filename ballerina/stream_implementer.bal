@@ -57,18 +57,9 @@ class SOQLQueryResultStream {
         self.nextRecordsUrl = response.hasKey(NEXT_RECORDS_URL) ? check response.get(NEXT_RECORDS_URL).ensureType() :
             EMPTY_STRING;
 
-        map<json>[] array = response.records;
-        return check covertToRecordsArray(array);
+        record{}[] array = response.records;
+        return array;
     }
-}
-
-isolated function covertToRecordsArray(map<json>[] queryResultArray) returns record {}[]|error {
-    record {}[] resultRecordArray = [];
-    foreach map<json> queryResult in queryResultArray {
-        _ = check queryResult.removeIfHasKey(ATTRIBUTES).ensureType();
-        resultRecordArray.push(check queryResult.cloneWithType(Record));
-    }
-    return resultRecordArray;
 }
 
 class SOSLSearchResult {
@@ -94,8 +85,8 @@ class SOSLSearchResult {
 
     isolated function fetchSearchResult() returns record {}[]|error {
         SoslSearchResult response = check self.httpClient->get(self.path);
-        map<json>[] array = response.searchRecords;
-        return check covertSearchResultsToRecordsArray(array);
+        record{}[] array = response.searchRecords;
+        return array;
     }
 }
 
