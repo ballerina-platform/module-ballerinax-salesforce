@@ -37,6 +37,5 @@ const STATUS_CODE = "statusCode";
 const HEADERS = "headers";
 const BODY = "body";
 
-
+public const string CLIENT_INIT_ERROR_MSG = "Error occurred while initializing the client: ";
 public const string ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
-public const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";

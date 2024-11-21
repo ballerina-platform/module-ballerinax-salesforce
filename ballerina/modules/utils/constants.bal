@@ -34,6 +34,5 @@ const string QUESTION_MARK = "?";
 # Constant field `EQUAL_SIGN`. Holds the value of "=".
 const string EQUAL_SIGN = "=";
 
-public const INVALID_CLIENT_CONFIG = "Invalid values provided for client configuration parameters.";
+public const string CLIENT_INIT_ERROR_MSG = "Error occurred while initializing the client: ";
 const ERR_EXTRACTING_ERROR_MSG = "Error occured while extracting errors from payload.";
-
