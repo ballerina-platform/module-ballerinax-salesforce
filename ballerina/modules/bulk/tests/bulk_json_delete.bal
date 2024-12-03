@@ -17,6 +17,7 @@
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
+import ballerina/io;
 
 @test:Config {
     dependsOn: [queryXml]
@@ -32,6 +33,7 @@ function deleteJson() returns error? {
     //add json content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(deleteJob, contacts);
+        io:println("deleteJson: " + contacts.toString());
         if batch is BatchInfo {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using json.");
             batchId = batch.id;

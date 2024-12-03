@@ -17,6 +17,7 @@
 import ballerina/log;
 import ballerina/test;
 import ballerina/lang.runtime;
+import ballerina/io;
 
 @test:Config {
     dependsOn: [queryXml]
@@ -30,6 +31,7 @@ function deleteCsv() returns error? {
 
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
+        io:println("deleteCsv: " + csvInputResult);
         error|BatchInfo batch = baseClient->addBatch(deleteJob, csvInputResult);
         if batch is BatchInfo {
             test:assertTrue(batch.id.length() > 0, msg = "Could not upload the contacts to delete using CSV.");
