@@ -1,5 +1,5 @@
 [package]
-distribution = "2201.10.0"
+distribution = "2201.11.0-20241117-133400-a3054b77"
 org = "ballerinax"
 name = "salesforce"
 version = "@toml.version@"
@@ -13,88 +13,88 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-salesforce
 [build-options]
 observabilityIncluded = true
 
-[platform.java17]
+[platform.java21]
 graalvmCompatible = true
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 path = "../native/build/libs/salesforce-native-@project.version@.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
 version = "@project.version@"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "com.opencsv"
 artifactId = "opencsv"
 version = "@opencsv.version@"
 path = "./lib/opencsv-@opencsv.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.cometd.java"
 artifactId = "bayeux-api"
 version = "@cometd.java.client.version@"
 path = "./lib/bayeux-api-@cometd.java.client.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.cometd.java"
 artifactId = "cometd-java-client"
 version = "@cometd.java.client.version@"
 path = "./lib/cometd-java-client-@cometd.java.client.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.cometd.java"
 artifactId = "cometd-java-common"
 version = "@cometd.java.client.version@"
 path = "./lib/cometd-java-common-@cometd.java.client.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-client"
 version = "@jetty.version@"
 path = "./lib/jetty-client-@jetty.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-http"
 version = "@jetty.version@"
 path = "./lib/jetty-http-@jetty.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-io"
 version = "@jetty.version@"
 path = "./lib/jetty-io-@jetty.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util"
 version = "@jetty.version@"
 path = "./lib/jetty-util-@jetty.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util-ajax"
 version = "@jetty.version@"
 path = "./lib/jetty-util-ajax-@jetty.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "org.json"
 artifactId = "json"
 version = "@json.version@"
 path = "./lib/json-@json.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-databind"
 version = "@jackson.databind.version@"
 path = "./lib/jackson-databind-@jackson.databind.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-annotations"
 version = "@jackson.annotations.version@"
 path = "./lib/jackson-annotations-@jackson.annotations.version@.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-core"
 version = "@jackson.core.version@"
