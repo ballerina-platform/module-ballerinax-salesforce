@@ -19,13 +19,12 @@
 package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
-import io.ballerina.runtime.api.Future;
-import io.ballerina.runtime.api.PredefinedTypes;
-import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.TypeCreator;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.ArrayType;
 import io.ballerina.runtime.api.types.ObjectType;
+import io.ballerina.runtime.api.types.PredefinedTypes;
 import io.ballerina.runtime.api.types.RecordType;
 import io.ballerina.runtime.api.types.StreamType;
 import io.ballerina.runtime.api.utils.TypeUtils;
@@ -48,19 +47,19 @@ import static io.ballerinax.salesforce.Utils.getMetadata;
 public class ReadOperationExecutor {
 
     public static Object getRecord(Environment env, BObject client, BString path, BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, path, true};
+        Object[] paramFeed = {targetType, path};
         return invokeClientMethod(env, client, "processGetRecord", paramFeed);
     }
 
     public static Object getInvocableActions(Environment env, BObject client, BString subContext,
                                              BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, subContext, true};
+        Object[] paramFeed = {targetType, subContext};
         return invokeClientMethod(env, client, "processGetInvocableActions", paramFeed);
     }
 
     public static Object invokeActions(Environment env, BObject client, BString subContext, BMap<BString, ?> payload,
                                        BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, subContext, true, payload, true};
+        Object[] paramFeed = {targetType, subContext, payload};
         return invokeClientMethod(env, client, "processInvokeActions", paramFeed);
     }
 
@@ -68,20 +67,20 @@ public class ReadOperationExecutor {
                                        BTypedesc targetType) {
         RecordType recordType = (RecordType) targetType.getDescribingType();
         BArray fields = getMetadata(recordType);
-        Object[] paramFeed = {targetType, true, sobject, true, id, true, fields, true};
+        Object[] paramFeed = {targetType, sobject, id, fields};
         return invokeClientMethod(env, client, "processGetRecordById", paramFeed);
     }
 
     public static Object getNamedLayouts(Environment env, BObject client, BString sObject, BString name,
                                          BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, sObject, true, name, true};
+        Object[] paramFeed = {targetType, sObject, name};
         return invokeClientMethod(env, client, "processGetNamedLayouts", paramFeed);
     }
 
     public static Object apexRestExecute(Environment env, BObject client, BString urlPath,
                                          BString methodType, BMap<BString, ?> payload,
                                          BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, urlPath, true, methodType, true, payload, true};
+        Object[] paramFeed = {targetType, urlPath, methodType, payload};
         return invokeClientMethod(env, client, "processApexExecute", paramFeed);
     }
 
@@ -89,59 +88,35 @@ public class ReadOperationExecutor {
                                           BString extId, BTypedesc targetType) {
         RecordType recordType = (RecordType) targetType.getDescribingType();
         BArray fields = getMetadata(recordType);
-        Object[] paramFeed = {targetType, true, sObject, true, extIdField, true, extId, true, fields, true};
+        Object[] paramFeed = {targetType, sObject, extIdField, extId, fields};
         return invokeClientMethod(env, client, "processGetRecordByExtId", paramFeed);
     }
 
     public static Object getQueryResult(Environment env, BObject client, BString receivedQuery, BTypedesc targetType) {
         ArrayType bArrayType = TypeCreator.createArrayType(targetType.getDescribingType());
         BTypedesc typedesc = ValueCreator.createTypedescValue(bArrayType);
-        Object[] paramFeed = {typedesc, true, receivedQuery, true};
+        Object[] paramFeed = {typedesc, receivedQuery};
         return invokeClientMethod(env, client, "processGetQueryResult", paramFeed);
     }
 
     public static Object searchSOSLString(Environment env, BObject client, BString searchString,
                                           BTypedesc targetType) {
-        Object[] paramFeed = {targetType, true, searchString, true};
+        Object[] paramFeed = {targetType, searchString};
         return invokeClientMethod(env, client, "processSearchSOSLString", paramFeed);
     }
 
     private static Object invokeClientMethod(Environment env, BObject client, String methodName, Object[] paramFeed) {
 
-        Future balFuture = env.markAsync();
-        ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(client));
-        if (objectType.isIsolated() && objectType.isIsolated(methodName)) {
-            env.getRuntime().invokeMethodAsyncConcurrently(client, methodName,
-                    null, null, new Callback() {
-                        @Override
-                        public void notifySuccess(Object result) {
+        return env.yieldAndRun(() -> {
+            ObjectType objectType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(client));
+            boolean isIsolated = objectType.isIsolated() && objectType.isIsolated(methodName);
+            try {
+                return env.getRuntime().callMethod(client, methodName, new StrandMetadata(isIsolated, null), paramFeed);
+            } catch (BError bError) {
+                return bError;
+            }
 
-                            balFuture.complete(result);
-                        }
-
-                        @Override
-                        public void notifyFailure(BError bError) {
-
-                            balFuture.complete(bError);
-                        }
-                    }, null, PredefinedTypes.TYPE_NULL, paramFeed);
-        } else {
-            env.getRuntime().invokeMethodAsyncSequentially(client, methodName,
-                    null, null, new Callback() {
-                        @Override
-                        public void notifySuccess(Object result) {
-
-                            balFuture.complete(result);
-                        }
-
-                        @Override
-                        public void notifyFailure(BError bError) {
-
-                            balFuture.complete(bError);
-                        }
-                    }, null, PredefinedTypes.TYPE_NULL, paramFeed);
-        }
-        return null;
+        });
     }
 
     public static BStream streamConverter(Environment env, BObject client, BStream data, BTypedesc returnType) {
