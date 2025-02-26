@@ -17,10 +17,10 @@ observabilityIncluded = true
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
-path = "../native/build/libs/salesforce-native-8.2.0.jar"
+path = "../native/build/libs/salesforce-native-8.2.0-SNAPSHOT.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "8.2.0"
+version = "8.2.0-SNAPSHOT"
 
 [[platform.java21.dependency]]
 groupId = "com.opencsv"
