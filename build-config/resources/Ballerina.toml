@@ -3,7 +3,6 @@ distribution = "2201.11.0-20241117-133400-a3054b77"
 org = "ballerinax"
 name = "salesforce"
 version = "@toml.version@"
-export = ["salesforce", "salesforce.bulk", "salesforce.soap","salesforce.bulkv2", "salesforce.apex", "salesforce.types"]
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["Sales & CRM/Customer Relationship Management", "Cost/Freemium"]
@@ -12,6 +11,26 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-salesforce
 
 [build-options]
 observabilityIncluded = true
+
+[[package.modules]]
+name = "salesforce.bulk"
+export = true
+
+[[package.modules]]
+name = "salesforce.soap"
+export = true
+
+[[package.modules]]
+name = "salesforce.bulkv2"
+export = true
+
+[[package.modules]]
+name = "salesforce.apex"
+export = true
+
+[[package.modules]]
+name = "salesforce.types"
+export = true
 
 [platform.java21]
 graalvmCompatible = true
