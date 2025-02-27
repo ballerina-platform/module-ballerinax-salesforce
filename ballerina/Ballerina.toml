@@ -13,10 +13,6 @@ repository = "https://github.com/ballerina-platform/module-ballerinax-salesforce
 observabilityIncluded = true
 
 [[package.modules]]
-name = "salesforce"
-export = true
-
-[[package.modules]]
 name = "salesforce.bulk"
 export = true
 
