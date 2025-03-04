@@ -22,6 +22,22 @@ apply plugin: 'java'
 
 description = 'Ballerina - Salesforce Test samples'
 
+def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
+
+def stripBallerinaExtensionVersion(String extVersion) {
+    if (extVersion.matches(project.ext.timestampedVersionRegex)) {
+        def splitVersion = extVersion.split('-')
+        if (splitVersion.length > 3) {
+            def strippedValues = splitVersion[0..-4]
+            return strippedValues.join('-')
+        } else {
+            return extVersion
+        }
+    } else {
+        return extVersion.replace("${project.ext.snapshotVersion}", '')
+    }
+}
+
 def filePath = project.fileTree("${project.projectDir}")
 def examples = filePath.matching {
     include("**/*.bal")
@@ -38,7 +54,7 @@ task testExamples {
 
 task buildExamples {
     dependsOn ":${project.packageName}-ballerina:build"
-    
+
     gradle.taskGraph.whenReady { graph ->
         if (graph.hasTask(":${project.packageName}-examples:test")) {
             buildExamples.enabled = false
@@ -52,9 +68,9 @@ task buildExamples {
                 workingDir project.projectDir
                 println("Working dir: ${workingDir}")
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'sh', "/c", "chmod +x ./build.sh && ./build.sh build && exit %%ERRORLEVEL%%"
+                    commandLine 'sh', "/c", "chmod +x ./build.sh && ./build.sh build ${tomlVersion} && exit %%ERRORLEVEL%%"
                 } else {
-                    commandLine 'sh', "-c", "chmod +x ./build.sh && ./build.sh build"
+                    commandLine 'sh', "-c", "chmod +x ./build.sh && ./build.sh build ${tomlVersion}"
                 }
             }
         } catch (Exception e) {

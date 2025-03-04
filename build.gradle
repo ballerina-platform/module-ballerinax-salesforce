@@ -87,6 +87,7 @@ def executeBalCommand(String command, String dir) {
 task build {
     dependsOn("${project.packageName}-native:build")
     dependsOn("${project.packageName}-ballerina:build")
+    dependsOn("${project.packageName}-examples:build")
 }
 
 release {

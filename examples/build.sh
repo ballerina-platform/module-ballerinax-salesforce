@@ -19,6 +19,8 @@ run)
   ;;
 esac
 
+VERSION="$2"
+
 # Read Ballerina package name
 BAL_PACKAGE_NAME=$(awk -F'"' '/^name/ {print $2}' "$BAL_HOME_DIR/Ballerina.toml")
 
@@ -49,6 +51,5 @@ for dir in $(find "$BAL_EXAMPLES_DIR" -type d -maxdepth 2  -mindepth 2); do
   if [[ "$dir" == *libs ]] || [[ "$dir" == *tmp ]]; then
     continue
   fi
-  (cd "$dir" && bal "$BAL_CMD" --offline && cd ..); 
+  (cd "$dir" && sed -i "s/version =.*/version= \""$VERSION"\" /g" Ballerina.toml && bal "$BAL_CMD" --offline && cd ..);
 done
-
