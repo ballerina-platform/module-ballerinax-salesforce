@@ -31,19 +31,32 @@ configurations {
 
 dependencies {
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacocoToolVersion}:runtime"
-    implementation group: 'org.eclipse.jetty', name: 'jetty-util', version: "${jettyVersion}"
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${jacksonDatabindVersion}"
+
+    implementation "com.opencsv:opencsv:${openCsvVersion}"
+
+    implementation group: 'org.cometd.java', name: 'bayeux-api', version: "${cometdJavaClientVersion}"
     implementation group: 'org.cometd.java', name: 'cometd-java-client', version: "${cometdJavaClientVersion}"
-    implementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
+    implementation group: 'org.cometd.java', name: 'cometd-java-common', version: "${cometdJavaClientVersion}"
+
+    implementation group: 'org.eclipse.jetty', name: 'jetty-http', version: "${jettyVersion}"
+    implementation group: 'org.eclipse.jetty', name: 'jetty-client', version: "${jettyVersion}"
+    implementation group: 'org.eclipse.jetty', name: 'jetty-io', version: "${jettyVersion}"
+    implementation group: 'org.eclipse.jetty', name: 'jetty-util', version: "${jettyVersion}"
+    implementation group: 'org.eclipse.jetty', name: 'jetty-util-ajax', version: "${jettyVersion}"
+
     implementation group: 'org.json', name: 'json', version: "${jsonVersion}"
+    implementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
+
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${jacksonDatabindVersion}"
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: "${jacksonDatabindVersion}"
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: "${jacksonDatabindVersion}"
+
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation(group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}") {
         transitive = false
     }
     checkstyle project(":checkstyle")
     checkstyle "com.puppycrawl.tools:checkstyle:${checkstylePluginVersion}"
-    implementation "com.opencsv:opencsv:${openCsvVersion}"
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
 }
 
 tasks.withType(JavaCompile) {
