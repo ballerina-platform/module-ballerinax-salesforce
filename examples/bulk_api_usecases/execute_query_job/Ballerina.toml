@@ -1,11 +1,11 @@
 [package]
 org = "salesforce_examples"
 name = "use_bulk_query"
-version= "8.2.0" 
+version = "8.2.0" 
 distribution = "2201.11.0"
 
 [[dependency]]
 org = "ballerinax"
 name = "salesforce"
-version= "8.2.0" 
+version = "8.2.0" 
 repository = "local"

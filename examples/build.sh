@@ -51,5 +51,5 @@ for dir in $(find "$BAL_EXAMPLES_DIR" -type d -maxdepth 2  -mindepth 2); do
   if [[ "$dir" == *libs ]] || [[ "$dir" == *tmp ]]; then
     continue
   fi
-  (cd "$dir" && sed -i "s/version =.*/version= \""$VERSION"\" /g" Ballerina.toml && bal "$BAL_CMD" --offline && cd ..);
+  (cd "$dir" && sed -i "s/version =.*/version = \""$VERSION"\" /g" Ballerina.toml && bal "$BAL_CMD" --offline && cd ..);
 done
