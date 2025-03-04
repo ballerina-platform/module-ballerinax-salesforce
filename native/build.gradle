@@ -31,6 +31,7 @@ configurations {
 
 dependencies {
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacocoToolVersion}:runtime"
+    implementation group: 'org.eclipse.jetty', name: 'jetty-util', version: "${jettyVersion}"
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${jacksonDatabindVersion}"
     implementation group: 'org.cometd.java', name: 'cometd-java-client', version: "${cometdJavaClientVersion}"
     implementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
