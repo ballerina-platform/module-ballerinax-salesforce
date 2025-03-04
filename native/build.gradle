@@ -31,10 +31,10 @@ configurations {
 
 dependencies {
     jacocoRuntime "org.jacoco:org.jacoco.agent:${jacocoToolVersion}:runtime"
-    shadow group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${jacksonDatabindVersion}"
-    shadow group: 'org.cometd.java', name: 'cometd-java-client', version: "${cometdJavaClientVersion}"
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "${jacksonDatabindVersion}"
+    implementation group: 'org.cometd.java', name: 'cometd-java-client', version: "${cometdJavaClientVersion}"
     implementation group: 'com.google.code.gson', name: 'gson', version: "${gsonVersion}"
-    shadow group: 'org.json', name: 'json', version: "${jsonVersion}"
+    implementation group: 'org.json', name: 'json', version: "${jsonVersion}"
     implementation group: 'org.ballerinalang', name: 'ballerina-lang', version: "${ballerinaLangVersion}"
     implementation(group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}") {
         transitive = false
