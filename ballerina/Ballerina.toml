@@ -68,32 +68,32 @@ path = "./lib/cometd-java-common-4.0.9.jar"
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-client"
-version = "9.4.55.v20240627"
-path = "./lib/jetty-client-9.4.55.v20240627.jar"
+version = "12.0.1"
+path = "./lib/jetty-client-12.0.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-http"
-version = "9.4.55.v20240627"
-path = "./lib/jetty-http-9.4.55.v20240627.jar"
+version = "12.0.1"
+path = "./lib/jetty-http-12.0.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-io"
-version = "9.4.55.v20240627"
-path = "./lib/jetty-io-9.4.55.v20240627.jar"
+version = "12.0.1"
+path = "./lib/jetty-io-12.0.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util"
-version = "9.4.55.v20240627"
-path = "./lib/jetty-util-9.4.55.v20240627.jar"
+version = "12.0.1"
+path = "./lib/jetty-util-12.0.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util-ajax"
-version = "9.4.55.v20240627"
-path = "./lib/jetty-util-ajax-9.4.55.v20240627.jar"
+version = "12.0.1"
+path = "./lib/jetty-util-ajax-12.0.1.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.json"
