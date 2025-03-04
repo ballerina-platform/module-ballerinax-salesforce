@@ -71,3 +71,7 @@ build
 
 # Files from bal Github action
 *.deb 
+
+#Ignore examples auto generated files
+examples/**/Dependencies.toml
+examples/**/Config.toml
