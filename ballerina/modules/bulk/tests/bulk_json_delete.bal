@@ -22,12 +22,20 @@ import ballerina/lang.runtime;
     dependsOn: [queryXml]
 }
 function deleteJson() returns error? {
+    check deleteJsonResources();
+}
+
+function deleteJsonResources(boolean ignoreResult = false) returns error? {
     log:printInfo("baseClient -> deleteJson");
     string batchId = "";
     json contacts = getJsonContactsToDelete(jsonInsertResult);
 
     //create job
     BulkJob deleteJob = check baseClient->createJob("delete", "Contact", "JSON");
+
+    if ignoreResult {
+       return;
+    }
 
     //add json content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
