@@ -112,10 +112,7 @@ function queryXml() returns error? {
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|json|xml|string|Result[] batchResult = baseClient->getBatchResult(queryJob, batchId);
         if batchResult is xml {
-            if (batchResult/<*>).length() == 6 {
-                test:assertTrue((batchResult/<*>).length() == 6, msg = "Retrieving batch result failed.");
-                break;
-            } else {
+            if (batchResult/<*>).length() != 4 {
                 if currentRetry != maxIterations {
                     log:printWarn("getBatchResult Operation Failed! Retrying...");
                     runtime:sleep(delayInSecs);
@@ -123,6 +120,7 @@ function queryXml() returns error? {
                     log:printWarn("getBatchResult Operation Failed! Giving up after 5 tries.");
                     test:assertFail(msg = batchResult.toString());
                 }
+                
             }
         } else if batchResult is error {
             if currentRetry != maxIterations {

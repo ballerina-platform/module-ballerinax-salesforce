@@ -19,7 +19,7 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    dependsOn: [queryXml]
+    dependsOn: [queryJson]
 }
 function deleteJson() returns error? {
     check deleteJsonResources();

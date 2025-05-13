@@ -19,7 +19,7 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    dependsOn: [queryXml]
+    dependsOn: [queryCsv]
 }
 function deleteCsv() returns error? {
     check deleteCsvResources();
