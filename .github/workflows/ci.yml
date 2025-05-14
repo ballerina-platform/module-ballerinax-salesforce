@@ -8,6 +8,11 @@ on:
   repository_dispatch:
     types: check_connector_for_breaking_changes
 
+concurrency:
+  # No workflows can run parallel as these are run against the same system
+  group: ${{ github.repository }}
+  cancel-in-progress: true
+
 jobs:
   call_workflow:
     name: Run Connector Build Workflow

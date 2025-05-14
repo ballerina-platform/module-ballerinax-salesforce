@@ -19,15 +19,22 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    dependsOn: [queryXml]
+    dependsOn: [queryCsv]
 }
 function deleteCsv() returns error? {
+    check deleteCsvResources();
+}
+
+function deleteCsvResources(boolean ignoreResult = false) returns error? {
     log:printInfo("baseClient -> deleteCsv");
     string batchId = "";
 
     //create job
     BulkJob deleteJob = check baseClient->createJob("delete", "Contact", "CSV");
 
+    if ignoreResult {
+       return;
+    }
     //add csv content
     foreach int currentRetry in 1 ..< maxIterations + 1 {
         error|BatchInfo batch = baseClient->addBatch(deleteJob, csvInputResult);

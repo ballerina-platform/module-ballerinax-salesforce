@@ -22,12 +22,20 @@ import ballerina/lang.runtime;
     dependsOn: [queryXml]
 }
 function deleteXml() returns error? {
+    check deleteXmlResources();
+}
+
+function deleteXmlResources(boolean ignoreResult = false) returns error? {
     log:printInfo("baseClient -> deleteXml");
     string batchId = "";
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">${xmlInsertResult}</sObjects>`;
 
     //create job
     BulkJob deleteJob = check baseClient->createJob("delete", "Contact", "XML");
+
+    if ignoreResult {
+       return;
+    }
 
     //add xml content
     foreach int currentRetry in 1 ..< maxIterations + 1 {

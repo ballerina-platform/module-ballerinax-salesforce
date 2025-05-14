@@ -94,3 +94,12 @@ isolated function getJsonContactsToDelete(json[] resultList) returns json[] {
     }
     return contacts;
 }
+
+@test:AfterSuite{
+    alwaysRun: true
+}
+function afterSuite() returns error? {
+    error? ignoreResult = deleteCsvResources(ignoreResult = true);
+    ignoreResult = deleteXmlResources(ignoreResult = true);
+    ignoreResult = deleteJsonResources(ignoreResult = true);
+}

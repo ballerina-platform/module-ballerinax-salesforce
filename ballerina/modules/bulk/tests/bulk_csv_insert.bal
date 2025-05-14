@@ -20,7 +20,7 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 const int maxIterations = 5;
-const decimal delayInSecs = 5.0;
+const decimal delayInSecs = 6.0;
 
 @test:Config {}
 function insertCsv() returns error? {

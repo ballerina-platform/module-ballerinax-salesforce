@@ -1,7 +1,8 @@
 name: PR Build
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  # No workflows can run parallel as these are run against the same system
+  group: ${{ github.repository }}
   cancel-in-progress: true
 
 on: pull_request
