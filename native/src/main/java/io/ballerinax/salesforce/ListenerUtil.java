@@ -42,16 +42,21 @@ import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
  * Util class containing the java external functions for Ballerina Salesforce listener.
  */
 public class ListenerUtil {
+    public static final String IS_OAUTH2 = "isOAuth2";
+    public static final String BASE_URL = "baseUrl";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
-    public static void initListener(BObject listener, int replayFrom, boolean isSandBox) {
+    public static void initListener(BObject listener, int replayFrom, boolean isSandBox, boolean isOAuth2,
+            BString baseUrl) {
         listener.addNativeData(CONSUMER_SERVICES, services);
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(IS_SAND_BOX, isSandBox);
+        listener.addNativeData(IS_OAUTH2, isOAuth2);
+        listener.addNativeData(BASE_URL, baseUrl.getValue());
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
@@ -74,26 +79,51 @@ public class ListenerUtil {
         return null;
     }
 
-    public static Object startListener(BString username, BString password, BObject listener) {
-        BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
+    public static Object startListener(BString username, BString password, BString accessToken, BObject listener) {
+        boolean isOAuth2 = (Boolean) listener.getNativeData(IS_OAUTH2);
+        String baseUrl = (String) listener.getNativeData(BASE_URL);
+
+        BayeuxParameters params;
+        if (isOAuth2) {
+            String token = accessToken.getValue();
+            params = new BayeuxParameters() {
+                @Override
+                public String bearerToken() {
+                    return token;
+                }
+
+                @Override
+                public java.net.URL endpoint() {
+                    try {
+                        String cometdPath = LoginHelper.COMETD_REPLAY + version();
+                        return new java.net.URL(baseUrl + cometdPath);
+                    } catch (java.net.MalformedURLException e) {
+                        throw new RuntimeException("Invalid instance URL: " + baseUrl, e);
+                    }
+                }
+            };
+        } else {
+            BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
+                try {
+                    return LoginHelper.login(username.getValue(), password.getValue(), listener);
+                } catch (Exception e) {
+                    throw sfdcError(e.getMessage());
+                }
+            });
             try {
-                return LoginHelper.login(username.getValue(), password.getValue(), listener);
+                params = tokenProvider.login();
             } catch (Exception e) {
                 throw sfdcError(e.getMessage());
             }
-        });
-        BayeuxParameters params;
-        try {
-            params = tokenProvider.login();
-        } catch (Exception e) {
-            throw sfdcError(e.getMessage());
         }
+
         connector = new EmpConnector(params);
         try {
             connector.start().get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             return sfdcError(e.getMessage());
         }
+
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         @SuppressWarnings("unchecked")
@@ -104,14 +134,11 @@ public class ListenerUtil {
             String channelName = listener.getNativeData(CHANNEL_NAME).toString();
             long replayFrom = (Integer) listener.getNativeData(REPLAY_FROM);
 
-            // Retrieve the DispatcherService from the map
             DispatcherService dispatcherService = serviceDispatcherMap.get(service);
             if (dispatcherService == null) {
-                // Handle error condition where no DispatcherService is found
                 return sfdcError("DispatcherService not found for service.");
             }
 
-            // Create a consumer for subscribing to Salesforce events
             Consumer<Map<String, Object>> consumer = event -> injectEvent(dispatcherService, event);
 
             try {
