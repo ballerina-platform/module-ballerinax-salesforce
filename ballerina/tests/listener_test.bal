@@ -36,6 +36,26 @@ isolated boolean isCreated = false;
 isolated boolean isDeleted = false;
 isolated boolean isRestored = false;
 
+Client sfdc = check new ({
+    auth: {
+        clientId,
+        clientSecret,
+        refreshToken,
+        refreshUrl
+    },
+    baseUrl
+});
+
+Listener authListener = check new ({
+    auth: {
+        clientId,
+        clientSecret,
+        refreshToken,
+        refreshUrl
+    },
+    baseUrl
+});
+
 service "/data/ChangeEvents" on eventListener {
 
     remote function onCreate(EventData payload) {
@@ -181,4 +201,79 @@ function testRestoredEventTrigger() {
         test:assertTrue(isRestored, "Error in retrieving account update!");
 
     }
+}
+
+Service oauth2Service = service object {
+    remote function onCreate(EventData payload) {
+        io:println("Received event in OAuth2 listener");
+        string? eventType = payload.metadata?.changeType;
+        if eventType is "CREATE" {
+            lock {
+                isCreated = true;
+            }
+            io:println("Created " + payload.toString());
+        } else {
+            io:println(payload.toString());
+        }
+    }
+
+
+    remote isolated function onUpdate(EventData payload) returns error? {
+        string accountName = check payload.changedData.get("Name").ensureType();
+        if accountName is "HK Holdings" {
+            lock {
+                isUpdated = true;
+            }
+            io:println("Updated " + payload.toString());
+        } else {
+            io:println(payload.toString());
+        }
+    }
+
+    remote function onDelete(EventData payload) {
+        string? eventType = payload.metadata?.changeType;
+        if eventType is "DELETE" {
+            lock {
+                isDeleted = true;
+            }
+            io:println("Deleted " + payload.toString());
+        } else {
+            io:println(payload.toString());
+        }
+    }
+
+    remote function onRestore(EventData payload) {
+        string? eventType = payload.metadata?.changeType;
+        if eventType is "UNDELETE" {
+            lock {
+                isRestored = true;
+            }
+            io:println("Restored " + payload.toString());
+        } else {
+            io:println(payload.toString());
+        }
+    }
+};
+
+@test:Config {
+    groups: ["oauth2"]
+}
+function testOAuth2ListenerInitialization() returns error? {
+    lock {
+	    isCreated = false;
+    }
+    log:printInfo("Testing OAuth2 listener initialization");
+    check authListener.attach(oauth2Service, "/data/ChangeEvents");
+    check authListener.'start();
+    runtime:registerListener(authListener);
+    Account accountRecordNew = {
+        Name: "HK Holdings",
+        BillingCity: "Colombo 04"
+    };
+    CreationResponse response = check sfdc->create(ACCOUNT, accountRecordNew);
+    runtime:sleep(10);
+    lock {
+        test:assertTrue(isCreated);
+    }
+    _ = check sfdc->delete(ACCOUNT, response.id);
 }
