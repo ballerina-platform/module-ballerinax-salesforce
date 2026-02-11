@@ -14,7 +14,9 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Configurations related to authentication.
+import ballerina/http;
+
+# Configurations related to username/password authentication.
 public type CredentialsConfig record {|
     # Salesforce login username
     string username;
@@ -22,14 +24,19 @@ public type CredentialsConfig record {|
     string password;
 |};
 
+# OAuth2 authentication configuration type.
+public type OAuth2Config http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|http:OAuth2ClientCredentialsGrantConfig;
+
 # Salesforce listener configuration.
 public type ListenerConfig record {|
-    # Configurations related to username/password authentication
-    CredentialsConfig auth;
+    # Authentication configuration for the listener
+    CredentialsConfig|OAuth2Config auth;
     # The replay ID to change the point in time when events are read
     int|ReplayOptions replayFrom = REPLAY_FROM_TIP;
     # The type of salesforce environment, if sandbox environment or not
     boolean isSandBox = false;
+    # The base URL of the Salesforce instance
+    string baseUrl = "";
 |};
 
 # The replay options representing the point in time when events are read.
