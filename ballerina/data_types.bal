@@ -37,6 +37,12 @@ public type ListenerConfig record {|
     boolean isSandBox = false;
     # The base URL of the Salesforce instance
     string baseUrl = "";
+    # The maximum time in seconds to wait for establishing a connection to the Salesforce streaming API.
+    # Default is 30 seconds
+    decimal connectionTimeout = 30;
+    # The maximum time in seconds to wait for the long polling transport before considering a request failed.
+    # Default is 30 seconds
+    decimal readTimeout = 30;
 |};
 
 # The replay options representing the point in time when events are read.

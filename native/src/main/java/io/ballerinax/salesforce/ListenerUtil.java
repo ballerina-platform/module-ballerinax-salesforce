@@ -22,6 +22,7 @@ package io.ballerinax.salesforce;
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import static io.ballerinax.salesforce.Constants.CHANNEL_NAME;
@@ -44,19 +46,28 @@ import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
 public class ListenerUtil {
     public static final String IS_OAUTH2 = "isOAuth2";
     public static final String BASE_URL = "baseUrl";
+    public static final String CONNECTION_TIMEOUT = "connectionTimeout";
+    public static final String READ_TIMEOUT = "readTimeout";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
     public static void initListener(BObject listener, int replayFrom, boolean isSandBox, boolean isOAuth2,
-            BString baseUrl) {
+            BString baseUrl, BDecimal connectionTimeout, BDecimal readTimeout) {
         listener.addNativeData(CONSUMER_SERVICES, services);
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(IS_SAND_BOX, isSandBox);
         listener.addNativeData(IS_OAUTH2, isOAuth2);
         listener.addNativeData(BASE_URL, baseUrl.getValue());
+        long connectionTimeoutMs = connectionTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
+        long readTimeoutMs = readTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
+        listener.addNativeData(CONNECTION_TIMEOUT, connectionTimeoutMs);
+        listener.addNativeData(READ_TIMEOUT, readTimeoutMs);
+        listener.addNativeData(CONNECTION_TIMEOUT + "_display", 
+            connectionTimeout.value().stripTrailingZeros().toPlainString());
+        listener.addNativeData(READ_TIMEOUT + "_display", readTimeout.value().stripTrailingZeros().toPlainString());
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
@@ -82,6 +93,9 @@ public class ListenerUtil {
     public static Object startListener(BString username, BString password, BString accessToken, BObject listener) {
         boolean isOAuth2 = (Boolean) listener.getNativeData(IS_OAUTH2);
         String baseUrl = (String) listener.getNativeData(BASE_URL);
+        long connectionTimeoutMs = (Long) listener.getNativeData(CONNECTION_TIMEOUT);
+        long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
+        String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
         BayeuxParameters params;
         if (isOAuth2) {
@@ -101,6 +115,11 @@ public class ListenerUtil {
                         throw new RuntimeException("Invalid instance URL: " + baseUrl, e);
                     }
                 }
+
+                @Override
+                public int maxNetworkDelay() {
+                    return (int) readTimeoutMs;
+                }
             };
         } else {
             BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
@@ -111,7 +130,13 @@ public class ListenerUtil {
                 }
             });
             try {
-                params = tokenProvider.login();
+                BayeuxParameters loginParams = tokenProvider.login();
+                params = new DelegatingBayeuxParameters(loginParams) {
+                    @Override
+                    public int maxNetworkDelay() {
+                        return (int) readTimeoutMs;
+                    }
+                };
             } catch (Exception e) {
                 throw sfdcError(e.getMessage());
             }
@@ -119,7 +144,9 @@ public class ListenerUtil {
 
         connector = new EmpConnector(params);
         try {
-            connector.start().get(5, TimeUnit.SECONDS);
+            connector.start().get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException exception) {
+            return sfdcError("Connection timed out after " + connectionTimeoutDisplay + " seconds.");
         } catch (Exception e) {
             return sfdcError(e.getMessage());
         }
@@ -142,7 +169,8 @@ public class ListenerUtil {
             Consumer<Map<String, Object>> consumer = event -> injectEvent(dispatcherService, event);
 
             try {
-                subscription = connector.subscribe(channelName, replayFrom, consumer).get(5, TimeUnit.SECONDS);
+                subscription = connector.subscribe(channelName, replayFrom, consumer)
+                        .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 return sfdcError(e.getMessage());
             }
@@ -174,6 +202,7 @@ public class ListenerUtil {
     }
 
     private static BError sfdcError(String errorMessage) {
-        return ErrorCreator.createError(StringUtils.fromString(errorMessage));
+        String message = errorMessage != null ? errorMessage : "Unknown error";
+        return ErrorCreator.createError(StringUtils.fromString(message));
     }
 }
