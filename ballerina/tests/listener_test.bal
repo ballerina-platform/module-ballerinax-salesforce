@@ -275,5 +275,6 @@ function testOAuth2ListenerInitialization() returns error? {
     lock {
         test:assertTrue(isCreated);
     }
-    _ = check sfdc->delete(ACCOUNT, response.id);
+    check sfdc->delete(ACCOUNT, response.id);
+    check authListener.gracefulStop();
 }
