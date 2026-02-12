@@ -43,6 +43,8 @@ public type ListenerConfig record {|
     decimal readTimeout = 30;
     # The maximum duration in seconds that a connection is kept alive without activity
     decimal keepAliveInterval = 120;
+    # The Salesforce API version to use for Streaming API
+    string apiVersion = "43.0";
 |};
 
 # The replay options representing the point in time when events are read.

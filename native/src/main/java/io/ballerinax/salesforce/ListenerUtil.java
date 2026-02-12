@@ -49,19 +49,22 @@ public class ListenerUtil {
     public static final String CONNECTION_TIMEOUT = "connectionTimeout";
     public static final String READ_TIMEOUT = "readTimeout";
     public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
+    public static final String API_VERSION = "apiVersion";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
     public static void initListener(BObject listener, int replayFrom, boolean isSandBox, boolean isOAuth2,
-            BString baseUrl, BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval) {
+            BString baseUrl, BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
+            BString apiVersion) {
         listener.addNativeData(CONSUMER_SERVICES, services);
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(IS_SAND_BOX, isSandBox);
         listener.addNativeData(IS_OAUTH2, isOAuth2);
         listener.addNativeData(BASE_URL, baseUrl.getValue());
+        listener.addNativeData(API_VERSION, apiVersion.getValue());
         long connectionTimeoutMs = connectionTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
         long readTimeoutMs = readTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
         long keepAliveIntervalMs = keepAliveInterval.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
@@ -99,6 +102,7 @@ public class ListenerUtil {
         long connectionTimeoutMs = (Long) listener.getNativeData(CONNECTION_TIMEOUT);
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
+        String apiVersion = (String) listener.getNativeData(API_VERSION);
         String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
         BayeuxParameters params;
@@ -121,6 +125,11 @@ public class ListenerUtil {
                 }
 
                 @Override
+                public String version() {
+                    return apiVersion;
+                }
+
+                @Override
                 public int maxNetworkDelay() {
                     return (int) readTimeoutMs;
                 }
@@ -138,7 +147,7 @@ public class ListenerUtil {
         } else {
             BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
                 try {
-                    return LoginHelper.login(username.getValue(), password.getValue(), listener);
+                    return LoginHelper.login(username.getValue(), password.getValue(), listener, apiVersion);
                 } catch (Exception e) {
                     throw sfdcError(e.getMessage());
                 }

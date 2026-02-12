@@ -32,6 +32,7 @@ public isolated class Listener {
     private final decimal connectionTimeout;
     private final decimal readTimeout;
     private final decimal keepAliveInterval;
+    private final string apiVersion;
 
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
@@ -48,6 +49,7 @@ public isolated class Listener {
         self.connectionTimeout = listenerConfig.connectionTimeout;
         self.readTimeout = listenerConfig.readTimeout;
         self.keepAliveInterval = listenerConfig.keepAliveInterval;
+        self.apiVersion = listenerConfig.apiVersion;
         CredentialsConfig|OAuth2Config authConfig = listenerConfig.auth;
         self.username = authConfig is CredentialsConfig ? authConfig.username : "";
         self.password = authConfig is CredentialsConfig ? authConfig.password : "";
@@ -55,7 +57,7 @@ public isolated class Listener {
         self.baseUrl = listenerConfig.baseUrl;
         self.oauth2Config = authConfig is OAuth2Config ? authConfig.cloneReadOnly() : ();
         initListener(self, self.replayFrom, self.isSandBox, self.isOAuth2, self.baseUrl,
-                self.connectionTimeout, self.readTimeout, self.keepAliveInterval);
+                self.connectionTimeout, self.readTimeout, self.keepAliveInterval, self.apiVersion);
     }
 
     # Attaches the service to the `salesforce:Listener` endpoint.
@@ -120,7 +122,8 @@ public isolated class Listener {
 }
 
 isolated function initListener(Listener instance, int replayFrom, boolean isSandBox, boolean isOAuth2,
-        string baseUrl, decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval) =
+        string baseUrl, decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval,
+        string apiVersion) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
