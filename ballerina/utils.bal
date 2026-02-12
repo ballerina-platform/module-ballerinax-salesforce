@@ -96,6 +96,14 @@ isolated function convertStringListToString(string[][]|stream<string[], error?> 
     }
 }
 
+isolated function extractBaseUrl(ListenerConfig listenerConfig, boolean isOAuth2) returns string|error {
+    string? baseUrl = listenerConfig.baseUrl;
+    if baseUrl is () && isOAuth2 {
+        return error("Base URL is required for OAuth2 authentication");
+    }
+    return baseUrl ?: "";
+}
+
 isolated function parseCsvString(string stringContent) returns string[][]|error = @java:Method {
    'class: "io.ballerinax.salesforce.CsvParserUtils",
    name: "parseCsvToStringArray"
