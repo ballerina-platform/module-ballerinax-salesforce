@@ -85,6 +85,10 @@ public class ListenerUtil {
 
         BayeuxParameters params;
         if (isOAuth2) {
+            if (baseUrl == null || baseUrl.isEmpty()) {
+                return sfdcError("Base URL is required for OAuth2 authentication");
+            }
+
             String token = accessToken.getValue();
             params = new BayeuxParameters() {
                 @Override
@@ -98,7 +102,7 @@ public class ListenerUtil {
                         String cometdPath = LoginHelper.COMETD_REPLAY + version();
                         return new java.net.URL(baseUrl + cometdPath);
                     } catch (java.net.MalformedURLException e) {
-                        throw new RuntimeException("Invalid instance URL: " + baseUrl, e);
+                        throw sfdcError("Invalid instance URL: " + baseUrl);
                     }
                 }
             };
