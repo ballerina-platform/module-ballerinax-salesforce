@@ -25,7 +25,7 @@ public isolated class Listener {
     private final string password;
     private final boolean isOAuth2;
     private final string baseUrl;
-    private final readonly & (oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig|http:BearerTokenConfig)? oauth2Config;
+    private final readonly & OAuth2Config? oauth2Config;
     private string? channelName = ();
     private final int replayFrom;
     private final boolean isSandBox;

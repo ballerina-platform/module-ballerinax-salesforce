@@ -26,7 +26,8 @@ public type CredentialsConfig record {|
 |};
 
 # OAuth2 authentication configuration type.
-public type OAuth2Config http:BearerTokenConfig|oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig;
+public type OAuth2Config http:BearerTokenConfig|
+    oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig;
 
 # Salesforce listener configuration.
 public type ListenerConfig record {|
