@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/oauth2;
 
 # Configurations related to username/password authentication.
 public type CredentialsConfig record {|
@@ -25,7 +26,7 @@ public type CredentialsConfig record {|
 |};
 
 # OAuth2 authentication configuration type.
-public type OAuth2Config http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|http:OAuth2ClientCredentialsGrantConfig;
+public type OAuth2Config http:BearerTokenConfig|oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig;
 
 # Salesforce listener configuration.
 public type ListenerConfig record {|

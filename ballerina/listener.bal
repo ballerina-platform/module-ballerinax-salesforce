@@ -25,7 +25,7 @@ public isolated class Listener {
     private final string password;
     private final boolean isOAuth2;
     private final string baseUrl;
-    private final readonly & (http:OAuth2RefreshTokenGrantConfig|http:OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig)? oauth2Config;
+    private final readonly & (oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig|http:BearerTokenConfig)? oauth2Config;
     private string? channelName = ();
     private final int replayFrom;
     private final boolean isSandBox;
@@ -80,13 +80,10 @@ public isolated class Listener {
     #
     # + return - The access token or an error if token retrieval fails
     private isolated function getOAuth2Token() returns string|error {
-        http:OAuth2RefreshTokenGrantConfig|http:OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig? config = self.oauth2Config;
+        (oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig|http:BearerTokenConfig)? & readonly config = self.oauth2Config;
         if config is http:BearerTokenConfig {
             return config.token;
-        } else if config is http:OAuth2RefreshTokenGrantConfig {
-            oauth2:ClientOAuth2Provider provider = new (config);
-            return provider.generateToken();
-        } else if config is http:OAuth2ClientCredentialsGrantConfig {
+        } else if config is oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig {
             oauth2:ClientOAuth2Provider provider = new (config);
             return provider.generateToken();
         }
