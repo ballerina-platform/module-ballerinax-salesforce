@@ -76,14 +76,13 @@ public isolated class Listener {
     #
     # + return - The access token or an error if token retrieval fails
     private isolated function getOAuth2Token() returns string|error {
-        (oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig|http:BearerTokenConfig)? & readonly config = self.oauth2Config;
+        OAuth2Config? & readonly config = self.oauth2Config;
         if config is http:BearerTokenConfig {
             return config.token;
-        } else if config is oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig {
-            oauth2:ClientOAuth2Provider provider = new (config);
+        } else {
+            oauth2:ClientOAuth2Provider provider = new (check config.cloneWithType());
             return provider.generateToken();
         }
-        return error("OAuth2 configuration is not set");
     }
 
     # Stops subscription and detaches the service from the `salesforce:Listener` endpoint.
