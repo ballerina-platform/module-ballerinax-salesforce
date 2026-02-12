@@ -48,13 +48,14 @@ public class ListenerUtil {
     public static final String BASE_URL = "baseUrl";
     public static final String CONNECTION_TIMEOUT = "connectionTimeout";
     public static final String READ_TIMEOUT = "readTimeout";
+    public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
     public static void initListener(BObject listener, int replayFrom, boolean isSandBox, boolean isOAuth2,
-            BString baseUrl, BDecimal connectionTimeout, BDecimal readTimeout) {
+            BString baseUrl, BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval) {
         listener.addNativeData(CONSUMER_SERVICES, services);
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
@@ -63,9 +64,11 @@ public class ListenerUtil {
         listener.addNativeData(BASE_URL, baseUrl.getValue());
         long connectionTimeoutMs = connectionTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
         long readTimeoutMs = readTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
+        long keepAliveIntervalMs = keepAliveInterval.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
         listener.addNativeData(CONNECTION_TIMEOUT, connectionTimeoutMs);
         listener.addNativeData(READ_TIMEOUT, readTimeoutMs);
-        listener.addNativeData(CONNECTION_TIMEOUT + "_display", 
+        listener.addNativeData(KEEP_ALIVE_INTERVAL, keepAliveIntervalMs);
+        listener.addNativeData(CONNECTION_TIMEOUT + "_display",
             connectionTimeout.value().stripTrailingZeros().toPlainString());
         listener.addNativeData(READ_TIMEOUT + "_display", readTimeout.value().stripTrailingZeros().toPlainString());
     }
@@ -95,6 +98,7 @@ public class ListenerUtil {
         String baseUrl = (String) listener.getNativeData(BASE_URL);
         long connectionTimeoutMs = (Long) listener.getNativeData(CONNECTION_TIMEOUT);
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
+        long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
         BayeuxParameters params;
@@ -120,6 +124,16 @@ public class ListenerUtil {
                 public int maxNetworkDelay() {
                     return (int) readTimeoutMs;
                 }
+
+                @Override
+                public long keepAlive() {
+                    return keepAliveIntervalMs;
+                }
+
+                @Override
+                public TimeUnit keepAliveUnit() {
+                    return TimeUnit.MILLISECONDS;
+                }
             };
         } else {
             BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
@@ -135,6 +149,16 @@ public class ListenerUtil {
                     @Override
                     public int maxNetworkDelay() {
                         return (int) readTimeoutMs;
+                    }
+
+                    @Override
+                    public long keepAlive() {
+                        return keepAliveIntervalMs;
+                    }
+
+                    @Override
+                    public TimeUnit keepAliveUnit() {
+                        return TimeUnit.MILLISECONDS;
                     }
                 };
             } catch (Exception e) {
