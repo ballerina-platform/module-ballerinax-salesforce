@@ -36,7 +36,7 @@ public type ListenerConfig record {|
     # The type of salesforce environment, if sandbox environment or not
     boolean isSandBox = false;
     # The base URL of the Salesforce instance
-    string baseUrl = "";
+    string baseUrl?;
 |};
 
 # The replay options representing the point in time when events are read.

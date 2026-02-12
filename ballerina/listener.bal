@@ -46,7 +46,11 @@ public isolated class Listener {
         self.username = authConfig is CredentialsConfig ? authConfig.username : "";
         self.password = authConfig is CredentialsConfig ? authConfig.password : "";
         self.isOAuth2 = authConfig is OAuth2Config;
-        self.baseUrl = listenerConfig.baseUrl;
+        string? baseUrl = listenerConfig.baseUrl;
+        if baseUrl is () && self.isOAuth2 {
+            return error("Base URL is required for OAuth2 authentication");
+        }
+        self.baseUrl = baseUrl ?: "";
         self.oauth2Config = authConfig is OAuth2Config ? authConfig.cloneReadOnly() : ();
         initListener(self, self.replayFrom, self.isSandBox, self.isOAuth2, self.baseUrl);
     }
