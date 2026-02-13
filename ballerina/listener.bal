@@ -75,7 +75,7 @@ public isolated class Listener {
     # Retrieves the OAuth2 access token based on the configured grant type.
     #
     # + return - The access token or an error if token retrieval fails
-    private isolated function getOAuth2Token() returns string|error {
+    public isolated function getOAuth2Token() returns string|error {
         OAuth2Config? & readonly config = self.oauth2Config;
         if config is http:BearerTokenConfig {
             return config.token;

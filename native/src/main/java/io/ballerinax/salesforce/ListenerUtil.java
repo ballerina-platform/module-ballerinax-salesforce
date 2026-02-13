@@ -79,18 +79,29 @@ public class ListenerUtil {
         return null;
     }
 
-    public static Object startListener(BString username, BString password, BString accessToken, BObject listener) {
+    public static Object startListener(Environment env, BString username, BString password, BString accessToken,
+                                        BObject listener) {
         boolean isOAuth2 = (Boolean) listener.getNativeData(IS_OAUTH2);
         String baseUrl = (String) listener.getNativeData(BASE_URL);
 
         BayeuxParameters params;
+        BearerTokenProvider tokenProvider;
+
         if (isOAuth2) {
             if (baseUrl == null || baseUrl.isEmpty()) {
                 return sfdcError("Base URL is required for OAuth2 authentication");
             }
-            params = new OAuth2BayeuxParameters(accessToken.getValue(), baseUrl);
+
+            tokenProvider = new BearerTokenProvider(() ->
+                new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl)
+            );
+            try {
+                params = tokenProvider.login();
+            } catch (Exception e) {
+                throw sfdcError(e.getMessage());
+            }
         } else {
-            BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
+            tokenProvider = new BearerTokenProvider(() -> {
                 try {
                     return LoginHelper.login(username.getValue(), password.getValue(), listener);
                 } catch (Exception e) {
@@ -105,6 +116,7 @@ public class ListenerUtil {
         }
 
         connector = new EmpConnector(params);
+        connector.setBearerTokenProvider(tokenProvider);
         try {
             connector.start().get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
@@ -158,6 +170,14 @@ public class ListenerUtil {
 
     private static void injectEvent(DispatcherService dispatcherService, Map<String, Object> eventData) {
         dispatcherService.handleDispatch(eventData);
+    }
+
+    private static String getOAuth2Token(Environment env, BObject listener) {
+        Object result = env.getRuntime().callMethod(listener, "getOAuth2Token", null);
+        if (result instanceof BError) {
+            throw sfdcError(((BError) result).getMessage());
+        }
+        return ((BString) result).getValue();
     }
 
     private static BError sfdcError(String errorMessage) {

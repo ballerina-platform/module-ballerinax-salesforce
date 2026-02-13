@@ -24,22 +24,23 @@ import io.ballerina.runtime.api.values.BError;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Supplier;
 
 /**
  * Implementation of BayeuxParameters for OAuth2 authentication.
  */
 public class OAuth2BayeuxParameters implements BayeuxParameters {
-    private final String token;
+    private final Supplier<String> tokenSupplier;
     private final String baseUrl;
 
-    public OAuth2BayeuxParameters(String token, String baseUrl) {
-        this.token = token;
+    public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl) {
+        this.tokenSupplier = tokenSupplier;
         this.baseUrl = baseUrl;
     }
 
     @Override
     public String bearerToken() {
-        return token;
+        return tokenSupplier.get();
     }
 
     @Override
