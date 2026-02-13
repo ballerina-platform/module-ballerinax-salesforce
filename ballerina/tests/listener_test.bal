@@ -222,7 +222,7 @@ Service oauth2Service = service object {
     }
 
     remote function onDelete(EventData payload) {
-        log:printInfo("The `onRestore` method is invoked");
+        log:printInfo("The `onDelete` method is invoked");
     }
 
     remote function onRestore(EventData payload) {
