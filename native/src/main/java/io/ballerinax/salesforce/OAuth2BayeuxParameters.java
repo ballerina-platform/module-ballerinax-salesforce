@@ -18,10 +18,6 @@
 
 package io.ballerinax.salesforce;
 
-import io.ballerina.runtime.api.creators.ErrorCreator;
-import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.values.BError;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.function.Supplier;
@@ -48,12 +44,8 @@ public class OAuth2BayeuxParameters implements BayeuxParameters {
         try {
             String cometdPath = LoginHelper.COMETD_REPLAY + version();
             return new URL(baseUrl + cometdPath);
-        } catch (MalformedURLException e) {
-            throw createSfdcError("Invalid instance URL: " + baseUrl);
+        } catch (MalformedURLException exception) {
+            throw new RuntimeException("Invalid instance URL: " + baseUrl, exception);
         }
-    }
-
-    private BError createSfdcError(String errorMessage) {
-        return ErrorCreator.createError(StringUtils.fromString(errorMessage));
     }
 }
