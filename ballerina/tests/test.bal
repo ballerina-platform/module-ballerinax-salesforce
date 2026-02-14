@@ -20,14 +20,23 @@ import ballerina/test;
 import ballerina/time;
 import ballerina/lang.runtime;
 
-// Create Salesforce client configuration by reading from environemnt.
-configurable string clientId = os:getEnv("CLIENT_ID");
-configurable string clientSecret = os:getEnv("CLIENT_SECRET");
-configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
-configurable string refreshUrl = os:getEnv("REFRESH_URL");
-configurable string baseUrl = os:getEnv("EP_URL");
+
+const string MOCK_URL = "http://host.docker.internal:8089";
+
+string envClientId = os:getEnv("CLIENT_ID");
+string envClientSecret = os:getEnv("CLIENT_SECRET");
+string envRefreshToken = os:getEnv("REFRESH_TOKEN");
+string envRefreshUrl = os:getEnv("REFRESH_URL");
+string envBaseUrl = os:getEnv("EP_URL");
+
+configurable string clientId = envClientId != "" ? envClientId : "mock-client-id";
+configurable string clientSecret = envClientSecret != "" ? envClientSecret : "mock-client-secret";
+configurable string refreshToken = envRefreshToken != "" ? envRefreshToken : "mock-refresh-token";
+configurable string refreshUrl = envRefreshUrl != "" ? envRefreshUrl : MOCK_URL + "/services/oauth2/token";
+configurable string baseUrl = envBaseUrl != "" ? envBaseUrl : MOCK_URL;
 
 string reportInstanceID = "";
+boolean isLiveServer = envBaseUrl != "";
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfigRefreshCodeFlow = {
@@ -267,7 +276,7 @@ function testQueryWithLimit() returns error? {
 }
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function testQueryWithAggregateFunctionWithAlias() returns error? {
     log:printInfo("baseClient -> testQueryWithAggregateFunctionWithAlias()");
@@ -283,7 +292,7 @@ function testQueryWithAggregateFunctionWithAlias() returns error? {
 
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function testQueryWithAggregateFunctionWithoutAlias() returns error? {
     log:printInfo("baseClient -> testQueryWithAggregateFunctionWithoutAlias()");
@@ -608,7 +617,9 @@ function testDeleteByExternalId() returns error? {
     if creation is error {
         test:assertFail(msg = creation.message());
     }
-    runtime:sleep(10);
+    if isLiveServer {
+        runtime:sleep(10);
+    }
     error? response = baseClient->deleteRecordsUsingExtId("Asset", "assetExt_id__c", "asdfg");
     if response is error {
         test:assertFail(msg = response.message());
@@ -664,12 +675,16 @@ function testApex() returns error? {
     if caseId is error {
         test:assertFail(msg = caseId.message());
     }
-    runtime:sleep(5);
+    if isLiveServer {
+        runtime:sleep(5);
+    }
     record{}|error case = baseClient->apexRestExecute(string `Cases/${caseId}`, "GET", {});
     if case is error {
         test:assertFail(msg = case.message());
     }
-    runtime:sleep(5);
+    if isLiveServer {
+        runtime:sleep(5);
+    }
     error? deleteResponse = baseClient->apexRestExecute(string `Cases/${caseId}`, "DELETE", {});
     if deleteResponse is error {
         test:assertFail(msg = deleteResponse.message());
@@ -680,6 +695,9 @@ function testApex() returns error? {
 
 @test:AfterSuite {}
 function testDeleteRecordNew() returns error? {
+    if testRecordIdNew == "" {
+        return;
+    }
     log:printInfo("baseClient -> delete()");
     error? response = baseClient->delete(ACCOUNT, testRecordIdNew);
     if response is error {

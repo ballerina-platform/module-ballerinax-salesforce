@@ -17,7 +17,7 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function abortAndDeleteJob() returns error? {
     log:printInfo("baseClient -> deleteCsv");

@@ -19,7 +19,7 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true,
+    enable: isLiveServer,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryCsv() returns error? {
@@ -65,7 +65,7 @@ function queryCsv() returns error? {
 
 
 @test:Config {
-    enable: true,
+    enable: isLiveServer,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryWithLowerMaxRecordsValue() returns error? {
@@ -122,7 +122,7 @@ function queryWithLowerMaxRecordsValue() returns error? {
 
 
 @test:Config {
-    enable: true,
+    enable: isLiveServer,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryWithHigherMaxRecordsValue() returns error? {
@@ -178,7 +178,7 @@ function queryWithHigherMaxRecordsValue() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    enable: isLiveServer,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryAndWaitCsv() returns error? {

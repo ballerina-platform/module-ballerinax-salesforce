@@ -23,7 +23,7 @@ const decimal delayInSecs = 5.0;
 string batchId = "id\n";
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function insertCsv() returns error? {
     log:printInfo("baseClient -> insertCsv");
@@ -91,7 +91,7 @@ function insertCsv() returns error? {
 }
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function insertCsvFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvFromFile");
@@ -153,7 +153,7 @@ function insertCsvFromFile() returns error? {
 }
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function insertCsvStringArrayFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
@@ -221,7 +221,7 @@ function insertCsvStringArrayFromFile() returns error? {
 }
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function insertCsvStreamFromFile() returns error? {
     log:printInfo("baseClient -> insertCsvStreamFromFile");
