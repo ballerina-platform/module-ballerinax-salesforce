@@ -19,7 +19,7 @@ import ballerina/os;
 import ballerina/test;
 import ballerinax/salesforce;
 
-const string MOCK_URL = "http://host.docker.internal:8089";
+const string MOCK_URL = "http://localhost:8089";
 
 string envClientId = os:getEnv("CLIENT_ID");
 string envClientSecret = os:getEnv("CLIENT_SECRET");
