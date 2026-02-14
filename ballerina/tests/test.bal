@@ -36,7 +36,7 @@ configurable string refreshUrl = envRefreshUrl != "" ? envRefreshUrl : MOCK_URL 
 configurable string baseUrl = envBaseUrl != "" ? envBaseUrl : MOCK_URL;
 
 string reportInstanceID = "";
-boolean isLiveServer = envBaseUrl != "";
+boolean isLiveServer = false;
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfigRefreshCodeFlow = {
