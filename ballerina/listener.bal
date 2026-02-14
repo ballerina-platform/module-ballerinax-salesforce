@@ -25,7 +25,7 @@ public isolated class Listener {
     private final string password;
     private final boolean isOAuth2;
     private final string baseUrl;
-    private final readonly & (http:OAuth2RefreshTokenGrantConfig|http:OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig)? oauth2Config;
+    private final readonly & OAuth2Config? oauth2Config;
     private string? channelName = ();
     private final int replayFrom;
     private final boolean isSandBox;
@@ -52,7 +52,7 @@ public isolated class Listener {
         self.username = authConfig is CredentialsConfig ? authConfig.username : "";
         self.password = authConfig is CredentialsConfig ? authConfig.password : "";
         self.isOAuth2 = authConfig is OAuth2Config;
-        self.baseUrl = listenerConfig.baseUrl;
+        self.baseUrl = check extractBaseUrl(listenerConfig, self.isOAuth2);
         self.oauth2Config = authConfig is OAuth2Config ? authConfig.cloneReadOnly() : ();
         initListener(self, self.replayFrom, self.isSandBox, self.isOAuth2, self.baseUrl,
                 self.connectionTimeout, self.readTimeout, self.keepAliveInterval);
@@ -82,18 +82,14 @@ public isolated class Listener {
     # Retrieves the OAuth2 access token based on the configured grant type.
     #
     # + return - The access token or an error if token retrieval fails
-    private isolated function getOAuth2Token() returns string|error {
-        http:OAuth2RefreshTokenGrantConfig|http:OAuth2ClientCredentialsGrantConfig|http:BearerTokenConfig? config = self.oauth2Config;
+    public isolated function getOAuth2Token() returns string|error {
+        OAuth2Config? & readonly config = self.oauth2Config;
         if config is http:BearerTokenConfig {
             return config.token;
-        } else if config is http:OAuth2RefreshTokenGrantConfig {
-            oauth2:ClientOAuth2Provider provider = new (config);
-            return provider.generateToken();
-        } else if config is http:OAuth2ClientCredentialsGrantConfig {
-            oauth2:ClientOAuth2Provider provider = new (config);
+        } else {
+            oauth2:ClientOAuth2Provider provider = new (check config.cloneWithType());
             return provider.generateToken();
         }
-        return error("OAuth2 configuration is not set");
     }
 
     # Stops subscription and detaches the service from the `salesforce:Listener` endpoint.

@@ -184,39 +184,28 @@ function testRestoredEventTrigger() {
 
 Service oauth2Service = service object {
     remote function onCreate(EventData payload) {
+        log:printInfo("Received event in OAuth2 listener");
         string? eventType = payload.metadata?.changeType;
         if eventType is "CREATE" {
             lock {
                 isCreated = true;
             }
+            log:printInfo("Created " + payload.toString());
+        } else {
+            log:printInfo(payload.toString());
         }
     }
 
-    remote function onUpdate(EventData payload) {
-        string? eventType = payload.metadata?.changeType;
-        if eventType is "UPDATE" {
-            lock {
-                isUpdated = true;
-            }
-        }
+    remote isolated function onUpdate(EventData payload) returns error? {
+        log:printInfo("The `onUpdate` method is invoked");
     }
 
     remote function onDelete(EventData payload) {
-        string? eventType = payload.metadata?.changeType;
-        if eventType is "DELETE" {
-            lock {
-                isDeleted = true;
-            }
-        }
+        log:printInfo("The `onDelete` method is invoked");
     }
 
     remote function onRestore(EventData payload) {
-        string? eventType = payload.metadata?.changeType;
-        if eventType is "UNDELETE" {
-            lock {
-                isRestored = true;
-            }
-        }
+        log:printInfo("The `onRestore` method is invoked");
     }
 };
 
@@ -243,7 +232,8 @@ function testOAuth2ListenerInitialization() returns error? {
     lock {
         test:assertTrue(isCreated);
     }
-    _ = check sfdc->delete(ACCOUNT, response.id);
+    check sfdc->delete(ACCOUNT, response.id);
+    check authListener.gracefulStop();
 }
 
 
