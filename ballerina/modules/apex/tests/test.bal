@@ -28,11 +28,11 @@ string envRefreshUrl = os:getEnv("REFRESH_URL");
 string envBaseUrl = os:getEnv("EP_URL");
 
 // Create Salesforce client configuration by reading from environment.
-configurable string clientId = envClientId != "" ? envClientId : "mock-client-id";
-configurable string clientSecret = envClientSecret != "" ? envClientSecret : "mock-client-secret";
-configurable string refreshToken = envRefreshToken != "" ? envRefreshToken : "mock-refresh-token";
-configurable string refreshUrl = envRefreshUrl != "" ? envRefreshUrl : MOCK_URL + "/services/oauth2/token";
-configurable string baseUrl = envBaseUrl != "" ? envBaseUrl : MOCK_URL;
+string clientId = envClientId != "" ? envClientId : "mock-client-id";
+string clientSecret = envClientSecret != "" ? envClientSecret : "mock-client-secret";
+string refreshToken = envRefreshToken != "" ? envRefreshToken : "mock-refresh-token";
+string refreshUrl = envRefreshUrl != "" ? envRefreshUrl : MOCK_URL + "/services/oauth2/token";
+string baseUrl = envBaseUrl != "" ? envBaseUrl : MOCK_URL;
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfigRefreshCodeFlow = {
