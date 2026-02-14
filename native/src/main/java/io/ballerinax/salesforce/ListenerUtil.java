@@ -216,8 +216,12 @@ public class ListenerUtil {
     }
 
     public static Object stopListener() {
-        subscription.cancel();
-        connector.stop();
+        if (subscription != null) {
+            subscription.cancel();
+        }
+        if (connector != null) {
+            connector.stop();
+        }
         return null;
     }
 
