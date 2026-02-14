@@ -119,7 +119,11 @@ clean {
 
 updateTomlFiles.dependsOn copyStdlibs
 build.dependsOn ":${project.packageName}-native:build"
+build.dependsOn ":${project.packageName}-mock-server:startMockServer"
+build.finalizedBy ":${project.packageName}-mock-server:stopMockServer"
 build.dependsOn "generatePomFileForMavenPublication"
 publishToMavenLocal.dependsOn build
 test.dependsOn ":${project.packageName}-native:build"
+test.dependsOn ":${project.packageName}-mock-server:startMockServer"
+test.finalizedBy ":${project.packageName}-mock-server:stopMockServer"
 publish.dependsOn build

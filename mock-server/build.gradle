@@ -1,0 +1,124 @@
+/*
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow'
+}
+
+description = 'Mock Salesforce Server for Testing'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.cometd.java:cometd-java-server:${cometdJavaClientVersion}"
+    implementation "org.cometd.java:cometd-java-websocket-jetty-server:${cometdJavaClientVersion}"
+    implementation "org.eclipse.jetty:jetty-server:${jettyVersion}"
+    implementation "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
+    implementation "org.eclipse.jetty:jetty-servlets:${jettyVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    implementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+}
+
+shadowJar {
+    archiveBaseName.set('salesforce-mock-server')
+    archiveVersion.set('1.0.0')
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'io.ballerinax.salesforce.mock.MockSalesforceServer'
+    }
+}
+
+build.dependsOn shadowJar
+
+def mockServerPort = 8089
+def pidFile = file("${buildDir}/mock-server.pid")
+
+task startMockServer(dependsOn: shadowJar) {
+    doLast {
+        def jarFile = shadowJar.archiveFile.get().asFile
+        def logFile = file("${buildDir}/mock-server.log")
+
+        // Kill any existing process on the port
+        def killCmd = "lsof -ti:${mockServerPort} | xargs kill -9 2>/dev/null || true"
+        ['/bin/sh', '-c', killCmd].execute().waitFor()
+
+        // Start the mock server
+        def processBuilder = new ProcessBuilder(
+            'java', '-jar', jarFile.absolutePath
+        )
+        processBuilder.environment().put('SERVER_PORT', String.valueOf(mockServerPort))
+        processBuilder.redirectOutput(logFile)
+        processBuilder.redirectErrorStream(true)
+        def process = processBuilder.start()
+
+        pidFile.text = "${process.pid()}"
+        logger.lifecycle("Starting mock Salesforce server on port ${mockServerPort} (PID: ${process.pid()})")
+
+        // Wait for the server to be ready
+        def maxRetries = 30
+        def ready = false
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                Thread.sleep(1000)
+                def connection = new URL("http://localhost:${mockServerPort}/health").openConnection()
+                connection.setConnectTimeout(2000)
+                connection.setReadTimeout(2000)
+                if (connection.responseCode == 200) {
+                    ready = true
+                    logger.lifecycle("Mock Salesforce server is ready on port ${mockServerPort}")
+                    break
+                }
+            } catch (Exception ignored) {
+                // Server not ready yet
+            }
+        }
+
+        if (!ready) {
+            throw new GradleException("Mock Salesforce server failed to start within ${maxRetries} seconds")
+        }
+    }
+}
+
+task stopMockServer {
+    doLast {
+        if (pidFile.exists()) {
+            def pid = pidFile.text.trim()
+            logger.lifecycle("Stopping mock Salesforce server (PID: ${pid})")
+            try {
+                def killCmd = "kill " + pid + " 2>/dev/null || true"
+                ['/bin/sh', '-c', killCmd].execute().waitFor()
+                Thread.sleep(1000)
+                // Force kill if still running
+                def forceKillCmd = "kill -9 " + pid + " 2>/dev/null || true"
+                ['/bin/sh', '-c', forceKillCmd].execute().waitFor()
+            } catch (Exception e) {
+                logger.warn("Failed to stop mock server: ${e.message}")
+            }
+            pidFile.delete()
+        }
+    }
+}
