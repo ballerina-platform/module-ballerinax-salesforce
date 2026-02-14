@@ -20,6 +20,9 @@ import ballerina/test;
 
 @test:AfterSuite {}
 function deleteCSV() returns error? {
+    if !isLiveServer {
+        return;
+    }
     log:printInfo("baseClient -> deleteCsv");
     //create job
     BulkCreatePayload payload = {

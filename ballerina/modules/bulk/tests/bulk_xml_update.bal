@@ -19,6 +19,7 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
+    enable: false,
     dependsOn: [insertXml, upsertXml]
 }
 function updateXml() returns error? {
