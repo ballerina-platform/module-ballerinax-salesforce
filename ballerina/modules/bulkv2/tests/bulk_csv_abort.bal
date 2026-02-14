@@ -45,12 +45,13 @@ ConnectionConfig sfConfigRefreshCodeFlow = {
     }
 };
 
-Client baseClient = check new (sfConfigRefreshCodeFlow);
+Client? baseClient = ();
 
 @test:Config {
     enable: false
 }
 function abortAndDeleteJob() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> deleteCsv");
     //create job
     BulkCreatePayload payload = {

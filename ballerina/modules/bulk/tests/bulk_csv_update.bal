@@ -23,6 +23,7 @@ import ballerina/lang.runtime;
     dependsOn: [insertCsv, upsertCsv]
 }
 function updateCsv() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> updateCsv");
     string batchId = "";
     string binnsID = check getContactIdByName("Cuthbert", "Binns", "Professor Level 02");

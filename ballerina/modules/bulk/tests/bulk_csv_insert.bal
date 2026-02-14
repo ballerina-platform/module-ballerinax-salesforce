@@ -26,6 +26,7 @@ const decimal delayInSecs = 6.0;
     enable: false
 }
 function insertCsv() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> insertCsv");
     string batchId = "";
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n"
@@ -173,6 +174,7 @@ function insertCsv() returns error? {
     enable: false
 }
 function insertCsvFromFile() {
+    Client baseClient = checkpanic new (sfConfig);
     log:printInfo("baseClient -> insertCsvFromFile");
     string batchId = "";
 
@@ -320,6 +322,7 @@ function insertCsvFromFile() {
     enable: false
 }
 function insertCsvStringArrayFromFile() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
     string batchId = "";
 
@@ -461,6 +464,7 @@ function insertCsvStringArrayFromFile() returns error? {
     enable: false
 }
 function insertCsvStreamFromFile() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> insertCsvStreamFromFile");
     string batchId = "";
 

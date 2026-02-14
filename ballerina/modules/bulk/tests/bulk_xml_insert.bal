@@ -24,6 +24,7 @@ import ballerina/lang.runtime;
     dependsOn: [queryJson]
 }
 function insertXml() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> insertXml");
     string xmlBatchId = "";
 
@@ -166,6 +167,7 @@ function insertXml() returns error? {
     dependsOn: [queryJson]
 }
 function insertXmlFromFile() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> insertXmlFromFile");
     string xmlBatchId = "";
 

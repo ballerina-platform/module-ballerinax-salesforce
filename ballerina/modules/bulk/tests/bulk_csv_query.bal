@@ -23,6 +23,7 @@ import ballerina/lang.runtime;
     dependsOn: [updateCsv, insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryCsv() returns error? {
+    Client baseClient = check new (sfConfig);
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryCsv");
     string batchId = "";

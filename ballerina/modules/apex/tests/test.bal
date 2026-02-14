@@ -45,12 +45,13 @@ ConnectionConfig sfConfigRefreshCodeFlow = {
     }
 };
 
-Client baseClient = check new (sfConfigRefreshCodeFlow);
+Client? baseClient = ();
 
 @test:Config {
     enable: true
 }
 function testApex() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> executeApex()");
     string|error caseId = baseClient->apexRestExecute("Cases", "POST", 
         {"subject" : "Bigfoot Sighting9!",

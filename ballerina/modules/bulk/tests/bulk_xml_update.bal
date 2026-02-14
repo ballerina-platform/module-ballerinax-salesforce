@@ -23,6 +23,7 @@ import ballerina/lang.runtime;
     dependsOn: [insertXml, upsertXml]
 }
 function updateXml() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> updateXml");
     string batchId = "";
     string flitchID = check getContactIdByName("Argus", "Filch", "Professor Level 01");

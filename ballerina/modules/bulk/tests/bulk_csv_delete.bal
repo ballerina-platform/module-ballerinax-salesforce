@@ -23,10 +23,12 @@ import ballerina/lang.runtime;
     dependsOn: [queryCsv]
 }
 function deleteCsv() returns error? {
+    Client baseClient = check new (sfConfig);
     check deleteCsvResources();
 }
 
 function deleteCsvResources(boolean ignoreResult = false) returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> deleteCsv");
     string batchId = "";
 

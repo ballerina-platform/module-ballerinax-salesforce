@@ -44,8 +44,8 @@ ConnectionConfig sfConfig = {
     }
 };
 
-Client soapClient = check new (sfConfig);
-salesforce:Client restClient = check new (sfConfig);
+Client? soapClient = ();
+salesforce:Client? restClient = ();
 
 string leadId = salesforce:EMPTY_STRING;
 string accountId = salesforce:EMPTY_STRING;
@@ -54,6 +54,8 @@ string opportunityId = salesforce:EMPTY_STRING;
 
 @test:BeforeSuite
 function createLead() {
+    Client soapClient = checkpanic new (sfConfig);
+    salesforce:Client restClient = checkpanic new (sfConfig);
     log:printInfo("baseClient -> convertLead()");
     record{} leadRecord = {
         "FirstName": "Mark",
@@ -71,6 +73,7 @@ function createLead() {
 
 @test:Config {enable: false}
 function testconvertLead() {
+    Client soapClient = checkpanic new (sfConfig);
     ConvertedLead|error response = soapClient->convertLead({leadId: leadId, convertedStatus: "Closed - Converted"});
     if response is ConvertedLead {
         test:assertEquals(leadId, response.leadId, "Lead Not Converted");
@@ -85,6 +88,7 @@ function testconvertLead() {
 @test:AfterSuite {
 }
 function testDeleteRecord() returns error? {
+    salesforce:Client restClient = checkpanic new (sfConfig);
     if !isLiveServer {
         return;
     }

@@ -26,6 +26,7 @@ string batchId = "id\n";
     enable: isLiveServer
 }
 function insertCsv() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> insertCsv");
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n"
         + "Created_from_Ballerina_Sf_Bulk_API_V2,Cuthbert,Binns,Professor Level 02,0332236677,john434@gmail.com,845\n"
@@ -94,6 +95,7 @@ function insertCsv() returns error? {
     enable: isLiveServer
 }
 function insertCsvFromFile() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> insertCsvFromFile");
     string csvContactsFilePath = "tests/resources/contacts1.csv";
 
@@ -156,6 +158,7 @@ function insertCsvFromFile() returns error? {
     enable: isLiveServer
 }
 function insertCsvStringArrayFromFile() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> insertCsvStringArrayFromFile");
 
     string csvContactsFilePath = "tests/resources/contacts2.csv";
@@ -224,6 +227,7 @@ function insertCsvStringArrayFromFile() returns error? {
     enable: isLiveServer
 }
 function insertCsvStreamFromFile() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> insertCsvStreamFromFile");
 
     string csvContactsFilePath = "tests/resources/contacts3.csv";

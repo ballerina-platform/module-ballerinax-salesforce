@@ -23,10 +23,12 @@ import ballerina/lang.runtime;
     dependsOn: [queryXml]
 }
 function deleteXml() returns error? {
+    Client baseClient = check new (sfConfig);
     check deleteXmlResources();
 }
 
 function deleteXmlResources(boolean ignoreResult = false) returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> deleteXml");
     string batchId = "";
     xml contacts = xml `<sObjects xmlns="http://www.force.com/2009/06/asyncapi/dataload">${xmlInsertResult}</sObjects>`;

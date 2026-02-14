@@ -23,6 +23,7 @@ import ballerina/lang.runtime;
     dependsOn: [updateJson, insertJsonFromFile]
 }
 function queryJson() returns error? {
+    Client baseClient = check new (sfConfig);
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryJson");
     string batchId = "";

@@ -24,6 +24,7 @@ import ballerina/lang.runtime;
     dependsOn: [queryCsv]
 }
 function insertJson() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> insertJson");
     string jsonBatchId = "";
 
@@ -189,6 +190,7 @@ function insertJson() returns error? {
     dependsOn: [insertJson, queryCsv]
 }
 function insertJsonFromFile() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> insertJsonFromFile");
     string jsonBatchId = "";
     string jsonContactsFilePath = "modules/bulk/tests/resources/contacts.json";
