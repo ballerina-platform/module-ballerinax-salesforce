@@ -240,6 +240,21 @@ function testOAuth2ListenerInitialization() returns error? {
 @test:Config {
     groups: ["listener"]
 }
+function testOAuth2ListenerWithoutBaseUrl() {
+    Listener|error result = new (
+        auth = {
+            token: "mock-bearer-token"
+        }
+    );
+    test:assertTrue(result is error, "Expected error when baseUrl is not provided for OAuth2 authentication");
+    if result is error {
+        test:assertEquals(result.message(), "Base URL is required for OAuth2 authentication");
+    }
+}
+
+@test:Config {
+    groups: ["listener"]
+}
 function testConnectionTimeoutInListenerInitialization() returns error? {
     decimal connectionTimeout = 0.5;
     Listener sfListener = check new ({
