@@ -20,18 +20,24 @@ package io.ballerinax.salesforce;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
  * Implementation of BayeuxParameters for OAuth2 authentication.
  */
 public class OAuth2BayeuxParameters implements BayeuxParameters {
-    private final Supplier<String> tokenSupplier;
+   private final Supplier<String> tokenSupplier;
     private final String baseUrl;
+    private final long readTimeoutMs;
+    private final long keepAliveIntervalMs;
 
-    public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl) {
+    public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl, 
+        long readTimeoutMs, long keepAliveIntervalMs) {
         this.tokenSupplier = tokenSupplier;
         this.baseUrl = baseUrl;
+        this.readTimeoutMs = readTimeoutMs;
+        this.keepAliveIntervalMs = keepAliveIntervalMs;
     }
 
     @Override
@@ -47,5 +53,20 @@ public class OAuth2BayeuxParameters implements BayeuxParameters {
         } catch (MalformedURLException exception) {
             throw new RuntimeException("Invalid instance URL: " + baseUrl, exception);
         }
+    }
+
+    @Override
+    public int maxNetworkDelay() {
+        return (int) readTimeoutMs;
+    }
+
+    @Override
+    public long keepAlive() {
+        return keepAliveIntervalMs;
+    }
+
+    @Override
+    public TimeUnit keepAliveUnit() {
+        return TimeUnit.MILLISECONDS;
     }
 }

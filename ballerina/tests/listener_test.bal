@@ -253,3 +253,27 @@ function testOAuth2ListenerInitialization() returns error? {
     check sfdc->delete(ACCOUNT, response.id);
     check authListener.gracefulStop();
 }
+
+
+@test:Config {
+    groups: ["listener"]
+}
+function testConnectionTimeoutInListenerInitialization() returns error? {
+    decimal connectionTimeout = 0.5;
+    Listener sfListener = check new ({
+        auth: {
+            clientId,
+            clientSecret,
+            refreshToken,
+            refreshUrl
+        },
+        baseUrl,
+        connectionTimeout: connectionTimeout
+    });
+    check sfListener.attach(oauth2Service, "/data/ChangeEvents");
+    error? response = sfListener.'start();
+    test:assertTrue(response is error);
+    if response is error {
+        test:assertEquals(response.message(), string `Connection timed out after ${connectionTimeout} seconds.`);
+    }
+}

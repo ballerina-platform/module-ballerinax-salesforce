@@ -323,6 +323,9 @@ public class EmpConnector {
 
         client = new BayeuxClient(parameters.endpoint().toExternalForm(), httpTransport);
 
+        long keepAliveMs = parameters.keepAliveUnit().toMillis(parameters.keepAlive());
+        client.setOption("maxInterval", keepAliveMs);
+
         client.addExtension(new ReplayExtension(replay));
 
         addListeners(client);

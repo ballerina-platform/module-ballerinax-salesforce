@@ -29,6 +29,9 @@ public isolated class Listener {
     private string? channelName = ();
     private final int replayFrom;
     private final boolean isSandBox;
+    private final decimal connectionTimeout;
+    private final decimal readTimeout;
+    private final decimal keepAliveInterval;
 
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
@@ -42,13 +45,17 @@ public isolated class Listener {
             self.replayFrom = -2;
         }
         self.isSandBox = listenerConfig.isSandBox;
+        self.connectionTimeout = listenerConfig.connectionTimeout;
+        self.readTimeout = listenerConfig.readTimeout;
+        self.keepAliveInterval = listenerConfig.keepAliveInterval;
         CredentialsConfig|OAuth2Config authConfig = listenerConfig.auth;
         self.username = authConfig is CredentialsConfig ? authConfig.username : "";
         self.password = authConfig is CredentialsConfig ? authConfig.password : "";
         self.isOAuth2 = authConfig is OAuth2Config;
         self.baseUrl = check extractBaseUrl(listenerConfig, self.isOAuth2);
         self.oauth2Config = authConfig is OAuth2Config ? authConfig.cloneReadOnly() : ();
-        initListener(self, self.replayFrom, self.isSandBox, self.isOAuth2, self.baseUrl);
+        initListener(self, self.replayFrom, self.isSandBox, self.isOAuth2, self.baseUrl,
+                self.connectionTimeout, self.readTimeout, self.keepAliveInterval);
     }
 
     # Attaches the service to the `salesforce:Listener` endpoint.
@@ -109,7 +116,7 @@ public isolated class Listener {
 }
 
 isolated function initListener(Listener instance, int replayFrom, boolean isSandBox, boolean isOAuth2,
-        string baseUrl) =
+        string baseUrl, decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
