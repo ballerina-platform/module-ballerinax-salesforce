@@ -31,13 +31,20 @@ public class OAuth2BayeuxParameters implements BayeuxParameters {
     private final String baseUrl;
     private final long readTimeoutMs;
     private final long keepAliveIntervalMs;
+    private final String apiVersion;
 
-    public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl, 
-        long readTimeoutMs, long keepAliveIntervalMs) {
+    public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl,
+        long readTimeoutMs, long keepAliveIntervalMs, String apiVersion) {
         this.tokenSupplier = tokenSupplier;
         this.baseUrl = baseUrl;
         this.readTimeoutMs = readTimeoutMs;
         this.keepAliveIntervalMs = keepAliveIntervalMs;
+        this.apiVersion = apiVersion;
+    }
+
+    @Override
+    public String version() {
+        return apiVersion;
     }
 
     @Override

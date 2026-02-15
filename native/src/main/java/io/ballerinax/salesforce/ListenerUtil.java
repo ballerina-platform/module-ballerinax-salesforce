@@ -115,8 +115,8 @@ public class ListenerUtil {
             }
 
             tokenProvider = new BearerTokenProvider(() ->
-                new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl, 
-                    readTimeoutMs, keepAliveIntervalMs)
+                new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl,
+                    readTimeoutMs, keepAliveIntervalMs, apiVersion)
             );
             try {
                 params = tokenProvider.login();
