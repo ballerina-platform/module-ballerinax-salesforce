@@ -26,9 +26,6 @@ const string INVALID_CLIENT_CONFIG = "Invalid values provided for client configu
 # Constant field `BASE_PATH`. Holds the value for the Salesforce base path/URL.
 const string BASE_PATH = "/services/data";
 
-# Constant field `API_BASE_PATH`. Holds the value for the Salesforce API base path/URL.
-final string API_BASE_PATH = string `${BASE_PATH}/${API_VERSION}`;
-
 # Constant field `BATCHES`. Holds the value batches for bulk resource prefix.
 const string BATCHES = "batches";
 

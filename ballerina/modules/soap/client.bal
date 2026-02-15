@@ -27,6 +27,7 @@ import ballerinax/salesforce.utils;
 # + clientConfig - Configurations required to initialize the `Client`
 public isolated client class Client {
     private final http:Client salesforceClient;
+    private final string apiVersion;
     private final http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig clientConfig;
     private final http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler clientHandler;
 
@@ -38,6 +39,7 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
+        self.apiVersion = config.apiVersion;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
         http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig auth = let var authConfig = config.auth in 
                 (authConfig is http:BearerTokenConfig ?  authConfig : {...authConfig});
@@ -75,7 +77,7 @@ public isolated client class Client {
         http:Request request = new;
         request.setHeader(SOAP_ACTION, ADD);
         request.setTextPayload(xmlPayload, contentType = TEXT_XML);
-        string path = utils:prepareUrl([SERVICES, SOAP, C, VERSION]);
+        string path = utils:prepareUrl([SERVICES, SOAP, C, self.apiVersion]);
         http:Response response = check self.salesforceClient->post(path, request);
         return createResponse(response);
     }

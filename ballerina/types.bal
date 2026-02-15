@@ -75,6 +75,8 @@ public type ConnectionConfig record {|
     # Configurations related to client authentication
     http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig|
         config:OAuth2PasswordGrantConfig|config:OAuth2ClientCredentialsGrantConfig auth;
+    # The Salesforce API version
+    string apiVersion = "59.0";
 |};
 
 # Defines the Salesforce version type.
