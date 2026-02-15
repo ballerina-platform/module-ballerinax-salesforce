@@ -96,7 +96,8 @@ public class ListenerUtil {
         return null;
     }
 
-    public static Object startListener(BString username, BString password, BString accessToken, BObject listener) {
+    public static Object startListener(Environment env, BString username, BString password, BString accessToken,
+                                        BObject listener) {
         boolean isOAuth2 = (Boolean) listener.getNativeData(IS_OAUTH2);
         String baseUrl = (String) listener.getNativeData(BASE_URL);
         long connectionTimeoutMs = (Long) listener.getNativeData(CONNECTION_TIMEOUT);
@@ -106,46 +107,24 @@ public class ListenerUtil {
         String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
         BayeuxParameters params;
+        BearerTokenProvider tokenProvider;
+
         if (isOAuth2) {
-            String token = accessToken.getValue();
-            params = new BayeuxParameters() {
-                @Override
-                public String bearerToken() {
-                    return token;
-                }
+            if (baseUrl == null || baseUrl.isEmpty()) {
+                return sfdcError("Base URL is required for OAuth2 authentication");
+            }
 
-                @Override
-                public java.net.URL endpoint() {
-                    try {
-                        String cometdPath = LoginHelper.COMETD_REPLAY + version();
-                        return new java.net.URL(baseUrl + cometdPath);
-                    } catch (java.net.MalformedURLException e) {
-                        throw new RuntimeException("Invalid instance URL: " + baseUrl, e);
-                    }
-                }
-
-                @Override
-                public String version() {
-                    return apiVersion;
-                }
-
-                @Override
-                public int maxNetworkDelay() {
-                    return (int) readTimeoutMs;
-                }
-
-                @Override
-                public long keepAlive() {
-                    return keepAliveIntervalMs;
-                }
-
-                @Override
-                public TimeUnit keepAliveUnit() {
-                    return TimeUnit.MILLISECONDS;
-                }
-            };
+            tokenProvider = new BearerTokenProvider(() ->
+                new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl, 
+                    readTimeoutMs, keepAliveIntervalMs)
+            );
+            try {
+                params = tokenProvider.login();
+            } catch (Exception e) {
+                throw sfdcError(e.getMessage());
+            }
         } else {
-            BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
+            tokenProvider = new BearerTokenProvider(() -> {
                 try {
                     return LoginHelper.login(username.getValue(), password.getValue(), listener, apiVersion);
                 } catch (Exception e) {
@@ -176,6 +155,7 @@ public class ListenerUtil {
         }
 
         connector = new EmpConnector(params);
+        connector.setBearerTokenProvider(tokenProvider);
         try {
             connector.start().get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
         } catch (TimeoutException exception) {
@@ -205,6 +185,7 @@ public class ListenerUtil {
                 subscription = connector.subscribe(channelName, replayFrom, consumer)
                         .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
+                connector.stop();
                 return sfdcError(e.getMessage());
             }
         }
@@ -232,6 +213,14 @@ public class ListenerUtil {
 
     private static void injectEvent(DispatcherService dispatcherService, Map<String, Object> eventData) {
         dispatcherService.handleDispatch(eventData);
+    }
+
+    private static String getOAuth2Token(Environment env, BObject listener) {
+        Object result = env.getRuntime().callMethod(listener, "getOAuth2Token", null);
+        if (result instanceof BError) {
+            throw sfdcError(((BError) result).getMessage());
+        }
+        return ((BString) result).getValue();
     }
 
     private static BError sfdcError(String errorMessage) {
