@@ -18,7 +18,7 @@
 
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 description = 'Mock Salesforce Server for Testing'
@@ -32,9 +32,14 @@ repositories {
     mavenCentral()
 }
 
+def cometdVersion = project.hasProperty('cometdJavaClientVersion') ? cometdJavaClientVersion : '4.0.9'
+def jettyVersion = project.hasProperty('jettyVersion') ? jettyVersion : '9.4.55.v20240627'
+def gsonVersion = project.hasProperty('gsonVersion') ? gsonVersion : '2.10.1'
+def slf4jVersion = project.hasProperty('slf4jVersion') ? slf4jVersion : '1.7.36'
+
 dependencies {
-    implementation "org.cometd.java:cometd-java-server:${cometdJavaClientVersion}"
-    implementation "org.cometd.java:cometd-java-websocket-jetty-server:${cometdJavaClientVersion}"
+    implementation "org.cometd.java:cometd-java-server:${cometdVersion}"
+    implementation "org.cometd.java:cometd-java-websocket-jetty-server:${cometdVersion}"
     implementation "org.eclipse.jetty:jetty-server:${jettyVersion}"
     implementation "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
     implementation "org.eclipse.jetty:jetty-servlets:${jettyVersion}"
@@ -55,35 +60,35 @@ shadowJar {
 build.dependsOn shadowJar
 
 def mockServerPort = 8089
-def pidFile = file("${buildDir}/mock-server.pid")
+def dockerComposeFile = file("${rootDir}/docker-compose.yml")
 
-task startMockServer(dependsOn: shadowJar) {
+task startMockServer {
     doLast {
-        def jarFile = shadowJar.archiveFile.get().asFile
-        def logFile = file("${buildDir}/mock-server.log")
+        logger.lifecycle("Starting mock Salesforce server via Docker Compose...")
 
-        // Kill any existing process on the port
-        def killCmd = "lsof -ti:${mockServerPort} | xargs kill -9 2>/dev/null || true"
-        ['/bin/sh', '-c', killCmd].execute().waitFor()
-
-        // Start the mock server
-        def processBuilder = new ProcessBuilder(
-            'java', '-jar', jarFile.absolutePath
+        def process = new ProcessBuilder(
+            'docker', 'compose', '-f', dockerComposeFile.absolutePath,
+            'up', '-d', '--build', 'mock-server'
         )
-        processBuilder.environment().put('SERVER_PORT', String.valueOf(mockServerPort))
-        processBuilder.redirectOutput(logFile)
-        processBuilder.redirectErrorStream(true)
-        def process = processBuilder.start()
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start()
 
-        pidFile.text = "${process.pid()}"
-        logger.lifecycle("Starting mock Salesforce server on port ${mockServerPort} (PID: ${process.pid()})")
+        def output = process.inputStream.text
+        def exitCode = process.waitFor()
+
+        if (exitCode != 0) {
+            throw new GradleException("Failed to start Docker Compose:\n${output}")
+        }
+
+        logger.lifecycle("Waiting for mock Salesforce server to be healthy...")
 
         // Wait for the server to be ready
         def maxRetries = 30
         def ready = false
         for (int i = 0; i < maxRetries; i++) {
             try {
-                Thread.sleep(1000)
+                Thread.sleep(2000)
                 def connection = new URL("http://localhost:${mockServerPort}/health").openConnection()
                 connection.setConnectTimeout(2000)
                 connection.setReadTimeout(2000)
@@ -98,27 +103,30 @@ task startMockServer(dependsOn: shadowJar) {
         }
 
         if (!ready) {
-            throw new GradleException("Mock Salesforce server failed to start within ${maxRetries} seconds")
+            throw new GradleException("Mock Salesforce server failed to start within ${maxRetries * 2} seconds")
         }
     }
 }
 
 task stopMockServer {
     doLast {
-        if (pidFile.exists()) {
-            def pid = pidFile.text.trim()
-            logger.lifecycle("Stopping mock Salesforce server (PID: ${pid})")
-            try {
-                def killCmd = "kill " + pid + " 2>/dev/null || true"
-                ['/bin/sh', '-c', killCmd].execute().waitFor()
-                Thread.sleep(1000)
-                // Force kill if still running
-                def forceKillCmd = "kill -9 " + pid + " 2>/dev/null || true"
-                ['/bin/sh', '-c', forceKillCmd].execute().waitFor()
-            } catch (Exception e) {
-                logger.warn("Failed to stop mock server: ${e.message}")
-            }
-            pidFile.delete()
+        logger.lifecycle("Stopping mock Salesforce server via Docker Compose...")
+
+        def process = new ProcessBuilder(
+            'docker', 'compose', '-f', dockerComposeFile.absolutePath,
+            'down', 'mock-server'
+        )
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start()
+
+        def output = process.inputStream.text
+        def exitCode = process.waitFor()
+
+        if (exitCode != 0) {
+            logger.warn("Failed to stop Docker Compose:\n${output}")
+        } else {
+            logger.lifecycle("Mock Salesforce server stopped.")
         }
     }
 }
