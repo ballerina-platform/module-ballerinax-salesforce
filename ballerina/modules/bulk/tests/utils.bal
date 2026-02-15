@@ -24,12 +24,20 @@ json[] jsonInsertResult = [];
 xml xmlInsertResult = xml ``;
 string csvInputResult = "Id";
 
+const string MOCK_URL = "http://localhost:8089";
+
+string envClientId = os:getEnv("CLIENT_ID");
+string envClientSecret = os:getEnv("CLIENT_SECRET");
+string envRefreshToken = os:getEnv("REFRESH_TOKEN");
+string envRefreshUrl = os:getEnv("REFRESH_URL");
+string envBaseUrl = os:getEnv("EP_URL");
+
 // Create Salesforce client configuration by reading from environment.
-configurable string clientId = os:getEnv("CLIENT_ID");
-configurable string clientSecret = os:getEnv("CLIENT_SECRET");
-configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
-configurable string refreshUrl = os:getEnv("REFRESH_URL");
-configurable string baseUrl = os:getEnv("EP_URL");
+string clientId = envClientId != "" ? envClientId : "mock-client-id";
+string clientSecret = envClientSecret != "" ? envClientSecret : "mock-client-secret";
+string refreshToken = envRefreshToken != "" ? envRefreshToken : "mock-refresh-token";
+string refreshUrl = envRefreshUrl != "" ? envRefreshUrl : MOCK_URL + "/services/oauth2/token";
+string baseUrl = envBaseUrl != "" ? envBaseUrl : MOCK_URL;
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfig = {
@@ -42,8 +50,8 @@ ConnectionConfig sfConfig = {
     }
 };
 
-Client baseClient = check new (sfConfig);
-salesforce:Client restClient = check new (sfConfig);
+Client? baseClient = ();
+salesforce:Client? restClient = ();
 
 isolated function closeRb(io:ReadableByteChannel ch) {
     io:Error? cr = ch.close();
@@ -70,6 +78,7 @@ type ResultValue record {|
 |};
 
 function getContactIdByName(string firstName, string lastName, string title) returns string|error {
+    salesforce:Client restClient = check new (sfConfig);
     string contactId = "";
     string sampleQuery = 
     string `SELECT Id FROM Contact WHERE FirstName='${firstName}' AND LastName='${lastName}' AND Title='${title}'`;

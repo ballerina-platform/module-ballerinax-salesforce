@@ -1,0 +1,25 @@
+services:
+  mock-server:
+    build:
+      context: ./mock-server
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8089"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  ballerina-build:
+    image: ballerina/ballerina:2201.11.0
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      mock-server:
+        condition: service_healthy
+    environment:
+      - MOCK_URL=http://mock-server:8089
+      - SKIP_MOCK_SERVER_LIFECYCLE=true
+    command: ["./gradlew", "build", "-x", ":salesforce-examples:build", "--no-daemon"]

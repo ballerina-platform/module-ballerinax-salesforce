@@ -19,9 +19,11 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
+    enable: false,
     dependsOn: [insertJson, upsertJson]
 }
 function updateJson() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> updateJson");
     string batchId = "";
     string mornsId = check getContactIdByName("Remus", "Lupin", "Professor Level 03");

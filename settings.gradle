@@ -47,11 +47,13 @@ include ":checkstyle"
 include ":${projectName}-native"
 include ":${projectName}-ballerina"
 include ":${projectName}-examples"
+include ":${projectName}-mock-server"
 
 project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
 project(":${projectName}-native").projectDir = file('native')
 project(":${projectName}-ballerina").projectDir = file('ballerina')
 project(":${projectName}-examples").projectDir = file('examples')
+project(":${projectName}-mock-server").projectDir = file('mock-server')
 
 gradleEnterprise {
     buildScan {

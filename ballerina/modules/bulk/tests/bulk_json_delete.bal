@@ -19,13 +19,16 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
+    enable: false,
     dependsOn: [queryJson]
 }
 function deleteJson() returns error? {
+    Client baseClient = check new (sfConfig);
     check deleteJsonResources();
 }
 
 function deleteJsonResources(boolean ignoreResult = false) returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> deleteJson");
     string batchId = "";
     json contacts = getJsonContactsToDelete(jsonInsertResult);

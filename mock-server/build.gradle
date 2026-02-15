@@ -1,0 +1,132 @@
+/*
+ * Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
+ *
+ * WSO2 LLC. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+description = 'Mock Salesforce Server for Testing'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+def cometdVersion = project.hasProperty('cometdJavaClientVersion') ? cometdJavaClientVersion : '4.0.9'
+def jettyVersion = project.hasProperty('jettyVersion') ? jettyVersion : '9.4.55.v20240627'
+def gsonVersion = project.hasProperty('gsonVersion') ? gsonVersion : '2.10.1'
+def slf4jVersion = project.hasProperty('slf4jVersion') ? slf4jVersion : '1.7.36'
+
+dependencies {
+    implementation "org.cometd.java:cometd-java-server:${cometdVersion}"
+    implementation "org.cometd.java:cometd-java-websocket-jetty-server:${cometdVersion}"
+    implementation "org.eclipse.jetty:jetty-server:${jettyVersion}"
+    implementation "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
+    implementation "org.eclipse.jetty:jetty-servlets:${jettyVersion}"
+    implementation "com.google.code.gson:gson:${gsonVersion}"
+    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    implementation "org.slf4j:slf4j-simple:${slf4jVersion}"
+}
+
+shadowJar {
+    archiveBaseName.set('salesforce-mock-server')
+    archiveVersion.set('1.0.0')
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'io.ballerinax.salesforce.mock.MockSalesforceServer'
+    }
+}
+
+build.dependsOn shadowJar
+
+def mockServerPort = 8089
+def dockerComposeFile = file("${rootDir}/docker-compose.yml")
+
+task startMockServer {
+    doLast {
+        logger.lifecycle("Starting mock Salesforce server via Docker Compose...")
+
+        def process = new ProcessBuilder(
+            'docker', 'compose', '-f', dockerComposeFile.absolutePath,
+            'up', '-d', '--build', 'mock-server'
+        )
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start()
+
+        def output = process.inputStream.text
+        def exitCode = process.waitFor()
+
+        if (exitCode != 0) {
+            throw new GradleException("Failed to start Docker Compose:\n${output}")
+        }
+
+        logger.lifecycle("Waiting for mock Salesforce server to be healthy...")
+
+        // Wait for the server to be ready
+        def maxRetries = 30
+        def ready = false
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                Thread.sleep(2000)
+                def connection = new URL("http://localhost:${mockServerPort}/health").openConnection()
+                connection.setConnectTimeout(2000)
+                connection.setReadTimeout(2000)
+                if (connection.responseCode == 200) {
+                    ready = true
+                    logger.lifecycle("Mock Salesforce server is ready on port ${mockServerPort}")
+                    break
+                }
+            } catch (Exception ignored) {
+                // Server not ready yet
+            }
+        }
+
+        if (!ready) {
+            throw new GradleException("Mock Salesforce server failed to start within ${maxRetries * 2} seconds")
+        }
+    }
+}
+
+task stopMockServer {
+    doLast {
+        logger.lifecycle("Stopping mock Salesforce server via Docker Compose...")
+
+        def process = new ProcessBuilder(
+            'docker', 'compose', '-f', dockerComposeFile.absolutePath,
+            'down', 'mock-server'
+        )
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start()
+
+        def output = process.inputStream.text
+        def exitCode = process.waitFor()
+
+        if (exitCode != 0) {
+            logger.warn("Failed to stop Docker Compose:\n${output}")
+        } else {
+            logger.lifecycle("Mock Salesforce server stopped.")
+        }
+    }
+}

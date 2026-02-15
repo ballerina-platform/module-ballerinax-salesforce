@@ -17,9 +17,10 @@ import ballerina/log;
 import ballerina/test;
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function abortAndDeleteJob() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> deleteCsv");
     //create job
     BulkCreatePayload payload = {

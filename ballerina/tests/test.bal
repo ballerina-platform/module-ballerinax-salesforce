@@ -20,14 +20,23 @@ import ballerina/test;
 import ballerina/time;
 import ballerina/lang.runtime;
 
-// Create Salesforce client configuration by reading from environemnt.
-configurable string clientId = os:getEnv("CLIENT_ID");
-configurable string clientSecret = os:getEnv("CLIENT_SECRET");
-configurable string refreshToken = os:getEnv("REFRESH_TOKEN");
-configurable string refreshUrl = os:getEnv("REFRESH_URL");
-configurable string baseUrl = os:getEnv("EP_URL");
+
+const string MOCK_URL = "http://localhost:8089";
+
+string envClientId = os:getEnv("CLIENT_ID");
+string envClientSecret = os:getEnv("CLIENT_SECRET");
+string envRefreshToken = os:getEnv("REFRESH_TOKEN");
+string envRefreshUrl = os:getEnv("REFRESH_URL");
+string envBaseUrl = os:getEnv("EP_URL");
+
+string clientId = envClientId != "" ? envClientId : "mock-client-id";
+string clientSecret = envClientSecret != "" ? envClientSecret : "mock-client-secret";
+string refreshToken = envRefreshToken != "" ? envRefreshToken : "mock-refresh-token";
+string refreshUrl = envRefreshUrl != "" ? envRefreshUrl : MOCK_URL + "/services/oauth2/token";
+string baseUrl = envBaseUrl != "" ? envBaseUrl : MOCK_URL;
 
 string reportInstanceID = "";
+boolean isLiveServer = false;
 
 // Using direct-token config for client configuration
 ConnectionConfig sfConfigRefreshCodeFlow = {
@@ -49,7 +58,7 @@ ConnectionConfig sfConfigCredentialsFlow = {
     }
 };
 
-Client baseClient = check new (sfConfigRefreshCodeFlow);
+Client? baseClient = ();
 // Client baseClientPasswordFlow = check new (sfConfigPasswordFlow);
 // Client baseClientCredentialsFlow = check new (sfConfigCredentialsFlow);
 
@@ -148,6 +157,7 @@ string testRecordIdNew = "";
     enable: true
 }
 function testCreate() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> create");
     CreationResponse|error response = baseClient->create(ACCOUNT, accountRecordNew);
 
@@ -166,6 +176,7 @@ function testCreate() {
     dependsOn: [testCreate]
 }
 function testGetById() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getById()");
     Account|error response = baseClient->getById(ACCOUNT, testRecordIdNew);
 
@@ -182,6 +193,7 @@ function testGetById() {
     dependsOn: [testCreate]
 }
 function testGetByExternalId() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getByExternalId()");
     string externalIdField = "";
     string externalId = "";
@@ -200,6 +212,7 @@ function testGetByExternalId() {
     dependsOn: [testCreate, testGetById]
 }
 function testUpdate() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> update()");
     Account account = {
         Name: "MAAS Holdings",
@@ -217,6 +230,7 @@ function testUpdate() {
     enable: true
 }
 function testQuery() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> query()");
     string sampleQuery = "SELECT name FROM Account";
     stream<Account, error?>|error queryResult = check baseClient->query(sampleQuery);
@@ -255,6 +269,7 @@ function testQuery() returns error? {
     enable: true
 }
 function testQueryWithLimit() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getQueryResultWithLimit()");
     string sampleQuery = "SELECT Name,Industry FROM Account LIMIT 3";
     stream<Account, error?>|error queryResult = check baseClient->query(sampleQuery);
@@ -267,9 +282,10 @@ function testQueryWithLimit() returns error? {
 }
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function testQueryWithAggregateFunctionWithAlias() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> testQueryWithAggregateFunctionWithAlias()");
     string sampleQuery = "SELECT COUNT(Id) NumAccounts, Name FROM Account GROUP BY Name";
     stream<AccountResultWithAlias, error?>|error queryResult = check baseClient->query(sampleQuery);
@@ -283,9 +299,10 @@ function testQueryWithAggregateFunctionWithAlias() returns error? {
 
 
 @test:Config {
-    enable: true
+    enable: isLiveServer
 }
 function testQueryWithAggregateFunctionWithoutAlias() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> testQueryWithAggregateFunctionWithoutAlias()");
     string sampleQuery = "SELECT COUNT(Id) FROM Account";
     stream<AccountResultWithoutAlias, error?>|error queryResult = check baseClient->query(sampleQuery);
@@ -300,8 +317,7 @@ function testQueryWithAggregateFunctionWithoutAlias() returns error? {
 @test:Config {
     enable: false
 }
-function testQueryWithPagination() returns error? {
-    log:printInfo("baseClient -> getQueryResultWithPagination()");
+function testQueryWithPagination() returns error? {    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);    log:printInfo("baseClient -> getQueryResultWithPagination()");
     string sampleQuery = "SELECT Name FROM Contact";
     stream<Account, error?> resultStream = check baseClient->query(sampleQuery);
     int count = check countStream(resultStream);
@@ -314,6 +330,7 @@ function testQueryWithPagination() returns error? {
     dependsOn: [testUpdate]
 }
 function testSearch() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> search()");
     string searchString = "FIND {MAAS Holdings}";
     stream<record {}, error?>|error queryResult = baseClient->search(searchString);
@@ -329,6 +346,7 @@ function testSearch() returns error? {
     enable: true
 }
 function testLimits() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getLimits()");
     map<Limit>|error limits = baseClient->getLimits();
 
@@ -354,6 +372,7 @@ function testLimits() {
     enable: true
 }
 function testOrganizationMetaData() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getOrganizationMetaData()");
     OrganizationMetadata|error description = baseClient->getOrganizationMetaData();
 
@@ -368,6 +387,7 @@ function testOrganizationMetaData() {
     enable: true
 }
 function testBasicInfo() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getBasicInfo()");
     SObjectBasicInfo|error description = baseClient->getBasicInfo("Account");
 
@@ -382,6 +402,7 @@ function testBasicInfo() {
     enable: true
 }
 function testDescribe() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> describe()");
     SObjectMetaData|error description = baseClient->describe("Account");
 
@@ -396,6 +417,7 @@ function testDescribe() {
     enable: true
 }
 function testPlatformAction() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getPlatformAction()");
     SObjectBasicInfo|error description = baseClient->getPlatformAction();
 
@@ -410,6 +432,7 @@ function testPlatformAction() {
     enable: true
 }
 function testApiVersions() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getApiVersions()");
     Version[]|error versions = baseClient->getApiVersions();
 
@@ -424,6 +447,7 @@ function testApiVersions() {
     enable: true
 }
 function testgetDeleted() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getDeletedRecords()");
     DeletedRecordsResult|error deletedRecords = baseClient->getDeletedRecords("Account", time:utcToCivil(time:utcNow()),
         time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
@@ -437,6 +461,7 @@ function testgetDeleted() {
     enable: true
 }
 function testgetUpdated() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getUpdatedRecords()");
     UpdatedRecordsResults|error updatedRecords = baseClient->getUpdatedRecords("Account", time:utcToCivil(time:utcNow()),
         time:utcToCivil(time:utcAddSeconds(time:utcNow(), -86400)));
@@ -449,6 +474,7 @@ function testgetUpdated() {
     enable: true
 }
 function testgetPasswordInfo() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getPasswordInfo()");
     boolean _ = check baseClient->isPasswordExpired("0055g00000J48In");
 }
@@ -458,6 +484,7 @@ function testgetPasswordInfo() returns error? {
     dependsOn: [testgetPasswordInfo]
 }
 function testResetPassword() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> resetPassword()");
     runtime:sleep(10);
     byte[]|error resettedPassword = baseClient->resetPassword("");
@@ -471,6 +498,7 @@ function testResetPassword() returns error? {
     dependsOn: [testResetPassword]
 }
 function testSetPassword() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> changePassword()");
     string newPassword = "";
     error? response = baseClient->changePassword("", newPassword);
@@ -483,6 +511,7 @@ function testSetPassword() returns error? {
     dependsOn: []
 }
 function testGetQuickActions() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getQuickActions()");
     QuickAction[]|error resp = baseClient->getQuickActions("Contact");
     if resp !is QuickAction[] {
@@ -495,6 +524,7 @@ function testGetQuickActions() returns error? {
     dependsOn: []
 }
 function testListReports() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> listReports()");
     Report[]|error resp = baseClient->listReports();
     if resp !is Report[] {
@@ -510,6 +540,7 @@ function testListReports() returns error? {
     dependsOn: []
 }
 function testRunReportSync() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> runReportSync()");
     ReportInstanceResult|error resp = baseClient->runReportSync("00O5g00000Jrs9DEAR");
     if resp !is ReportInstanceResult {
@@ -525,6 +556,7 @@ function testRunReportSync() returns error? {
     dependsOn: []
 }
 function testRunReportAsync() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> runReportAsync()");
     ReportInstance|error resp = baseClient->runReportAsync("00O5g00000Jrs9DEAR");
     if resp !is ReportInstance {
@@ -540,6 +572,7 @@ function testRunReportAsync() returns error? {
     dependsOn: [testRunReportAsync]
 }
 function testListAsyncRunsOfReport() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> listAsyncRunsOfReport()");
     ReportInstance[]|error resp = baseClient->listAsyncRunsOfReport("00O5g00000Jrs9DEAR");
     if resp !is ReportInstance[] {
@@ -556,6 +589,7 @@ function testListAsyncRunsOfReport() returns error? {
     dependsOn: [testListAsyncRunsOfReport]
 }
 function testGetReportInstanceResult() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getReportInstanceResult()");
     ReportInstanceResult|error resp = baseClient->getReportInstanceResult("00O5g00000Jrs9DEAR", reportInstanceID);
     if resp !is ReportInstanceResult {
@@ -571,6 +605,7 @@ function testGetReportInstanceResult() returns error? {
     enable: true
 }
 function testBatchExecute() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> batch()");
     Subrequest[] subrequests = [{method: "GET", url: "/services/data/v59.0/sobjects/Account/describe"},
                                 {method: "GET", url: "/services/data/v59.0/sobjects/Contact/describe"}];
@@ -587,6 +622,7 @@ function testBatchExecute() returns error? {
     dependsOn: []
 }
 function testGeNamedLayouts() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getNamedLayouts()");
     Layout|error resp = baseClient->getNamedLayouts("User", "UserAlt");
     if resp !is Layout {
@@ -603,12 +639,15 @@ function testGeNamedLayouts() returns error? {
     dependsOn: []
 }
 function testDeleteByExternalId() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> deleteRecordsUsingExtId()");
     CreationResponse|error creation = check baseClient->create("Asset", {"Name": "testAsset", "assetExt_id__c": "asdfg", "AccountId":"0015g00001Per6rAAB"});
     if creation is error {
         test:assertFail(msg = creation.message());
     }
-    runtime:sleep(10);
+    if isLiveServer {
+        runtime:sleep(10);
+    }
     error? response = baseClient->deleteRecordsUsingExtId("Asset", "assetExt_id__c", "asdfg");
     if response is error {
         test:assertFail(msg = response.message());
@@ -620,6 +659,7 @@ function testDeleteByExternalId() returns error? {
     dependsOn: []
 }
 function testlistReports() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> listReports()");
     Report[]|error creation = check baseClient->listReports();
     if creation is error {
@@ -631,6 +671,7 @@ function testlistReports() returns error? {
     enable: true
 }
 function testResources() {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> getResources()");
     map<string>|error resources = baseClient->getResources(API_VERSION);
 
@@ -655,6 +696,7 @@ function testResources() {
     enable: true
 }
 function testApex() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
     log:printInfo("baseClient -> executeApex()");
     string|error caseId = baseClient->apexRestExecute("Cases", "POST", 
         {"subject" : "Bigfoot Sighting9!",
@@ -664,12 +706,16 @@ function testApex() returns error? {
     if caseId is error {
         test:assertFail(msg = caseId.message());
     }
-    runtime:sleep(5);
+    if isLiveServer {
+        runtime:sleep(5);
+    }
     record{}|error case = baseClient->apexRestExecute(string `Cases/${caseId}`, "GET", {});
     if case is error {
         test:assertFail(msg = case.message());
     }
-    runtime:sleep(5);
+    if isLiveServer {
+        runtime:sleep(5);
+    }
     error? deleteResponse = baseClient->apexRestExecute(string `Cases/${caseId}`, "DELETE", {});
     if deleteResponse is error {
         test:assertFail(msg = deleteResponse.message());
@@ -680,6 +726,10 @@ function testApex() returns error? {
 
 @test:AfterSuite {}
 function testDeleteRecordNew() returns error? {
+    Client baseClient = checkpanic new (sfConfigRefreshCodeFlow);
+    if testRecordIdNew == "" {
+        return;
+    }
     log:printInfo("baseClient -> delete()");
     error? response = baseClient->delete(ACCOUNT, testRecordIdNew);
     if response is error {

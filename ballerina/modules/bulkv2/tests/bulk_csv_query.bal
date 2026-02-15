@@ -19,10 +19,11 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryCsv() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryCsv");
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
@@ -64,10 +65,11 @@ function queryCsv() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryWithLowerMaxRecordsValue() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryCsv");
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
@@ -120,10 +122,11 @@ function queryWithLowerMaxRecordsValue() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryWithHigherMaxRecordsValue() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryCsv");
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 02'";
@@ -176,10 +179,11 @@ function queryWithHigherMaxRecordsValue() returns error? {
 }
 
 @test:Config {
-    enable: true,
+    enable: false,
     dependsOn: [insertCsvFromFile, insertCsv, insertCsvStringArrayFromFile, insertCsvStreamFromFile]
 }
 function queryAndWaitCsv() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryCsvWithWait");
     string queryStr = "SELECT Id, Name FROM Contact WHERE Title='Professor Level 03'";

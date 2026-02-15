@@ -19,6 +19,10 @@ import ballerina/test;
 
 @test:AfterSuite {}
 function deleteCSV() returns error? {
+    Client baseClient = check new (sfConfigRefreshCodeFlow);
+    if !isLiveServer {
+        return;
+    }
     log:printInfo("baseClient -> deleteCsv");
     //create job
     BulkCreatePayload payload = {

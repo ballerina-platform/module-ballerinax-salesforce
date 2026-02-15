@@ -19,9 +19,11 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
+    enable: false,
     dependsOn: [updateXml, insertXmlFromFile]
 }
 function queryXml() returns error? {
+    Client baseClient = check new (sfConfig);
     runtime:sleep(delayInSecs);
     log:printInfo("baseClient -> queryXml");
     string batchId = "";

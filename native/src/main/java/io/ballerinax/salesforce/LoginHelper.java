@@ -115,8 +115,14 @@ public class LoginHelper {
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT = "/services/Soap/u/44.0/";
 
     public static BayeuxParameters login(String username, String password, BObject listener) throws Exception {
-        boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
-        String endpoint = getLoginEndpoint(isSandBox);
+        String baseUrl = (String) listener.getNativeData("baseUrl");
+        String endpoint;
+        if (baseUrl != null && !baseUrl.isEmpty()) {
+            endpoint = baseUrl;
+        } else {
+            boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
+            endpoint = getLoginEndpoint(isSandBox);
+        }
         return login(new URL(endpoint), username, password);
     }
 

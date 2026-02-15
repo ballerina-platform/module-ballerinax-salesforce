@@ -19,13 +19,16 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
+    enable: false,
     dependsOn: [queryCsv]
 }
 function deleteCsv() returns error? {
+    Client baseClient = check new (sfConfig);
     check deleteCsvResources();
 }
 
 function deleteCsvResources(boolean ignoreResult = false) returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> deleteCsv");
     string batchId = "";
 

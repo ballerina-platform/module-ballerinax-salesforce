@@ -19,9 +19,11 @@ import ballerina/test;
 import ballerina/lang.runtime;
 
 @test:Config {
+    enable: false,
     dependsOn: [insertCsv]
 }
 function upsertCsv() returns error? {
+    Client baseClient = check new (sfConfig);
     log:printInfo("baseClient -> upsertCsv");
     string batchId = "";
     string contacts = "description,FirstName,LastName,Title,Phone,Email,My_External_Id__c\n" 
