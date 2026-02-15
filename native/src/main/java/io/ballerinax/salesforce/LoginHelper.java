@@ -115,31 +115,15 @@ public class LoginHelper {
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_PREFIX = "/services/Soap/u/";
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_SUFFIX = "/";
 
-    public static BayeuxParameters login(String username, String password, BObject listener, String apiVersion) throws Exception {
+    public static BayeuxParameters login(String username, String password, 
+        BObject listener, String apiVersion) throws Exception {
         boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
         String endpoint = getLoginEndpoint(isSandBox);
         return login(new URL(endpoint), username, password, apiVersion);
     }
 
-    public static BayeuxParameters login(String username, String password, BayeuxParameters params) throws Exception {
-        return login(new URL(LOGIN_ENDPOINT), username, password, params, params.version());
-    }
-
-    public static BayeuxParameters login(URL loginEndpoint, String username, String password) throws Exception {
-        return login(loginEndpoint, username, password, new BayeuxParameters() {
-            @Override
-            public String bearerToken() {
-                throw new IllegalStateException("Have not authenticated");
-            }
-
-            @Override
-            public URL endpoint() {
-                throw new IllegalStateException("Have not established replay endpoint");
-            }
-        }, version());
-    }
-
-    public static BayeuxParameters login(URL loginEndpoint, String username, String password, String apiVersion) throws Exception {
+    public static BayeuxParameters login(URL loginEndpoint, String username, 
+            String password, String apiVersion) throws Exception {
         return login(loginEndpoint, username, password, new BayeuxParameters() {
             @Override
             public String bearerToken() {
