@@ -42,8 +42,8 @@ import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
  * Util class containing the java external functions for Ballerina Salesforce listener.
  */
 public class ListenerUtil {
-    public static final String IS_OAUTH2 = "isOAuth2";
-    public static final String BASE_URL = "baseUrl";
+    private static final String IS_OAUTH2 = "isOAuth2";
+    private static final String BASE_URL = "baseUrl";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     private static EmpConnector connector;
