@@ -181,6 +181,7 @@ public class ListenerUtil {
                 subscription = connector.subscribe(channelName, replayFrom, consumer)
                         .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
+                connector.stop();
                 return sfdcError(e.getMessage());
             }
         }

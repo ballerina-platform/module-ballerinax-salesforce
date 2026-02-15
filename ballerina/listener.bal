@@ -45,8 +45,17 @@ public isolated class Listener {
             self.replayFrom = -2;
         }
         self.isSandBox = listenerConfig.isSandBox;
+        if (listenerConfig.connectionTimeout <= 0d) {
+            return error("Connection timeout must be greater than 0.");
+        }
         self.connectionTimeout = listenerConfig.connectionTimeout;
+        if (listenerConfig.readTimeout <= 0d) {
+            return error("Read timeout must be greater than 0.");
+        }
         self.readTimeout = listenerConfig.readTimeout;
+        if (listenerConfig.keepAliveInterval <= 0d) {
+            return error("Keep alive interval must be greater than 0.");
+        }
         self.keepAliveInterval = listenerConfig.keepAliveInterval;
         CredentialsConfig|OAuth2Config authConfig = listenerConfig.auth;
         self.username = authConfig is CredentialsConfig ? authConfig.username : "";
