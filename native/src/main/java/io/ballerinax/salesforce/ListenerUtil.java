@@ -135,22 +135,7 @@ public class ListenerUtil {
             });
             try {
                 BayeuxParameters loginParams = tokenProvider.login();
-                params = new DelegatingBayeuxParameters(loginParams) {
-                    @Override
-                    public int maxNetworkDelay() {
-                        return (int) readTimeoutMs;
-                    }
-
-                    @Override
-                    public long keepAlive() {
-                        return keepAliveIntervalMs;
-                    }
-
-                    @Override
-                    public TimeUnit keepAliveUnit() {
-                        return TimeUnit.MILLISECONDS;
-                    }
-                };
+                params = new TimeoutBayeuxParameters(loginParams, readTimeoutMs, keepAliveIntervalMs);
             } catch (Exception e) {
                 throw sfdcError(e.getMessage());
             }
