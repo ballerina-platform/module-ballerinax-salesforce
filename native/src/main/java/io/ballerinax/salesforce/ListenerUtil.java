@@ -113,7 +113,7 @@ public class ListenerUtil {
 
         if (isOAuth2) {
             if (baseUrl == null || baseUrl.isEmpty()) {
-                return sfdcError("Base URL is required for OAuth2 authentication");
+                return sfdcError("Base URL is required for OAuth2 authentication", null);
             }
 
             tokenProvider = new BearerTokenProvider(() ->
@@ -123,21 +123,21 @@ public class ListenerUtil {
             try {
                 params = tokenProvider.login();
             } catch (Exception e) {
-                throw sfdcError(e.getMessage());
+                throw sfdcError(e.getMessage(), e.getCause());
             }
         } else {
             tokenProvider = new BearerTokenProvider(() -> {
                 try {
                     return LoginHelper.login(username.getValue(), password.getValue(), listener, apiVersion);
                 } catch (Exception e) {
-                    throw sfdcError(e.getMessage());
+                    throw sfdcError(e.getMessage(), e.getCause());
                 }
             });
             try {
                 BayeuxParameters loginParams = tokenProvider.login();
                 params = new TimeoutBayeuxParameters(loginParams, readTimeoutMs, keepAliveIntervalMs);
             } catch (Exception e) {
-                throw sfdcError(e.getMessage());
+                throw sfdcError(e.getMessage(), e.getCause());
             }
         }
 
@@ -147,9 +147,9 @@ public class ListenerUtil {
             connector.start().get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
         } catch (TimeoutException exception) {
             connector.stop();
-            return sfdcError("Connection timed out after " + connectionTimeoutDisplay + " seconds.");
+            return sfdcError("Connection timed out after " + connectionTimeoutDisplay + " seconds.", null);
         } catch (Exception e) {
-            return sfdcError(e.getMessage());
+            return sfdcError(e.getMessage(), e.getCause());
         }
 
         @SuppressWarnings("unchecked")
@@ -161,14 +161,15 @@ public class ListenerUtil {
         for (BObject service : services) {
             Object channelNameObj = listener.getNativeData(CHANNEL_NAME);
             if (channelNameObj == null) {
-                return sfdcError("Channel name is not set. Please attach a service before starting the listener.");
+                return sfdcError("Channel name is not set. Please attach a service before starting the listener.",
+                        null);
             }
             String channelName = channelNameObj.toString();
             long replayFrom = (Integer) listener.getNativeData(REPLAY_FROM);
 
             DispatcherService dispatcherService = serviceDispatcherMap.get(service);
             if (dispatcherService == null) {
-                return sfdcError("DispatcherService not found for service.");
+                return sfdcError("DispatcherService not found for service.", null);
             }
 
             Consumer<Map<String, Object>> consumer = event -> injectEvent(dispatcherService, event);
@@ -178,7 +179,7 @@ public class ListenerUtil {
                         .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 connector.stop();
-                return sfdcError(e.getMessage());
+                return sfdcError(e.getMessage(), e.getCause());
             }
         }
         return null;
@@ -210,13 +211,13 @@ public class ListenerUtil {
     private static String getOAuth2Token(Environment env, BObject listener) {
         Object result = env.getRuntime().callMethod(listener, GET_OAUTH2_TOKEN_METHOD, null);
         if (TypeUtils.getType(result).getTag() == TypeTags.ERROR_TAG) {
-            throw sfdcError(((BError) result).getMessage());
+            throw sfdcError(((BError) result).getMessage(), null);
         }
         return ((BString) result).getValue();
     }
 
-    private static BError sfdcError(String errorMessage) {
+    private static BError sfdcError(String errorMessage, Throwable cause) {
         String message = errorMessage != null ? errorMessage : "Unknown error";
-        return ErrorCreator.createError(StringUtils.fromString(message));
+        return ErrorCreator.createError(StringUtils.fromString(message), cause);
     }
 }
