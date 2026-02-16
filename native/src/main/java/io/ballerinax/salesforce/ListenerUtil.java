@@ -82,8 +82,7 @@ public class ListenerUtil {
         return null;
     }
 
-    public static Object startListener(Environment env, BString username, BString password, BString accessToken,
-                                        BObject listener) {
+    public static Object startListener(Environment env, BString username, BString password, BObject listener) {
         boolean isOAuth2 = (Boolean) listener.getNativeData(IS_OAUTH2);
         String baseUrl = (String) listener.getNativeData(BASE_URL);
 
