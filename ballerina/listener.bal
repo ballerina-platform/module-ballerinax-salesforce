@@ -86,8 +86,7 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to start
     public isolated function 'start() returns error? {
-        string accessToken = self.isOAuth2 ? check self.getOAuth2Token() : "";
-        return startListener(self.username, self.password, accessToken, self);
+        return startListener(self.username, self.password, self);
     }
 
     # Retrieves the OAuth2 access token based on the configured grant type.
@@ -138,7 +137,7 @@ isolated function attachService(Listener instance, Service s, string? channelNam
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-isolated function startListener(string username, string password, string accessToken, Listener instance) returns error? =
+isolated function startListener(string username, string password, Listener instance) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
