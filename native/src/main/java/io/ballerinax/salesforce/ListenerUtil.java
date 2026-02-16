@@ -170,7 +170,11 @@ public class ListenerUtil {
                 (Map<BObject, DispatcherService>) listener.getNativeData(DISPATCHERS);
 
         for (BObject service : services) {
-            String channelName = listener.getNativeData(CHANNEL_NAME).toString();
+            Object channelNameObj = listener.getNativeData(CHANNEL_NAME);
+            if (channelNameObj == null) {
+                return sfdcError("Channel name is not set. Please attach a service before starting the listener.");
+            }
+            String channelName = channelNameObj.toString();
             long replayFrom = (Integer) listener.getNativeData(REPLAY_FROM);
 
             DispatcherService dispatcherService = serviceDispatcherMap.get(service);
