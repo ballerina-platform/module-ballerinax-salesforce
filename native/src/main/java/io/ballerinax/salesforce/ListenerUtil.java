@@ -21,7 +21,9 @@ package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -46,6 +48,7 @@ public class ListenerUtil {
     private static final String BASE_URL = "baseUrl";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
+    public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
@@ -173,8 +176,8 @@ public class ListenerUtil {
     }
 
     private static String getOAuth2Token(Environment env, BObject listener) {
-        Object result = env.getRuntime().callMethod(listener, "getOAuth2Token", null);
-        if (result instanceof BError) {
+        Object result = env.getRuntime().callMethod(listener, GET_OAUTH2_TOKEN_METHOD, null);
+        if (TypeUtils.getType(result).getTag() == TypeTags.ERROR_TAG) {
             throw sfdcError(((BError) result).getMessage());
         }
         return ((BString) result).getValue();
