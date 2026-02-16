@@ -144,7 +144,7 @@ public isolated client class Client {
     # + jobType - Type of the job
     # + return - `AllJobs` if successful or else `error`
     isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
-        string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST]) +
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
         return check self.salesforceClient->get(path);
     }
