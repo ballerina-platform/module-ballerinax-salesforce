@@ -58,6 +58,9 @@ public isolated class Listener {
             return error("Keep alive interval must be greater than 0.");
         }
         self.keepAliveInterval = listenerConfig.keepAliveInterval;
+        if (listenerConfig.apiVersion == "") {
+            return error("API version must be a non-empty string.");
+        }
         self.apiVersion = listenerConfig.apiVersion;
         CredentialsConfig|OAuth2Config authConfig = listenerConfig.auth;
         self.username = authConfig is CredentialsConfig ? authConfig.username : "";
@@ -94,6 +97,9 @@ public isolated class Listener {
     # + return - The access token or an error if token retrieval fails
     public isolated function getOAuth2Token() returns string|error {
         OAuth2Config? & readonly config = self.oauth2Config;
+        if config is () {
+            return error("OAuth2 configuration is not set for this listener.");
+        }
         if config is http:BearerTokenConfig {
             return config.token;
         } else {

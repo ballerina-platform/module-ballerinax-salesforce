@@ -158,6 +158,7 @@ public class ListenerUtil {
         try {
             connector.start().get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
         } catch (TimeoutException exception) {
+            connector.stop();
             return sfdcError("Connection timed out after " + connectionTimeoutDisplay + " seconds.");
         } catch (Exception e) {
             return sfdcError(e.getMessage());
