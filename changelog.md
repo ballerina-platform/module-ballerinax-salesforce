@@ -3,6 +3,14 @@ This file contains all the notable changes done to the Ballerina Salesforce pack
 
 ## [Unreleased]
 
+### Added
+
+- [[#390] Add OAuth2 support for the Salesforce listener](https://github.com/ballerina-platform/module-ballerinax-salesforce/pull/390)
+- [[#392] Add support for connection and read timeouts in listener](https://github.com/ballerina-platform/module-ballerinax-salesforce/pull/392)
+- [[#393] Add configurable variable for Salesforce API versions](https://github.com/ballerina-platform/module-ballerinax-salesforce/pull/393)
+
+## [8.2.0] - 2025-03-04
+
 ### Fixed
 
 - [[#6727] Fixed data-binding error in Salesforce query](https://github.com/ballerina-platform/ballerina-library/issues/6727)
