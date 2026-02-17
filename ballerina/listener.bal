@@ -14,13 +14,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/http;
 import ballerina/jballerina.java;
+import ballerina/oauth2;
 
-# Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.  
+# Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.
 @display {label: "Salesforce", iconPath: "icon.png"}
 public isolated class Listener {
     private final string username;
     private final string password;
+    private final boolean isOAuth2;
+    private final string baseUrl;
+    private final readonly & OAuth2Config? oauth2Config;
     private string? channelName = ();
     private final int replayFrom;
     private final boolean isSandBox;
@@ -29,18 +34,21 @@ public isolated class Listener {
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
     #
     # + listenerConfig - Salesforce Listener configuration
-    public isolated function init(*ListenerConfig listenerConfig) {
-        // set these in java code 
-        self.username = listenerConfig.auth.username;
-        self.password = listenerConfig.auth.password;
+    # + return - An error if initialization fails
+    public isolated function init(*ListenerConfig listenerConfig) returns error? {
         if listenerConfig.replayFrom is REPLAY_FROM_TIP {
             self.replayFrom = -1;
         } else {
             self.replayFrom = -2;
         }
-
         self.isSandBox = listenerConfig.isSandBox;
-        initListener(self, self.replayFrom, self.isSandBox);
+        CredentialsConfig|OAuth2Config authConfig = listenerConfig.auth;
+        self.username = authConfig is CredentialsConfig ? authConfig.username : "";
+        self.password = authConfig is CredentialsConfig ? authConfig.password : "";
+        self.isOAuth2 = authConfig is OAuth2Config;
+        self.baseUrl = check extractBaseUrl(listenerConfig, self.isOAuth2);
+        self.oauth2Config = authConfig is OAuth2Config ? authConfig.cloneReadOnly() : ();
+        initListener(self, self.replayFrom, self.isSandBox, self.isOAuth2, self.baseUrl);
     }
 
     # Attaches the service to the `salesforce:Listener` endpoint.
@@ -61,6 +69,19 @@ public isolated class Listener {
     # + return - `()` or else a `error` upon failure to start
     public isolated function 'start() returns error? {
         return startListener(self.username, self.password, self);
+    }
+
+    # Retrieves the OAuth2 access token based on the configured grant type.
+    #
+    # + return - The access token or an error if token retrieval fails
+    public isolated function getOAuth2Token() returns string|error {
+        OAuth2Config? & readonly config = self.oauth2Config;
+        if config is http:BearerTokenConfig {
+            return config.token;
+        } else {
+            oauth2:ClientOAuth2Provider provider = new (check config.cloneWithType());
+            return provider.generateToken();
+        }
     }
 
     # Stops subscription and detaches the service from the `salesforce:Listener` endpoint.
@@ -86,7 +107,8 @@ public isolated class Listener {
     }
 }
 
-isolated function initListener(Listener instance, int replayFrom, boolean isSandBox) =
+isolated function initListener(Listener instance, int replayFrom, boolean isSandBox, boolean isOAuth2,
+        string baseUrl) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;

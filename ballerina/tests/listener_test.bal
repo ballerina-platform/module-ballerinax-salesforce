@@ -36,6 +36,26 @@ isolated boolean isCreated = false;
 isolated boolean isDeleted = false;
 isolated boolean isRestored = false;
 
+Client sfdc = check new ({
+    auth: {
+        clientId,
+        clientSecret,
+        refreshToken,
+        refreshUrl
+    },
+    baseUrl
+});
+
+Listener authListener = check new ({
+    auth: {
+        clientId,
+        clientSecret,
+        refreshToken,
+        refreshUrl
+    },
+    baseUrl
+});
+
 service "/data/ChangeEvents" on eventListener {
 
     remote function onCreate(EventData payload) {
@@ -181,4 +201,55 @@ function testRestoredEventTrigger() {
         test:assertTrue(isRestored, "Error in retrieving account update!");
 
     }
+}
+
+Service oauth2Service = service object {
+    remote function onCreate(EventData payload) {
+        log:printInfo("Received event in OAuth2 listener");
+        string? eventType = payload.metadata?.changeType;
+        if eventType is "CREATE" {
+            lock {
+                isCreated = true;
+            }
+            log:printInfo("Created " + payload.toString());
+        } else {
+            log:printInfo(payload.toString());
+        }
+    }
+
+    remote isolated function onUpdate(EventData payload) returns error? {
+        log:printInfo("The `onUpdate` method is invoked");
+    }
+
+    remote function onDelete(EventData payload) {
+        log:printInfo("The `onDelete` method is invoked");
+    }
+
+    remote function onRestore(EventData payload) {
+        log:printInfo("The `onRestore` method is invoked");
+    }
+};
+
+@test:Config {
+    groups: ["oauth2"]
+}
+function testOAuth2ListenerInitialization() returns error? {
+    lock {
+	    isCreated = false;
+    }
+    log:printInfo("Testing OAuth2 listener initialization");
+    check authListener.attach(oauth2Service, "/data/ChangeEvents");
+    check authListener.'start();
+    runtime:registerListener(authListener);
+    Account accountRecordNew = {
+        Name: "HK Holdings",
+        BillingCity: "Colombo 04"
+    };
+    CreationResponse response = check sfdc->create(ACCOUNT, accountRecordNew);
+    runtime:sleep(10);
+    lock {
+        test:assertTrue(isCreated);
+    }
+    check sfdc->delete(ACCOUNT, response.id);
+    check authListener.gracefulStop();
 }
