@@ -25,20 +25,33 @@ public type CredentialsConfig record {|
     string password;
 |};
 
+public type ListenerConfig SoapBasedListenerConfig|RestBasedListenerConfig;
+
 # OAuth2 authentication configuration type.
 public type OAuth2Config http:BearerTokenConfig|
     oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig;
 
-# Salesforce listener configuration.
-public type ListenerConfig record {|
+# Salesforce listener configuration for password based authentication against the SOAP API endpoint.
+public type SoapBasedListenerConfig record {|
     # Authentication configuration for the listener
-    CredentialsConfig|OAuth2Config auth;
-    # The replay ID to change the point in time when events are read
-    int|ReplayOptions replayFrom = REPLAY_FROM_TIP;
+    CredentialsConfig auth;
     # The type of salesforce environment, if sandbox environment or not
     boolean isSandBox = false;
+    *CommonListenerConfig;
+|};
+
+# Salesforce listener configuration for OAuth2 based authentication.
+public type RestBasedListenerConfig record {|
+    # Authentication configuration for the listener
+    OAuth2Config auth;
     # The base URL of the Salesforce instance
-    string baseUrl?;
+    string baseUrl;
+    *CommonListenerConfig;
+|};
+
+public type CommonListenerConfig record {|
+    # The replay ID to change the point in time when events are read
+    int|ReplayOptions replayFrom = REPLAY_FROM_TIP;
     # The maximum time in seconds to wait for establishing a connection to the Salesforce streaming API
     decimal connectionTimeout = 30;
     # The maximum time in seconds to wait for the long polling transport before considering a request failed
