@@ -25,6 +25,7 @@ public type CredentialsConfig record {|
     string password;
 |};
 
+# Salesforce listener configuration type.
 public type ListenerConfig SoapBasedListenerConfig|RestBasedListenerConfig;
 
 # OAuth2 authentication configuration type.
@@ -49,6 +50,7 @@ public type RestBasedListenerConfig record {|
     *CommonListenerConfig;
 |};
 
+# Common configuration for Salesforce listeners.
 public type CommonListenerConfig record {|
     # The replay ID to change the point in time when events are read
     int|ReplayOptions replayFrom = REPLAY_FROM_TIP;
