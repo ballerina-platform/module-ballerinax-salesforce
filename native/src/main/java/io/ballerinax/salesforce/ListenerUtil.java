@@ -232,13 +232,15 @@ public class ListenerUtil {
     private static String getOAuth2Token(Environment env, BObject listener) {
         Object result = env.getRuntime().callMethod(listener, GET_OAUTH2_TOKEN_METHOD, null);
         if (TypeUtils.getType(result).getTag() == TypeTags.ERROR_TAG) {
-            throw sfdcError(((BError) result).getMessage(), null);
+            throw sfdcError(((BError) result).getMessage(), ((BError) result).getCause());
         }
         return ((BString) result).getValue();
     }
 
     private static BError sfdcError(String errorMessage, Throwable cause) {
         String message = errorMessage != null ? errorMessage : "Unknown error";
-        return ErrorCreator.createError(StringUtils.fromString(message), cause);
+        return (cause != null)
+                ? ErrorCreator.createError(StringUtils.fromString(message), cause)
+                : ErrorCreator.createError(StringUtils.fromString(message));
     }
 }
