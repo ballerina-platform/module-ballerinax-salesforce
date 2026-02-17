@@ -91,6 +91,18 @@ public isolated function prepareQueryUrl(string[] paths, string[] queryParamName
     return url;
 }
 
+# Validates the Salesforce API version format.
+# The API version must be a numeric value like "59.0".
+#
+# + apiVersion - The API version string to validate
+# + return - An error if the API version format is invalid
+public isolated function validateApiVersion(string apiVersion) returns error? {
+    if !re `^\d+\.\d+$`.isFullMatch(apiVersion) {
+        return error(string `Invalid API version format: "${apiVersion}". ` +
+            "Expected a numeric version like \"59.0\".");
+    }
+}
+
 public isolated function appendQueryParams(string[] fields) returns string {
     string appended = "?fields=";
     foreach string item in fields {

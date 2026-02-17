@@ -36,5 +36,4 @@ const string XMLNS_SOAP = "xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envel
 const string XMLNS = "xmlns=\"urn:enterprise.soap.sforce.com\"";
 const string XMLNS_XSI = "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
 
-const string VERSION = "59.0";
 const string EMPTY_STRING = "";

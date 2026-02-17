@@ -110,11 +110,13 @@ public enum ColumnDelimiterEnum {
 #
 # + baseUrl - The Salesforce endpoint URL
 # + auth - Configurations related to client authentication
+# + apiVersion - The Salesforce REST API version
 public type ConnectionConfig record {|
     *config:ConnectionConfig;
     string baseUrl;
     http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig|
         config:OAuth2PasswordGrantConfig|config:OAuth2ClientCredentialsGrantConfig auth;
+    string apiVersion = "59.0";
 |};
 
 # Defines the Salesforce version type.

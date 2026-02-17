@@ -112,19 +112,18 @@ public class LoginHelper {
                     + "xmlns:urn='urn:partner.soap.sforce.com'><soapenv:Body>";
 
     // The enterprise SOAP API endpoint used for the login call
-    private static final String SERVICES_SOAP_PARTNER_ENDPOINT = "/services/Soap/u/44.0/";
+    private static final String SERVICES_SOAP_PARTNER_ENDPOINT_PREFIX = "/services/Soap/u/";
+    private static final String SERVICES_SOAP_PARTNER_ENDPOINT_SUFFIX = "/";
 
-    public static BayeuxParameters login(String username, String password, BObject listener) throws Exception {
+    public static BayeuxParameters login(String username, String password, 
+        BObject listener, String apiVersion) throws Exception {
         boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
         String endpoint = getLoginEndpoint(isSandBox);
-        return login(new URL(endpoint), username, password);
+        return login(new URL(endpoint), username, password, apiVersion);
     }
 
-    public static BayeuxParameters login(String username, String password, BayeuxParameters params) throws Exception {
-        return login(new URL(LOGIN_ENDPOINT), username, password, params);
-    }
-
-    public static BayeuxParameters login(URL loginEndpoint, String username, String password) throws Exception {
+    public static BayeuxParameters login(URL loginEndpoint, String username, 
+            String password, String apiVersion) throws Exception {
         return login(loginEndpoint, username, password, new BayeuxParameters() {
             @Override
             public String bearerToken() {
@@ -135,16 +134,21 @@ public class LoginHelper {
             public URL endpoint() {
                 throw new IllegalStateException("Have not established replay endpoint");
             }
-        });
+
+            @Override
+            public String version() {
+                return apiVersion;
+            }
+        }, apiVersion);
     }
 
     public static BayeuxParameters login(URL loginEndpoint, String username, String password,
-                                         BayeuxParameters parameters) throws Exception {
+                                         BayeuxParameters parameters, String apiVersion) throws Exception {
         HttpClient client = new HttpClient(parameters.sslContextFactory());
         try {
             client.getProxyConfiguration().getProxies().addAll(parameters.proxies());
             client.start();
-            URL endpoint = new URL(loginEndpoint, getSoapUri());
+            URL endpoint = new URL(loginEndpoint, getSoapUri(apiVersion));
             Request post = client.POST(endpoint.toURI());
             post.content(new ByteBufferContentProvider("text/xml",
                     ByteBuffer.wrap(soapXmlForLogin(username, password))));
@@ -189,8 +193,8 @@ public class LoginHelper {
         }
     }
 
-    private static String getSoapUri() {
-        return SERVICES_SOAP_PARTNER_ENDPOINT;
+    private static String getSoapUri(String apiVersion) {
+        return SERVICES_SOAP_PARTNER_ENDPOINT_PREFIX + apiVersion + SERVICES_SOAP_PARTNER_ENDPOINT_SUFFIX;
     }
 
     private static byte[] soapXmlForLogin(String username, String password) throws UnsupportedEncodingException {

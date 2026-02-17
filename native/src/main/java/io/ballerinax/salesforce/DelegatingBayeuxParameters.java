@@ -94,5 +94,4 @@ public class DelegatingBayeuxParameters implements BayeuxParameters {
     public String version() {
         return parameters.version();
     }
-
 }

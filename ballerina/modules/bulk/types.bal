@@ -25,6 +25,8 @@ public type ConnectionConfig record {|
     string baseUrl;
     # Configurations related to client authentication
     http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig auth;
+    # The Salesforce Bulk API version
+    string apiVersion = "59.0";
 |};
 
 # Defines the job type.

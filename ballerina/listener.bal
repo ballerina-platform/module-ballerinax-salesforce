@@ -17,6 +17,7 @@
 import ballerina/http;
 import ballerina/jballerina.java;
 import ballerina/oauth2;
+import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.
 @display {label: "Salesforce", iconPath: "icon.png"}
@@ -27,6 +28,7 @@ public isolated class Listener {
     private final readonly & OAuth2Config? oauth2Config;
     private string? channelName = ();
     private final int replayFrom;
+    private final string apiVersion;
 
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
@@ -51,20 +53,22 @@ public isolated class Listener {
         if keepAliveInterval <= 0d {
             return error("Keep alive interval must be greater than 0.");
         }
+        check utils:validateApiVersion(listenerConfig.apiVersion);
+        self.apiVersion = listenerConfig.apiVersion;
         if listenerConfig is RestBasedListenerConfig {
             self.username = "";
             self.password = "";
             self.isOAuth2 = true;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
             initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
-                    connectionTimeout, readTimeout, keepAliveInterval);
+                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
         } else {
             self.username = listenerConfig.auth.username;
             self.password = listenerConfig.auth.password;
             self.isOAuth2 = false;
             self.oauth2Config = ();
             initListener(self, self.replayFrom, listenerConfig.isSandBox,
-                    connectionTimeout, readTimeout, keepAliveInterval);
+                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
         }
     }
 
@@ -97,6 +101,9 @@ public isolated class Listener {
     # + return - The access token or an error if token retrieval fails
     isolated function getOAuth2Token() returns string|error {
         OAuth2Config? & readonly config = self.oauth2Config;
+        if config is () {
+            return error("OAuth2 configuration is not set for this listener.");
+        }
         if config is http:BearerTokenConfig {
             return config.token;
         } else {
@@ -129,22 +136,24 @@ public isolated class Listener {
 }
 
 isolated function initListener(Listener instance, int replayFrom, boolean isSandBox,
-        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval) =
+        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval, string apiVersion) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil",
     paramTypes: ["io.ballerina.runtime.api.values.BObject", "int", "boolean",
         "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BDecimal"]
+        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BString"]
 } external;
 
 isolated function initListenerWithOAuth2(Listener instance, int replayFrom, string baseUrl,
-        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval) =
+        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval,
+        string apiVersion) =
 @java:Method {
     name: "initListener",
     'class: "io.ballerinax.salesforce.ListenerUtil",
     paramTypes: ["io.ballerina.runtime.api.values.BObject", "int",
         "io.ballerina.runtime.api.values.BString", "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal"]
+        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BString"]
 } external;
 
 isolated function attachService(Listener instance, Service s, string? channelName) returns error? =

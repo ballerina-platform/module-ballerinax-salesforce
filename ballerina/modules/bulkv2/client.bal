@@ -26,6 +26,7 @@ import ballerinax/salesforce.utils;
 public isolated client class Client {
 
     private final http:Client salesforceClient;
+    private final string apiBasePath;
     private map<string> sfLocators = {};
 
     # Initializes the Bulk V2 client. During initialization you can pass either http:BearerTokenConfig if you have a bearer
@@ -45,6 +46,8 @@ public isolated client class Client {
         } else {
             return error(INVALID_CLIENT_CONFIG);
         }
+        check utils:validateApiVersion(config.apiVersion);
+        self.apiBasePath = string `${BASE_PATH}/v${config.apiVersion}`;
     }
 
     # Creates a bulkv2 ingest job.
@@ -52,7 +55,7 @@ public isolated client class Client {
     # + payload - The payload for the bulk job
     # + return - `BulkJob` if successful or else `error`
     isolated remote function createIngestJob(BulkCreatePayload payload) returns BulkJob|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST]);
         return check self.salesforceClient->post(path, payload);
     }
 
@@ -61,7 +64,7 @@ public isolated client class Client {
     # + payload - The payload for the bulk job
     # + return - `BulkJob` if successful or else `error`
     isolated remote function createQueryJob(BulkCreatePayload payload) returns BulkJob|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY]);
         return check self.salesforceClient->post(path, payload);
     }
 
@@ -70,13 +73,13 @@ public isolated client class Client {
     # + payload - The payload for the bulk job
     # + return - `future<BulkJobInfo>` if successful else `error`
     isolated remote function createQueryJobAndWait(BulkCreatePayload payload) returns future<BulkJobInfo|error>|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY]);
         http:Response response = check self.salesforceClient->post(path, payload);
         if response.statusCode != 200 {
             return error("Error occurred while closing the bulk job. ", httpCode = response.statusCode);
         }
         BulkJob bulkJob = check (check response.getJsonPayload()).fromJsonWithType();
-        final string jobPath = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJob.id]);
+        final string jobPath = utils:prepareUrl([self.apiBasePath, JOBS, QUERY, bulkJob.id]);
         worker A returns BulkJobInfo|error {
             while true {
                 runtime:sleep(2);
@@ -102,7 +105,7 @@ public isolated client class Client {
     # + bulkOperation - The processing operation for the job
     # + return - `BulkJobInfo` if successful or else `error`
     isolated remote function getJobInfo(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, bulkOperation, bulkJobId]);
         return check self.salesforceClient->get(path);
     };
 
@@ -113,7 +116,7 @@ public isolated client class Client {
     # + return - `()` if successful or else `error`
     isolated remote function addBatch(string bulkJobId, string|string[][]|stream<string[], error?>|io:ReadableByteChannel content) returns error? {
         string payload = "";
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, BATCHES]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST, bulkJobId, BATCHES]);
         if content is io:ReadableByteChannel {
             payload = check convertToString(content);
         } else if content is string[][]|stream<string[], error?> {
@@ -132,7 +135,7 @@ public isolated client class Client {
     # + jobType - Type of the job
     # + return - `AllJobs` record if successful or else `error`
     isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
         return check self.salesforceClient->get(path);
     }
@@ -142,7 +145,7 @@ public isolated client class Client {
     # + jobType - Type of the job
     # + return - `AllJobs` if successful or else `error`
     isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST]) +
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
         return check self.salesforceClient->get(path);
     }
@@ -154,7 +157,7 @@ public isolated client class Client {
     # + return - `string[][]` if successful or else `error`
     isolated remote function getJobStatus(string bulkJobId, Status status)
             returns string[][]|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId, status]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST, bulkJobId, status]);
         http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             string textPayload = check response.getTextPayload();
@@ -193,7 +196,7 @@ public isolated client class Client {
                     batchingParams = string `results?maxRecords=${maxRecords}`;
                 }
             }
-            path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
+            path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY, bulkJobId, batchingParams]);
             // Max records value default, we might not know when the locator comes
         } else {
             lock {
@@ -203,9 +206,9 @@ public isolated client class Client {
                         return [];
                     } 
                     batchingParams = string `results?locator=${locator}`;
-                    path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, batchingParams]);
+                    path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY, bulkJobId, batchingParams]);
                 } else {
-                    path = utils:prepareUrl([API_BASE_PATH, JOBS, QUERY, bulkJobId, RESULT]);
+                    path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY, bulkJobId, RESULT]);
                 }
             }
         } 
@@ -238,7 +241,7 @@ public isolated client class Client {
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful or else `error`
     isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, bulkOperation, bulkJobId]);
         record {} payload = {"state": "Aborted"};
         return check self.salesforceClient->patch(path, payload);
     }
@@ -249,7 +252,7 @@ public isolated client class Client {
     # + bulkOperation - The processing operation for the job
     # + return - `()` if successful or else `error`
     isolated remote function deleteJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
-        string path = utils:prepareUrl([API_BASE_PATH, JOBS, bulkOperation, bulkJobId]);
+        string path = utils:prepareUrl([self.apiBasePath, JOBS, bulkOperation, bulkJobId]);
         return check self.salesforceClient->delete(path);
     }
 
@@ -258,7 +261,7 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + return - future<BulkJobInfo> if successful or else `error`
     isolated remote function closeIngestJobAndWait(string bulkJobId) returns error|future<BulkJobInfo|error> {
-        final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+        final string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};
         http:Response response = check self.salesforceClient->patch(path, payload);
         if response.statusCode != 200 {
@@ -288,7 +291,7 @@ public isolated client class Client {
     # + bulkJobId - Id of the bulk job
     # + return - BulkJobInfo if successful or else `error`
     isolated remote function closeIngestJob(string bulkJobId) returns error|BulkJobCloseInfo {
-        final string path = utils:prepareUrl([API_BASE_PATH, JOBS, INGEST, bulkJobId]);
+        final string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};
         return check self.salesforceClient->patch(path, payload);
     }
