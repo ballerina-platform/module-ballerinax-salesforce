@@ -24,31 +24,48 @@ public isolated class Listener {
     private final string username;
     private final string password;
     private final boolean isOAuth2;
-    private final string baseUrl;
     private final readonly & OAuth2Config? oauth2Config;
     private string? channelName = ();
     private final int replayFrom;
-    private final boolean isSandBox;
 
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
     #
     # + listenerConfig - Salesforce Listener configuration
     # + return - An error if initialization fails
-    public isolated function init(*ListenerConfig listenerConfig) returns error? {
+    public isolated function init(ListenerConfig listenerConfig) returns error? {
         if listenerConfig.replayFrom is REPLAY_FROM_TIP {
             self.replayFrom = -1;
         } else {
             self.replayFrom = -2;
         }
-        self.isSandBox = listenerConfig.isSandBox;
-        CredentialsConfig|OAuth2Config authConfig = listenerConfig.auth;
-        self.username = authConfig is CredentialsConfig ? authConfig.username : "";
-        self.password = authConfig is CredentialsConfig ? authConfig.password : "";
-        self.isOAuth2 = authConfig is OAuth2Config;
-        self.baseUrl = check extractBaseUrl(listenerConfig, self.isOAuth2);
-        self.oauth2Config = authConfig is OAuth2Config ? authConfig.cloneReadOnly() : ();
-        initListener(self, self.replayFrom, self.isSandBox, self.isOAuth2, self.baseUrl);
+        decimal connectionTimeout = listenerConfig.connectionTimeout;
+        if connectionTimeout <= 0d {
+            return error("Connection timeout must be greater than 0.");
+        }
+        decimal readTimeout = listenerConfig.readTimeout;
+        if readTimeout <= 0d {
+            return error("Read timeout must be greater than 0.");
+        }
+        decimal keepAliveInterval = listenerConfig.keepAliveInterval;
+        if keepAliveInterval <= 0d {
+            return error("Keep alive interval must be greater than 0.");
+        }
+        if listenerConfig is RestBasedListenerConfig {
+            self.username = "";
+            self.password = "";
+            self.isOAuth2 = true;
+            self.oauth2Config = listenerConfig.auth.cloneReadOnly();
+            initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
+                    connectionTimeout, readTimeout, keepAliveInterval);
+        } else {
+            self.username = listenerConfig.auth.username;
+            self.password = listenerConfig.auth.password;
+            self.isOAuth2 = false;
+            self.oauth2Config = ();
+            initListener(self, self.replayFrom, listenerConfig.isSandBox,
+                    connectionTimeout, readTimeout, keepAliveInterval);
+        }
     }
 
     # Attaches the service to the `salesforce:Listener` endpoint.
@@ -68,13 +85,17 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to start
     public isolated function 'start() returns error? {
-        return startListener(self.username, self.password, self);
+        if self.isOAuth2 {
+            return startListenerWithOAuth2(self);
+        } else {
+            return startListener(self.username, self.password, self);
+        }
     }
 
     # Retrieves the OAuth2 access token based on the configured grant type.
     #
     # + return - The access token or an error if token retrieval fails
-    public isolated function getOAuth2Token() returns string|error {
+    isolated function getOAuth2Token() returns string|error {
         OAuth2Config? & readonly config = self.oauth2Config;
         if config is http:BearerTokenConfig {
             return config.token;
@@ -107,10 +128,23 @@ public isolated class Listener {
     }
 }
 
-isolated function initListener(Listener instance, int replayFrom, boolean isSandBox, boolean isOAuth2,
-        string baseUrl) =
+isolated function initListener(Listener instance, int replayFrom, boolean isSandBox,
+        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval) =
 @java:Method {
-    'class: "io.ballerinax.salesforce.ListenerUtil"
+    'class: "io.ballerinax.salesforce.ListenerUtil",
+    paramTypes: ["io.ballerina.runtime.api.values.BObject", "int", "boolean",
+        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BDecimal"]
+} external;
+
+isolated function initListenerWithOAuth2(Listener instance, int replayFrom, string baseUrl,
+        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval) =
+@java:Method {
+    name: "initListener",
+    'class: "io.ballerinax.salesforce.ListenerUtil",
+    paramTypes: ["io.ballerina.runtime.api.values.BObject", "int",
+        "io.ballerina.runtime.api.values.BString", "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal"]
 } external;
 
 isolated function attachService(Listener instance, Service s, string? channelName) returns error? =
@@ -120,6 +154,13 @@ isolated function attachService(Listener instance, Service s, string? channelNam
 
 isolated function startListener(string username, string password, Listener instance) returns error? =
 @java:Method {
+    name: "startListener",
+    'class: "io.ballerinax.salesforce.ListenerUtil"
+} external;
+
+isolated function startListenerWithOAuth2(Listener instance) returns error? =
+@java:Method {
+    name: "startListener",
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 

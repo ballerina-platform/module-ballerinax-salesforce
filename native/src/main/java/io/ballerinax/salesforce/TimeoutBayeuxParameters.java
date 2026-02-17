@@ -18,41 +18,19 @@
 
 package io.ballerinax.salesforce;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 /**
- * Implementation of BayeuxParameters for OAuth2 authentication.
+ * A delegating BayeuxParameters implementation that overrides timeout and keep-alive settings.
  */
-public class OAuth2BayeuxParameters implements BayeuxParameters {
-   private final Supplier<String> tokenSupplier;
-    private final String baseUrl;
+public class TimeoutBayeuxParameters extends DelegatingBayeuxParameters {
     private final long readTimeoutMs;
     private final long keepAliveIntervalMs;
 
-    public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl, 
-        long readTimeoutMs, long keepAliveIntervalMs) {
-        this.tokenSupplier = tokenSupplier;
-        this.baseUrl = baseUrl;
+    public TimeoutBayeuxParameters(BayeuxParameters parameters, long readTimeoutMs, long keepAliveIntervalMs) {
+        super(parameters);
         this.readTimeoutMs = readTimeoutMs;
         this.keepAliveIntervalMs = keepAliveIntervalMs;
-    }
-
-    @Override
-    public String bearerToken() {
-        return tokenSupplier.get();
-    }
-
-    @Override
-    public URL endpoint() {
-        try {
-            String cometdPath = LoginHelper.COMETD_REPLAY + version();
-            return new URL(baseUrl + cometdPath);
-        } catch (MalformedURLException exception) {
-            throw new RuntimeException("Invalid instance URL: " + baseUrl, exception);
-        }
     }
 
     @Override

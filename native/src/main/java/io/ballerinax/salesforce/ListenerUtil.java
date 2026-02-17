@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import static io.ballerinax.salesforce.Constants.CHANNEL_NAME;
@@ -44,21 +46,43 @@ import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
  * Util class containing the java external functions for Ballerina Salesforce listener.
  */
 public class ListenerUtil {
-    private static final String IS_OAUTH2 = "isOAuth2";
-    private static final String BASE_URL = "baseUrl";
+    public static final String IS_OAUTH2 = "isOAuth2";
+    public static final String BASE_URL = "baseUrl";
+    public static final String CONNECTION_TIMEOUT = "connectionTimeout";
+    public static final String READ_TIMEOUT = "readTimeout";
+    public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
-    public static void initListener(BObject listener, int replayFrom, boolean isSandBox, boolean isOAuth2,
-            BString baseUrl) {
+    private static void extractBaseConfigs(BObject listener, int replayFrom,
+            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval) {
         listener.addNativeData(CONSUMER_SERVICES, services);
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
+        long connectionTimeoutMs = connectionTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
+        long readTimeoutMs = readTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
+        long keepAliveIntervalMs = keepAliveInterval.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
+        listener.addNativeData(CONNECTION_TIMEOUT, connectionTimeoutMs);
+        listener.addNativeData(READ_TIMEOUT, readTimeoutMs);
+        listener.addNativeData(KEEP_ALIVE_INTERVAL, keepAliveIntervalMs);
+        listener.addNativeData(CONNECTION_TIMEOUT + "_display",
+            connectionTimeout.value().stripTrailingZeros().toPlainString());
+    }
+
+    public static void initListener(BObject listener, int replayFrom, boolean isSandBox,
+            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval) {
+        extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval);
+        listener.addNativeData(IS_OAUTH2, false);
         listener.addNativeData(IS_SAND_BOX, isSandBox);
-        listener.addNativeData(IS_OAUTH2, isOAuth2);
+    }
+
+    public static void initListener(BObject listener, int replayFrom, BString baseUrl,
+            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval) {
+        extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval);
+        listener.addNativeData(IS_OAUTH2, true);
         listener.addNativeData(BASE_URL, baseUrl.getValue());
     }
 
@@ -83,48 +107,67 @@ public class ListenerUtil {
     }
 
     public static Object startListener(Environment env, BString username, BString password, BObject listener) {
-        boolean isOAuth2 = (Boolean) listener.getNativeData(IS_OAUTH2);
-        String baseUrl = (String) listener.getNativeData(BASE_URL);
+        long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
+        long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
+
+        BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
+            try {
+                return LoginHelper.login(username.getValue(), password.getValue(), listener);
+            } catch (Exception e) {
+                throw sfdcError(e.getMessage());
+            }
+        });
 
         BayeuxParameters params;
-        BearerTokenProvider tokenProvider;
-
-        if (isOAuth2) {
-            if (baseUrl == null || baseUrl.isEmpty()) {
-                return sfdcError("Base URL is required for OAuth2 authentication");
-            }
-
-            tokenProvider = new BearerTokenProvider(() ->
-                new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl)
-            );
-            try {
-                params = tokenProvider.login();
-            } catch (Exception e) {
-                throw sfdcError(e.getMessage());
-            }
-        } else {
-            tokenProvider = new BearerTokenProvider(() -> {
-                try {
-                    return LoginHelper.login(username.getValue(), password.getValue(), listener);
-                } catch (Exception e) {
-                    throw sfdcError(e.getMessage());
-                }
-            });
-            try {
-                params = tokenProvider.login();
-            } catch (Exception e) {
-                throw sfdcError(e.getMessage());
-            }
+        try {
+            BayeuxParameters loginParams = tokenProvider.login();
+            params = new TimeoutBayeuxParameters(loginParams, readTimeoutMs, keepAliveIntervalMs);
+        } catch (Exception e) {
+            throw sfdcError(e.getMessage());
         }
+
+        return startConnector(params, tokenProvider, listener);
+    }
+
+    public static Object startListener(Environment env, BObject listener) {
+        String baseUrl = (String) listener.getNativeData(BASE_URL);
+        long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
+        long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
+
+        BearerTokenProvider tokenProvider = new BearerTokenProvider(() ->
+            new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl,
+                readTimeoutMs, keepAliveIntervalMs)
+        );
+
+        BayeuxParameters params;
+        try {
+            params = tokenProvider.login();
+        } catch (Exception e) {
+            throw sfdcError(e.getMessage());
+        }
+
+        return startConnector(params, tokenProvider, listener);
+    }
+
+    private static Object startConnector(BayeuxParameters params, BearerTokenProvider tokenProvider,
+            BObject listener) {
+        long connectionTimeoutMs = (Long) listener.getNativeData(CONNECTION_TIMEOUT);
+        String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
         connector = new EmpConnector(params);
         connector.setBearerTokenProvider(tokenProvider);
         try {
-            connector.start().get(5, TimeUnit.SECONDS);
+            connector.start().get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException exception) {
+            return sfdcError("Connection timed out after " + connectionTimeoutDisplay + " seconds.");
         } catch (Exception e) {
             return sfdcError(e.getMessage());
         }
 
+        return subscribeServices(listener, connectionTimeoutMs);
+    }
+
+    private static Object subscribeServices(BObject listener, long connectionTimeoutMs) {
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         @SuppressWarnings("unchecked")
@@ -143,8 +186,10 @@ public class ListenerUtil {
             Consumer<Map<String, Object>> consumer = event -> injectEvent(dispatcherService, event);
 
             try {
-                subscription = connector.subscribe(channelName, replayFrom, consumer).get(5, TimeUnit.SECONDS);
+                subscription = connector.subscribe(channelName, replayFrom, consumer)
+                        .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
+                connector.stop();
                 return sfdcError(e.getMessage());
             }
         }
@@ -183,6 +228,7 @@ public class ListenerUtil {
     }
 
     private static BError sfdcError(String errorMessage) {
-        return ErrorCreator.createError(StringUtils.fromString(errorMessage));
+        String message = errorMessage != null ? errorMessage : "Unknown error";
+        return ErrorCreator.createError(StringUtils.fromString(message));
     }
 }
