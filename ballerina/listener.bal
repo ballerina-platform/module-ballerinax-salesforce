@@ -100,7 +100,7 @@ public isolated class Listener {
     # Retrieves the OAuth2 access token based on the configured grant type.
     #
     # + return - The access token or an error if token retrieval fails
-    public isolated function getOAuth2Token() returns string|error {
+    isolated function getOAuth2Token() returns string|error {
         OAuth2Config? & readonly config = self.oauth2Config;
         if config is () {
             return error("OAuth2 configuration is not set for this listener.");
