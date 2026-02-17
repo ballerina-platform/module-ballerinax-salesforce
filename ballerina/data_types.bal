@@ -25,14 +25,14 @@ public type CredentialsConfig record {|
     string password;
 |};
 
-public type ListenerConfig SoapListenerConfig|RestListenerConfig;
+public type ListenerConfig PasswordAuthListenerConfig|OAuth2AuthListenerConfig;
 
 # OAuth2 authentication configuration type.
 public type OAuth2Config http:BearerTokenConfig|
     oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig;
 
-# Salesforce listener configuration for SOAP based authentication.
-public type SoapListenerConfig record {|
+# Salesforce listener configuration for password based authentication against the SOAP API endpoint.
+public type PasswordAuthListenerConfig record {|
     # Authentication configuration for the listener
     CredentialsConfig auth;
     # The replay ID to change the point in time when events are read
@@ -47,8 +47,8 @@ public type SoapListenerConfig record {|
     decimal keepAliveInterval = 120;
 |};
 
-# Salesforce listener configuration for REST based authentication.
-public type RestListenerConfig record {|
+# Salesforce listener configuration for OAuth2 based authentication.
+public type OAuth2AuthListenerConfig record {|
     # Authentication configuration for the listener
     OAuth2Config auth;
     # The replay ID to change the point in time when events are read
