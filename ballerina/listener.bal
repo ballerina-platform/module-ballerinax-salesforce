@@ -17,6 +17,7 @@
 import ballerina/http;
 import ballerina/jballerina.java;
 import ballerina/oauth2;
+import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.
 @display {label: "Salesforce", iconPath: "icon.png"}
@@ -52,9 +53,7 @@ public isolated class Listener {
         if keepAliveInterval <= 0d {
             return error("Keep alive interval must be greater than 0.");
         }
-        if (listenerConfig.apiVersion == "") {
-            return error("API version must be a non-empty string.");
-        }
+        check utils:validateApiVersion(listenerConfig.apiVersion);
         self.apiVersion = listenerConfig.apiVersion;
         if listenerConfig is RestBasedListenerConfig {
             self.username = "";

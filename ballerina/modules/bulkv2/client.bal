@@ -46,6 +46,7 @@ public isolated client class Client {
         } else {
             return error(INVALID_CLIENT_CONFIG);
         }
+        check utils:validateApiVersion(config.apiVersion);
         self.apiBasePath = string `${BASE_PATH}/v${config.apiVersion}`;
     }
 

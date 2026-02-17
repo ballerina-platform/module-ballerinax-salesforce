@@ -39,6 +39,7 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
+        check utils:validateApiVersion(config.apiVersion);
         self.apiVersion = config.apiVersion;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
         http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig auth = let var authConfig = config.auth in 
