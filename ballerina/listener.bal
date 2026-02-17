@@ -51,7 +51,7 @@ public isolated class Listener {
         if keepAliveInterval <= 0d {
             return error("Keep alive interval must be greater than 0.");
         }
-        if listenerConfig is OAuth2AuthListenerConfig {
+        if listenerConfig is RestBasedListenerConfig {
             self.username = "";
             self.password = "";
             self.isOAuth2 = true;
