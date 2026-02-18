@@ -44,8 +44,8 @@ version = "8.3.0-SNAPSHOT"
 [[platform.java21.dependency]]
 groupId = "com.opencsv"
 artifactId = "opencsv"
-version = "5.9"
-path = "./lib/opencsv-5.9.jar"
+version = "5.12.0"
+path = "./lib/opencsv-5.12.0.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.cometd.java"
@@ -104,17 +104,17 @@ path = "./lib/json-20240303.jar"
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-databind"
-version = "2.13.5"
-path = "./lib/jackson-databind-2.13.5.jar"
+version = "2.15.4"
+path = "./lib/jackson-databind-2.15.4.jar"
 
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-annotations"
-version = "2.13.5"
-path = "./lib/jackson-annotations-2.13.5.jar"
+version = "2.15.4"
+path = "./lib/jackson-annotations-2.15.4.jar"
 
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-core"
-version = "2.13.5"
-path = "./lib/jackson-core-2.13.5.jar"
+version = "2.15.4"
+path = "./lib/jackson-core-2.15.4.jar"
