@@ -132,47 +132,13 @@ public class LoginHelper {
 
     public static BayeuxParameters login(URL loginEndpoint, String username,
             String password, String apiVersion) throws Exception {
-        return login(loginEndpoint, username, password, new BayeuxParameters() {
-            @Override
-            public String bearerToken() {
-                throw new IllegalStateException("Have not authenticated");
-            }
-
-            @Override
-            public URL endpoint() {
-                throw new IllegalStateException("Have not established replay endpoint");
-            }
-
-            @Override
-            public String version() {
-                return apiVersion;
-            }
-        }, apiVersion);
+        return login(loginEndpoint, username, password, new BasicBayeuxParameters(apiVersion), apiVersion);
     }
 
     public static BayeuxParameters login(URL loginEndpoint, String username,
             String password, String apiVersion, SslContextFactory sslContextFactory) throws Exception {
-        return login(loginEndpoint, username, password, new BayeuxParameters() {
-            @Override
-            public String bearerToken() {
-                throw new IllegalStateException("Have not authenticated");
-            }
-
-            @Override
-            public URL endpoint() {
-                throw new IllegalStateException("Have not established replay endpoint");
-            }
-
-            @Override
-            public String version() {
-                return apiVersion;
-            }
-
-            @Override
-            public SslContextFactory sslContextFactory() {
-                return sslContextFactory;
-            }
-        }, apiVersion);
+        return login(loginEndpoint, username, password,
+                new BasicBayeuxParameters(apiVersion, sslContextFactory), apiVersion);
     }
 
     public static BayeuxParameters login(URL loginEndpoint, String username, String password,
