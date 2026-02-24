@@ -26,8 +26,10 @@ import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,9 +54,17 @@ public class ListenerUtil {
     public static final String READ_TIMEOUT = "readTimeout";
     public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
     public static final String API_VERSION = "apiVersion";
+    public static final String SECURE_SOCKET_KEYSTORE_PATH = "secureSocket_keystore_path";
+    public static final String SECURE_SOCKET_KEYSTORE_PASSWORD = "secureSocket_keystore_password";
+    public static final String SECURE_SOCKET_TRUSTSTORE_PATH = "secureSocket_truststore_path";
+    public static final String SECURE_SOCKET_TRUSTSTORE_PASSWORD = "secureSocket_truststore_password";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
+    public static final BString KEYSTORE_PATH = StringUtils.fromString("path");
+    public static final BString KEYSTORE_PASSWORD = StringUtils.fromString("password");
+    public static final BString KEYSTORE_CONFIG = StringUtils.fromString("key");
+    public static final BString TRUSTSTORE_CONFIG = StringUtils.fromString("cert");
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
@@ -76,17 +86,57 @@ public class ListenerUtil {
     }
 
     public static void initListener(BObject listener, int replayFrom, boolean isSandBox,
-            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion) {
+            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion,
+            Object secureSocket) {
         extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval, apiVersion);
         listener.addNativeData(IS_OAUTH2, false);
         listener.addNativeData(IS_SAND_BOX, isSandBox);
+        if (secureSocket != null) {
+            extractSecureSocketConfig(listener, (BMap<?, ?>) secureSocket);
+        }
     }
 
-    public static void initListener(BObject listener, int replayFrom, BString baseUrl,
-            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion) {
+    public static void initListener(BObject listener, int replayFrom, BString baseUrl, BDecimal connectionTimeout,
+                                    BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion,
+                                    Object secureSocket) {
         extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval, apiVersion);
         listener.addNativeData(IS_OAUTH2, true);
         listener.addNativeData(BASE_URL, baseUrl.getValue());
+        if (secureSocket != null) {
+            extractSecureSocketConfig(listener, (BMap<?, ?>) secureSocket);
+        }
+    }
+
+    private static void extractSecureSocketConfig(BObject listener, BMap<?, ?> secureSocketMap) {
+        BMap<?, ?> keystore = secureSocketMap.getMapValue(KEYSTORE_CONFIG);
+        if (keystore != null) {
+            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PATH,
+                    keystore.getStringValue(KEYSTORE_PATH).getValue());
+            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PASSWORD,
+                    keystore.getStringValue(KEYSTORE_PASSWORD).getValue());
+        }
+        BMap<?, ?> truststore = secureSocketMap.getMapValue(TRUSTSTORE_CONFIG);
+        if (truststore != null) {
+            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PATH,
+                    truststore.getStringValue(KEYSTORE_PATH).getValue());
+            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PASSWORD,
+                    truststore.getStringValue(KEYSTORE_PASSWORD).getValue());
+        }
+    }
+
+    private static SslContextFactory buildSslContextFactory(BObject listener) {
+        SslContextFactory factory = new SslContextFactory();
+        String keystorePath = (String) listener.getNativeData(SECURE_SOCKET_KEYSTORE_PATH);
+        if (keystorePath != null) {
+            factory.setKeyStorePath(keystorePath);
+            factory.setKeyStorePassword((String) listener.getNativeData(SECURE_SOCKET_KEYSTORE_PASSWORD));
+        }
+        String truststorePath = (String) listener.getNativeData(SECURE_SOCKET_TRUSTSTORE_PATH);
+        if (truststorePath != null) {
+            factory.setTrustStorePath(truststorePath);
+            factory.setTrustStorePassword((String) listener.getNativeData(SECURE_SOCKET_TRUSTSTORE_PASSWORD));
+        }
+        return factory;
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
@@ -113,10 +163,12 @@ public class ListenerUtil {
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String apiVersion = (String) listener.getNativeData(API_VERSION);
+        SslContextFactory sslContextFactory = buildSslContextFactory(listener);
 
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
             try {
-                return LoginHelper.login(username.getValue(), password.getValue(), listener, apiVersion);
+                return LoginHelper.login(username.getValue(), password.getValue(), listener, apiVersion,
+                        sslContextFactory);
             } catch (Exception e) {
                 throw sfdcError(e.getMessage(), e.getCause());
             }
@@ -138,10 +190,11 @@ public class ListenerUtil {
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String apiVersion = (String) listener.getNativeData(API_VERSION);
+        SslContextFactory sslContextFactory = buildSslContextFactory(listener);
 
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() ->
             new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl,
-                readTimeoutMs, keepAliveIntervalMs, apiVersion));
+                readTimeoutMs, keepAliveIntervalMs, apiVersion, sslContextFactory));
 
         BayeuxParameters params;
         try {
