@@ -31,7 +31,20 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -56,15 +69,23 @@ public class ListenerUtil {
     public static final String API_VERSION = "apiVersion";
     public static final String SECURE_SOCKET_KEYSTORE_PATH = "secureSocket_keystore_path";
     public static final String SECURE_SOCKET_KEYSTORE_PASSWORD = "secureSocket_keystore_password";
+    public static final String SECURE_SOCKET_CERTKEY_CERT_FILE = "secureSocket_certkey_certFile";
+    public static final String SECURE_SOCKET_CERTKEY_KEY_FILE = "secureSocket_certkey_keyFile";
+    public static final String SECURE_SOCKET_CERTKEY_KEY_PASSWORD = "secureSocket_certkey_keyPassword";
     public static final String SECURE_SOCKET_TRUSTSTORE_PATH = "secureSocket_truststore_path";
     public static final String SECURE_SOCKET_TRUSTSTORE_PASSWORD = "secureSocket_truststore_password";
+    public static final String SECURE_SOCKET_CERT_FILE = "secureSocket_cert_file";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
-    public static final BString KEYSTORE_PATH = StringUtils.fromString("path");
-    public static final BString KEYSTORE_PASSWORD = StringUtils.fromString("password");
+    public static final BString FIELD_PATH = StringUtils.fromString("path");
+    public static final BString FIELD_PASSWORD = StringUtils.fromString("password");
+    public static final BString FIELD_CERT_FILE = StringUtils.fromString("certFile");
+    public static final BString FIELD_KEY_FILE = StringUtils.fromString("keyFile");
+    public static final BString FIELD_KEY_PASSWORD = StringUtils.fromString("keyPassword");
     public static final BString KEYSTORE_CONFIG = StringUtils.fromString("key");
     public static final BString TRUSTSTORE_CONFIG = StringUtils.fromString("cert");
+    public static final String X_509 = "X.509";
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
@@ -108,35 +129,104 @@ public class ListenerUtil {
     }
 
     private static void extractSecureSocketConfig(BObject listener, BMap<?, ?> secureSocketMap) {
-        BMap<?, ?> keystore = secureSocketMap.getMapValue(KEYSTORE_CONFIG);
-        if (keystore != null) {
-            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PATH,
-                    keystore.getStringValue(KEYSTORE_PATH).getValue());
-            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PASSWORD,
-                    keystore.getStringValue(KEYSTORE_PASSWORD).getValue());
+        BMap<?, ?> keyField = secureSocketMap.getMapValue(KEYSTORE_CONFIG);
+        if (keyField != null && keyField.containsKey(FIELD_PATH)) {
+            BString path = keyField.getStringValue(FIELD_PATH);
+            BString password = keyField.getStringValue(FIELD_PASSWORD);
+            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PATH, path.getValue());
+            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PASSWORD, password.getValue());
+        } else if (keyField != null && keyField.containsKey(FIELD_CERT_FILE)) {
+            BString certFile = keyField.getStringValue(FIELD_CERT_FILE);
+            BString keyFile = keyField.getStringValue(FIELD_KEY_FILE);
+            listener.addNativeData(SECURE_SOCKET_CERTKEY_CERT_FILE, certFile.getValue());
+            listener.addNativeData(SECURE_SOCKET_CERTKEY_KEY_FILE, keyFile.getValue());
+            BString keyPassword = keyField.getStringValue(FIELD_KEY_PASSWORD);
+            if (keyPassword != null) {
+                listener.addNativeData(SECURE_SOCKET_CERTKEY_KEY_PASSWORD, keyPassword.getValue());
+            }
         }
-        BMap<?, ?> truststore = secureSocketMap.getMapValue(TRUSTSTORE_CONFIG);
-        if (truststore != null) {
-            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PATH,
-                    truststore.getStringValue(KEYSTORE_PATH).getValue());
-            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PASSWORD,
-                    truststore.getStringValue(KEYSTORE_PASSWORD).getValue());
+        BMap<?, ?> certField = secureSocketMap.getMapValue(TRUSTSTORE_CONFIG);
+        if (certField != null && TypeUtils.getType(certField).getTag() == TypeTags.MAP_TAG) {
+            BString path = certField.getStringValue(FIELD_PATH);
+            BString password = certField.getStringValue(FIELD_PASSWORD);
+            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PATH, path.getValue());
+            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PASSWORD, password.getValue());
+        } else if (certField != null) {
+            listener.addNativeData(SECURE_SOCKET_CERT_FILE, ((BString) certField).getValue());
         }
     }
 
     private static SslContextFactory buildSslContextFactory(BObject listener) {
-        SslContextFactory factory = new SslContextFactory();
+        SslContextFactory.Client factory = new SslContextFactory.Client();
         String keystorePath = (String) listener.getNativeData(SECURE_SOCKET_KEYSTORE_PATH);
         if (keystorePath != null) {
             factory.setKeyStorePath(keystorePath);
             factory.setKeyStorePassword((String) listener.getNativeData(SECURE_SOCKET_KEYSTORE_PASSWORD));
         }
+        String certKeyFile = (String) listener.getNativeData(SECURE_SOCKET_CERTKEY_CERT_FILE);
+        if (certKeyFile != null) {
+            String keyFile = (String) listener.getNativeData(SECURE_SOCKET_CERTKEY_KEY_FILE);
+            String keyPassword = (String) listener.getNativeData(SECURE_SOCKET_CERTKEY_KEY_PASSWORD);
+            char[] keyPasswordChars = keyPassword != null ? keyPassword.toCharArray() : new char[0];
+            try {
+                KeyStore keystore = buildKeyStoreFromPem(certKeyFile, keyFile, keyPasswordChars);
+                factory.setKeyStore(keystore);
+                factory.setKeyStorePassword(keyPassword != null ? keyPassword : "");
+            } catch (GeneralSecurityException | IOException e) {
+                throw new IllegalArgumentException("Failed to load the keystore: " + e.getMessage(), e);
+            }
+        }
+
         String truststorePath = (String) listener.getNativeData(SECURE_SOCKET_TRUSTSTORE_PATH);
         if (truststorePath != null) {
             factory.setTrustStorePath(truststorePath);
             factory.setTrustStorePassword((String) listener.getNativeData(SECURE_SOCKET_TRUSTSTORE_PASSWORD));
         }
+        String certFilePath = (String) listener.getNativeData(SECURE_SOCKET_CERT_FILE);
+        if (certFilePath != null) {
+            try {
+                KeyStore ts = buildTrustStoreFromPem(certFilePath);
+                factory.setTrustStore(ts);
+            } catch (GeneralSecurityException | IOException e) {
+                throw new IllegalArgumentException("Failed to load the truststore: " + e.getMessage(), e);
+            }
+        }
+
         return factory;
+    }
+
+    private static KeyStore buildKeyStoreFromPem(String certFilePath, String keyFilePath, char[] keyPassword)
+            throws GeneralSecurityException, IOException {
+        CertificateFactory cf = CertificateFactory.getInstance(X_509);
+        Certificate cert;
+        try (InputStream certIn = new FileInputStream(certFilePath)) {
+            cert = cf.generateCertificate(certIn);
+        }
+        byte[] keyBytes = readPemKey(keyFilePath);
+        PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keystore.load(null, null);
+        keystore.setKeyEntry("client", privateKey, keyPassword, new Certificate[]{cert});
+        return keystore;
+    }
+
+    private static KeyStore buildTrustStoreFromPem(String certFilePath)
+            throws GeneralSecurityException, IOException {
+        CertificateFactory cf = CertificateFactory.getInstance(X_509);
+        Certificate cert;
+        try (InputStream certIn = new FileInputStream(certFilePath)) {
+            cert = cf.generateCertificate(certIn);
+        }
+
+        KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
+        truststore.load(null, null);
+        truststore.setCertificateEntry("trusted", cert);
+        return truststore;
+    }
+
+    private static byte[] readPemKey(String filePath) throws IOException {
+        byte[] content = Files.readAllBytes(Paths.get(filePath));
+        return Base64.getMimeDecoder().decode(content);
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
