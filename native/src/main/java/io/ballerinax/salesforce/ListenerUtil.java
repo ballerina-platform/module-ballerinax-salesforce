@@ -67,14 +67,14 @@ public class ListenerUtil {
     public static final String READ_TIMEOUT = "readTimeout";
     public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
     public static final String API_VERSION = "apiVersion";
-    public static final String SECURE_SOCKET_KEYSTORE_PATH = "secureSocket_keystore_path";
-    public static final String SECURE_SOCKET_KEYSTORE_PASSWORD = "secureSocket_keystore_password";
-    public static final String SECURE_SOCKET_CERTKEY_CERT_FILE = "secureSocket_certkey_certFile";
-    public static final String SECURE_SOCKET_CERTKEY_KEY_FILE = "secureSocket_certkey_keyFile";
-    public static final String SECURE_SOCKET_CERTKEY_KEY_PASSWORD = "secureSocket_certkey_keyPassword";
-    public static final String SECURE_SOCKET_TRUSTSTORE_PATH = "secureSocket_truststore_path";
-    public static final String SECURE_SOCKET_TRUSTSTORE_PASSWORD = "secureSocket_truststore_password";
-    public static final String SECURE_SOCKET_CERT_FILE = "secureSocket_cert_file";
+    public static final String KEYSTORE_PATH = "secureSocket_keystore_path";
+    public static final String KEYSTORE_PASSWORD = "secureSocket_keystore_password";
+    public static final String KEYSTORE_CERT_FILE = "secureSocket_certkey_certFile";
+    public static final String KEYSTORE_KEY_FILE = "secureSocket_certkey_keyFile";
+    public static final String KEYSTORE_KEY_PASSWORD = "secureSocket_certkey_keyPassword";
+    public static final String TRUSTSTORE_PATH = "secureSocket_truststore_path";
+    public static final String TRUSTSTORE_PASSWORD = "secureSocket_truststore_password";
+    public static final String TRUSTSTORE_CERT_FILE = "secureSocket_cert_file";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
@@ -133,40 +133,41 @@ public class ListenerUtil {
         if (keyField != null && keyField.containsKey(FIELD_PATH)) {
             BString path = keyField.getStringValue(FIELD_PATH);
             BString password = keyField.getStringValue(FIELD_PASSWORD);
-            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PATH, path.getValue());
-            listener.addNativeData(SECURE_SOCKET_KEYSTORE_PASSWORD, password.getValue());
+            listener.addNativeData(KEYSTORE_PATH, path.getValue());
+            listener.addNativeData(KEYSTORE_PASSWORD, password.getValue());
         } else if (keyField != null && keyField.containsKey(FIELD_CERT_FILE)) {
             BString certFile = keyField.getStringValue(FIELD_CERT_FILE);
             BString keyFile = keyField.getStringValue(FIELD_KEY_FILE);
-            listener.addNativeData(SECURE_SOCKET_CERTKEY_CERT_FILE, certFile.getValue());
-            listener.addNativeData(SECURE_SOCKET_CERTKEY_KEY_FILE, keyFile.getValue());
+            listener.addNativeData(KEYSTORE_CERT_FILE, certFile.getValue());
+            listener.addNativeData(KEYSTORE_KEY_FILE, keyFile.getValue());
             BString keyPassword = keyField.getStringValue(FIELD_KEY_PASSWORD);
             if (keyPassword != null) {
-                listener.addNativeData(SECURE_SOCKET_CERTKEY_KEY_PASSWORD, keyPassword.getValue());
+                listener.addNativeData(KEYSTORE_KEY_PASSWORD, keyPassword.getValue());
             }
         }
-        BMap<?, ?> certField = secureSocketMap.getMapValue(TRUSTSTORE_CONFIG);
-        if (certField != null && TypeUtils.getType(certField).getTag() == TypeTags.MAP_TAG) {
-            BString path = certField.getStringValue(FIELD_PATH);
-            BString password = certField.getStringValue(FIELD_PASSWORD);
-            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PATH, path.getValue());
-            listener.addNativeData(SECURE_SOCKET_TRUSTSTORE_PASSWORD, password.getValue());
-        } else if (certField != null) {
-            listener.addNativeData(SECURE_SOCKET_CERT_FILE, ((BString) certField).getValue());
+        Object certField = secureSocketMap.get(TRUSTSTORE_CONFIG);
+        if (certField instanceof BMap) {
+            BMap<?, ?> certMap = (BMap<?, ?>) certField;
+            BString path = certMap.getStringValue(FIELD_PATH);
+            BString password = certMap.getStringValue(FIELD_PASSWORD);
+            listener.addNativeData(TRUSTSTORE_PATH, path.getValue());
+            listener.addNativeData(TRUSTSTORE_PASSWORD, password.getValue());
+        } else if (certField instanceof BString) {
+            listener.addNativeData(TRUSTSTORE_CERT_FILE, ((BString) certField).getValue());
         }
     }
 
     private static SslContextFactory buildSslContextFactory(BObject listener) {
         SslContextFactory.Client factory = new SslContextFactory.Client();
-        String keystorePath = (String) listener.getNativeData(SECURE_SOCKET_KEYSTORE_PATH);
+        String keystorePath = (String) listener.getNativeData(KEYSTORE_PATH);
         if (keystorePath != null) {
             factory.setKeyStorePath(keystorePath);
-            factory.setKeyStorePassword((String) listener.getNativeData(SECURE_SOCKET_KEYSTORE_PASSWORD));
+            factory.setKeyStorePassword((String) listener.getNativeData(KEYSTORE_PASSWORD));
         }
-        String certKeyFile = (String) listener.getNativeData(SECURE_SOCKET_CERTKEY_CERT_FILE);
+        String certKeyFile = (String) listener.getNativeData(KEYSTORE_CERT_FILE);
         if (certKeyFile != null) {
-            String keyFile = (String) listener.getNativeData(SECURE_SOCKET_CERTKEY_KEY_FILE);
-            String keyPassword = (String) listener.getNativeData(SECURE_SOCKET_CERTKEY_KEY_PASSWORD);
+            String keyFile = (String) listener.getNativeData(KEYSTORE_KEY_FILE);
+            String keyPassword = (String) listener.getNativeData(KEYSTORE_KEY_PASSWORD);
             char[] keyPasswordChars = keyPassword != null ? keyPassword.toCharArray() : new char[0];
             try {
                 KeyStore keystore = buildKeyStoreFromPem(certKeyFile, keyFile, keyPasswordChars);
@@ -177,12 +178,12 @@ public class ListenerUtil {
             }
         }
 
-        String truststorePath = (String) listener.getNativeData(SECURE_SOCKET_TRUSTSTORE_PATH);
+        String truststorePath = (String) listener.getNativeData(TRUSTSTORE_PATH);
         if (truststorePath != null) {
             factory.setTrustStorePath(truststorePath);
-            factory.setTrustStorePassword((String) listener.getNativeData(SECURE_SOCKET_TRUSTSTORE_PASSWORD));
+            factory.setTrustStorePassword((String) listener.getNativeData(TRUSTSTORE_PASSWORD));
         }
-        String certFilePath = (String) listener.getNativeData(SECURE_SOCKET_CERT_FILE);
+        String certFilePath = (String) listener.getNativeData(TRUSTSTORE_CERT_FILE);
         if (certFilePath != null) {
             try {
                 KeyStore ts = buildTrustStoreFromPem(certFilePath);
