@@ -42,6 +42,7 @@ import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -204,11 +205,23 @@ public class ListenerUtil {
             cert = cf.generateCertificate(certIn);
         }
         byte[] keyBytes = readPemKey(keyFilePath);
-        PrivateKey privateKey = KeyFactory.getInstance("RSA").generatePrivate(new PKCS8EncodedKeySpec(keyBytes));
+        PrivateKey privateKey = loadPrivateKey(keyBytes);
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
         keystore.load(null, null);
         keystore.setKeyEntry("client", privateKey, keyPassword, new Certificate[]{cert});
         return keystore;
+    }
+
+    private static PrivateKey loadPrivateKey(byte[] keyBytes) throws GeneralSecurityException {
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        for (String algorithm : new String[]{"RSA", "EC", "DSA"}) {
+            try {
+                return KeyFactory.getInstance(algorithm).generatePrivate(spec);
+            } catch (InvalidKeySpecException ignored) {
+            }
+        }
+        throw new InvalidKeySpecException("The private key algorithm is not supported." +
+                " Only RSA, EC, and DSA are supported.");
     }
 
     private static KeyStore buildTrustStoreFromPem(String certFilePath)
