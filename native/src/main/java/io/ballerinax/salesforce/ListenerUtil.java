@@ -160,6 +160,7 @@ public class ListenerUtil {
 
     private static SslContextFactory buildSslContextFactory(BObject listener) {
         SslContextFactory.Client factory = new SslContextFactory.Client();
+        factory.setEndpointIdentificationAlgorithm("HTTPS");
         String keystorePath = (String) listener.getNativeData(KEYSTORE_PATH);
         if (keystorePath != null) {
             factory.setKeyStorePath(keystorePath);
