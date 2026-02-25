@@ -60,5 +60,30 @@
         <Bug code="SIC" />
         <Package name="io.ballerinax.salesforce" />
     </Match>
+
+
+    <Match>
+        <Bug code="EI2" />
+        <Class name="io.ballerinax.salesforce.OAuth2BayeuxParameters" />
+        <Method name="&lt;init&gt;" />
+    </Match>
+
+    <Match>
+        <Bug code="EI" />
+        <Class name="io.ballerinax.salesforce.OAuth2BayeuxParameters" />
+        <Method name="sslContextFactory" />
+    </Match>
+
+    <Match>
+        <Bug code="EI2" />
+        <Class name="io.ballerinax.salesforce.BasicBayeuxParameters" />
+        <Method name="&lt;init&gt;" />
+    </Match>
+
+    <Match>
+        <Bug code="EI" />
+        <Class name="io.ballerinax.salesforce.BasicBayeuxParameters" />
+        <Method name="sslContextFactory" />
+    </Match>
 </FindBugsFilter>
 
