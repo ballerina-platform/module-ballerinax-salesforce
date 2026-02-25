@@ -34,6 +34,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -41,6 +42,7 @@ import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -228,20 +230,27 @@ public class ListenerUtil {
     private static KeyStore buildTrustStoreFromPem(String certFilePath)
             throws GeneralSecurityException, IOException {
         CertificateFactory cf = CertificateFactory.getInstance(X_509);
-        Certificate cert;
-        try (InputStream certIn = new FileInputStream(certFilePath)) {
-            cert = cf.generateCertificate(certIn);
-        }
-
         KeyStore truststore = KeyStore.getInstance(KeyStore.getDefaultType());
         truststore.load(null, null);
-        truststore.setCertificateEntry("trusted", cert);
+        try (InputStream certIn = new FileInputStream(certFilePath)) {
+            int index = 0;
+            for (Certificate cert : cf.generateCertificates(certIn)) {
+                truststore.setCertificateEntry("trusted-" + index++, cert);
+            }
+        } catch (CertificateException | IOException exception) {
+                throw new IOException("Failed to read certificates from "
+                        + certFilePath + ": " + exception.getMessage(), exception);
+        }
+        if (truststore.size() == 0) {
+            throw new IllegalArgumentException("No certificates found in: " + certFilePath);
+        }
         return truststore;
     }
 
     private static byte[] readPemKey(String filePath) throws IOException {
-        byte[] content = Files.readAllBytes(Paths.get(filePath));
-        return Base64.getMimeDecoder().decode(content);
+        String content = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
+        String stripped = content.replaceAll("-----[^-]+-----", "").replaceAll("\\s+", "");
+        return Base64.getDecoder().decode(stripped);
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
@@ -268,7 +277,12 @@ public class ListenerUtil {
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String apiVersion = (String) listener.getNativeData(API_VERSION);
-        SslContextFactory sslContextFactory = buildSslContextFactory(listener);
+        SslContextFactory sslContextFactory;
+        try {
+            sslContextFactory = buildSslContextFactory(listener);
+        } catch (IllegalArgumentException e) {
+            return sfdcError(e.getMessage(), e.getCause());
+        }
 
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
             try {
@@ -295,7 +309,12 @@ public class ListenerUtil {
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String apiVersion = (String) listener.getNativeData(API_VERSION);
-        SslContextFactory sslContextFactory = buildSslContextFactory(listener);
+        SslContextFactory sslContextFactory;
+        try {
+            sslContextFactory = buildSslContextFactory(listener);
+        } catch (IllegalArgumentException e) {
+            return sfdcError(e.getMessage(), e.getCause());
+        }
 
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() ->
             new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl,
