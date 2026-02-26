@@ -28,6 +28,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.util.ByteBufferContentProvider;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -115,31 +116,29 @@ public class LoginHelper {
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_PREFIX = "/services/Soap/u/";
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_SUFFIX = "/";
 
-    public static BayeuxParameters login(String username, String password, 
-        BObject listener, String apiVersion) throws Exception {
+    public static BayeuxParameters login(String username, String password,
+            BObject listener, String apiVersion) throws Exception {
         boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
         String endpoint = getLoginEndpoint(isSandBox);
         return login(new URL(endpoint), username, password, apiVersion);
     }
 
-    public static BayeuxParameters login(URL loginEndpoint, String username, 
+    public static BayeuxParameters login(String username, String password,
+            BObject listener, String apiVersion, SslContextFactory sslContextFactory) throws Exception {
+        boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
+        String endpoint = getLoginEndpoint(isSandBox);
+        return login(new URL(endpoint), username, password, apiVersion, sslContextFactory);
+    }
+
+    public static BayeuxParameters login(URL loginEndpoint, String username,
             String password, String apiVersion) throws Exception {
-        return login(loginEndpoint, username, password, new BayeuxParameters() {
-            @Override
-            public String bearerToken() {
-                throw new IllegalStateException("Have not authenticated");
-            }
+        return login(loginEndpoint, username, password, new BasicBayeuxParameters(apiVersion), apiVersion);
+    }
 
-            @Override
-            public URL endpoint() {
-                throw new IllegalStateException("Have not established replay endpoint");
-            }
-
-            @Override
-            public String version() {
-                return apiVersion;
-            }
-        }, apiVersion);
+    public static BayeuxParameters login(URL loginEndpoint, String username,
+            String password, String apiVersion, SslContextFactory sslContextFactory) throws Exception {
+        return login(loginEndpoint, username, password,
+                new BasicBayeuxParameters(apiVersion, sslContextFactory), apiVersion);
     }
 
     public static BayeuxParameters login(URL loginEndpoint, String username, String password,
