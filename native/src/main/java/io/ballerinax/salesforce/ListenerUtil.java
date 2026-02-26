@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
@@ -149,12 +150,12 @@ public class ListenerUtil {
             }
         }
         Object certField = secureSocketMap.get(TRUSTSTORE_CONFIG);
-        if (TypeUtils.getType(certField).getTag() == TypeTags.MAP_TAG) {
-            BString path = ((BMap<?, ?>) certField).getStringValue(FIELD_PATH);
-            BString password = ((BMap<?, ?>) certField).getStringValue(FIELD_PASSWORD);
+        if (certField instanceof BMap<?, ?> certMap) {
+            BString path = certMap.getStringValue(FIELD_PATH);
+            BString password = certMap.getStringValue(FIELD_PASSWORD);
             listener.addNativeData(TRUSTSTORE_PATH, path.getValue());
             listener.addNativeData(TRUSTSTORE_PASSWORD, password.getValue());
-        } else if (TypeUtils.getType(certField).getTag() == TypeTags.STRING_TAG) {
+        } else if (certField instanceof BString) {
             listener.addNativeData(TRUSTSTORE_CERT_FILE, ((BString) certField).getValue());
         }
     }
@@ -341,6 +342,10 @@ public class ListenerUtil {
         } catch (TimeoutException exception) {
             connector.stop();
             return sfdcError("Connection timed out after " + connectionTimeoutDisplay + " seconds.", null);
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            return sfdcError(cause != null ? cause.getMessage() : e.getMessage(),
+                    cause != null ? cause.getCause() : null);
         } catch (Exception e) {
             return sfdcError(e.getMessage(), e.getCause());
         }
@@ -374,6 +379,11 @@ public class ListenerUtil {
             try {
                 subscription = connector.subscribe(channelName, replayFrom, consumer)
                         .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
+            } catch (ExecutionException e) {
+                connector.stop();
+                Throwable cause = e.getCause();
+                return sfdcError(cause != null ? cause.getMessage() : e.getMessage(),
+                        cause != null ? cause.getCause() : null);
             } catch (Exception e) {
                 connector.stop();
                 return sfdcError(e.getMessage(), e.getCause());
