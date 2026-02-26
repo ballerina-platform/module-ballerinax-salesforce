@@ -34,7 +34,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -99,9 +99,9 @@ public class ListenerUtil {
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(API_VERSION, apiVersion.getValue());
-        long connectionTimeoutMs = connectionTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
-        long readTimeoutMs = readTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
-        long keepAliveIntervalMs = keepAliveInterval.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
+        long connectionTimeoutMs = connectionTimeout.value().multiply(BigDecimal.valueOf(1000)).longValue();
+        long readTimeoutMs = readTimeout.value().multiply(BigDecimal.valueOf(1000)).longValue();
+        long keepAliveIntervalMs = keepAliveInterval.value().multiply(BigDecimal.valueOf(1000)).longValue();
         listener.addNativeData(CONNECTION_TIMEOUT, connectionTimeoutMs);
         listener.addNativeData(READ_TIMEOUT, readTimeoutMs);
         listener.addNativeData(KEEP_ALIVE_INTERVAL, keepAliveIntervalMs);
@@ -149,13 +149,12 @@ public class ListenerUtil {
             }
         }
         Object certField = secureSocketMap.get(TRUSTSTORE_CONFIG);
-        if (certField instanceof BMap) {
-            BMap<?, ?> certMap = (BMap<?, ?>) certField;
-            BString path = certMap.getStringValue(FIELD_PATH);
-            BString password = certMap.getStringValue(FIELD_PASSWORD);
+        if (TypeUtils.getType(certField).getTag() == TypeTags.MAP_TAG) {
+            BString path = ((BMap<?, ?>) certField).getStringValue(FIELD_PATH);
+            BString password = ((BMap<?, ?>) certField).getStringValue(FIELD_PASSWORD);
             listener.addNativeData(TRUSTSTORE_PATH, path.getValue());
             listener.addNativeData(TRUSTSTORE_PASSWORD, password.getValue());
-        } else if (certField instanceof BString) {
+        } else if (TypeUtils.getType(certField).getTag() == TypeTags.STRING_TAG) {
             listener.addNativeData(TRUSTSTORE_CERT_FILE, ((BString) certField).getValue());
         }
     }
@@ -220,7 +219,7 @@ public class ListenerUtil {
         for (String algorithm : new String[]{"RSA", "EC", "DSA"}) {
             try {
                 return KeyFactory.getInstance(algorithm).generatePrivate(spec);
-            } catch (InvalidKeySpecException ignored) {
+            } catch (InvalidKeySpecException ignored) { // ignore and try next algorithm
             }
         }
         throw new InvalidKeySpecException("The private key algorithm is not supported." +
@@ -238,8 +237,8 @@ public class ListenerUtil {
                 truststore.setCertificateEntry("trusted-" + index++, cert);
             }
         } catch (CertificateException | IOException exception) {
-                throw new IOException("Failed to read certificates from "
-                        + certFilePath + ": " + exception.getMessage(), exception);
+            throw new IOException("Failed to read certificates from " + certFilePath + ": " + exception.getMessage(),
+                    exception);
         }
         if (truststore.size() == 0) {
             throw new IllegalArgumentException("No certificates found in: " + certFilePath);
@@ -248,7 +247,7 @@ public class ListenerUtil {
     }
 
     private static byte[] readPemKey(String filePath) throws IOException {
-        String content = new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
+        String content = Files.readString(Paths.get(filePath));
         String stripped = content.replaceAll("-----[^-]+-----", "").replaceAll("\\s+", "");
         return Base64.getDecoder().decode(stripped);
     }
