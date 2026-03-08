@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Triggers when a new event related to Salesforce records is received.
+# Triggers when a new Change Data Capture event is received from Salesforce channels.
 # Available actions: onCreate, onUpdate, onDelete, and onRestore
 public type Service service object {
     # Triggers on a new record create event.
@@ -26,7 +26,7 @@ public type Service service object {
     # Triggers on a record update event.
     #
     # + payload - The information about the triggered event
-    # + return - `()` on success else an `error` 
+    # + return - `()` on success else an `error`
     remote function onUpdate(EventData payload) returns error?;
 
     # Triggers on a record delete event.
@@ -40,4 +40,14 @@ public type Service service object {
     # + payload - The information about the triggered event
     # + return - `()` on success else an `error`
     remote function onRestore(EventData payload) returns error?;
+};
+
+# Triggers when a new Platform Event is received from Salesforce channels.
+# Available action: onMessage
+public type PlatformEventsService service object {
+    # Triggers when a Platform Event is published on the subscribed channel.
+    #
+    # + payload - The Platform Event data including all published fields and metadata
+    # + return - `()` on success else an `error`
+    remote function onMessage(PlatformEventsMessage payload) returns error?;
 };
