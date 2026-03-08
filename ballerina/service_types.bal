@@ -47,7 +47,7 @@ public type Service service object {
 public type PlatformEventsService service object {
     # Triggers when a Platform Event is published on the subscribed channel.
     #
-    # + payload - The Platform Event data including all published fields and metadata
+    # + message - The Platform Event data including all published fields and metadata
     # + return - `()` on success else an `error`
-    remote function onMessage(PlatformEventsMessage payload) returns error?;
+    remote function onMessage(PlatformEventsMessage message) returns error?;
 };
