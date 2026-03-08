@@ -52,17 +52,15 @@ public class ListenerUtil {
     public static final String READ_TIMEOUT = "readTimeout";
     public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
     public static final String API_VERSION = "apiVersion";
-    private static final ArrayList<BObject> services = new ArrayList<>();
-    private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
-    private static EmpConnector connector;
-    private static TopicSubscription subscription;
+    private static final String CONNECTOR = "connector";
+    private static final String SUBSCRIPTION = "subscription";
 
     private static void extractBaseConfigs(BObject listener, int replayFrom,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
             BString apiVersion) {
-        listener.addNativeData(CONSUMER_SERVICES, services);
-        listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
+        listener.addNativeData(CONSUMER_SERVICES, new ArrayList<BObject>());
+        listener.addNativeData(DISPATCHERS, new HashMap<BObject, DispatcherService>());
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(API_VERSION, apiVersion.getValue());
         long connectionTimeoutMs = connectionTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
@@ -90,7 +88,8 @@ public class ListenerUtil {
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
-        listener.addNativeData(CHANNEL_NAME, ((BString) channelName).getValue());
+        String channel = ((BString) channelName).getValue();
+        listener.addNativeData(CHANNEL_NAME, channel);
 
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
@@ -102,7 +101,7 @@ public class ListenerUtil {
             return null;
         }
 
-        DispatcherService dispatcherService = new DispatcherService(service, environment.getRuntime());
+        DispatcherService dispatcherService = new DispatcherService(service, environment.getRuntime(), channel);
         services.add(service);
         serviceDispatcherMap.put(service, dispatcherService);
 
@@ -158,7 +157,7 @@ public class ListenerUtil {
         long connectionTimeoutMs = (Long) listener.getNativeData(CONNECTION_TIMEOUT);
         String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
-        connector = new EmpConnector(params);
+        EmpConnector connector = new EmpConnector(params);
         connector.setBearerTokenProvider(tokenProvider);
         try {
             connector.start().get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
@@ -168,11 +167,11 @@ public class ListenerUtil {
         } catch (Exception e) {
             return sfdcError(e.getMessage(), e.getCause());
         }
-
-        return subscribeServices(listener, connectionTimeoutMs);
+        listener.addNativeData(CONNECTOR, connector);
+        return subscribeServices(listener, connector, connectionTimeoutMs);
     }
 
-    private static Object subscribeServices(BObject listener, long connectionTimeoutMs) {
+    private static Object subscribeServices(BObject listener, EmpConnector connector, long connectionTimeoutMs) {
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         @SuppressWarnings("unchecked")
@@ -196,8 +195,9 @@ public class ListenerUtil {
             Consumer<Map<String, Object>> consumer = event -> injectEvent(dispatcherService, event);
 
             try {
-                subscription = connector.subscribe(channelName, replayFrom, consumer)
+                TopicSubscription subscription = connector.subscribe(channelName, replayFrom, consumer)
                         .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
+                listener.addNativeData(SUBSCRIPTION, subscription);
             } catch (Exception e) {
                 connector.stop();
                 return sfdcError(e.getMessage(), e.getCause());
@@ -208,7 +208,10 @@ public class ListenerUtil {
 
     public static Object detachService(BObject listener, BObject service) {
         String channel = listener.getNativeData(CHANNEL_NAME).toString();
-        connector.unsubscribe(channel);
+        EmpConnector connector = (EmpConnector) listener.getNativeData(CONNECTOR);
+        if (connector != null) {
+            connector.unsubscribe(channel);
+        }
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         @SuppressWarnings("unchecked")
@@ -219,10 +222,12 @@ public class ListenerUtil {
         return null;
     }
 
-    public static Object stopListener() {
+    public static Object stopListener(BObject listener) {
+        TopicSubscription subscription = (TopicSubscription) listener.getNativeData(SUBSCRIPTION);
         if (subscription != null) {
             subscription.cancel();
         }
+        EmpConnector connector = (EmpConnector) listener.getNativeData(CONNECTOR);
         if (connector != null) {
             connector.stop();
         }
