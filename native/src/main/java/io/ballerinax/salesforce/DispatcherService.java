@@ -149,7 +149,7 @@ public class DispatcherService {
         Object payloadObj = event.get(EVENT_PAYLOAD);
         Map<?, ?> payloadMap = oMapper.convertValue(payloadObj, Map.class);
         BMap<BString, Object> payloadBMap = toBMap(payloadMap);
-        long replayId = 0L;
+        Long replayId = null;
         Object eventEnvelope = event.get("event");
         if (eventEnvelope instanceof Map) {
             Object rid = ((Map<?, ?>) eventEnvelope).get("replayId");
