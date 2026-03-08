@@ -28,12 +28,11 @@ import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -41,7 +40,6 @@ import static io.ballerinax.salesforce.Constants.CHANGE_ORIGIN;
 import static io.ballerinax.salesforce.Constants.COMMIT_NUMBER;
 import static io.ballerinax.salesforce.Constants.COMMIT_TIME_STAMP;
 import static io.ballerinax.salesforce.Constants.COMMIT_USER;
-import static io.ballerina.runtime.api.utils.StringUtils.fromString;
 import static io.ballerinax.salesforce.Constants.CREATE;
 import static io.ballerinax.salesforce.Constants.DELETE;
 import static io.ballerinax.salesforce.Constants.ENTITY_NAME;
@@ -54,7 +52,6 @@ import static io.ballerinax.salesforce.Constants.ON_CREATE;
 import static io.ballerinax.salesforce.Constants.ON_DELETE;
 import static io.ballerinax.salesforce.Constants.ON_RESTORE;
 import static io.ballerinax.salesforce.Constants.ON_UPDATE;
-import static io.ballerinax.salesforce.Constants.PLATFORM_EVENT_DATA_RECORD;
 import static io.ballerinax.salesforce.Constants.RECORD_IDS;
 import static io.ballerinax.salesforce.Constants.SEQUENCE_NUMBER;
 import static io.ballerinax.salesforce.Constants.TRANSACTION_KEY;
@@ -66,7 +63,7 @@ import static io.ballerinax.salesforce.Constants.UPDATE;
  */
 public class DispatcherService {
     public static final String ON_MESSAGE = "onMessage";
-    private static final Logger log = LoggerFactory.getLogger(DispatcherService.class);
+    public static final String PLATFORM_EVENT_MESSAGE = "PlatformEventsMessage";
     private static final String PLATFORM_EVENT_CHANNEL_PREFIX = "/event/";
 
     private final BObject service;
@@ -81,6 +78,10 @@ public class DispatcherService {
         this.service = service;
         this.runtime = runtime;
         this.channelName = channelName;
+    }
+
+    public String getChannelName() {
+        return channelName;
     }
 
     public void handleDispatch(Map<String, Object> eventData) {
@@ -98,58 +99,53 @@ public class DispatcherService {
         MethodType[] attachedFunctions = service.getType().getMethods();
         for (MethodType function : attachedFunctions) {
             if (ON_MESSAGE.equals(function.getName())) {
-                try {
-                    BMap<BString, Object> record = getPlatformEventDataRecord(eventData);
-                    executeResourceOnEvent(record, ON_MESSAGE);
-                } catch (Exception e) {
-                    log.error("Error dispatching Platform Event to onEvent(): {}", e.getMessage(), e);
-                }
+                BMap<BString, Object> record = getPlatformEventDataRecord(eventData);
+                executeResourceOnEvent(record, ON_MESSAGE);
             }
         }
     }
 
     private void handleCdcEvent(Map<String, Object> eventData) {
         MethodType[] attachedFunctions = service.getType().getMethods();
-        try {
-            Gson gson = new Gson();
-            String eventType = new JSONObject(gson.toJson(eventData.get(EVENT_PAYLOAD)))
-                    .getJSONObject(EVENT_HEADER)
-                    .get(EVENT_CHANGE_TYPE).toString();
-            BMap<BString, Object> eventDataRecord = getCdcEventDataRecord(eventData);
-            for (MethodType function : attachedFunctions) {
-                if (ON_CREATE.equals(function.getName()) && eventType.equals(CREATE)) {
-                    executeResourceOnEvent(eventDataRecord, ON_CREATE);
-                }
-                if (ON_UPDATE.equals(function.getName()) && eventType.equals(UPDATE)) {
-                    executeResourceOnEvent(eventDataRecord, ON_UPDATE);
-                }
-                if (ON_DELETE.equals(function.getName()) && eventType.equals(DELETE)) {
-                    executeResourceOnEvent(eventDataRecord, ON_DELETE);
-                }
-                if (ON_RESTORE.equals(function.getName()) && eventType.equals(UNDELETE)) {
-                    executeResourceOnEvent(eventDataRecord, ON_RESTORE);
-                }
+        Gson gson = new Gson();
+        String eventType = new JSONObject(gson.toJson(eventData.get(EVENT_PAYLOAD)))
+                .getJSONObject(EVENT_HEADER)
+                .get(EVENT_CHANGE_TYPE).toString();
+        BMap<BString, Object> eventDataRecord = getCdcEventDataRecord(eventData);
+        for (MethodType function : attachedFunctions) {
+            if (ON_CREATE.equals(function.getName()) && eventType.equals(CREATE)) {
+                executeResourceOnEvent(eventDataRecord, ON_CREATE);
             }
-        } catch (Exception e) {
-            log.error("Error dispatching CDC event: {}", e.getMessage(), e);
+            if (ON_UPDATE.equals(function.getName()) && eventType.equals(UPDATE)) {
+                executeResourceOnEvent(eventDataRecord, ON_UPDATE);
+            }
+            if (ON_DELETE.equals(function.getName()) && eventType.equals(DELETE)) {
+                executeResourceOnEvent(eventDataRecord, ON_DELETE);
+            }
+            if (ON_RESTORE.equals(function.getName()) && eventType.equals(UNDELETE)) {
+                executeResourceOnEvent(eventDataRecord, ON_RESTORE);
+            }
         }
     }
 
     private void executeResourceOnEvent(BMap<BString, Object> eventRecord, String functionName) {
-        executeResource(functionName, eventRecord);
+        Object result = executeResource(functionName, eventRecord);
+        if (result instanceof BError bError) {
+            throw bError;
+        }
     }
 
-    private void executeResource(String functionName, BMap<BString, Object> eventRecord) {
+    private Object executeResource(String functionName, BMap<BString, Object> eventRecord) {
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(functionName);
-        runtime.callMethod(service, functionName,
+        return runtime.callMethod(service, functionName,
                 new StrandMetadata(isIsolated, ModuleUtils.getProperties(functionName)), eventRecord);
     }
 
     private static BMap<BString, Object> getPlatformEventDataRecord(Map<String, Object> event) {
         ObjectMapper oMapper = new ObjectMapper();
         BMap<BString, Object> record =
-                ValueCreator.createRecordValue(ModuleUtils.getModule(), PLATFORM_EVENT_DATA_RECORD);
+                ValueCreator.createRecordValue(ModuleUtils.getModule(), PLATFORM_EVENT_MESSAGE);
         Object payloadObj = event.get(EVENT_PAYLOAD);
         Map<?, ?> payloadMap = oMapper.convertValue(payloadObj, Map.class);
         BMap<BString, Object> payloadBMap = toBMap(payloadMap);

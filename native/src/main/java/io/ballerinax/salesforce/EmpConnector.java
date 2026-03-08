@@ -312,12 +312,10 @@ public class EmpConnector {
             return future;
         }
 
-        String bearerToken = bearerToken();
-
         LongPollingTransport httpTransport = new LongPollingTransport(parameters.longPollingOptions(), httpClient) {
             @Override
             protected void customize(Request request) {
-                request.header(authorization, bearerToken);
+                request.header(authorization, bearerToken());
             }
         };
 
