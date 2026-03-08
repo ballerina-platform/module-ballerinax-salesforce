@@ -74,10 +74,10 @@ public isolated class Listener {
 
     # Attaches the service to the `salesforce:Listener` endpoint.
     #
-    # + s - Type descriptor of the service
-    # + name - Name of the service
+    # + s - Type descriptor of the service. Use `Service` for CDC channels and `PlatformEventsService` for platform events.
+    # + name - Channel name to subscribe to (e.g. `/data/ChangeEvents` or `/event/MyEvent__e`)
     # + return - `()` or else a `error` upon failure to register the service
-    public isolated function attach(Service s, string[]|string? name) returns error? {
+    public isolated function attach(Service|PlatformEventsService s, string[]|string? name) returns error? {
         if name is string {
             return attachService(self, s, name);
         } else {
@@ -116,7 +116,7 @@ public isolated class Listener {
     #
     # + s - Type descriptor of the service
     # + return - `()` or else a `error` upon failure to detach the service
-    public isolated function detach(Service s) returns error? {
+    public isolated function detach(Service|PlatformEventsService s) returns error? {
         return detachService(self, s);
     }
 
@@ -124,7 +124,7 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
-        return stopListener();
+        return stopListener(self);
     }
 
     # Stops subscriptions through all the consumer services and terminates the connection with the server.
@@ -156,7 +156,7 @@ isolated function initListenerWithOAuth2(Listener instance, int replayFrom, stri
         "io.ballerina.runtime.api.values.BString"]
 } external;
 
-isolated function attachService(Listener instance, Service s, string? channelName) returns error? =
+isolated function attachService(Listener instance, Service|PlatformEventsService s, string? channelName) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
@@ -173,12 +173,12 @@ isolated function startListenerWithOAuth2(Listener instance) returns error? =
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-isolated function detachService(Listener instance, Service s) returns error? =
+isolated function detachService(Listener instance, Service|PlatformEventsService s) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-isolated function stopListener() returns error? =
+isolated function stopListener(Listener instance) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
