@@ -26,6 +26,7 @@ import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
+import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
@@ -65,6 +66,8 @@ public class DispatcherService {
     public static final String ON_MESSAGE = "onMessage";
     public static final String PLATFORM_EVENT_MESSAGE = "PlatformEventsMessage";
     private static final String PLATFORM_EVENT_CHANNEL_PREFIX = "/event/";
+    public static final String EVENT_FIELD = "event";
+    public static final String REPLAY_ID = "replayId";
 
     private final BObject service;
     private final Runtime runtime;
@@ -143,21 +146,21 @@ public class DispatcherService {
     }
 
     private static BMap<BString, Object> getPlatformEventDataRecord(Map<String, Object> event) {
-        ObjectMapper oMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
         BMap<BString, Object> record =
                 ValueCreator.createRecordValue(ModuleUtils.getModule(), PLATFORM_EVENT_MESSAGE);
         Object payloadObj = event.get(EVENT_PAYLOAD);
-        Map<?, ?> payloadMap = oMapper.convertValue(payloadObj, Map.class);
-        BMap<BString, Object> payloadBMap = toBMap(payloadMap);
+        Map<?, ?> payloadMap = objectMapper.convertValue(payloadObj, Map.class);
+        BMap<BString, Object> payloadBMap = toJson(payloadMap);
         Long replayId = null;
-        Object eventEnvelope = event.get("event");
+        Object eventEnvelope = event.get(EVENT_FIELD);
         if (eventEnvelope instanceof Map) {
-            Object rid = ((Map<?, ?>) eventEnvelope).get("replayId");
+            Object rid = ((Map<?, ?>) eventEnvelope).get(REPLAY_ID);
             if (rid instanceof Number) {
                 replayId = ((Number) rid).longValue();
             }
         }
-        return ValueCreator.createRecordValue(record, new Object[]{payloadBMap, replayId});
+        return ValueCreator.createRecordValue(record, payloadBMap, replayId);
     }
 
     public static BMap<BString, Object> toBMap(Map<?, ?> map) {
@@ -170,6 +173,17 @@ public class DispatcherService {
         }
         return returnMap;
     }
+
+    public static BMap<BString, Object> toJson(Map<?, ?> map) {
+        BMap<BString, Object> returnMap = ValueCreator.createMapValue();
+        if (map != null) {
+            for (Object aKey : map.keySet().toArray()) {
+                returnMap.put(StringUtils.fromString(aKey.toString()), JsonUtils.convertToJson(map.get(aKey)));
+            }
+        }
+        return returnMap;
+    }
+
     private static BMap<BString, Object> getCdcEventDataRecord(Map<String, Object> event) {
         Gson gson = new Gson();
         ObjectMapper oMapper = new ObjectMapper();
