@@ -74,7 +74,7 @@ public isolated class Listener {
 
     # Attaches the service to the `salesforce:Listener` endpoint.
     #
-    # + s - Type descriptor of the service. Use `CdcService` for CDC channels and `PlatformEventsService` for platform events.
+    # + s - Service object to attach. Use `CdcService` for CDC channels and `PlatformEventsService` for platform events.
     # + name - Channel name to subscribe to (e.g. `/data/ChangeEvents` or `/event/MyEvent__e`)
     # + return - `()` or else a `error` upon failure to register the service
     public isolated function attach(Service s, string[]|string? name) returns error? {
