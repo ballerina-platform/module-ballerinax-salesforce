@@ -79,7 +79,13 @@ public isolated class Listener {
     # + return - `()` or else a `error` upon failure to register the service
     public isolated function attach(Service|PlatformEventsService s, string[]|string? name) returns error? {
         if name is string {
-            return attachService(self, s, name);
+            string channelName;
+            if s is PlatformEventsService {
+                channelName = name.startsWith(PLATFORM_EVENT_PREFIX) ? name : PLATFORM_EVENT_PREFIX + name;
+            } else {
+                channelName = name.startsWith(CDC_PREFIX) ? name : CDC_PREFIX + name;
+            }
+            return attachService(self, s, channelName);
         } else {
             return error("Invalid channel name.");
         }
