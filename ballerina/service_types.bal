@@ -14,9 +14,12 @@
 // specific language governing permissions and limitations
 // under the License.
 
+# This includes the service types for both Change Data Capture and Platform Events.
+public type Service CdcService|PlatformEventsService;
+
 # Triggers when a new Change Data Capture event is received from Salesforce channels.
 # Available actions: onCreate, onUpdate, onDelete, and onRestore
-public type Service service object {
+public type CdcService service object {
     # Triggers on a new record create event.
     #
     # + payload - The information about the triggered event
