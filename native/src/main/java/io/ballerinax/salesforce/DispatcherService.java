@@ -35,7 +35,10 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.ballerinax.salesforce.Constants.CHANGE_ORIGIN;
 import static io.ballerinax.salesforce.Constants.COMMIT_NUMBER;
@@ -72,6 +75,7 @@ public class DispatcherService {
     private final BObject service;
     private final Runtime runtime;
     private final String channelName;
+    private final Set<String> methodNames;
 
     public DispatcherService(BObject service, Runtime runtime) {
         this(service, runtime, null);
@@ -81,6 +85,9 @@ public class DispatcherService {
         this.service = service;
         this.runtime = runtime;
         this.channelName = channelName;
+        this.methodNames = Arrays.stream(service.getType().getMethods())
+                .map(MethodType::getName)
+                .collect(Collectors.toSet());
     }
 
     public String getChannelName() {
@@ -99,35 +106,26 @@ public class DispatcherService {
     }
 
     private void handlePlatformEvent(Map<String, Object> eventData) {
-        MethodType[] attachedFunctions = service.getType().getMethods();
-        for (MethodType function : attachedFunctions) {
-            if (ON_MESSAGE.equals(function.getName())) {
-                BMap<BString, Object> record = getPlatformEventDataRecord(eventData);
-                executeResourceOnEvent(record, ON_MESSAGE);
-            }
+        if (methodNames.contains(ON_MESSAGE)) {
+            BMap<BString, Object> record = getPlatformEventDataRecord(eventData);
+            executeResourceOnEvent(record, ON_MESSAGE);
         }
     }
 
     private void handleCdcEvent(Map<String, Object> eventData) {
-        MethodType[] attachedFunctions = service.getType().getMethods();
         Gson gson = new Gson();
         String eventType = new JSONObject(gson.toJson(eventData.get(EVENT_PAYLOAD)))
                 .getJSONObject(EVENT_HEADER)
                 .get(EVENT_CHANGE_TYPE).toString();
         BMap<BString, Object> eventDataRecord = getCdcEventDataRecord(eventData);
-        for (MethodType function : attachedFunctions) {
-            if (ON_CREATE.equals(function.getName()) && eventType.equals(CREATE)) {
-                executeResourceOnEvent(eventDataRecord, ON_CREATE);
-            }
-            if (ON_UPDATE.equals(function.getName()) && eventType.equals(UPDATE)) {
-                executeResourceOnEvent(eventDataRecord, ON_UPDATE);
-            }
-            if (ON_DELETE.equals(function.getName()) && eventType.equals(DELETE)) {
-                executeResourceOnEvent(eventDataRecord, ON_DELETE);
-            }
-            if (ON_RESTORE.equals(function.getName()) && eventType.equals(UNDELETE)) {
-                executeResourceOnEvent(eventDataRecord, ON_RESTORE);
-            }
+        if (methodNames.contains(ON_CREATE) && eventType.equals(CREATE)) {
+            executeResourceOnEvent(eventDataRecord, ON_CREATE);
+        } else if (methodNames.contains(ON_UPDATE) && eventType.equals(UPDATE)) {
+            executeResourceOnEvent(eventDataRecord, ON_UPDATE);
+        } else if (methodNames.contains(ON_DELETE) && eventType.equals(DELETE)) {
+            executeResourceOnEvent(eventDataRecord, ON_DELETE);
+        } else if (methodNames.contains(ON_RESTORE) && eventType.equals(UNDELETE)) {
+            executeResourceOnEvent(eventDataRecord, ON_RESTORE);
         }
     }
 
