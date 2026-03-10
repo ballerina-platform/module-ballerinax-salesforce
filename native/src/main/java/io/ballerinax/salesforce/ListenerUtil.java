@@ -21,6 +21,7 @@ package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
@@ -30,11 +31,15 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static io.ballerinax.salesforce.Constants.CONSUMER_SERVICES;
 import static io.ballerinax.salesforce.Constants.DISPATCHERS;
@@ -54,6 +59,8 @@ public class ListenerUtil {
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
     public static final String SUBSCRIPTIONS = "subscriptions";
     private static final String CONNECTOR = "connector";
+    private static final List<String> CDC_METHODS = List.of(
+            Constants.ON_CREATE, Constants.ON_UPDATE, Constants.ON_DELETE, Constants.ON_RESTORE);
 
     private static void extractBaseConfigs(BObject listener, int replayFrom,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
@@ -98,6 +105,16 @@ public class ListenerUtil {
 
         if (service == null) {
             return null;
+        }
+
+        Set<String> methodNames = Arrays.stream(service.getType().getMethods())
+                .map(MethodType::getName)
+                .collect(Collectors.toSet());
+        boolean hasOnMessage = methodNames.contains(DispatcherService.ON_MESSAGE);
+        boolean hasCdcMethod = CDC_METHODS.stream().anyMatch(methodNames::contains);
+        if (hasOnMessage && hasCdcMethod) {
+            return sfdcError("Ambiguous service: the service contains methods from both 'CdcService' " +
+                    "and 'PlatformEventsService'. A service must implement only one of these types.", null);
         }
 
         DispatcherService dispatcherService = new DispatcherService(service, environment.getRuntime(), channel);
