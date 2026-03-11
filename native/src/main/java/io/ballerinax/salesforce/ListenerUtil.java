@@ -89,7 +89,7 @@ public class ListenerUtil {
     private static EmpConnector connector;
     private static TopicSubscription subscription;
 
-    private static long secondsToMilliseconds(BDecimal seconds) {
+    private static long convertToMilliseconds(BDecimal seconds) {
         return seconds.value().multiply(BigDecimal.valueOf(MILLIS_PER_SECOND)).longValue();
     }
 
@@ -110,9 +110,9 @@ public class ListenerUtil {
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(API_VERSION, apiVersion.getValue());
-        long connectionTimeoutMs = secondsToMilliseconds(connectionTimeout);
-        long readTimeoutMs = secondsToMilliseconds(readTimeout);
-        long keepAliveIntervalMs = secondsToMilliseconds(keepAliveInterval);
+        long connectionTimeoutMs = convertToMilliseconds(connectionTimeout);
+        long readTimeoutMs = convertToMilliseconds(readTimeout);
+        long keepAliveIntervalMs = convertToMilliseconds(keepAliveInterval);
         listener.addNativeData(CONNECTION_TIMEOUT, connectionTimeoutMs);
         listener.addNativeData(READ_TIMEOUT, readTimeoutMs);
         listener.addNativeData(KEEP_ALIVE_INTERVAL, keepAliveIntervalMs);
