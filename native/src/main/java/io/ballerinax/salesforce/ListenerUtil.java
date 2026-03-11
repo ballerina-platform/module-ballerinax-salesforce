@@ -65,33 +65,43 @@ import static io.ballerinax.salesforce.Constants.REPLAY_FROM;
  * Util class containing the java external functions for Ballerina Salesforce listener.
  */
 public class ListenerUtil {
-    public static final String IS_OAUTH2 = "isOAuth2";
-    public static final String BASE_URL = "baseUrl";
-    public static final String CONNECTION_TIMEOUT = "connectionTimeout";
-    public static final String READ_TIMEOUT = "readTimeout";
-    public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
-    public static final String API_VERSION = "apiVersion";
-    public static final String KEYSTORE_PATH = "secureSocket_keystore_path";
-    public static final String KEYSTORE_PASSWORD = "secureSocket_keystore_password";
-    public static final String KEYSTORE_CERT_FILE = "secureSocket_certkey_certFile";
-    public static final String KEYSTORE_KEY_FILE = "secureSocket_certkey_keyFile";
-    public static final String KEYSTORE_KEY_PASSWORD = "secureSocket_certkey_keyPassword";
-    public static final String TRUSTSTORE_PATH = "secureSocket_truststore_path";
-    public static final String TRUSTSTORE_PASSWORD = "secureSocket_truststore_password";
-    public static final String TRUSTSTORE_CERT_FILE = "secureSocket_cert_file";
+    private static final String IS_OAUTH2 = "isOAuth2";
+    private static final String BASE_URL = "baseUrl";
+    private static final String CONNECTION_TIMEOUT = "connectionTimeout";
+    private static final String READ_TIMEOUT = "readTimeout";
+    private static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
+    private static final String API_VERSION = "apiVersion";
+    private static final String SSL_CONTEXT_FACTORY = "sslContextFactory";
     private static final ArrayList<BObject> services = new ArrayList<>();
     private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
-    public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
-    public static final BString FIELD_PATH = StringUtils.fromString("path");
-    public static final BString FIELD_PASSWORD = StringUtils.fromString("password");
-    public static final BString FIELD_CERT_FILE = StringUtils.fromString("certFile");
-    public static final BString FIELD_KEY_FILE = StringUtils.fromString("keyFile");
-    public static final BString FIELD_KEY_PASSWORD = StringUtils.fromString("keyPassword");
-    public static final BString KEYSTORE_CONFIG = StringUtils.fromString("key");
-    public static final BString TRUSTSTORE_CONFIG = StringUtils.fromString("cert");
-    public static final String X_509 = "X.509";
+    private static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
+    private static final BString FIELD_PATH = StringUtils.fromString("path");
+    private static final BString FIELD_PASSWORD = StringUtils.fromString("password");
+    private static final BString FIELD_CERT_FILE = StringUtils.fromString("certFile");
+    private static final BString FIELD_KEY_FILE = StringUtils.fromString("keyFile");
+    private static final BString FIELD_KEY_PASSWORD = StringUtils.fromString("keyPassword");
+    private static final BString KEYSTORE_CONFIG = StringUtils.fromString("key");
+    private static final BString TRUSTSTORE_CONFIG = StringUtils.fromString("cert");
+    private static final String X_509 = "X.509";
+    private static final String HTTPS_ENDPOINT_ID_ALGORITHM = "HTTPS";
+    private static final String[] SUPPORTED_KEY_ALGORITHMS = {"RSA", "EC", "DSA"};
+    private static final long MILLIS_PER_SECOND = 1000L;
     private static EmpConnector connector;
     private static TopicSubscription subscription;
+
+    private static long secondsToMilliseconds(BDecimal seconds) {
+        return seconds.value().multiply(BigDecimal.valueOf(MILLIS_PER_SECOND)).longValue();
+    }
+
+    private static SslContextFactory getSslContextFactory(BObject listener) {
+        SslContextFactory stored = (SslContextFactory) listener.getNativeData(SSL_CONTEXT_FACTORY);
+        if (stored != null) {
+            return stored;
+        }
+        SslContextFactory.Client factory = new SslContextFactory.Client();
+        factory.setEndpointIdentificationAlgorithm(HTTPS_ENDPOINT_ID_ALGORITHM);
+        return factory;
+    }
 
     private static void extractBaseConfigs(BObject listener, int replayFrom,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
@@ -100,9 +110,9 @@ public class ListenerUtil {
         listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(API_VERSION, apiVersion.getValue());
-        long connectionTimeoutMs = connectionTimeout.value().multiply(BigDecimal.valueOf(1000)).longValue();
-        long readTimeoutMs = readTimeout.value().multiply(BigDecimal.valueOf(1000)).longValue();
-        long keepAliveIntervalMs = keepAliveInterval.value().multiply(BigDecimal.valueOf(1000)).longValue();
+        long connectionTimeoutMs = secondsToMilliseconds(connectionTimeout);
+        long readTimeoutMs = secondsToMilliseconds(readTimeout);
+        long keepAliveIntervalMs = secondsToMilliseconds(keepAliveInterval);
         listener.addNativeData(CONNECTION_TIMEOUT, connectionTimeoutMs);
         listener.addNativeData(READ_TIMEOUT, readTimeoutMs);
         listener.addNativeData(KEEP_ALIVE_INTERVAL, keepAliveIntervalMs);
@@ -117,81 +127,50 @@ public class ListenerUtil {
         listener.addNativeData(IS_OAUTH2, false);
         listener.addNativeData(IS_SAND_BOX, isSandBox);
         if (secureSocket != null) {
-            extractSecureSocketConfig(listener, (BMap<?, ?>) secureSocket);
+            listener.addNativeData(SSL_CONTEXT_FACTORY, buildSslContextFactory((BMap<?, ?>) secureSocket));
         }
     }
 
-    public static void initListener(BObject listener, int replayFrom, BString baseUrl, BDecimal connectionTimeout,
-                                    BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion,
-                                    Object secureSocket) {
+    public static void initListener(BObject listener, int replayFrom, BString baseUrl,
+            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion,
+            Object secureSocket) {
         extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval, apiVersion);
         listener.addNativeData(IS_OAUTH2, true);
         listener.addNativeData(BASE_URL, baseUrl.getValue());
         if (secureSocket != null) {
-            extractSecureSocketConfig(listener, (BMap<?, ?>) secureSocket);
+            listener.addNativeData(SSL_CONTEXT_FACTORY, buildSslContextFactory((BMap<?, ?>) secureSocket));
         }
     }
 
-    private static void extractSecureSocketConfig(BObject listener, BMap<?, ?> secureSocketMap) {
+    private static SslContextFactory buildSslContextFactory(BMap<?, ?> secureSocketMap) {
+        SslContextFactory.Client factory = new SslContextFactory.Client();
+        factory.setEndpointIdentificationAlgorithm(HTTPS_ENDPOINT_ID_ALGORITHM);
+
         BMap<?, ?> keyField = secureSocketMap.getMapValue(KEYSTORE_CONFIG);
         if (keyField != null && keyField.containsKey(FIELD_PATH)) {
-            BString path = keyField.getStringValue(FIELD_PATH);
-            BString password = keyField.getStringValue(FIELD_PASSWORD);
-            listener.addNativeData(KEYSTORE_PATH, path.getValue());
-            listener.addNativeData(KEYSTORE_PASSWORD, password.getValue());
+            factory.setKeyStorePath(keyField.getStringValue(FIELD_PATH).getValue());
+            factory.setKeyStorePassword(keyField.getStringValue(FIELD_PASSWORD).getValue());
         } else if (keyField != null && keyField.containsKey(FIELD_CERT_FILE)) {
-            BString certFile = keyField.getStringValue(FIELD_CERT_FILE);
-            BString keyFile = keyField.getStringValue(FIELD_KEY_FILE);
-            listener.addNativeData(KEYSTORE_CERT_FILE, certFile.getValue());
-            listener.addNativeData(KEYSTORE_KEY_FILE, keyFile.getValue());
+            String certFile = keyField.getStringValue(FIELD_CERT_FILE).getValue();
+            String keyFilePath = keyField.getStringValue(FIELD_KEY_FILE).getValue();
             BString keyPassword = keyField.getStringValue(FIELD_KEY_PASSWORD);
-            if (keyPassword != null) {
-                listener.addNativeData(KEYSTORE_KEY_PASSWORD, keyPassword.getValue());
-            }
-        }
-        Object certField = secureSocketMap.get(TRUSTSTORE_CONFIG);
-        if (certField instanceof BMap<?, ?> certMap) {
-            BString path = certMap.getStringValue(FIELD_PATH);
-            BString password = certMap.getStringValue(FIELD_PASSWORD);
-            listener.addNativeData(TRUSTSTORE_PATH, path.getValue());
-            listener.addNativeData(TRUSTSTORE_PASSWORD, password.getValue());
-        } else if (certField instanceof BString) {
-            listener.addNativeData(TRUSTSTORE_CERT_FILE, ((BString) certField).getValue());
-        }
-    }
-
-    private static SslContextFactory buildSslContextFactory(BObject listener) {
-        SslContextFactory.Client factory = new SslContextFactory.Client();
-        factory.setEndpointIdentificationAlgorithm("HTTPS");
-        String keystorePath = (String) listener.getNativeData(KEYSTORE_PATH);
-        if (keystorePath != null) {
-            factory.setKeyStorePath(keystorePath);
-            factory.setKeyStorePassword((String) listener.getNativeData(KEYSTORE_PASSWORD));
-        }
-        String certKeyFile = (String) listener.getNativeData(KEYSTORE_CERT_FILE);
-        if (certKeyFile != null) {
-            String keyFile = (String) listener.getNativeData(KEYSTORE_KEY_FILE);
-            String keyPassword = (String) listener.getNativeData(KEYSTORE_KEY_PASSWORD);
-            char[] keyPasswordChars = keyPassword != null ? keyPassword.toCharArray() : new char[0];
+            char[] keyPasswordChars = keyPassword != null ? keyPassword.getValue().toCharArray() : new char[0];
             try {
-                KeyStore keystore = buildKeyStoreFromPem(certKeyFile, keyFile, keyPasswordChars);
+                KeyStore keystore = buildKeyStoreFromPem(certFile, keyFilePath, keyPasswordChars);
                 factory.setKeyStore(keystore);
-                factory.setKeyStorePassword(keyPassword != null ? keyPassword : "");
+                factory.setKeyStorePassword(keyPassword != null ? keyPassword.getValue() : "");
             } catch (GeneralSecurityException | IOException e) {
                 throw new IllegalArgumentException("Failed to load the keystore: " + e.getMessage(), e);
             }
         }
 
-        String truststorePath = (String) listener.getNativeData(TRUSTSTORE_PATH);
-        if (truststorePath != null) {
-            factory.setTrustStorePath(truststorePath);
-            factory.setTrustStorePassword((String) listener.getNativeData(TRUSTSTORE_PASSWORD));
-        }
-        String certFilePath = (String) listener.getNativeData(TRUSTSTORE_CERT_FILE);
-        if (certFilePath != null) {
+        Object certField = secureSocketMap.get(TRUSTSTORE_CONFIG);
+        if (certField instanceof BMap<?, ?> certMap) {
+            factory.setTrustStorePath(certMap.getStringValue(FIELD_PATH).getValue());
+            factory.setTrustStorePassword(certMap.getStringValue(FIELD_PASSWORD).getValue());
+        } else if (certField instanceof BString trustCert) {
             try {
-                KeyStore ts = buildTrustStoreFromPem(certFilePath);
-                factory.setTrustStore(ts);
+                factory.setTrustStore(buildTrustStoreFromPem(trustCert.getValue()));
             } catch (GeneralSecurityException | IOException e) {
                 throw new IllegalArgumentException("Failed to load the truststore: " + e.getMessage(), e);
             }
@@ -217,7 +196,7 @@ public class ListenerUtil {
 
     private static PrivateKey loadPrivateKey(byte[] keyBytes) throws GeneralSecurityException {
         PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        for (String algorithm : new String[]{"RSA", "EC", "DSA"}) {
+        for (String algorithm : SUPPORTED_KEY_ALGORITHMS) {
             try {
                 return KeyFactory.getInstance(algorithm).generatePrivate(spec);
             } catch (InvalidKeySpecException ignored) { // ignore and try next algorithm
@@ -277,12 +256,7 @@ public class ListenerUtil {
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String apiVersion = (String) listener.getNativeData(API_VERSION);
-        SslContextFactory sslContextFactory;
-        try {
-            sslContextFactory = buildSslContextFactory(listener);
-        } catch (IllegalArgumentException e) {
-            return sfdcError(e.getMessage(), e.getCause());
-        }
+        SslContextFactory sslContextFactory = getSslContextFactory(listener);
 
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() -> {
             try {
@@ -309,12 +283,7 @@ public class ListenerUtil {
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String apiVersion = (String) listener.getNativeData(API_VERSION);
-        SslContextFactory sslContextFactory;
-        try {
-            sslContextFactory = buildSslContextFactory(listener);
-        } catch (IllegalArgumentException e) {
-            return sfdcError(e.getMessage(), e.getCause());
-        }
+        SslContextFactory sslContextFactory = getSslContextFactory(listener);
 
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() ->
             new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl,
