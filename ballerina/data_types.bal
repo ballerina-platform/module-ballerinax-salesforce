@@ -62,6 +62,8 @@ public type CommonListenerConfig record {|
     decimal keepAliveInterval = 120;
     # The Salesforce API version to use for Streaming API
     string apiVersion = "43.0";
+    # Configurations for mutual TLS authentication
+    http:ClientSecureSocket secureSocket?;
 |};
 
 # The replay options representing the point in time when events are read.

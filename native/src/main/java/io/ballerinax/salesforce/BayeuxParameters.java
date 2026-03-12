@@ -40,6 +40,8 @@ import java.util.concurrent.TimeUnit;
  */
 public interface BayeuxParameters {
 
+    String HTTPS_ENDPOINT_ID_ALGORITHM = "HTTPS";
+
     /**
      * @return the bearer token used to authenticate
      */
@@ -114,7 +116,9 @@ public interface BayeuxParameters {
      * @return the SslContextFactory for establishing secure outbound connections
      */
     default SslContextFactory sslContextFactory() {
-        return new SslContextFactory();
+        SslContextFactory.Client factory = new SslContextFactory.Client();
+        factory.setEndpointIdentificationAlgorithm(HTTPS_ENDPOINT_ID_ALGORITHM);
+        return factory;
     }
 
     /**

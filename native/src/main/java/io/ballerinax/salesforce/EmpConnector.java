@@ -308,7 +308,7 @@ public class EmpConnector {
         } catch (Exception e) {
             log.error("Unable to start HTTP transport[{}]", parameters.endpoint(), e);
             running.set(false);
-            future.complete(false);
+            future.completeExceptionally(e);
             return future;
         }
 
