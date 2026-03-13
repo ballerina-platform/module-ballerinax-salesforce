@@ -21,6 +21,7 @@ package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
@@ -30,13 +31,16 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-import static io.ballerinax.salesforce.Constants.CHANNEL_NAME;
 import static io.ballerinax.salesforce.Constants.CONSUMER_SERVICES;
 import static io.ballerinax.salesforce.Constants.DISPATCHERS;
 import static io.ballerinax.salesforce.Constants.IS_SAND_BOX;
@@ -52,17 +56,18 @@ public class ListenerUtil {
     public static final String READ_TIMEOUT = "readTimeout";
     public static final String KEEP_ALIVE_INTERVAL = "keepAliveInterval";
     public static final String API_VERSION = "apiVersion";
-    private static final ArrayList<BObject> services = new ArrayList<>();
-    private static final Map<BObject, DispatcherService> serviceDispatcherMap = new HashMap<>();
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
-    private static EmpConnector connector;
-    private static TopicSubscription subscription;
+    public static final String SUBSCRIPTIONS = "subscriptions";
+    private static final String CONNECTOR = "connector";
+    private static final List<String> CDC_METHODS = List.of(
+            Constants.ON_CREATE, Constants.ON_UPDATE, Constants.ON_DELETE, Constants.ON_RESTORE);
 
     private static void extractBaseConfigs(BObject listener, int replayFrom,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
             BString apiVersion) {
-        listener.addNativeData(CONSUMER_SERVICES, services);
-        listener.addNativeData(DISPATCHERS, serviceDispatcherMap);
+        listener.addNativeData(CONSUMER_SERVICES, new ArrayList<BObject>());
+        listener.addNativeData(DISPATCHERS, new HashMap<BObject, DispatcherService>());
+        listener.addNativeData(SUBSCRIPTIONS, new HashMap<BObject, TopicSubscription>());
         listener.addNativeData(REPLAY_FROM, replayFrom);
         listener.addNativeData(API_VERSION, apiVersion.getValue());
         long connectionTimeoutMs = connectionTimeout.value().multiply(java.math.BigDecimal.valueOf(1000)).longValue();
@@ -90,7 +95,7 @@ public class ListenerUtil {
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
-        listener.addNativeData(CHANNEL_NAME, ((BString) channelName).getValue());
+        String channel = ((BString) channelName).getValue();
 
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
@@ -102,7 +107,17 @@ public class ListenerUtil {
             return null;
         }
 
-        DispatcherService dispatcherService = new DispatcherService(service, environment.getRuntime());
+        Set<String> methodNames = Arrays.stream(service.getType().getMethods())
+                .map(MethodType::getName)
+                .collect(Collectors.toSet());
+        boolean hasOnMessage = methodNames.contains(DispatcherService.ON_MESSAGE);
+        boolean hasCdcMethod = CDC_METHODS.stream().anyMatch(methodNames::contains);
+        if (hasOnMessage && hasCdcMethod) {
+            return sfdcError("Ambiguous service: the service contains methods from both 'CdcService' " +
+                    "and 'PlatformEventsService'. A service must implement only one of these types.", null);
+        }
+
+        DispatcherService dispatcherService = new DispatcherService(service, environment.getRuntime(), channel);
         services.add(service);
         serviceDispatcherMap.put(service, dispatcherService);
 
@@ -158,7 +173,7 @@ public class ListenerUtil {
         long connectionTimeoutMs = (Long) listener.getNativeData(CONNECTION_TIMEOUT);
         String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
-        connector = new EmpConnector(params);
+        EmpConnector connector = new EmpConnector(params);
         connector.setBearerTokenProvider(tokenProvider);
         try {
             connector.start().get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
@@ -168,36 +183,39 @@ public class ListenerUtil {
         } catch (Exception e) {
             return sfdcError(e.getMessage(), e.getCause());
         }
-
-        return subscribeServices(listener, connectionTimeoutMs);
+        listener.addNativeData(CONNECTOR, connector);
+        return subscribeServices(listener, connector, connectionTimeoutMs);
     }
 
-    private static Object subscribeServices(BObject listener, long connectionTimeoutMs) {
+    private static Object subscribeServices(BObject listener, EmpConnector connector, long connectionTimeoutMs) {
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         @SuppressWarnings("unchecked")
         Map<BObject, DispatcherService> serviceDispatcherMap =
                 (Map<BObject, DispatcherService>) listener.getNativeData(DISPATCHERS);
+        Map<BObject, TopicSubscription> subscriptionMap =
+                (Map<BObject, TopicSubscription>) listener.getNativeData(SUBSCRIPTIONS);
+
+        long replayFrom = (Integer) listener.getNativeData(REPLAY_FROM);
 
         for (BObject service : services) {
-            Object channelNameObj = listener.getNativeData(CHANNEL_NAME);
-            if (channelNameObj == null) {
-                return sfdcError("Channel name is not set. Please attach a service before starting the listener.",
-                        null);
-            }
-            String channelName = channelNameObj.toString();
-            long replayFrom = (Integer) listener.getNativeData(REPLAY_FROM);
-
             DispatcherService dispatcherService = serviceDispatcherMap.get(service);
             if (dispatcherService == null) {
                 return sfdcError("DispatcherService not found for service.", null);
             }
 
+            String channelName = dispatcherService.getChannelName();
+            if (channelName == null) {
+                return sfdcError("Channel name is not set. Please attach a service before starting the listener.",
+                        null);
+            }
+
             Consumer<Map<String, Object>> consumer = event -> injectEvent(dispatcherService, event);
 
             try {
-                subscription = connector.subscribe(channelName, replayFrom, consumer)
+                TopicSubscription subscription = connector.subscribe(channelName, replayFrom, consumer)
                         .get(connectionTimeoutMs, TimeUnit.MILLISECONDS);
+                subscriptionMap.put(service, subscription);
             } catch (Exception e) {
                 connector.stop();
                 return sfdcError(e.getMessage(), e.getCause());
@@ -207,22 +225,40 @@ public class ListenerUtil {
     }
 
     public static Object detachService(BObject listener, BObject service) {
-        String channel = listener.getNativeData(CHANNEL_NAME).toString();
-        connector.unsubscribe(channel);
         @SuppressWarnings("unchecked")
         ArrayList<BObject> services = (ArrayList<BObject>) listener.getNativeData(CONSUMER_SERVICES);
         @SuppressWarnings("unchecked")
         Map<BObject, DispatcherService> serviceDispatcherMap =
                 (Map<BObject, DispatcherService>) listener.getNativeData(DISPATCHERS);
+        Map<BObject, TopicSubscription> subscriptionMap =
+                (Map<BObject, TopicSubscription>) listener.getNativeData(SUBSCRIPTIONS);
+
+        DispatcherService dispatcherService = serviceDispatcherMap.get(service);
+        if (dispatcherService != null) {
+            TopicSubscription subscription = subscriptionMap.get(service);
+            if (subscription != null) {
+                subscription.cancel();
+                subscriptionMap.remove(service);
+            } else {
+                EmpConnector connector = (EmpConnector) listener.getNativeData(CONNECTOR);
+                if (connector != null) {
+                    connector.unsubscribe(dispatcherService.getChannelName());
+                }
+            }
+        }
+
         services.remove(service);
         serviceDispatcherMap.remove(service);
         return null;
     }
 
-    public static Object stopListener() {
-        if (subscription != null) {
-            subscription.cancel();
+    public static Object stopListener(BObject listener) {
+        Map<BObject, TopicSubscription> subscriptionMap =
+                (Map<BObject, TopicSubscription>) listener.getNativeData(SUBSCRIPTIONS);
+        if (subscriptionMap != null) {
+            subscriptionMap.values().forEach(TopicSubscription::cancel);
         }
+        EmpConnector connector = (EmpConnector) listener.getNativeData(CONNECTOR);
         if (connector != null) {
             connector.stop();
         }

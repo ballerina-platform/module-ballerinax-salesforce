@@ -147,3 +147,7 @@ const string PRODUCT = "Product2";
 
 # Constant field `NEW_LINE`. Holds the value of "\n".
 const string NEW_LINE = "\n";
+
+const string PLATFORM_EVENT_PREFIX = "/event/";
+
+const string CDC_PREFIX = "/data/";

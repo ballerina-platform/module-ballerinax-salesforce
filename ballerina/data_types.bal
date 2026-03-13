@@ -80,6 +80,14 @@ public type EventData record {
     ChangeEventMetadata metadata?;
 };
 
+# Contains data returned from a Platform Event
+public type PlatformEventsMessage record {
+    # The fields published with the Platform Event, as a JSON map
+    map<json> payload;
+    # The replay ID of the event, used for durable subscriptions
+    int replayId?;
+};
+
 # Header fields that contain information about the event.
 public type ChangeEventMetadata record {
     # The date and time when the change occurred, represented as the number of milliseconds since January 1, 1970 00:00:00 GMT

@@ -74,12 +74,18 @@ public isolated class Listener {
 
     # Attaches the service to the `salesforce:Listener` endpoint.
     #
-    # + s - Type descriptor of the service
-    # + name - Name of the service
+    # + s - Service object to attach. Use `CdcService` for CDC channels and `PlatformEventsService` for platform events.
+    # + name - Channel name to subscribe to (e.g. `/data/ChangeEvents` or `/event/MyEvent__e`)
     # + return - `()` or else a `error` upon failure to register the service
     public isolated function attach(Service s, string[]|string? name) returns error? {
         if name is string {
-            return attachService(self, s, name);
+            string channelName;
+            if s is PlatformEventsService {
+                channelName = name.startsWith(PLATFORM_EVENT_PREFIX) ? name : PLATFORM_EVENT_PREFIX + name;
+            } else {
+                channelName = name.startsWith(CDC_PREFIX) ? name : CDC_PREFIX + name;
+            }
+            return attachService(self, s, channelName);
         } else {
             return error("Invalid channel name.");
         }
@@ -124,7 +130,7 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
-        return stopListener();
+        return stopListener(self);
     }
 
     # Stops subscriptions through all the consumer services and terminates the connection with the server.
@@ -178,7 +184,7 @@ isolated function detachService(Listener instance, Service s) returns error? =
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
 
-isolated function stopListener() returns error? =
+isolated function stopListener(Listener instance) returns error? =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;
