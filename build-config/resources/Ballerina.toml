@@ -49,21 +49,39 @@ path = "./lib/opencsv-@opencsv.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.cometd.java"
-artifactId = "bayeux-api"
+artifactId = "cometd-java-api-common"
 version = "@cometd.java.client.version@"
-path = "./lib/bayeux-api-@cometd.java.client.version@.jar"
+path = "./lib/cometd-java-api-common-@cometd.java.client.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.cometd.java"
-artifactId = "cometd-java-client"
+artifactId = "cometd-java-api-client"
 version = "@cometd.java.client.version@"
-path = "./lib/cometd-java-client-@cometd.java.client.version@.jar"
+path = "./lib/cometd-java-api-client-@cometd.java.client.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.cometd.java"
 artifactId = "cometd-java-common"
 version = "@cometd.java.client.version@"
 path = "./lib/cometd-java-common-@cometd.java.client.version@.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.cometd.java"
+artifactId = "cometd-java-client-common"
+version = "@cometd.java.client.version@"
+path = "./lib/cometd-java-client-common-@cometd.java.client.version@.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.cometd.java"
+artifactId = "cometd-java-client-http-common"
+version = "@cometd.java.client.version@"
+path = "./lib/cometd-java-client-http-common-@cometd.java.client.version@.jar"
+
+[[platform.java21.dependency]]
+groupId = "org.cometd.java"
+artifactId = "cometd-java-client-http-jetty"
+version = "@cometd.java.client.version@"
+path = "./lib/cometd-java-client-http-jetty-@cometd.java.client.version@.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
