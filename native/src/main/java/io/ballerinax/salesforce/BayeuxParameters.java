@@ -113,8 +113,8 @@ public interface BayeuxParameters {
     /**
      * @return the SslContextFactory for establishing secure outbound connections
      */
-    default SslContextFactory sslContextFactory() {
-        return new SslContextFactory();
+    default SslContextFactory.Client sslContextFactory() {
+        return new SslContextFactory.Client();
     }
 
     /**

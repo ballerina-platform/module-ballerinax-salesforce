@@ -86,7 +86,7 @@ public class DelegatingBayeuxParameters implements BayeuxParameters {
     }
 
     @Override
-    public SslContextFactory sslContextFactory() {
+    public SslContextFactory.Client sslContextFactory() {
         return parameters.sslContextFactory();
     }
 

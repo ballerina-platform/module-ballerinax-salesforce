@@ -30,9 +30,9 @@ import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSessionChannel;
 import org.cometd.client.BayeuxClient;
-import org.cometd.client.transport.LongPollingTransport;
+import org.cometd.client.http.jetty.JettyHttpClientTransport;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,8 +145,9 @@ public class EmpConnector {
 
     public EmpConnector(BayeuxParameters parameters) {
         this.parameters = parameters;
-        httpClient = new HttpClient(parameters.sslContextFactory());
-        httpClient.getProxyConfiguration().getProxies().addAll(parameters.proxies());
+        httpClient = new HttpClient();
+        httpClient.setSslContextFactory(parameters.sslContextFactory());
+        parameters.proxies().forEach(httpClient.getProxyConfiguration()::addProxy);
     }
 
     /**
@@ -312,10 +313,11 @@ public class EmpConnector {
             return future;
         }
 
-        LongPollingTransport httpTransport = new LongPollingTransport(parameters.longPollingOptions(), httpClient) {
+        JettyHttpClientTransport httpTransport = new JettyHttpClientTransport(parameters.longPollingOptions(), 
+            httpClient) {
             @Override
             protected void customize(Request request) {
-                request.header(authorization, bearerToken());
+                request.headers(headers -> headers.put(authorization, bearerToken()));
             }
         };
 
