@@ -3,11 +3,23 @@ This file contains all the notable changes done to the Ballerina Salesforce pack
 
 ## [Unreleased]
 
+## [8.4.0] - 2026-03-13
+
 ### Added
 
-- [[#390] Add OAuth2 support for the Salesforce listener](https://github.com/ballerina-platform/module-ballerinax-salesforce/pull/390)
-- [[#392] Add support for connection and read timeouts in listener](https://github.com/ballerina-platform/module-ballerinax-salesforce/pull/392)
-- [[#393] Add configurable variable for Salesforce API versions](https://github.com/ballerina-platform/module-ballerinax-salesforce/pull/393)
+- [[#8674] Add support for platform events in Salesforce listener](https://github.com/ballerina-platform/ballerina-library/issues/8674)
+
+## [8.3.0] - 2026-02-18
+
+### Added
+
+- [[#8623] Add OAuth2 support for the Salesforce listener](https://github.com/ballerina-platform/ballerina-library/issues/8623)
+- [[#8649] Add support for connection and read timeouts in listener](https://github.com/ballerina-platform/ballerina-library/issues/8649)
+- [[#8650] Add configurable variable for Salesforce API versions](https://github.com/ballerina-platform/ballerina-library/issues/8650)
+
+### Fixed
+
+- [[#395] Ensure safe shutdown in Salesforce listener](https://github.com/ballerina-platform/module-ballerinax-salesforce/pull/395)
 
 ## [8.2.0] - 2025-03-04
 
