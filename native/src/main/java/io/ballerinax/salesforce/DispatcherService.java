@@ -26,7 +26,6 @@ import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.types.ObjectType;
-import io.ballerina.runtime.api.utils.JsonUtils;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
@@ -149,7 +148,7 @@ public class DispatcherService {
                 ValueCreator.createRecordValue(ModuleUtils.getModule(), PLATFORM_EVENT_MESSAGE);
         Object payloadObj = event.get(EVENT_PAYLOAD);
         Map<?, ?> payloadMap = objectMapper.convertValue(payloadObj, Map.class);
-        BMap<BString, Object> payloadBMap = toJson(payloadMap);
+        BMap<BString, Object> payloadBMap = toBMap(payloadMap);
         Long replayId = null;
         Object eventEnvelope = event.get(EVENT_FIELD);
         if (eventEnvelope instanceof Map) {
@@ -167,16 +166,6 @@ public class DispatcherService {
             for (Object aKey : map.keySet().toArray()) {
                 returnMap.put(StringUtils.fromString(aKey.toString()),
                         StringUtils.fromString(map.get(aKey).toString()));
-            }
-        }
-        return returnMap;
-    }
-
-    public static BMap<BString, Object> toJson(Map<?, ?> map) {
-        BMap<BString, Object> returnMap = ValueCreator.createMapValue();
-        if (map != null) {
-            for (Object aKey : map.keySet().toArray()) {
-                returnMap.put(StringUtils.fromString(aKey.toString()), JsonUtils.convertToJson(map.get(aKey)));
             }
         }
         return returnMap;
