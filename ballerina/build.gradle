@@ -72,7 +72,12 @@ configurations {
 
 dependencies {
     externalJars(group: 'com.opencsv', name: 'opencsv', version: openCsvVersion)
-    externalJars(group: 'org.cometd.java', name: 'cometd-java-client', version: cometdJavaClientVersion)
+    externalJars(group: 'org.cometd.java', name: 'cometd-java-api-common', version: cometdJavaClientVersion)
+    externalJars(group: 'org.cometd.java', name: 'cometd-java-api-client', version: cometdJavaClientVersion)
+    externalJars(group: 'org.cometd.java', name: 'cometd-java-common', version: cometdJavaClientVersion)
+    externalJars(group: 'org.cometd.java', name: 'cometd-java-client-common', version: cometdJavaClientVersion)
+    externalJars(group: 'org.cometd.java', name: 'cometd-java-client-http-common', version: cometdJavaClientVersion)
+    externalJars(group: 'org.cometd.java', name: 'cometd-java-client-http-jetty', version: cometdJavaClientVersion)
     externalJars(group: 'org.json', name: 'json', version: jsonVersion)
     externalJars(group: 'org.eclipse.jetty', name: 'jetty-client', version: jettyVersion)
     externalJars(group: 'org.eclipse.jetty', name: 'jetty-http', version: jettyVersion)
