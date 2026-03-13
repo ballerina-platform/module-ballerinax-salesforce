@@ -3,8 +3,6 @@ This file contains all the notable changes done to the Ballerina Salesforce pack
 
 ## [Unreleased]
 
-## [8.4.0] - 2026-03-13
-
 ### Added
 
 - [[#8674] Add support for platform events in Salesforce listener](https://github.com/ballerina-platform/ballerina-library/issues/8674)
