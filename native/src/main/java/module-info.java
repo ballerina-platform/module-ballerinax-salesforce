@@ -25,8 +25,9 @@ module io.ballerinax.salesforce {
     requires org.json;
     requires com.google.gson;
     requires com.fasterxml.jackson.databind;
-    requires org.cometd.bayeux;
+    requires org.cometd.api;
     requires org.cometd.client;
+    requires org.cometd.client.http.jetty;
     requires org.slf4j;
     exports io.ballerinax.salesforce;
 }

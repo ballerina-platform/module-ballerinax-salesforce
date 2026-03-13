@@ -29,7 +29,6 @@ package io.ballerinax.salesforce;
 import org.cometd.bayeux.Channel;
 import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
-import org.cometd.bayeux.client.ClientSession.Extension.Adapter;
 
 import java.util.Map;
 import java.util.Optional;
@@ -43,7 +42,7 @@ import java.util.function.Supplier;
  * @author hal.hildebrand
  * @since API v37.0
  */
-public class ReplayExtension extends Adapter {
+public class ReplayExtension implements ClientSession.Extension {
     private static final String EXTENSION_NAME = "replay";
     private static final String EVENT_KEY = "event";
     private static final String REPLAY_ID_KEY = "replayId";

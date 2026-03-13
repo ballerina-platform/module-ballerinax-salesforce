@@ -24,10 +24,10 @@
 package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.values.BObject;
+import org.eclipse.jetty.client.BytesRequestContent;
+import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.client.util.ByteBufferContentProvider;
+import org.eclipse.jetty.client.Request;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -35,7 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -144,16 +143,16 @@ public class LoginHelper {
 
     public static BayeuxParameters login(URL loginEndpoint, String username, String password,
                                          BayeuxParameters parameters, String apiVersion) throws Exception {
-        HttpClient client = new HttpClient(parameters.sslContextFactory());
+        HttpClient client = new HttpClient();
+        client.setSslContextFactory(parameters.sslContextFactory());
         try {
-            client.getProxyConfiguration().getProxies().addAll(parameters.proxies());
+            parameters.proxies().forEach(client.getProxyConfiguration()::addProxy);
             client.start();
             URL endpoint = new URL(loginEndpoint, getSoapUri(apiVersion));
             Request post = client.POST(endpoint.toURI());
-            post.content(new ByteBufferContentProvider("text/xml",
-                    ByteBuffer.wrap(soapXmlForLogin(username, password))));
-            post.header("SOAPAction", "''");
-            post.header("PrettyPrint", "Yes");
+            post.body(new BytesRequestContent("text/xml", soapXmlForLogin(username, password)));
+            post.headers(h -> h.put("SOAPAction", "''"));
+            post.headers(h -> h.put("PrettyPrint", "Yes"));
             ContentResponse response = post.send();
             SAXParserFactory spf = SAXParserFactory.newInstance();
             spf.setFeature("http://xml.org/sax/features/external-general-entities", false);
