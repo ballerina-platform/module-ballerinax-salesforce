@@ -5,7 +5,7 @@ name = "salesforce"
 version = "@toml.version@"
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
-keywords = ["Sales & CRM/Customer Relationship Management", "Cost/Freemium", "Vendor/Salesforce", "Area/CRM", "Type/Connector"]
+keywords = ["Cost/Freemium", "Vendor/Salesforce", "Area/CRM & Sales", "Type/Connector", "Type/Trigger"]
 icon = "icon.png"
 repository = "https://github.com/ballerina-platform/module-ballerinax-salesforce"
 
