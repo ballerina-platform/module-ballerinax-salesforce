@@ -68,13 +68,13 @@ public isolated class Listener {
             if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
                 http:OAuth2RefreshTokenGrantConfig rtConfig =
                     <http:OAuth2RefreshTokenGrantConfig>listenerConfig.auth;
-                log:printInfo("Listener using TokenManager for OAuth2 RefreshTokenGrantConfig (supports rotation)");
+                log:printDebug("Listener using TokenManager for OAuth2 RefreshTokenGrantConfig (supports rotation)");
                 self.tokenManager = check new (
                     rtConfig.clientId, rtConfig.clientSecret,
                     rtConfig.refreshToken, rtConfig.refreshUrl
                 );
             } else {
-                log:printInfo("Listener using standard OAuth2 provider (no rotation support)");
+                log:printDebug("Listener using standard OAuth2 provider (no rotation support)");
                 self.tokenManager = ();
             }
             initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
@@ -132,7 +132,7 @@ public isolated class Listener {
         // Use TokenManager for refresh token grant (handles rotation in memory)
         utils:TokenManager? tm = self.tokenManager;
         if tm is utils:TokenManager {
-            log:printInfo("Listener forcing fresh token refresh for CometD re-authentication");
+            log:printDebug("Listener forcing fresh token refresh for CometD re-authentication");
             string|error token = tm.refreshAccessToken();
             if token is error {
                 if token.message().includes("invalid_grant") {
@@ -144,7 +144,7 @@ public isolated class Listener {
                 }
                 return token;
             }
-            log:printInfo("Listener obtained fresh access token for CometD");
+            log:printDebug("Listener obtained fresh access token for CometD");
             return token;
         }
 
@@ -154,11 +154,11 @@ public isolated class Listener {
             return error("OAuth2 configuration is not set for this listener.");
         }
         if config is http:BearerTokenConfig {
-            log:printInfo("Listener using static bearer token");
+            log:printDebug("Listener using static bearer token");
             return config.token;
         }
         // Password grant and client credentials grant
-        log:printInfo("Listener generating token via OAuth2 provider");
+        log:printDebug("Listener generating token via OAuth2 provider");
         oauth2:ClientOAuth2Provider provider = new (check config.cloneWithType());
         return provider.generateToken();
     }
@@ -176,9 +176,9 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
-        log:printInfo("Salesforce CDC listener gracefully stopping — closing CometD connection");
+        log:printDebug("Salesforce CDC listener gracefully stopping — closing CometD connection");
         error? result = stopListener(self);
-        log:printInfo("Salesforce CDC listener stopped");
+        log:printDebug("Salesforce CDC listener stopped");
         if self.isOAuth2 {
             boolean permFailed;
             lock {
@@ -188,7 +188,7 @@ public isolated class Listener {
                 log:printError("Auto-reconnect SKIPPED: refresh token has permanently expired. " +
                     "Obtain a new refresh token and restart the listener.");
             } else {
-                log:printInfo("Scheduling auto-reconnect in 5 seconds...");
+                log:printDebug("Scheduling auto-reconnect in 5 seconds...");
                 _ = start scheduleReconnect(self);
             }
         }
@@ -206,9 +206,9 @@ public isolated class Listener {
         lock {
             self.tokenRefreshPermanentlyFailed = false;
         }
-        log:printInfo("Salesforce CDC listener reconnecting — creating new CometD connection");
+        log:printDebug("Salesforce CDC listener reconnecting — creating new CometD connection");
         check startListenerWithOAuth2(self);
-        log:printInfo("Salesforce CDC listener reconnected successfully");
+        log:printDebug("Salesforce CDC listener reconnected successfully");
     }
 
     # Stops subscriptions through all the consumer services and terminates the connection with the server.
@@ -221,12 +221,12 @@ public isolated class Listener {
 
 isolated function scheduleReconnect(Listener instance) {
     runtime:sleep(5);
-    log:printInfo("Attempting auto-reconnect after CometD connection stop...");
+    log:printDebug("Attempting auto-reconnect after CometD connection stop...");
     error? err = startListenerWithOAuth2(instance);
     if err is error {
         log:printError("Auto-reconnect failed — manual reconnect required", 'error = err);
     } else {
-        log:printInfo("CometD auto-reconnect succeeded — listener is active again");
+        log:printDebug("CometD auto-reconnect succeeded — listener is active again");
     }
 }
 
@@ -234,6 +234,7 @@ isolated function proactiveReconnectMonitor(Listener instance, utils:TokenManage
     int bufferSeconds = 300; // reconnect 5 minutes before token expiry
     while true {
         int secondsLeft = tokenManager.getSecondsUntilExpiry();
+        // int secondsLeft = 420;
         int sleepSeconds;
         if secondsLeft > bufferSeconds {
             sleepSeconds = secondsLeft - bufferSeconds;
@@ -242,14 +243,12 @@ isolated function proactiveReconnectMonitor(Listener instance, utils:TokenManage
         } else {
             sleepSeconds = 60; // token not yet obtained or expired, retry in 1 min
         }
-        log:printInfo("Proactive token monitor: next refresh scheduled",
+        log:printDebug("Proactive token monitor: next refresh scheduled",
             sleepSeconds = sleepSeconds,
             tokenExpiresInSeconds = secondsLeft);
         runtime:sleep(<decimal>sleepSeconds);
-        //Manual sleep for 60 seconds and force reconnect
-        // runtime:sleep(<decimal>60);
 
-        log:printInfo("Proactive reconnect: refreshing CometD connection before token expiry...");
+        log:printDebug("Proactive reconnect: refreshing CometD connection before token expiry...");
         error? stopErr = stopListener(instance);
         if stopErr is error {
             log:printWarn("Proactive reconnect: stop warning", 'error = stopErr);
@@ -259,7 +258,7 @@ isolated function proactiveReconnectMonitor(Listener instance, utils:TokenManage
             log:printError("Proactive reconnect failed — will retry in 60 seconds", 'error = startErr);
             runtime:sleep(60d);
         } else {
-            log:printInfo("Proactive reconnect succeeded — CometD refreshed with new token");
+            log:printDebug("Proactive reconnect succeeded — CometD refreshed with new token");
         }
     }
 }

@@ -47,7 +47,7 @@ public isolated client class Client {
         if config.auth is config:OAuth2RefreshTokenGrantConfig {
             config:OAuth2RefreshTokenGrantConfig rtConfig =
                 <config:OAuth2RefreshTokenGrantConfig>config.auth;
-            log:printInfo("Salesforce Client using TokenManager for OAuth2 RefreshTokenGrantConfig (supports rotation)");
+            log:printDebug("Salesforce Client using TokenManager for OAuth2 RefreshTokenGrantConfig (supports rotation)");
             self.tokenManager = check new (
                 rtConfig.clientId, rtConfig.clientSecret,
                 rtConfig.refreshToken, rtConfig.refreshUrl

@@ -49,7 +49,7 @@ public isolated class TokenManager {
         self.accessToken = "";
         self.accessTokenExpiryEpoch = -1;
         self.tokenClient = check new (tokenUrl);
-        log:printInfo("TokenManager initialized",
+        log:printDebug("TokenManager initialized",
             tokenEndpoint = tokenUrl,
             seedRefreshToken = maskToken(refreshToken));
     }
@@ -62,13 +62,13 @@ public isolated class TokenManager {
             [int, decimal] currentTime = time:utcNow();
             if self.accessToken != "" && currentTime[0] < self.accessTokenExpiryEpoch {
                 int secondsRemaining = self.accessTokenExpiryEpoch - currentTime[0];
-                log:printInfo("Reusing cached access token",
+                log:printDebug("Reusing cached access token",
                     accessTokenFingerprint = fingerprintToken(self.accessToken),
                     expiresInSeconds = secondsRemaining);
                 return self.accessToken;
             }
         }
-        log:printInfo("Access token expired or not yet obtained, refreshing");
+        log:printDebug("Access token expired or not yet obtained, refreshing");
         return self.refreshAccessToken();
     }
 
@@ -82,7 +82,7 @@ public isolated class TokenManager {
             currentRefreshToken = self.refreshToken;
         }
 
-        log:printInfo("Requesting new access token from Salesforce",
+        log:printDebug("Requesting new access token from Salesforce",
             refreshTokenUsed = maskToken(currentRefreshToken),
             refreshTokenFingerprint = fingerprintToken(currentRefreshToken),
             tokenEndpoint = self.tokenUrl);
@@ -109,7 +109,7 @@ public isolated class TokenManager {
 
         // Log response keys to diagnose whether Salesforce returned a refresh_token
         map<json> bodyMap = check body.ensureType();
-        log:printInfo("Salesforce token response received",
+        log:printDebug("Salesforce token response received",
             responseFields = bodyMap.keys().toString());
 
         string newAccessToken = check (check body.access_token).ensureType(string);
@@ -118,7 +118,7 @@ public isolated class TokenManager {
         string? rotatedRefreshToken = ();
         if bodyMap.hasKey("refresh_token") {
             json rtValue = bodyMap.get("refresh_token");
-            log:printInfo("refresh_token field found in response",
+            log:printDebug("refresh_token field found in response",
                 valueType = (typeof rtValue).toString(),
                 isNull = rtValue is ());
             string|error rtStr = rtValue.ensureType(string);
@@ -129,7 +129,7 @@ public isolated class TokenManager {
                     'error = rtStr);
             }
         } else {
-            log:printInfo("No refresh_token field in Salesforce response");
+            log:printDebug("No refresh_token field in Salesforce response");
         }
 
         // Extract expires_in for proactive refresh
@@ -153,19 +153,19 @@ public isolated class TokenManager {
             }
         }
 
-        log:printInfo("Access token obtained successfully",
+        log:printDebug("Access token obtained successfully",
             accessTokenFingerprint = fingerprintToken(newAccessToken),
             expiresInSeconds = expiresIn,
             expiryEpoch = effectiveExpiryEpoch);
 
         if rotatedRefreshToken is string {
-            log:printInfo("Refresh token rotated by Salesforce — updated in memory",
+            log:printDebug("Refresh token rotated by Salesforce — updated in memory",
                 previousRefreshToken = maskToken(currentRefreshToken),
                 previousRefreshTokenFingerprint = fingerprintToken(currentRefreshToken),
                 newRefreshToken = maskToken(rotatedRefreshToken),
                 newRefreshTokenFingerprint = fingerprintToken(rotatedRefreshToken));
         } else {
-            log:printInfo("No refresh token rotation detected (same token remains valid)",
+            log:printDebug("No refresh token rotation detected (same token remains valid)",
                 refreshTokenFingerprint = fingerprintToken(currentRefreshToken));
         }
 
