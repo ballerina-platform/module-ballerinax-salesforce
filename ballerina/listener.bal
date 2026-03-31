@@ -16,6 +16,8 @@
 
 import ballerina/http;
 import ballerina/jballerina.java;
+import ballerina/lang.runtime;
+import ballerina/log;
 import ballerina/oauth2;
 import ballerinax/salesforce.utils;
 
@@ -26,9 +28,11 @@ public isolated class Listener {
     private final string password;
     private final boolean isOAuth2;
     private final readonly & OAuth2Config? oauth2Config;
+    private final utils:TokenManager? tokenManager;
     private string? channelName = ();
     private final int replayFrom;
     private final string apiVersion;
+    private boolean tokenRefreshPermanentlyFailed = false;
 
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
@@ -60,6 +64,19 @@ public isolated class Listener {
             self.password = "";
             self.isOAuth2 = true;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
+            // Create TokenManager for RefreshTokenGrantConfig to handle token rotation
+            if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
+                http:OAuth2RefreshTokenGrantConfig rtConfig =
+                    <http:OAuth2RefreshTokenGrantConfig>listenerConfig.auth;
+                log:printDebug("Listener using TokenManager for OAuth2 RefreshTokenGrantConfig (supports rotation)");
+                self.tokenManager = check new (
+                    rtConfig.clientId, rtConfig.clientSecret,
+                    rtConfig.refreshToken, rtConfig.refreshUrl
+                );
+            } else {
+                log:printDebug("Listener using standard OAuth2 provider (no rotation support)");
+                self.tokenManager = ();
+            }
             initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
                     connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
         } else {
@@ -67,6 +84,7 @@ public isolated class Listener {
             self.password = listenerConfig.auth.password;
             self.isOAuth2 = false;
             self.oauth2Config = ();
+            self.tokenManager = ();
             initListener(self, self.replayFrom, listenerConfig.isSandBox,
                     connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
         }
@@ -96,26 +114,53 @@ public isolated class Listener {
     # + return - `()` or else a `error` upon failure to start
     public isolated function 'start() returns error? {
         if self.isOAuth2 {
-            return startListenerWithOAuth2(self);
+            check startListenerWithOAuth2(self);
+            utils:TokenManager? tm = self.tokenManager;
+            if tm is utils:TokenManager {
+                _ = start proactiveReconnectMonitor(self, tm);
+            }
         } else {
             return startListener(self.username, self.password, self);
         }
     }
 
     # Retrieves the OAuth2 access token based on the configured grant type.
+    # For RefreshTokenGrantConfig, uses TokenManager which handles refresh token rotation.
     #
     # + return - The access token or an error if token retrieval fails
     isolated function getOAuth2Token() returns string|error {
+        // Use TokenManager for refresh token grant (handles rotation in memory)
+        utils:TokenManager? tm = self.tokenManager;
+        if tm is utils:TokenManager {
+            log:printDebug("Listener forcing fresh token refresh for CometD re-authentication");
+            string|error token = tm.refreshAccessToken();
+            if token is error {
+                if token.message().includes("invalid_grant") {
+                    lock {
+                        self.tokenRefreshPermanentlyFailed = true;
+                    }
+                    log:printError("Refresh token invalid or expired (invalid_grant) — " +
+                        "auto-reconnect will be suppressed. Obtain a new refresh token and restart.");
+                }
+                return token;
+            }
+            log:printDebug("Listener obtained fresh access token for CometD");
+            return token;
+        }
+
+        // Existing paths for other grant types
         OAuth2Config? & readonly config = self.oauth2Config;
         if config is () {
             return error("OAuth2 configuration is not set for this listener.");
         }
         if config is http:BearerTokenConfig {
+            log:printDebug("Listener using static bearer token");
             return config.token;
-        } else {
-            oauth2:ClientOAuth2Provider provider = new (check config.cloneWithType());
-            return provider.generateToken();
         }
+        // Password grant and client credentials grant
+        log:printDebug("Listener generating token via OAuth2 provider");
+        oauth2:ClientOAuth2Provider provider = new (check config.cloneWithType());
+        return provider.generateToken();
     }
 
     # Stops subscription and detaches the service from the `salesforce:Listener` endpoint.
@@ -127,10 +172,51 @@ public isolated class Listener {
     }
 
     # Stops subscription through all consumer services by terminating the connection and all its channels.
+    # For OAuth2 listeners, automatically schedules a reconnect after 5 seconds.
     #
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
-        return stopListener(self);
+        log:printDebug("Salesforce CDC listener gracefully stopping — closing CometD connection");
+        error? result = stopListener(self);
+        log:printDebug("Salesforce CDC listener stopped");
+        if self.isOAuth2 {
+            boolean permFailed;
+            lock {
+                permFailed = self.tokenRefreshPermanentlyFailed;
+            }
+            if permFailed {
+                log:printError("Auto-reconnect SKIPPED: refresh token has permanently expired. " +
+                    "Obtain a new refresh token and restart the listener.");
+            } else {
+                log:printDebug("Scheduling auto-reconnect in 5 seconds...");
+                _ = start scheduleReconnect(self);
+            }
+        }
+        return result;
+    }
+
+    # Re-establishes the CometD connection. Safe to call after gracefulStop() or after a connection drop.
+    # Only supported for OAuth2 (RestBasedListenerConfig) listeners.
+    #
+    # + return - `()` or else a `error` upon failure to reconnect
+    public isolated function reconnect() returns error? {
+        if !self.isOAuth2 {
+            return error("reconnect() is only supported for OAuth2 listeners");
+        }
+        lock {
+            self.tokenRefreshPermanentlyFailed = false;
+        }
+        log:printDebug("Salesforce CDC listener reconnecting — creating new CometD connection");
+        check startListenerWithOAuth2(self);
+        log:printDebug("Salesforce CDC listener reconnected successfully");
+    }
+
+    # Returns true if a permanent token failure (e.g. invalid_grant) has been detected.
+    # Used by background monitors to know when to stop retrying.
+    isolated function isTokenRefreshPermanentlyFailed() returns boolean {
+        lock {
+            return self.tokenRefreshPermanentlyFailed;
+        }
     }
 
     # Stops subscriptions through all the consumer services and terminates the connection with the server.
@@ -141,13 +227,76 @@ public isolated class Listener {
     }
 }
 
+isolated function scheduleReconnect(Listener instance) {
+    runtime:sleep(5);
+    log:printDebug("Attempting auto-reconnect after CometD connection stop...");
+    error? err = startListenerWithOAuth2(instance);
+    if err is error {
+        log:printError("Auto-reconnect failed — manual reconnect required", 'error = err);
+    } else {
+        log:printDebug("CometD auto-reconnect succeeded — listener is active again");
+    }
+}
+
+isolated function proactiveReconnectMonitor(Listener instance, utils:TokenManager tokenManager) {
+    int bufferSeconds = 300; // reconnect 5 minutes before token expiry
+    while true {
+        // Stop the monitor if a permanent token failure has been detected
+        if instance.isTokenRefreshPermanentlyFailed() {
+            log:printError("Proactive token monitor stopping — refresh token permanently expired. " +
+                "Obtain a new refresh token and restart the listener.");
+            break;
+        }
+
+        int secondsLeft = tokenManager.getSecondsUntilExpiry();
+        int sleepSeconds;
+        if secondsLeft > bufferSeconds {
+            sleepSeconds = secondsLeft - bufferSeconds;
+        } else if secondsLeft > 0 {
+            sleepSeconds = secondsLeft;
+        } else {
+            sleepSeconds = 60; // token not yet obtained or expired, retry in 1 min
+        }
+        log:printDebug("Proactive token monitor: next refresh scheduled",
+            sleepSeconds = sleepSeconds,
+            tokenExpiresInSeconds = secondsLeft);
+        runtime:sleep(<decimal>sleepSeconds);
+
+        // Check again after sleeping — flag may have been set while we were sleeping
+        if instance.isTokenRefreshPermanentlyFailed() {
+            log:printError("Proactive token monitor stopping — refresh token permanently expired. " +
+                "Obtain a new refresh token and restart the listener.");
+            break;
+        }
+
+        log:printDebug("Proactive reconnect: refreshing CometD connection before token expiry...");
+        error? stopErr = stopListener(instance);
+        if stopErr is error {
+            log:printWarn("Proactive reconnect: stop warning", 'error = stopErr);
+        }
+        error? startErr = startListenerWithOAuth2(instance);
+        if startErr is error {
+            log:printError("Proactive reconnect failed — will retry in 60 seconds", 'error = startErr);
+            runtime:sleep(60d);
+        } else {
+            log:printDebug("Proactive reconnect succeeded — CometD refreshed with new token");
+        }
+    }
+}
+
 isolated function initListener(Listener instance, int replayFrom, boolean isSandBox,
         decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval, string apiVersion) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil",
-    paramTypes: ["io.ballerina.runtime.api.values.BObject", "int", "boolean",
-        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BString"]
+    paramTypes: [
+        "io.ballerina.runtime.api.values.BObject",
+        "int",
+        "boolean",
+        "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BString"
+    ]
 } external;
 
 isolated function initListenerWithOAuth2(Listener instance, int replayFrom, string baseUrl,
@@ -156,10 +305,15 @@ isolated function initListenerWithOAuth2(Listener instance, int replayFrom, stri
 @java:Method {
     name: "initListener",
     'class: "io.ballerinax.salesforce.ListenerUtil",
-    paramTypes: ["io.ballerina.runtime.api.values.BObject", "int",
-        "io.ballerina.runtime.api.values.BString", "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BString"]
+    paramTypes: [
+        "io.ballerina.runtime.api.values.BObject",
+        "int",
+        "io.ballerina.runtime.api.values.BString",
+        "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BDecimal",
+        "io.ballerina.runtime.api.values.BString"
+    ]
 } external;
 
 isolated function attachService(Listener instance, Service s, string? channelName) returns error? =
