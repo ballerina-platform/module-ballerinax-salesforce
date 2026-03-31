@@ -211,6 +211,14 @@ public isolated class Listener {
         log:printDebug("Salesforce CDC listener reconnected successfully");
     }
 
+    # Returns true if a permanent token failure (e.g. invalid_grant) has been detected.
+    # Used by background monitors to know when to stop retrying.
+    isolated function isTokenRefreshPermanentlyFailed() returns boolean {
+        lock {
+            return self.tokenRefreshPermanentlyFailed;
+        }
+    }
+
     # Stops subscriptions through all the consumer services and terminates the connection with the server.
     #
     # + return - `()` or else a `error` upon failure to close ChannelListener.
@@ -233,8 +241,14 @@ isolated function scheduleReconnect(Listener instance) {
 isolated function proactiveReconnectMonitor(Listener instance, utils:TokenManager tokenManager) {
     int bufferSeconds = 300; // reconnect 5 minutes before token expiry
     while true {
+        // Stop the monitor if a permanent token failure has been detected
+        if instance.isTokenRefreshPermanentlyFailed() {
+            log:printError("Proactive token monitor stopping — refresh token permanently expired. " +
+                "Obtain a new refresh token and restart the listener.");
+            break;
+        }
+
         int secondsLeft = tokenManager.getSecondsUntilExpiry();
-        // int secondsLeft = 420;
         int sleepSeconds;
         if secondsLeft > bufferSeconds {
             sleepSeconds = secondsLeft - bufferSeconds;
@@ -247,6 +261,13 @@ isolated function proactiveReconnectMonitor(Listener instance, utils:TokenManage
             sleepSeconds = sleepSeconds,
             tokenExpiresInSeconds = secondsLeft);
         runtime:sleep(<decimal>sleepSeconds);
+
+        // Check again after sleeping — flag may have been set while we were sleeping
+        if instance.isTokenRefreshPermanentlyFailed() {
+            log:printError("Proactive token monitor stopping — refresh token permanently expired. " +
+                "Obtain a new refresh token and restart the listener.");
+            break;
+        }
 
         log:printDebug("Proactive reconnect: refreshing CometD connection before token expiry...");
         error? stopErr = stopListener(instance);
