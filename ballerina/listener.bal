@@ -19,7 +19,12 @@ import ballerina/jballerina.java;
 import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/oauth2;
+import ballerina/task;
+import ballerina/time;
 import ballerinax/salesforce.utils;
+
+# Seconds before token expiry to trigger a proactive CometD reconnection with a fresh token.
+const int TOKEN_REFRESH_BUFFER_SECONDS = 60;
 
 # Ballerina Salesforce Listener connector provides the capability to receive notifications from Salesforce.
 @display {label: "Salesforce", iconPath: "icon.png"}
@@ -32,7 +37,10 @@ public isolated class Listener {
     private string? channelName = ();
     private final int replayFrom;
     private final string apiVersion;
+    private final string baseUrl;
+    private final int sessionTimeout;
     private boolean tokenRefreshPermanentlyFailed = false;
+    private task:JobId? tokenRefreshJobId = ();
 
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
@@ -57,24 +65,30 @@ public isolated class Listener {
         if keepAliveInterval <= 0d {
             return error("Keep alive interval must be greater than 0.");
         }
+        int sessionTimeout = listenerConfig.sessionTimeout;
+        if sessionTimeout <= 0 {
+            return error("Session timeout must be greater than 0.");
+        }
+        self.sessionTimeout = sessionTimeout;
         check utils:validateApiVersion(listenerConfig.apiVersion);
         self.apiVersion = listenerConfig.apiVersion;
         if listenerConfig is RestBasedListenerConfig {
             self.username = "";
             self.password = "";
             self.isOAuth2 = true;
+            self.baseUrl = listenerConfig.baseUrl;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
             // Create TokenManager for RefreshTokenGrantConfig to handle token rotation
             if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
                 http:OAuth2RefreshTokenGrantConfig rtConfig =
                     <http:OAuth2RefreshTokenGrantConfig>listenerConfig.auth;
-                log:printDebug("Listener using TokenManager for OAuth2 RefreshTokenGrantConfig (supports rotation)");
+
                 self.tokenManager = check new (
                     rtConfig.clientId, rtConfig.clientSecret,
-                    rtConfig.refreshToken, rtConfig.refreshUrl
+                    rtConfig.refreshToken, rtConfig.refreshUrl,
+                    sessionTimeout
                 );
             } else {
-                log:printDebug("Listener using standard OAuth2 provider (no rotation support)");
                 self.tokenManager = ();
             }
             initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
@@ -83,6 +97,7 @@ public isolated class Listener {
             self.username = listenerConfig.auth.username;
             self.password = listenerConfig.auth.password;
             self.isOAuth2 = false;
+            self.baseUrl = "";
             self.oauth2Config = ();
             self.tokenManager = ();
             initListener(self, self.replayFrom, listenerConfig.isSandBox,
@@ -115,10 +130,7 @@ public isolated class Listener {
     public isolated function 'start() returns error? {
         if self.isOAuth2 {
             check startListenerWithOAuth2(self);
-            utils:TokenManager? tm = self.tokenManager;
-            if tm is utils:TokenManager {
-                _ = start proactiveReconnectMonitor(self, tm);
-            }
+            check self.scheduleTokenRefreshJob();
         } else {
             return startListener(self.username, self.password, self);
         }
@@ -126,25 +138,33 @@ public isolated class Listener {
 
     # Retrieves the OAuth2 access token based on the configured grant type.
     # For RefreshTokenGrantConfig, uses TokenManager which handles refresh token rotation.
+    # Invalidates the cached token first to ensure a fresh token is obtained on re-auth.
     #
     # + return - The access token or an error if token retrieval fails
     isolated function getOAuth2Token() returns string|error {
-        // Use TokenManager for refresh token grant (handles rotation in memory)
         utils:TokenManager? tm = self.tokenManager;
         if tm is utils:TokenManager {
-            log:printDebug("Listener forcing fresh token refresh for CometD re-authentication");
-            string|error token = tm.refreshAccessToken();
+            tm.invalidateAccessToken();
+            log:printInfo("Requesting access token for CometD authentication");
+            string|error token = tm.getAccessToken();
             if token is error {
                 if token.message().includes("invalid_grant") {
                     lock {
                         self.tokenRefreshPermanentlyFailed = true;
                     }
-                    log:printError("Refresh token invalid or expired (invalid_grant) — " +
-                        "auto-reconnect will be suppressed. Obtain a new refresh token and restart.");
+                    log:printError("Refresh token permanently expired (invalid_grant). " +
+                        "Re-authenticate via the authorization code grant to obtain a new refresh token.");
+                    error? unscheduleErr = self.unscheduleTokenRefreshJob();
+                    if unscheduleErr is error {
+                        log:printWarn("Failed to unschedule token refresh job on invalid_grant",
+                            'error = unscheduleErr);
+                    }
+                    _ = start self.gracefulStop();
                 }
                 return token;
             }
-            log:printDebug("Listener obtained fresh access token for CometD");
+            log:printInfo("Access token obtained for CometD",
+                expiresInMinutes = tm.getSecondsUntilExpiry() / 60);
             return token;
         }
 
@@ -154,11 +174,9 @@ public isolated class Listener {
             return error("OAuth2 configuration is not set for this listener.");
         }
         if config is http:BearerTokenConfig {
-            log:printDebug("Listener using static bearer token");
             return config.token;
         }
         // Password grant and client credentials grant
-        log:printDebug("Listener generating token via OAuth2 provider");
         oauth2:ClientOAuth2Provider provider = new (check config.cloneWithType());
         return provider.generateToken();
     }
@@ -176,19 +194,23 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
-        log:printDebug("Salesforce CDC listener gracefully stopping — closing CometD connection");
+        log:printInfo("Salesforce CDC listener gracefully stopping — closing CometD connection");
+        error? unscheduleErr = self.unscheduleTokenRefreshJob();
+        if unscheduleErr is error {
+            log:printWarn("Failed to unschedule token refresh job", 'error = unscheduleErr);
+        }
         error? result = stopListener(self);
-        log:printDebug("Salesforce CDC listener stopped");
+        log:printInfo("Salesforce CDC listener stopped");
         if self.isOAuth2 {
             boolean permFailed;
             lock {
                 permFailed = self.tokenRefreshPermanentlyFailed;
             }
             if permFailed {
-                log:printError("Auto-reconnect SKIPPED: refresh token has permanently expired. " +
+                log:printError("Refresh token has permanently expired. " +
                     "Obtain a new refresh token and restart the listener.");
             } else {
-                log:printDebug("Scheduling auto-reconnect in 5 seconds...");
+                log:printInfo("Scheduling auto-reconnect in 5 seconds...");
                 _ = start scheduleReconnect(self);
             }
         }
@@ -206,13 +228,101 @@ public isolated class Listener {
         lock {
             self.tokenRefreshPermanentlyFailed = false;
         }
-        log:printDebug("Salesforce CDC listener reconnecting — creating new CometD connection");
         check startListenerWithOAuth2(self);
-        log:printDebug("Salesforce CDC listener reconnected successfully");
+        check self.scheduleTokenRefreshJob();
+    }
+
+    # Updates the in-memory refresh token used by the listener.
+    # This is useful after an authorization-code exchange returns a new refresh token.
+    #
+    # + newRefreshToken - The latest refresh token returned by Salesforce
+    # + return - `()` or else an error if this listener is not using refresh-token auth
+    public isolated function updateRefreshToken(string newRefreshToken) returns error? {
+        utils:TokenManager? tm = self.tokenManager;
+        if tm is () {
+            return error("Refresh token updates are only supported for refresh-token OAuth2 listeners");
+        }
+        tm.updateRefreshToken(newRefreshToken);
+        lock {
+            self.tokenRefreshPermanentlyFailed = false;
+        }
+    }
+
+    # Returns the current in-memory refresh token held by the TokenManager.
+    # Use this to read the latest rotated token and persist it to durable storage
+    # so a process restart loads the newest token rather than the original seed.
+    #
+    # + return - The current refresh token, or an error if this listener is not using refresh-token auth
+    public isolated function getRefreshToken() returns string|error {
+        utils:TokenManager? tm = self.tokenManager;
+        if tm is () {
+            return error("getRefreshToken() is only supported for refresh-token OAuth2 listeners");
+        }
+        return tm.getRefreshToken();
+    }
+
+    # Schedules a recurring token refresh job using `task:scheduleJobRecurByFrequency`.
+    # The job fires every (effectiveSessionTimeout - tokenRefreshBuffer) seconds and
+    # proactively refreshes the CometD connection before the access token expires.
+    # The effective session timeout is read from the TokenManager (may have been
+    # auto-detected from the org via the Metadata API).
+    #
+    # + return - `()` or else an error if scheduling fails
+    isolated function scheduleTokenRefreshJob() returns error? {
+        utils:TokenManager? tm = self.tokenManager;
+        if tm is utils:TokenManager {
+            error? unscheduleErr = self.unscheduleTokenRefreshJob();
+            if unscheduleErr is error {
+                log:printWarn("Failed to unschedule existing token refresh job", 'error = unscheduleErr);
+            }
+            int intervalSeconds = self.sessionTimeout - TOKEN_REFRESH_BUFFER_SECONDS;
+            if intervalSeconds <= 0 {
+                log:printError("Token refresh interval is non-positive — TOKEN_REFRESH_BUFFER_SECONDS " +
+                    "exceeds session timeout. Skipping job scheduling.",
+                    sessionTimeoutMinutes = self.sessionTimeout / 60,
+                    bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS);
+                return;
+            }
+            TokenRefreshJob job = new (self, tm);
+            // Delay the first execution by intervalSeconds so the job doesn't fire
+            // immediately at t=0 (scheduleJobRecurByFrequency fires at t=0 by default).
+            time:Utc firstFireUtc = time:utcAddSeconds(time:utcNow(), <decimal>intervalSeconds);
+            time:Civil firstFireCivil = time:utcToCivil(firstFireUtc);
+            task:JobId jobId = check task:scheduleJobRecurByFrequency(job, <decimal>intervalSeconds,
+                startTime = firstFireCivil);
+            lock {
+                self.tokenRefreshJobId = jobId;
+            }
+            int atSecondsLeft = tm.getSecondsUntilExpiry();
+            log:printInfo("Proactive token refresh job scheduled",
+                jobId = jobId.id,
+                intervalSeconds = intervalSeconds,
+                intervalMinutes = intervalSeconds / 60,
+                sessionTimeoutMinutes = self.sessionTimeout / 60,
+                bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS,
+                currentAtExpiresInMinutes = atSecondsLeft / 60);
+        } else {
+            log:printInfo("Token refresh job not scheduled — TokenManager not available (non-RefreshToken grant)");
+        }
+    }
+
+    # Unschedules the proactive token refresh job if one is currently active.
+    #
+    # + return - `()` or else an error if unscheduling fails
+    isolated function unscheduleTokenRefreshJob() returns error? {
+        task:JobId? jobId;
+        lock {
+            jobId = self.tokenRefreshJobId;
+            self.tokenRefreshJobId = ();
+        }
+        if jobId is task:JobId {
+            check task:unscheduleJob(jobId);
+            log:printInfo("Proactive token refresh job unscheduled");
+        }
     }
 
     # Returns true if a permanent token failure (e.g. invalid_grant) has been detected.
-    # Used by background monitors to know when to stop retrying.
+    # Used by the token refresh job to know when to stop retrying.
     isolated function isTokenRefreshPermanentlyFailed() returns boolean {
         lock {
             return self.tokenRefreshPermanentlyFailed;
@@ -223,63 +333,62 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to close ChannelListener.
     public isolated function immediateStop() returns error? {
-
+        error? unscheduleErr = self.unscheduleTokenRefreshJob();
+        if unscheduleErr is error {
+            log:printWarn("Failed to unschedule token refresh job", 'error = unscheduleErr);
+        }
     }
 }
 
 isolated function scheduleReconnect(Listener instance) {
     runtime:sleep(5);
-    log:printDebug("Attempting auto-reconnect after CometD connection stop...");
     error? err = startListenerWithOAuth2(instance);
     if err is error {
         log:printError("Auto-reconnect failed — manual reconnect required", 'error = err);
     } else {
-        log:printDebug("CometD auto-reconnect succeeded — listener is active again");
+        error? scheduleErr = instance.scheduleTokenRefreshJob();
+        if scheduleErr is error {
+            log:printError("Failed to reschedule token refresh job after auto-reconnect",
+                'error = scheduleErr);
+        }
     }
 }
 
-isolated function proactiveReconnectMonitor(Listener instance, utils:TokenManager tokenManager) {
-    int bufferSeconds = 300; // reconnect 5 minutes before token expiry
-    while true {
-        // Stop the monitor if a permanent token failure has been detected
-        if instance.isTokenRefreshPermanentlyFailed() {
-            log:printError("Proactive token monitor stopping — refresh token permanently expired. " +
-                "Obtain a new refresh token and restart the listener.");
-            break;
-        }
+# Job that proactively refreshes the CometD connection before the access token expires.
+# Scheduled via `task:scheduleJobRecurByFrequency` at (sessionTimeout - tokenRefreshBuffer) intervals.
+class TokenRefreshJob {
+    *task:Job;
 
-        int secondsLeft = tokenManager.getSecondsUntilExpiry();
-        int sleepSeconds;
-        if secondsLeft > bufferSeconds {
-            sleepSeconds = secondsLeft - bufferSeconds;
-        } else if secondsLeft > 0 {
-            sleepSeconds = secondsLeft;
-        } else {
-            sleepSeconds = 60; // token not yet obtained or expired, retry in 1 min
-        }
-        log:printDebug("Proactive token monitor: next refresh scheduled",
-            sleepSeconds = sleepSeconds,
-            tokenExpiresInSeconds = secondsLeft);
-        runtime:sleep(<decimal>sleepSeconds);
+    private final Listener listenerInstance;
+    private final utils:TokenManager tokenManager;
 
-        // Check again after sleeping — flag may have been set while we were sleeping
-        if instance.isTokenRefreshPermanentlyFailed() {
-            log:printError("Proactive token monitor stopping — refresh token permanently expired. " +
-                "Obtain a new refresh token and restart the listener.");
-            break;
-        }
+    isolated function init(Listener listenerInstance, utils:TokenManager tokenManager) {
+        self.listenerInstance = listenerInstance;
+        self.tokenManager = tokenManager;
+    }
 
-        log:printDebug("Proactive reconnect: refreshing CometD connection before token expiry...");
-        error? stopErr = stopListener(instance);
+    public function execute() {
+        if self.listenerInstance.isTokenRefreshPermanentlyFailed() {
+            log:printError("Token refresh job skipped — refresh token permanently expired. " +
+                "Re-authenticate via the authorization code grant to obtain a new refresh token.");
+            return;
+        }
+        int atSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
+        int rtSecondsLeft = self.tokenManager.getEstimatedRtSecondsLeft();
+
+        self.tokenManager.invalidateAccessToken();
+        log:printInfo("Proactive token refresh: stopping CometD to reconnect with fresh token...");
+        error? stopErr = stopListener(self.listenerInstance);
         if stopErr is error {
-            log:printWarn("Proactive reconnect: stop warning", 'error = stopErr);
+            log:printWarn("Proactive token refresh: stop warning", 'error = stopErr);
         }
-        error? startErr = startListenerWithOAuth2(instance);
+        error? startErr = startListenerWithOAuth2(self.listenerInstance);
         if startErr is error {
-            log:printError("Proactive reconnect failed — will retry in 60 seconds", 'error = startErr);
-            runtime:sleep(60d);
+            log:printError("Proactive token refresh failed", 'error = startErr);
         } else {
-            log:printDebug("Proactive reconnect succeeded — CometD refreshed with new token");
+            int newAtSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
+            log:printInfo("Proactive token refresh succeeded — CometD refreshed with new token",
+                newAtExpiresInMinutes = newAtSecondsLeft / 60);
         }
     }
 }

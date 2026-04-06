@@ -62,6 +62,10 @@ public type CommonListenerConfig record {|
     decimal keepAliveInterval = 120;
     # The Salesforce API version to use for Streaming API
     string apiVersion = "43.0";
+    # The Salesforce session timeout in seconds. Set this to match the "Session Timeout" value
+    # configured in your Salesforce org's Session Settings (Setup > Session Settings).
+    # At startup the listener can be configured with this value, if so it overrides this setting.
+    int sessionTimeout = 900;
 |};
 
 # The replay options representing the point in time when events are read.
