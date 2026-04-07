@@ -18,7 +18,6 @@ import ballerina/http;
 import ballerina/io;
 import ballerina/jballerina.java;
 import ballerina/lang.runtime;
-import ballerina/log;
 import ballerina/time;
 import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
@@ -30,35 +29,18 @@ public isolated client class Client {
     private final http:Client salesforceClient;
     private final string apiBasePath;
     private map<string> sfLocators = {};
-    private final utils:TokenManager? tokenManager;
 
     # Initializes the connector. During initialization you can pass either http:BearerTokenConfig if you have a bearer
     # token or http:OAuth2RefreshTokenGrantConfig if you have Oauth tokens.
-    # Create a Salesforce account and obtain tokens following
-    # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
+    # Create a Salesforce account and obtain tokens following 
+    # [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm). 
     #
     # + salesforceConfig - Salesforce Connector configuration
     # + return - `salesforce:Error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
         http:Client|http:ClientError|error httpClientResult;
-
-        // When auth is OAuth2RefreshTokenGrantConfig, use TokenManager to handle
-        // refresh token rotation. Create http:Client WITHOUT auth (TokenManager provides headers).
-        if config.auth is config:OAuth2RefreshTokenGrantConfig {
-            config:OAuth2RefreshTokenGrantConfig rtConfig =
-                <config:OAuth2RefreshTokenGrantConfig>config.auth;
-            self.tokenManager = check new (
-                rtConfig.clientId, rtConfig.clientSecret,
-                rtConfig.refreshToken, rtConfig.refreshUrl
-            );
-            // Create http:Client without auth — TokenManager will inject Authorization headers
-            httpClientResult = trap new (config.baseUrl);
-        } else {
-            // All other auth types: delegate to http:Client's built-in OAuth2
-            self.tokenManager = ();
-            http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
-            httpClientResult = trap new (config.baseUrl, httpClientConfig);
-        }
+        http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
+        httpClientResult = trap new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
@@ -69,116 +51,6 @@ public isolated client class Client {
         self.apiBasePath = string `${BASE_PATH}/v${config.apiVersion}`;
     }
 
-    # Returns Authorization headers from TokenManager if active, () otherwise.
-    # When () is returned, http:Client uses its built-in OAuth2 handler for auth.
-    private isolated function getAuthHeaders() returns map<string|string[]>?|error {
-        utils:TokenManager? tm = self.tokenManager;
-        if tm is utils:TokenManager {
-            string token = check tm.getAccessToken();
-            return {"Authorization": "Bearer " + token};
-        }
-        return ();
-    }
-
-    // ── 401-retry helpers ────────────────────────────────────────────────────
-    // When Salesforce returns 401 (e.g. access token invalidated due to refresh
-    // token revocation) and a TokenManager is active, these helpers force-refresh
-    // the access token and retry the request once before propagating the error.
-
-    private isolated function sfGet(string path) returns http:Response|error {
-        map<string|string[]>? headers = check self.getAuthHeaders();
-        http:Response response = check self.salesforceClient->get(path, headers);
-        if response.statusCode == 401 {
-            utils:TokenManager? tm = self.tokenManager;
-            if tm is utils:TokenManager {
-                log:printWarn("Received 401 from Salesforce — forcing token refresh and retrying GET", path = path);
-                _ = check tm.refreshAccessToken();
-                headers = check self.getAuthHeaders();
-                response = check self.salesforceClient->get(path, headers);
-            }
-        }
-        return response;
-    }
-
-    private isolated function sfPost(string path, http:RequestMessage message) returns http:Response|error {
-        map<string|string[]>? headers = check self.getAuthHeaders();
-        http:Response response = check self.salesforceClient->post(path, message, headers = headers);
-        if response.statusCode == 401 {
-            utils:TokenManager? tm = self.tokenManager;
-            if tm is utils:TokenManager {
-                log:printWarn("Received 401 from Salesforce — forcing token refresh and retrying POST", path = path);
-                _ = check tm.refreshAccessToken();
-                headers = check self.getAuthHeaders();
-                response = check self.salesforceClient->post(path, message, headers = headers);
-            }
-        }
-        return response;
-    }
-
-    private isolated function sfPatch(string path, http:RequestMessage message) returns http:Response|error {
-        map<string|string[]>? headers = check self.getAuthHeaders();
-        http:Response response = check self.salesforceClient->patch(path, message, headers = headers);
-        if response.statusCode == 401 {
-            utils:TokenManager? tm = self.tokenManager;
-            if tm is utils:TokenManager {
-                log:printWarn("Received 401 from Salesforce — forcing token refresh and retrying PATCH", path = path);
-                _ = check tm.refreshAccessToken();
-                headers = check self.getAuthHeaders();
-                response = check self.salesforceClient->patch(path, message, headers = headers);
-            }
-        }
-        return response;
-    }
-
-    private isolated function sfDelete(string path) returns http:Response|error {
-        map<string|string[]>? headers = check self.getAuthHeaders();
-        http:Response response = check self.salesforceClient->delete(path, headers = headers);
-        if response.statusCode == 401 {
-            utils:TokenManager? tm = self.tokenManager;
-            if tm is utils:TokenManager {
-                log:printWarn("Received 401 from Salesforce — forcing token refresh and retrying DELETE", path = path);
-                _ = check tm.refreshAccessToken();
-                headers = check self.getAuthHeaders();
-                response = check self.salesforceClient->delete(path, headers = headers);
-            }
-        }
-        return response;
-    }
-
-    private isolated function sfPut(string path, http:RequestMessage message, string? mediaType = ()) returns http:Response|error {
-        map<string|string[]>? headers = check self.getAuthHeaders();
-        http:Response response = check self.salesforceClient->put(path, message, headers = headers, mediaType = mediaType);
-        if response.statusCode == 401 {
-            utils:TokenManager? tm = self.tokenManager;
-            if tm is utils:TokenManager {
-                log:printWarn("Received 401 from Salesforce — forcing token refresh and retrying PUT", path = path);
-                _ = check tm.refreshAccessToken();
-                headers = check self.getAuthHeaders();
-                response = check self.salesforceClient->put(path, message, headers = headers, mediaType = mediaType);
-            }
-        }
-        return response;
-    }
-
-    // toJson: extracts the JSON payload and converts non-2xx responses into errors.
-    private isolated function toJson(http:Response response) returns json|error {
-        json payload = check response.getJsonPayload();
-        if response.statusCode < 200 || response.statusCode >= 300 {
-            return error("Salesforce API error: HTTP " + response.statusCode.toString(),
-                httpCode = response.statusCode, body = payload);
-        }
-        return payload;
-    }
-
-    // assertOk: returns an error for non-2xx responses (used by error?-returning methods).
-    private isolated function assertOk(http:Response response) returns error? {
-        if response.statusCode < 200 || response.statusCode >= 300 {
-            json|error errBody = response.getJsonPayload();
-            return error("Salesforce API error: HTTP " + response.statusCode.toString(),
-                httpCode = response.statusCode, body = errBody is json ? errBody : ());
-        }
-    }
-
     //Describe SObjects
     # Gets metadata of your organization.
     #
@@ -186,7 +58,7 @@ public isolated client class Client {
     isolated remote function getOrganizationMetaData() returns
                                                     OrganizationMetadata|error {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Gets basic data of the specified object.
@@ -196,7 +68,7 @@ public isolated client class Client {
     isolated remote function getBasicInfo(string sobjectName)
                                                 returns SObjectBasicInfo|error {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sobjectName]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Completely describes the individual metadata at all levels of the specified object. Can be used to retrieve
@@ -208,7 +80,7 @@ public isolated client class Client {
                                             returns SObjectMetaData|error {
 
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sObjectName, DESCRIBE]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Query for actions displayed in the UI, given a user, a context, device format, and a record ID.
@@ -216,7 +88,7 @@ public isolated client class Client {
     # + return - `SObjectBasicInfo` record if successful or else `error`
     isolated remote function getPlatformAction() returns SObjectBasicInfo|error {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, PLATFORM_ACTION]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     //Describe Organization
@@ -225,7 +97,7 @@ public isolated client class Client {
     # + return - List of `Version` if successful. Else, the occurred `error`
     isolated remote function getApiVersions() returns Version[]|error {
         string path = utils:prepareUrl([BASE_PATH]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Lists the resources available for the specified API version.
@@ -235,7 +107,7 @@ public isolated client class Client {
     isolated remote function getResources(string apiVersion)
                                                     returns map<string>|error {
         string path = utils:prepareUrl([BASE_PATH, apiVersion]);
-        json res = check self.toJson(check self.sfGet(path));
+        json res = check self.salesforceClient->get(path);
         return toMapOfStrings(res);
     }
 
@@ -244,7 +116,7 @@ public isolated client class Client {
     # + return - `OrganizationLimits` as a map of `Limit` if successful. Else, the occurred `error`
     isolated remote function getLimits() returns map<Limit>|error {
         string path = utils:prepareUrl([self.apiBasePath, LIMITS]);
-        json res = check self.toJson(check self.sfGet(path));
+        json res = check self.salesforceClient->get(path);
         return toMapOfLimits(res);
     }
 
@@ -266,7 +138,7 @@ public isolated client class Client {
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
         }
-        json response = check self.toJson(check self.sfGet(path));
+        json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
     }
 
@@ -289,7 +161,7 @@ public isolated client class Client {
         if fields.length() > 0 {
             path = path.concat(utils:appendQueryParams(fields));
         }
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Creates records based on relevant object type sent with json record.
@@ -302,8 +174,7 @@ public isolated client class Client {
         http:Request req = new;
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sObjectName]);
         req.setJsonPayload(sObject.toJson());
-        json payload = check self.toJson(check self.sfPost(path, req));
-        return check payload.cloneWithType();
+        return check self.salesforceClient->post(path, req);
     }
 
     # Updates records based on relevant object ID.
@@ -317,7 +188,7 @@ public isolated client class Client {
         http:Request req = new;
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sObjectName, id]);
         req.setJsonPayload(sObject.toJson());
-        return self.assertOk(check self.sfPatch(path, req));
+        return check self.salesforceClient->patch(path, req);
     }
 
     # Upsert a record based on the value of a specified external ID field.
@@ -332,7 +203,7 @@ public isolated client class Client {
         http:Request req = new;
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sObjectName, externalIdField, externalId]);
         req.setJsonPayload(sObject.toJson());
-        return self.assertOk(check self.sfPatch(path, req));
+        return check self.salesforceClient->patch(path, req);
     }
 
     # Delete existing records based on relevant object ID.
@@ -343,7 +214,7 @@ public isolated client class Client {
     isolated remote function delete(string sObjectName, string id)
                                     returns error? {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sObjectName, id]);
-        return self.assertOk(check self.sfDelete(path));
+        return check self.salesforceClient->delete(path);
     }
 
     # Lists reports.
@@ -351,7 +222,7 @@ public isolated client class Client {
     # + return - Array of `Report` if successful or else `error`
     isolated remote function listReports() returns Report[]|error {
         string path = utils:prepareUrl([self.apiBasePath, ANALYTICS, REPORTS]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Deletes a report.
@@ -360,7 +231,7 @@ public isolated client class Client {
     # + return - `Nil` if the report deletion is successful or else an error
     isolated remote function deleteReport(string reportId) returns error? {
         string path = utils:prepareUrl([self.apiBasePath, ANALYTICS, REPORTS, reportId]);
-        return self.assertOk(check self.sfDelete(path));
+        return check self.salesforceClient->delete(path);
     }
 
     # Runs an instance of a report synchronously.
@@ -370,7 +241,7 @@ public isolated client class Client {
     isolated remote function runReportSync(string reportId)
             returns ReportInstanceResult|error {
         string path = utils:prepareUrl([self.apiBasePath, ANALYTICS, REPORTS, reportId]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Runs an instance of a report asynchronously.
@@ -379,7 +250,7 @@ public isolated client class Client {
     # + return - `ReportInstance` if successful or else `error`
     isolated remote function runReportAsync(string reportId) returns ReportInstance|error {
         string path = utils:prepareUrl([self.apiBasePath, ANALYTICS, REPORTS, reportId, INSTANCES]);
-        return check (check self.toJson(check self.sfPost(path, {}))).cloneWithType();
+        return check self.salesforceClient->post(path, {});
     }
 
     # Lists asynchronous runs of a Report.
@@ -388,7 +259,7 @@ public isolated client class Client {
     # + return - Array of `ReportInstance` if successful or else `error`
     isolated remote function listAsyncRunsOfReport(string reportId) returns ReportInstance[]|error {
         string path = utils:prepareUrl([self.apiBasePath, ANALYTICS, REPORTS, reportId, INSTANCES]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Get report instance result.
@@ -399,7 +270,7 @@ public isolated client class Client {
     isolated remote function getReportInstanceResult(string reportId, string instanceId) returns
             ReportInstanceResult|error {
         string path = utils:prepareUrl([self.apiBasePath, ANALYTICS, REPORTS, reportId, INSTANCES, instanceId]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Executes the specified SOQL query.
@@ -467,7 +338,7 @@ public isolated client class Client {
             'start: check time:civilToString(removeDecimalPlaces(startDate)),
             end: check time:civilToString(removeDecimalPlaces(endDate))
         });
-        return check (check self.toJson(check self.sfGet(finalUrl))).cloneWithType();
+        return check self.salesforceClient->get(finalUrl);
     }
 
     # Retrieves the list of individual records that have been updated within the given timespan.
@@ -483,7 +354,7 @@ public isolated client class Client {
             'start: check time:civilToString(removeDecimalPlaces(startDate)),
             end: check time:civilToString(removeDecimalPlaces(endDate))
         });
-        return check (check self.toJson(check self.sfGet(finalUrl))).cloneWithType();
+        return check self.salesforceClient->get(finalUrl);
     }
 
     # Get the password information
@@ -492,7 +363,7 @@ public isolated client class Client {
     # + return - `boolean` if successful or else `error`
     isolated remote function isPasswordExpired(string userId) returns boolean|error {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, USER, userId, PASSWORD]);
-        http:Response response = check self.sfGet(path);
+        http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             json payload = check response.getJsonPayload();
             map<json> payloadMap = check payload.ensureType();
@@ -515,9 +386,7 @@ public isolated client class Client {
     # + return - `byte[]` if successful or else `error`
     isolated remote function resetPassword(string userId) returns byte[]|error {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, USER, userId, PASSWORD]);
-        http:Response sfResp = check self.sfDelete(path);
-        check self.assertOk(sfResp);
-        return check sfResp.getBinaryPayload();
+        return check self.salesforceClient->delete(path);
     }
 
     # Change the user password
@@ -528,7 +397,7 @@ public isolated client class Client {
     isolated remote function changePassword(string userId, string newPassword) returns error? {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, USER, userId, PASSWORD]);
         record {} payload = {"NewPassword": newPassword};
-        return self.assertOk(check self.sfPost(path, payload));
+        return check self.salesforceClient->post(path, payload);
     }
 
     # Returns a list of actions and their details
@@ -537,7 +406,7 @@ public isolated client class Client {
     # + return - `QuickAction[]` if successful or else `error`
     isolated remote function getQuickActions(string sObjectName) returns QuickAction[]|error {
         string path = utils:prepareUrl([self.apiBasePath, QUICK_ACTIONS]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Executes up to 25 sub-requests in a single request.
@@ -548,7 +417,7 @@ public isolated client class Client {
     isolated remote function batch(Subrequest[] batchRequests, boolean haltOnError = false) returns BatchResult|error {
         string path = utils:prepareUrl([self.apiBasePath, COMPOSITE, BATCH]);
         record {} payload = {"batchRequests": batchRequests, "haltOnError": haltOnError};
-        return check (check self.toJson(check self.sfPost(path, payload))).cloneWithType();
+        return check self.salesforceClient->post(path, payload);
     }
 
     # Retrieves information about alternate named layouts for a given object.
@@ -566,7 +435,7 @@ public isolated client class Client {
     private isolated function processGetNamedLayouts(typedesc<record {}> returnType, string sobjectName, string layoutName
                                                     ) returns record {}|error {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sobjectName, DESCRIBE, NAMED_LAYOUTS, layoutName]);
-        json response = check self.toJson(check self.sfGet(path));
+        json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
     }
 
@@ -583,7 +452,7 @@ public isolated client class Client {
 
     private isolated function processGetInvocableActions(typedesc<record {}> returnType, string subContext) returns record {}|error {
         string path = utils:prepareUrl([self.apiBasePath, ACTIONS]) + subContext;
-        json response = check self.toJson(check self.sfGet(path));
+        json response = check self.salesforceClient->get(path);
         return check response.cloneWithType(returnType);
     }
 
@@ -601,7 +470,7 @@ public isolated client class Client {
 
     private isolated function processInvokeActions(typedesc<record {}> returnType, string subContext, record {} payload) returns record {}|error {
         string path = utils:prepareUrl([self.apiBasePath, ACTIONS]) + subContext;
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Delete record using external Id.
@@ -612,7 +481,7 @@ public isolated client class Client {
     # + return - `Nil` if successful or else `error`
     isolated remote function deleteRecordsUsingExtId(string sObjectName, string externalId, string value) returns error? {
         string path = utils:prepareUrl([self.apiBasePath, SOBJECTS, sObjectName, externalId, value]);
-        return self.assertOk(check self.sfDelete(path));
+        return check self.salesforceClient->delete(path);
     }
 
     # Access Salesforce APEX resource.
@@ -638,19 +507,19 @@ public isolated client class Client {
         http:Response response = new;
         match methodType {
             "GET" => {
-                response = check self.sfGet(path);
+                response = check self.salesforceClient->get(path);
             }
             "POST" => {
-                response = check self.sfPost(path, payload);
+                response = check self.salesforceClient->post(path, payload);
             }
             "DELETE" => {
-                response = check self.sfDelete(path);
+                response = check self.salesforceClient->delete(path);
             }
             "PUT" => {
-                response = check self.sfPut(path, payload);
+                response = check self.salesforceClient->put(path, payload);
             }
             "PATCH" => {
-                response = check self.sfPatch(path, payload);
+                response = check self.salesforceClient->patch(path, payload);
             }
             _ => {
                 return error("Invalid Method");
@@ -681,7 +550,7 @@ public isolated client class Client {
     @deprecated
     isolated remote function createIngestJob(BulkCreatePayload payload) returns BulkJob|error {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST]);
-        return check (check self.toJson(check self.sfPost(path, payload))).cloneWithType();
+        return check self.salesforceClient->post(path, payload);
     }
 
     # Creates a bulkv2 query job.
@@ -694,7 +563,7 @@ public isolated client class Client {
     @deprecated
     isolated remote function createQueryJob(BulkCreatePayload payload) returns BulkJob|error {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY]);
-        return check (check self.toJson(check self.sfPost(path, payload))).cloneWithType();
+        return check self.salesforceClient->post(path, payload);
     }
 
     # Creates a bulkv2 query job and provide future value.
@@ -707,7 +576,7 @@ public isolated client class Client {
     @deprecated
     isolated remote function createQueryJobAndWait(BulkCreatePayload payload) returns future<BulkJobInfo|error>|error {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, QUERY]);
-        http:Response response = check self.sfPost(path, payload);
+        http:Response response = check self.salesforceClient->post(path, payload);
         if response.statusCode != 200 {
             return error("Error occurred while closing the bulk job. ", httpCode = response.statusCode);
         }
@@ -716,7 +585,7 @@ public isolated client class Client {
         worker A returns BulkJobInfo|error {
             while true {
                 runtime:sleep(2);
-                http:Response jobStatus = check self.sfGet(jobPath);
+                http:Response jobStatus = check self.salesforceClient->get(jobPath);
                 if jobStatus.statusCode != 200 {
                     return error("Error occurred while checking the status of the bulk job. ",
                         httpCode = jobStatus.statusCode);
@@ -743,7 +612,7 @@ public isolated client class Client {
     @deprecated
     isolated remote function getJobInfo(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, bulkOperation, bulkJobId]);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     };
 
     # Uploads data for a job using CSV data.
@@ -765,7 +634,7 @@ public isolated client class Client {
         } else {
             payload = content;
         }
-        http:Response response = check self.sfPut(path, payload, mediaType = "text/csv");
+        http:Response response = check self.salesforceClient->put(path, payload, mediaType = "text/csv");
         if response.statusCode != 201 {
             return error("Error occurred while adding the batch. ", httpCode = response.statusCode);
         }
@@ -782,7 +651,7 @@ public isolated client class Client {
     isolated remote function getAllJobs(JobType? jobType = ()) returns error|AllJobs {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Get details of all query jobs.
@@ -796,7 +665,7 @@ public isolated client class Client {
     isolated remote function getAllQueryJobs(JobType? jobType = ()) returns error|AllJobs {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST]) +
             ((jobType is ()) ? "" : string `?jobType=${jobType}`);
-        return check (check self.toJson(check self.sfGet(path))).cloneWithType();
+        return check self.salesforceClient->get(path);
     }
 
     # Get job status information.
@@ -811,7 +680,7 @@ public isolated client class Client {
     isolated remote function getJobStatus(string bulkJobId, Status status)
             returns string[][]|error {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST, bulkJobId, status]);
-        http:Response response = check self.sfGet(path);
+        http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             string textPayload = check response.getTextPayload();
             if textPayload == "" {
@@ -870,7 +739,7 @@ public isolated client class Client {
             }
         } 
         
-        http:Response response = check self.sfGet(path);
+        http:Response response = check self.salesforceClient->get(path);
         if response.statusCode == 200 {
             string textPayload = check response.getTextPayload();
             if textPayload == "" {
@@ -904,7 +773,7 @@ public isolated client class Client {
     isolated remote function abortJob(string bulkJobId, BulkOperation bulkOperation) returns BulkJobInfo|error {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, bulkOperation, bulkJobId]);
         record {} payload = {"state": "Aborted"};
-        return check (check self.toJson(check self.sfPatch(path, payload))).cloneWithType();
+        return check self.salesforceClient->patch(path, payload);
     }
 
     # Delete a bulkv2 job.
@@ -918,7 +787,7 @@ public isolated client class Client {
     @deprecated
     isolated remote function deleteJob(string bulkJobId, BulkOperation bulkOperation) returns error? {
         string path = utils:prepareUrl([self.apiBasePath, JOBS, bulkOperation, bulkJobId]);
-        return self.assertOk(check self.sfDelete(path));
+        return check self.salesforceClient->delete(path);
     }
 
     # Notifies Salesforce servers that the upload of job data is complete.
@@ -932,14 +801,14 @@ public isolated client class Client {
     isolated remote function closeIngestJobAndWait(string bulkJobId) returns error|future<BulkJobInfo|error> {
         final string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};
-        http:Response response = check self.sfPatch(path, payload);
+        http:Response response = check self.salesforceClient->patch(path, payload);
         if response.statusCode != 200 {
             return error("Error occurred while closing the bulk job. ", httpCode = response.statusCode);
         }
         worker A returns BulkJobInfo|error {
             while true {
                 runtime:sleep(2);
-                http:Response jobStatus = check self.sfGet(path);
+                http:Response jobStatus = check self.salesforceClient->get(path);
                 if jobStatus.statusCode != 200 {
                     return error("Error occurred while checking the status of the bulk job. ",
                         httpCode = jobStatus.statusCode);
@@ -966,6 +835,6 @@ public isolated client class Client {
     isolated remote function closeIngestJob(string bulkJobId) returns error|BulkJobCloseInfo {
         final string path = utils:prepareUrl([self.apiBasePath, JOBS, INGEST, bulkJobId]);
         record {} payload = {"state": "UploadComplete"};
-        return check (check self.toJson(check self.sfPatch(path, payload))).cloneWithType();
+        return check self.salesforceClient->patch(path, payload);
     }
 }
