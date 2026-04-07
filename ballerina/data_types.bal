@@ -16,6 +16,7 @@
 
 import ballerina/http;
 import ballerina/oauth2;
+import ballerinax/salesforce.utils;
 
 # Configurations related to username/password authentication.
 public type CredentialsConfig record {|
@@ -47,6 +48,11 @@ public type RestBasedListenerConfig record {|
     OAuth2Config auth;
     # The base URL of the Salesforce instance
     string baseUrl;
+    # Optional pluggable token store for multi-replica coordination.
+    # When set, the `TokenManager` uses this store to share token state across replicas
+    # and acquires an advisory lock before refreshing, preventing Token Replay Attacks.
+    # Leave `()` (default) for single-replica / in-memory token management.
+    utils:TokenStore? tokenStore = ();
     *CommonListenerConfig;
 |};
 

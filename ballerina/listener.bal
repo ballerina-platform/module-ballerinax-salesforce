@@ -86,7 +86,8 @@ public isolated class Listener {
                 self.tokenManager = check new (
                     rtConfig.clientId, rtConfig.clientSecret,
                     rtConfig.refreshToken, rtConfig.refreshUrl,
-                    <int>rtConfig.defaultTokenExpTime
+                    <int>rtConfig.defaultTokenExpTime,
+                    listenerConfig.tokenStore
                 );
             } else {
                 self.tokenManager = ();
