@@ -86,7 +86,7 @@ public isolated class Listener {
                 self.tokenManager = check new (
                     rtConfig.clientId, rtConfig.clientSecret,
                     rtConfig.refreshToken, rtConfig.refreshUrl,
-                    sessionTimeout
+                    <int>rtConfig.defaultTokenExpTime
                 );
             } else {
                 self.tokenManager = ();
@@ -153,18 +153,18 @@ public isolated class Listener {
                         self.tokenRefreshPermanentlyFailed = true;
                     }
                     log:printError("Refresh token permanently expired (invalid_grant). " +
-                        "Re-authenticate via the authorization code grant to obtain a new refresh token.");
+                            "Re-authenticate via the authorization code grant to obtain a new refresh token.");
                     error? unscheduleErr = self.unscheduleTokenRefreshJob();
                     if unscheduleErr is error {
                         log:printWarn("Failed to unschedule token refresh job on invalid_grant",
-                            'error = unscheduleErr);
+                                'error = unscheduleErr);
                     }
                     _ = start self.gracefulStop();
                 }
                 return token;
             }
             log:printInfo("Access token obtained for CometD",
-                expiresInMinutes = tm.getSecondsUntilExpiry() / 60);
+                    expiresInMinutes = tm.getSecondsUntilExpiry() / 60);
             return token;
         }
 
@@ -208,7 +208,7 @@ public isolated class Listener {
             }
             if permFailed {
                 log:printError("Refresh token has permanently expired. " +
-                    "Obtain a new refresh token and restart the listener.");
+                        "Obtain a new refresh token and restart the listener.");
             } else {
                 log:printInfo("Scheduling auto-reconnect in 5 seconds...");
                 _ = start scheduleReconnect(self);
@@ -275,12 +275,20 @@ public isolated class Listener {
             if unscheduleErr is error {
                 log:printWarn("Failed to unschedule existing token refresh job", 'error = unscheduleErr);
             }
-            int intervalSeconds = self.sessionTimeout - TOKEN_REFRESH_BUFFER_SECONDS;
+
+            OAuth2Config? & readonly config = self.oauth2Config;
+            int intervalSeconds;
+            if config is http:OAuth2RefreshTokenGrantConfig {
+                intervalSeconds = <int>config.defaultTokenExpTime - TOKEN_REFRESH_BUFFER_SECONDS;
+            } else {
+                intervalSeconds = self.sessionTimeout - TOKEN_REFRESH_BUFFER_SECONDS;
+            }
+
             if intervalSeconds <= 0 {
                 log:printError("Token refresh interval is non-positive — TOKEN_REFRESH_BUFFER_SECONDS " +
-                    "exceeds session timeout. Skipping job scheduling.",
-                    sessionTimeoutMinutes = self.sessionTimeout / 60,
-                    bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS);
+                        "exceeds session timeout. Skipping job scheduling.",
+                        sessionTimeoutMinutes = self.sessionTimeout / 60,
+                        bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS);
                 return;
             }
             TokenRefreshJob job = new (self, tm);
@@ -289,18 +297,18 @@ public isolated class Listener {
             time:Utc firstFireUtc = time:utcAddSeconds(time:utcNow(), <decimal>intervalSeconds);
             time:Civil firstFireCivil = time:utcToCivil(firstFireUtc);
             task:JobId jobId = check task:scheduleJobRecurByFrequency(job, <decimal>intervalSeconds,
-                startTime = firstFireCivil);
+                    startTime = firstFireCivil);
             lock {
                 self.tokenRefreshJobId = jobId;
             }
             int atSecondsLeft = tm.getSecondsUntilExpiry();
             log:printInfo("Proactive token refresh job scheduled",
-                jobId = jobId.id,
-                intervalSeconds = intervalSeconds,
-                intervalMinutes = intervalSeconds / 60,
-                sessionTimeoutMinutes = self.sessionTimeout / 60,
-                bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS,
-                currentAtExpiresInMinutes = atSecondsLeft / 60);
+                    jobId = jobId.id,
+                    intervalSeconds = intervalSeconds,
+                    intervalMinutes = intervalSeconds / 60,
+                    sessionTimeoutMinutes = self.sessionTimeout / 60,
+                    bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS,
+                    currentAtExpiresInMinutes = atSecondsLeft / 60);
         } else {
             log:printInfo("Token refresh job not scheduled — TokenManager not available (non-RefreshToken grant)");
         }
@@ -349,7 +357,7 @@ isolated function scheduleReconnect(Listener instance) {
         error? scheduleErr = instance.scheduleTokenRefreshJob();
         if scheduleErr is error {
             log:printError("Failed to reschedule token refresh job after auto-reconnect",
-                'error = scheduleErr);
+                    'error = scheduleErr);
         }
     }
 }
@@ -370,7 +378,7 @@ class TokenRefreshJob {
     public function execute() {
         if self.listenerInstance.isTokenRefreshPermanentlyFailed() {
             log:printError("Token refresh job skipped — refresh token permanently expired. " +
-                "Re-authenticate via the authorization code grant to obtain a new refresh token.");
+                    "Re-authenticate via the authorization code grant to obtain a new refresh token.");
             return;
         }
         int atSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
@@ -388,7 +396,7 @@ class TokenRefreshJob {
         } else {
             int newAtSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
             log:printInfo("Proactive token refresh succeeded — CometD refreshed with new token",
-                newAtExpiresInMinutes = newAtSecondsLeft / 60);
+                    newAtExpiresInMinutes = newAtSecondsLeft / 60);
         }
     }
 }
