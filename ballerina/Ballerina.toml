@@ -32,6 +32,10 @@ export = true
 name = "salesforce.types"
 export = true
 
+[[package.modules]]
+name = "salesforce.utils"
+export = true
+
 [platform.java21]
 graalvmCompatible = true
 
