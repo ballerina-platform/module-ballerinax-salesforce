@@ -150,6 +150,15 @@ public isolated class Listener {
             string|error token = tm.getAccessToken();
             if token is error {
                 if token.message().includes("invalid_grant") {
+                    // --- Auto-evict dead token from distributed store ---
+                    // Without this, the dead token poisons the Redis cache:
+                    // on restart, the connector reads the stale token from Redis,
+                    // ignores the fresh seed token in config, and crashes in a loop.
+                    error? evictErr = tm.clearTokenStore();
+                    if evictErr is error {
+                        log:printWarn("Failed to evict dead token from store on invalid_grant — " +
+                                "manual Redis cleanup may be needed", 'error = evictErr);
+                    }
                     lock {
                         self.tokenRefreshPermanentlyFailed = true;
                     }

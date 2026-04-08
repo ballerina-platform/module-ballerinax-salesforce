@@ -109,6 +109,19 @@ public isolated class RedisTokenStore {
         log:printInfo("[RedisTokenStore] Token data written to store", dataKey = dataKey);
     }
 
+    // Removes token data and its associated lock from Redis.
+    // Called on invalid_grant to prevent cache poisoning — ensures the next
+    // boot uses the fresh seed token from config instead of the dead cached one.
+    //
+    // Deletes both the data key and the lock key for the given token family.
+    public isolated function clearTokenData(string key) returns error? {
+        string dataKey = "data:" + key;
+        string lockKey = "lock:" + key;
+        _ = check self.redisClient->del([dataKey, lockKey]);
+        log:printInfo("[RedisTokenStore] Token data evicted (cache poisoning prevention)",
+                dataKey = dataKey, lockKey = lockKey);
+    }
+
     // Flushes all test-namespaced keys from Redis (for test cleanup).
     public isolated function flushAll() returns error? {
         string[]|redis:Error lockKeys = self.redisClient->keys("lock:*");

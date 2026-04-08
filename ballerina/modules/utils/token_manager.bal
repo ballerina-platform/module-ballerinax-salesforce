@@ -74,6 +74,18 @@ public type TokenStore isolated object {
     # + data - The new token data to persist
     # + return - `()` on success, or an `error` if the write fails
     public isolated function setTokenData(string key, TokenData data) returns error?;
+
+    # Removes token data and its associated lock from the shared store.
+    # Called when the token family is permanently invalidated (e.g., Salesforce
+    # returns `invalid_grant` after absolute session timeout expiry).
+    #
+    # This prevents "cache poisoning" — without eviction, a restarting replica
+    # would read the dead token from the store, ignore the fresh seed token
+    # from its configuration, and crash in a loop.
+    #
+    # + key - A unique key identifying the token family
+    # + return - `()` on success, or an `error` if the delete fails
+    public isolated function clearTokenData(string key) returns error?;
 };
 
 # Default in-memory token store for single-replica deployments.
@@ -102,6 +114,12 @@ public isolated class InMemoryTokenStore {
     public isolated function setTokenData(string key, TokenData data) returns error? {
         lock {
             self.tokenData = data.cloneReadOnly();
+        }
+    }
+
+    public isolated function clearTokenData(string key) returns error? {
+        lock {
+            self.tokenData = ();
         }
     }
 }
@@ -449,6 +467,43 @@ public isolated class TokenManager {
                 self.rtIssuedAtEpoch = data.issuedAtEpoch;
             }
         }
+    }
+
+    # Evicts token data from the distributed store, preventing cache poisoning.
+    #
+    # When Salesforce returns `invalid_grant`, the entire token family is dead.
+    # This method removes the dead token data and its lock from the shared store
+    # so that when the application restarts with a fresh seed token, the store
+    # is empty and the new seed is used instead of the stale cached data.
+    #
+    # Also clears the local in-memory token state.
+    #
+    # + return - `()` on success, or an `error` if the store eviction fails
+    public isolated function clearTokenStore() returns error? {
+        string storeKey;
+        lock {
+            storeKey = self.storeKey;
+        }
+        // Evict from distributed store first (most important — prevents cache poisoning)
+        error? clearErr = self.tokenStore.clearTokenData(storeKey);
+        if clearErr is error {
+            log:printWarn("Failed to evict dead token from distributed store — " +
+                    "manual cleanup may be needed to prevent cache poisoning on restart",
+                    storeKey = storeKey,
+                    'error = clearErr);
+        } else {
+            log:printInfo("Dead token evicted from distributed store (cache poisoning prevented)",
+                    storeKey = storeKey);
+        }
+        // Also release any lingering lock
+        error? releaseLockErr = self.tokenStore.releaseLock(storeKey);
+        if releaseLockErr is error {
+            log:printWarn("Failed to release lock during token store eviction",
+                    'error = releaseLockErr);
+        }
+        // Clear local in-memory state
+        self.invalidateAccessToken();
+        return clearErr;
     }
 
     # Clears the cached access token, forcing the next `getAccessToken()` call to obtain a fresh one.
