@@ -386,13 +386,24 @@ class TokenRefreshJob {
     }
 
     public function execute() {
+        // --- Kill switch: check if a previous execution detected a fatal error ---
+        // When invalid_grant is detected (by getOAuth2Token() during startListenerWithOAuth2()),
+        // the tokenRefreshPermanentlyFailed flag is set. However, unscheduleTokenRefreshJob()
+        // called from within the Java interop context may not reliably cancel the scheduler.
+        // So we defensively re-unschedule here on every entry to guarantee termination.
         if self.listenerInstance.isTokenRefreshPermanentlyFailed() {
-            log:printError("Token refresh job skipped — refresh token permanently expired. " +
+            log:printError("Proactive token scheduler terminated due to fatal authorization error. " +
                     "Re-authenticate via the authorization code grant to obtain a new refresh token.");
+            // Defensive re-unschedule: the previous unschedule attempt (from within the Java
+            // interop context in getOAuth2Token()) may have silently failed. This call runs
+            // on the task scheduler's own strand, where task:unscheduleJob() is reliable.
+            error? unscheduleErr = self.listenerInstance.unscheduleTokenRefreshJob();
+            if unscheduleErr is error {
+                log:printWarn("Failed to unschedule token refresh job from kill switch",
+                        'error = unscheduleErr);
+            }
             return;
         }
-        int atSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
-        int rtSecondsLeft = self.tokenManager.getEstimatedRtSecondsLeft();
 
         self.tokenManager.invalidateAccessToken();
         log:printInfo("Proactive token refresh: stopping CometD to reconnect with fresh token...");
@@ -403,6 +414,16 @@ class TokenRefreshJob {
         error? startErr = startListenerWithOAuth2(self.listenerInstance);
         if startErr is error {
             log:printError("Proactive token refresh failed", 'error = startErr);
+            // startListenerWithOAuth2() → getOAuth2Token() → invalid_grant sets the flag.
+            // We check it immediately after the call to prevent even ONE more scheduler tick.
+            if self.listenerInstance.isTokenRefreshPermanentlyFailed() {
+                log:printError("Proactive token scheduler terminated due to fatal authorization error.");
+                error? unscheduleErr = self.listenerInstance.unscheduleTokenRefreshJob();
+                if unscheduleErr is error {
+                    log:printWarn("Failed to unschedule token refresh job after fatal error",
+                            'error = unscheduleErr);
+                }
+            }
         } else {
             int newAtSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
             log:printInfo("Proactive token refresh succeeded — CometD refreshed with new token",
