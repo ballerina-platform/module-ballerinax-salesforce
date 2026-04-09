@@ -59,15 +59,15 @@ public isolated class RedisTokenStore {
     // For production, use a Lua script or Redlock for atomicity.
     // Acceptable for integration tests.
     public isolated function acquireLock(string lockKey, int ttlSeconds) returns boolean|error {
-        string lockRedisKey = "lock:" + lockKey;
+        string lockRedisKey = string `lock:${lockKey}`;
         boolean didSet = check self.redisClient->setNx(lockRedisKey, "locked");
         if didSet {
             // Set TTL for auto-release safety net (if holder crashes mid-refresh)
             _ = check self.redisClient->expire(lockRedisKey, ttlSeconds);
-            log:printInfo("[RedisTokenStore] Lock acquired", lockKey = lockRedisKey);
+            log:printDebug("[RedisTokenStore] Lock acquired", lockKey = lockRedisKey);
             return true;
         }
-        log:printInfo("[RedisTokenStore] Lock NOT acquired (held by another)", lockKey = lockRedisKey);
+        log:printDebug("[RedisTokenStore] Lock NOT acquired (held by another)", lockKey = lockRedisKey);
         return false;
     }
 
@@ -75,9 +75,9 @@ public isolated class RedisTokenStore {
     //
     // API reference: del(string[] keys) returns int|Error
     public isolated function releaseLock(string lockKey) returns error? {
-        string lockRedisKey = "lock:" + lockKey;
+        string lockRedisKey = string `lock:${lockKey}`;
         _ = check self.redisClient->del([lockRedisKey]);
-        log:printInfo("[RedisTokenStore] Lock released", lockKey = lockRedisKey);
+        log:printDebug("[RedisTokenStore] Lock released", lockKey = lockRedisKey);
     }
 
     // Reads token data from Redis. Stored as a JSON string.
@@ -106,7 +106,7 @@ public isolated class RedisTokenStore {
         string dataKey = "data:" + key;
         string jsonStr = data.toJsonString();
         _ = check self.redisClient->set(dataKey, jsonStr);
-        log:printInfo("[RedisTokenStore] Token data written to store", dataKey = dataKey);
+        log:printDebug("[RedisTokenStore] Token data written to store", dataKey = dataKey);
     }
 
     // Removes token data and its associated lock from Redis.
@@ -118,7 +118,7 @@ public isolated class RedisTokenStore {
         string dataKey = "data:" + key;
         string lockKey = "lock:" + key;
         _ = check self.redisClient->del([dataKey, lockKey]);
-        log:printInfo("[RedisTokenStore] Token data evicted (cache poisoning prevention)",
+        log:printDebug("[RedisTokenStore] Token data evicted (cache poisoning prevention)",
                 dataKey = dataKey, lockKey = lockKey);
     }
 
@@ -132,7 +132,7 @@ public isolated class RedisTokenStore {
         if dataKeys is string[] && dataKeys.length() > 0 {
             _ = check self.redisClient->del(dataKeys);
         }
-        log:printInfo("[RedisTokenStore] Test keys flushed");
+        log:printDebug("[RedisTokenStore] Test keys flushed");
     }
 
     // Closes the Redis connection.

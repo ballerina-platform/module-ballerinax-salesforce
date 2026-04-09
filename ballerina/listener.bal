@@ -146,7 +146,7 @@ public isolated class Listener {
         utils:TokenManager? tm = self.tokenManager;
         if tm is utils:TokenManager {
             tm.invalidateAccessToken();
-            log:printInfo("Requesting access token for CometD authentication");
+            log:printDebug("Requesting access token for CometD authentication");
             string|error token = tm.getAccessToken();
             if token is error {
                 if token.message().includes("invalid_grant") {
@@ -173,7 +173,7 @@ public isolated class Listener {
                 }
                 return token;
             }
-            log:printInfo("Access token obtained for CometD",
+            log:printDebug("Access token obtained for CometD",
                     expiresInMinutes = tm.getSecondsUntilExpiry() / 60);
             return token;
         }
@@ -204,13 +204,13 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
-        log:printInfo("Salesforce CDC listener gracefully stopping — closing CometD connection");
+        log:printDebug("Salesforce CDC listener gracefully stopping — closing CometD connection");
         error? unscheduleErr = self.unscheduleTokenRefreshJob();
         if unscheduleErr is error {
             log:printWarn("Failed to unschedule token refresh job", 'error = unscheduleErr);
         }
         error? result = stopListener(self);
-        log:printInfo("Salesforce CDC listener stopped");
+        log:printDebug("Salesforce CDC listener stopped");
         if self.isOAuth2 {
             boolean permFailed;
             lock {
@@ -220,7 +220,7 @@ public isolated class Listener {
                 log:printError("Refresh token has permanently expired. " +
                         "Obtain a new refresh token and restart the listener.");
             } else {
-                log:printInfo("Scheduling auto-reconnect in 5 seconds...");
+                log:printDebug("Scheduling auto-reconnect in 5 seconds...");
                 _ = start scheduleReconnect(self);
             }
         }
@@ -312,7 +312,7 @@ public isolated class Listener {
                 self.tokenRefreshJobId = jobId;
             }
             int atSecondsLeft = tm.getSecondsUntilExpiry();
-            log:printInfo("Proactive token refresh job scheduled",
+            log:printDebug("Proactive token refresh job scheduled",
                     jobId = jobId.id,
                     intervalSeconds = intervalSeconds,
                     intervalMinutes = intervalSeconds / 60,
@@ -320,7 +320,7 @@ public isolated class Listener {
                     bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS,
                     currentAtExpiresInMinutes = atSecondsLeft / 60);
         } else {
-            log:printInfo("Token refresh job not scheduled — TokenManager not available (non-RefreshToken grant)");
+            log:printDebug("Token refresh job not scheduled — TokenManager not available (non-RefreshToken grant)");
         }
     }
 
@@ -335,7 +335,7 @@ public isolated class Listener {
         }
         if jobId is task:JobId {
             check task:unscheduleJob(jobId);
-            log:printInfo("Proactive token refresh job unscheduled");
+            log:printDebug("Proactive token refresh job unscheduled");
         }
     }
 
@@ -406,7 +406,7 @@ class TokenRefreshJob {
         }
 
         self.tokenManager.invalidateAccessToken();
-        log:printInfo("Proactive token refresh: stopping CometD to reconnect with fresh token...");
+        log:printDebug("Proactive token refresh: stopping CometD to reconnect with fresh token...");
         error? stopErr = stopListener(self.listenerInstance);
         if stopErr is error {
             log:printWarn("Proactive token refresh: stop warning", 'error = stopErr);
@@ -426,7 +426,7 @@ class TokenRefreshJob {
             }
         } else {
             int newAtSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
-            log:printInfo("Proactive token refresh succeeded — CometD refreshed with new token",
+            log:printDebug("Proactive token refresh succeeded — CometD refreshed with new token",
                     newAtExpiresInMinutes = newAtSecondsLeft / 60);
         }
     }

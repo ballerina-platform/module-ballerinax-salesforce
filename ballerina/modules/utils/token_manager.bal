@@ -239,7 +239,7 @@ public isolated class TokenManager {
             // The holder is expected to finish within a few hundred milliseconds
             // (HTTP call to Salesforce + Redis write). We poll up to ~10 seconds
             // before giving up and attempting to acquire the lock ourselves.
-            log:printInfo("Token refresh lock held by another replica — entering wait loop");
+            log:printDebug("Token refresh lock held by another replica — entering wait loop");
 
             string|error waitResult = self.waitForStoreUpdate(storeKey);
             if waitResult is string {
@@ -307,7 +307,7 @@ public isolated class TokenManager {
             if storeData is TokenData {
                 if storeData.accessTokenExpiryEpoch > now[0] {
                     self.adoptStoreData(storeData);
-                    log:printInfo(
+                    log:printDebug(
                         string `Adopted token from store after ${attempt} poll(s) (${elapsedSeconds}s wait)`,
                         fingerprint = fingerprintToken(storeData.accessToken),
                         expiresInSeconds = storeData.accessTokenExpiryEpoch - now[0]);
@@ -338,7 +338,7 @@ public isolated class TokenManager {
                     if storeData.issuedAtEpoch > 0 {
                         self.rtIssuedAtEpoch = storeData.issuedAtEpoch;
                     }
-                    log:printInfo("Adopted token from store (refreshed by another replica)",
+                    log:printDebug("Adopted token from store (refreshed by another replica)",
                             fingerprint = fingerprintToken(storeData.accessToken),
                             expiresInSeconds = storeData.accessTokenExpiryEpoch - now[0]);
                     return storeData.accessToken;
@@ -346,7 +346,7 @@ public isolated class TokenManager {
                 // Store token expired — use the store's refresh token (may be more recent
                 // than ours if another replica rotated it previously).
                 if storeData.refreshToken != "" && storeData.refreshToken != self.refreshToken {
-                    log:printInfo("Adopting newer refresh token from store before refreshing",
+                    log:printDebug("Adopting newer refresh token from store before refreshing",
                             localFingerprint = fingerprintToken(self.refreshToken),
                             storeFingerprint = fingerprintToken(storeData.refreshToken));
                     self.refreshToken = storeData.refreshToken;
@@ -424,17 +424,17 @@ public isolated class TokenManager {
             self.accessTokenExpiryEpoch = issuedAtEpoch + self.sessionTimeoutSeconds - self.clockSkewSeconds;
 
             int validForMinutes = (self.accessTokenExpiryEpoch - issuedAtEpoch) / 60;
-            log:printInfo(string `AT#${self.atGeneration} issued`,
+            log:printDebug(string `AT#${self.atGeneration} issued`,
                 fingerprint = fingerprintToken(newAccessToken),
                 validForMinutes = validForMinutes,
                 sessionTimeoutAssumptionMinutes = self.sessionTimeoutSeconds / 60);
 
             if rotatedRefreshToken is string {
-                log:printInfo(string `RT#${self.rtGeneration - 1} → RT#${self.rtGeneration} (Salesforce rotated refresh token)`,
+                log:printDebug(string `RT#${self.rtGeneration - 1} → RT#${self.rtGeneration} (Salesforce rotated refresh token)`,
                     previousFingerprint = fingerprintToken(currentRefreshToken),
                     newFingerprint = fingerprintToken(<string>rotatedRefreshToken));
             } else {
-                log:printInfo("No refresh token rotation in response — existing RT unchanged",
+                log:printDebug("No refresh token rotation in response — existing RT unchanged",
                     rtGeneration = self.rtGeneration,
                     fingerprint = fingerprintToken(currentRefreshToken));
             }
@@ -492,7 +492,7 @@ public isolated class TokenManager {
                     storeKey = storeKey,
                     'error = clearErr);
         } else {
-            log:printInfo("Dead token evicted from distributed store (cache poisoning prevented)",
+            log:printDebug("Dead token evicted from distributed store (cache poisoning prevented)",
                     storeKey = storeKey);
         }
         // Also release any lingering lock
@@ -563,7 +563,7 @@ public isolated class TokenManager {
             self.atGeneration = 0;
             self.rtGeneration = 0;
         }
-        log:printInfo("New seed refresh token installed (RT#0) — generation counters reset",
+        log:printDebug("New seed refresh token installed (RT#0) — generation counters reset",
             newSeedFingerprint = fingerprintToken(newRefreshToken));
     }
 
