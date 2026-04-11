@@ -59,6 +59,45 @@ isolated function incrementCallCount() returns int {
     }
 }
 
+// --- Failure mode toggle ---
+// When `mockFailureMode` is true, the mock token endpoint returns a 400
+// error response with the configured error code (default: "invalid_grant").
+// Used by the cache-poisoning auto-eviction test to simulate a fatal auth
+// failure from Salesforce. Tests MUST reset this flag after use to prevent
+// interfering with subsequent tests.
+isolated boolean mockFailureMode = false;
+isolated string mockFailureErrorCode = "invalid_grant";
+
+isolated function enableMockFailureMode(string errorCode = "invalid_grant") {
+    lock {
+        mockFailureMode = true;
+    }
+    lock {
+        mockFailureErrorCode = errorCode;
+    }
+}
+
+isolated function disableMockFailureMode() {
+    lock {
+        mockFailureMode = false;
+    }
+    lock {
+        mockFailureErrorCode = "invalid_grant";
+    }
+}
+
+isolated function getMockFailureState() returns [boolean, string] {
+    boolean mode;
+    lock {
+        mode = mockFailureMode;
+    }
+    string code;
+    lock {
+        code = mockFailureErrorCode;
+    }
+    return [mode, code];
+}
+
 // --- Mock HTTP Service ---
 // The service is attached to the listener programmatically in @test:BeforeSuite.
 // Each POST to "/" returns a unique access_token, a rotated refresh_token,
@@ -71,7 +110,9 @@ final http:Service mockTokenService = service object {
     // Simulates Salesforce token endpoint.
     // TokenManager posts to "" which maps to root resource.
     // Returns http:Ok (200) explicitly — Ballerina POST resources default to 201.
-    resource function post .(http:Request req) returns http:Ok|error {
+    // When failure mode is enabled, returns 400 with an error payload matching
+    // Salesforce's real invalid_grant response shape.
+    resource function post .(http:Request req) returns http:Ok|http:BadRequest|error {
         int count = incrementCallCount();
 
         // Add a small artificial delay (50ms) to widen the race window for
@@ -79,18 +120,33 @@ final http:Service mockTokenService = service object {
         // overlap their refresh calls if locking is absent.
         runtime:sleep(0.05);
 
+        // --- Failure mode branch ---
+        [boolean, string] failState = getMockFailureState();
+        if failState[0] {
+            log:printInfo(string `[MockSF] Token endpoint hit #${count} — returning 400 ${failState[1]}`);
+            http:BadRequest errorResponse = {
+                body: {
+                    "error": failState[1],
+                    "error_description": "expired access/refresh token"
+                }
+            };
+            return errorResponse;
+        }
+
         [int, decimal] now = time:utcNow();
         int issuedAtMs = now[0] * 1000;
 
         // Generate unique tokens per call to simulate RTR.
-        string accessToken = string `AT_mock_${uuid:createType1AsString()}`;
-        string refreshToken = string `RT_mock_${uuid:createType1AsString()}`;
+        // Include the monotonically-increasing call counter to guarantee
+        // uniqueness even when rapid back-to-back calls share a UUID clock tick.
+        string accessToken = string `AT_mock_${count}_${uuid:createType1AsString()}`;
+        string refreshToken = string `RT_mock_${count}_${uuid:createType1AsString()}`;
 
         log:printInfo(string `[MockSF] Token endpoint hit #${count}`,
                 accessTokenPrefix = accessToken.substring(0, 16),
                 refreshTokenPrefix = refreshToken.substring(0, 16));
 
-        return {
+        http:Ok okResponse = {
             body: {
                 "access_token": accessToken,
                 "refresh_token": refreshToken,
@@ -101,6 +157,7 @@ final http:Service mockTokenService = service object {
                 "signature": "mock_signature"
             }
         };
+        return okResponse;
     }
 
     // Returns the current call count (for debugging via curl).

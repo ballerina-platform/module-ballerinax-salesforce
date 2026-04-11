@@ -355,6 +355,8 @@ public isolated class Listener {
         if unscheduleErr is error {
             log:printWarn("Failed to unschedule token refresh job", 'error = unscheduleErr);
         }
+        return stopListener(self);
+
     }
 }
 

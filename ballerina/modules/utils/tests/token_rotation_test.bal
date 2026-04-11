@@ -75,7 +75,7 @@ const int TEST_SESSION_TIMEOUT = 900;
 // ==========================================================================
 
 @test:Config {
-    groups: ["token_store"]
+    groups: ["in-memory"]
 }
 function testSingleNodeInMemory() returns error? {
     log:printInfo("=== TEST 1: Single Node InMemory — 5 concurrent workers ===");
@@ -166,7 +166,7 @@ function testSingleNodeInMemory() returns error? {
 // ==========================================================================
 
 @test:Config {
-    groups: ["token_store"],
+    groups: ["in-memory"],
     dependsOn: [testSingleNodeInMemory]
 }
 function testMultiNodeInMemoryChaos() returns error? {
@@ -251,7 +251,7 @@ function testMultiNodeInMemoryChaos() returns error? {
 // ==========================================================================
 
 @test:Config {
-    groups: ["token_store", "redis"],
+    groups: ["redis-integration"],
     dependsOn: [testMultiNodeInMemoryChaos]
 }
 function testMultiNodeRedisCoordination() returns error? {
