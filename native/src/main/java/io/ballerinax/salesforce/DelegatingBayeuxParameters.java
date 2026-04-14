@@ -26,6 +26,7 @@
 
 package io.ballerinax.salesforce;
 
+import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
@@ -93,5 +94,10 @@ public class DelegatingBayeuxParameters implements BayeuxParameters {
     @Override
     public String version() {
         return parameters.version();
+    }
+
+    @Override
+    public void configureAuthentication(HttpClient httpClient) {
+        parameters.configureAuthentication(httpClient);
     }
 }

@@ -24,6 +24,7 @@
 
 package io.ballerinax.salesforce;
 
+import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import java.net.MalformedURLException;
@@ -108,6 +109,17 @@ public interface BayeuxParameters {
      */
     default Collection<? extends org.eclipse.jetty.client.ProxyConfiguration.Proxy> proxies() {
         return Collections.emptyList();
+    }
+
+    /**
+     * Configures proxy authentication on the provided {@link HttpClient}.
+     * Implementations that require proxy credentials should override this method
+     * to register the appropriate authentication with the client's
+     * {@code AuthenticationStore}. The default implementation is a no-op.
+     *
+     * @param httpClient the Jetty HTTP client to configure
+     */
+    default void configureAuthentication(HttpClient httpClient) {
     }
 
     /**

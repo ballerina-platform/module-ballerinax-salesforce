@@ -50,6 +50,20 @@ public type RestBasedListenerConfig record {|
     *CommonListenerConfig;
 |};
 
+# Proxy server configuration for the Salesforce listener.
+# When set, all listener traffic (the login/token request and the CometD
+# long-poll connection) is routed through the specified HTTP proxy server.
+public type ListenerProxyConfig record {|
+    # Host name or IP address of the proxy server
+    string host;
+    # Port of the proxy server
+    int port;
+    # Username for proxy authentication. Leave empty if the proxy does not require authentication.
+    string username = "";
+    # Password for proxy authentication. Leave empty if the proxy does not require authentication.
+    string password = "";
+|};
+
 # Common configuration for Salesforce listeners.
 public type CommonListenerConfig record {|
     # The replay ID to change the point in time when events are read
@@ -62,6 +76,9 @@ public type CommonListenerConfig record {|
     decimal keepAliveInterval = 120;
     # The Salesforce API version to use for Streaming API
     string apiVersion = "43.0";
+    # Proxy server configuration for outbound connections to the Salesforce Streaming API.
+    # Supports HTTP CONNECT proxies. When not set, a direct connection is used.
+    ListenerProxyConfig? proxy = ();
 |};
 
 # The replay options representing the point in time when events are read.

@@ -148,6 +148,7 @@ public class EmpConnector {
         httpClient = new HttpClient();
         httpClient.setSslContextFactory(parameters.sslContextFactory());
         parameters.proxies().forEach(httpClient.getProxyConfiguration()::addProxy);
+        parameters.configureAuthentication(httpClient);
     }
 
     /**

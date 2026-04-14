@@ -55,20 +55,33 @@ public isolated class Listener {
         }
         check utils:validateApiVersion(listenerConfig.apiVersion);
         self.apiVersion = listenerConfig.apiVersion;
+        string proxyHost = "";
+        int proxyPort = 0;
+        string proxyUsername = "";
+        string proxyPassword = "";
+        ListenerProxyConfig? proxyConfig = listenerConfig.proxy;
+        if proxyConfig is ListenerProxyConfig {
+            proxyHost = proxyConfig.host;
+            proxyPort = proxyConfig.port;
+            proxyUsername = proxyConfig.username;
+            proxyPassword = proxyConfig.password;
+        }
         if listenerConfig is RestBasedListenerConfig {
             self.username = "";
             self.password = "";
             self.isOAuth2 = true;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
             initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
-                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
+                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion,
+                    proxyHost, proxyPort, proxyUsername, proxyPassword);
         } else {
             self.username = listenerConfig.auth.username;
             self.password = listenerConfig.auth.password;
             self.isOAuth2 = false;
             self.oauth2Config = ();
             initListener(self, self.replayFrom, listenerConfig.isSandBox,
-                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
+                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion,
+                    proxyHost, proxyPort, proxyUsername, proxyPassword);
         }
     }
 
@@ -142,24 +155,29 @@ public isolated class Listener {
 }
 
 isolated function initListener(Listener instance, int replayFrom, boolean isSandBox,
-        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval, string apiVersion) =
+        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval, string apiVersion,
+        string proxyHost, int proxyPort, string proxyUsername, string proxyPassword) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil",
     paramTypes: ["io.ballerina.runtime.api.values.BObject", "int", "boolean",
         "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BString"]
+        "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BString",
+        "io.ballerina.runtime.api.values.BString", "int",
+        "io.ballerina.runtime.api.values.BString", "io.ballerina.runtime.api.values.BString"]
 } external;
 
 isolated function initListenerWithOAuth2(Listener instance, int replayFrom, string baseUrl,
-        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval,
-        string apiVersion) =
+        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval, string apiVersion,
+        string proxyHost, int proxyPort, string proxyUsername, string proxyPassword) =
 @java:Method {
     name: "initListener",
     'class: "io.ballerinax.salesforce.ListenerUtil",
     paramTypes: ["io.ballerina.runtime.api.values.BObject", "int",
         "io.ballerina.runtime.api.values.BString", "io.ballerina.runtime.api.values.BDecimal",
         "io.ballerina.runtime.api.values.BDecimal", "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BString"]
+        "io.ballerina.runtime.api.values.BString",
+        "io.ballerina.runtime.api.values.BString", "int",
+        "io.ballerina.runtime.api.values.BString", "io.ballerina.runtime.api.values.BString"]
 } external;
 
 isolated function attachService(Listener instance, Service s, string? channelName) returns error? =

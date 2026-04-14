@@ -24,9 +24,12 @@
 package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.values.BObject;
+import org.eclipse.jetty.client.BasicAuthentication;
 import org.eclipse.jetty.client.BytesRequestContent;
 import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.client.ProxyConfiguration;
 import org.eclipse.jetty.client.Request;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
@@ -34,12 +37,21 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import static io.ballerinax.salesforce.Constants.IS_SAND_BOX;
+import static io.ballerinax.salesforce.ListenerUtil.PROXY_HOST;
+import static io.ballerinax.salesforce.ListenerUtil.PROXY_PASSWORD;
+import static io.ballerinax.salesforce.ListenerUtil.PROXY_PORT;
+import static io.ballerinax.salesforce.ListenerUtil.PROXY_USERNAME;
 
 /**
  * A helper to obtain the Authentication bearer token via login.
@@ -114,16 +126,22 @@ public class LoginHelper {
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_PREFIX = "/services/Soap/u/";
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_SUFFIX = "/";
 
-    public static BayeuxParameters login(String username, String password, 
-        BObject listener, String apiVersion) throws Exception {
+    public static BayeuxParameters login(String username, String password,
+            BObject listener, String apiVersion) throws Exception {
         boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
+        String proxyHost = (String) listener.getNativeData(PROXY_HOST);
+        int proxyPort = (Integer) listener.getNativeData(PROXY_PORT);
+        String proxyUsername = (String) listener.getNativeData(PROXY_USERNAME);
+        String proxyPassword = (String) listener.getNativeData(PROXY_PASSWORD);
         String endpoint = getLoginEndpoint(isSandBox);
-        return login(new URL(endpoint), username, password, apiVersion);
+        BayeuxParameters baseParams = buildProxyAwareParams(apiVersion, proxyHost, proxyPort,
+                proxyUsername, proxyPassword);
+        return login(new URL(endpoint), username, password, baseParams, apiVersion);
     }
 
-    public static BayeuxParameters login(URL loginEndpoint, String username, 
-            String password, String apiVersion) throws Exception {
-        return login(loginEndpoint, username, password, new BayeuxParameters() {
+    private static BayeuxParameters buildProxyAwareParams(String apiVersion, String proxyHost, int proxyPort,
+            String proxyUsername, String proxyPassword) {
+        return new BayeuxParameters() {
             @Override
             public String bearerToken() {
                 throw new IllegalStateException("Have not authenticated");
@@ -138,7 +156,31 @@ public class LoginHelper {
             public String version() {
                 return apiVersion;
             }
-        }, apiVersion);
+
+            @Override
+            public Collection<? extends ProxyConfiguration.Proxy> proxies() {
+                if (proxyHost == null || proxyHost.isEmpty() || proxyPort <= 0) {
+                    return Collections.emptyList();
+                }
+                return List.of(new HttpProxy(proxyHost, proxyPort));
+            }
+
+            @Override
+            public void configureAuthentication(HttpClient httpClient) {
+                if (proxyHost == null || proxyHost.isEmpty()
+                        || proxyUsername == null || proxyUsername.isEmpty()) {
+                    return;
+                }
+                try {
+                    URI proxyUri = new URI("http", null, proxyHost, proxyPort, null, null, null);
+                    httpClient.getAuthenticationStore().addAuthentication(
+                            new BasicAuthentication(proxyUri, BasicAuthentication.ANY_REALM,
+                                    proxyUsername, proxyPassword));
+                } catch (URISyntaxException e) {
+                    throw new RuntimeException("Invalid proxy URI: " + proxyHost + ":" + proxyPort, e);
+                }
+            }
+        };
     }
 
     public static BayeuxParameters login(URL loginEndpoint, String username, String password,
@@ -147,6 +189,7 @@ public class LoginHelper {
         client.setSslContextFactory(parameters.sslContextFactory());
         try {
             parameters.proxies().forEach(client.getProxyConfiguration()::addProxy);
+            parameters.configureAuthentication(client);
             client.start();
             URL endpoint = new URL(loginEndpoint, getSoapUri(apiVersion));
             Request post = client.POST(endpoint.toURI());

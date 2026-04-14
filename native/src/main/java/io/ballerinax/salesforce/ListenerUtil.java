@@ -58,13 +58,17 @@ public class ListenerUtil {
     public static final String API_VERSION = "apiVersion";
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
     public static final String SUBSCRIPTIONS = "subscriptions";
+    public static final String PROXY_HOST = "proxyHost";
+    public static final String PROXY_PORT = "proxyPort";
+    public static final String PROXY_USERNAME = "proxyUsername";
+    public static final String PROXY_PASSWORD = "proxyPassword";
     private static final String CONNECTOR = "connector";
     private static final List<String> CDC_METHODS = List.of(
             Constants.ON_CREATE, Constants.ON_UPDATE, Constants.ON_DELETE, Constants.ON_RESTORE);
 
     private static void extractBaseConfigs(BObject listener, int replayFrom,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
-            BString apiVersion) {
+            BString apiVersion, BString proxyHost, int proxyPort, BString proxyUsername, BString proxyPassword) {
         listener.addNativeData(CONSUMER_SERVICES, new ArrayList<BObject>());
         listener.addNativeData(DISPATCHERS, new HashMap<BObject, DispatcherService>());
         listener.addNativeData(SUBSCRIPTIONS, new HashMap<BObject, TopicSubscription>());
@@ -78,18 +82,26 @@ public class ListenerUtil {
         listener.addNativeData(KEEP_ALIVE_INTERVAL, keepAliveIntervalMs);
         listener.addNativeData(CONNECTION_TIMEOUT + "_display",
             connectionTimeout.value().stripTrailingZeros().toPlainString());
+        listener.addNativeData(PROXY_HOST, proxyHost.getValue());
+        listener.addNativeData(PROXY_PORT, proxyPort);
+        listener.addNativeData(PROXY_USERNAME, proxyUsername.getValue());
+        listener.addNativeData(PROXY_PASSWORD, proxyPassword.getValue());
     }
 
     public static void initListener(BObject listener, int replayFrom, boolean isSandBox,
-            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion) {
-        extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval, apiVersion);
+            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion,
+            BString proxyHost, int proxyPort, BString proxyUsername, BString proxyPassword) {
+        extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval, apiVersion,
+                proxyHost, proxyPort, proxyUsername, proxyPassword);
         listener.addNativeData(IS_OAUTH2, false);
         listener.addNativeData(IS_SAND_BOX, isSandBox);
     }
 
     public static void initListener(BObject listener, int replayFrom, BString baseUrl,
-            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion) {
-        extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval, apiVersion);
+            BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval, BString apiVersion,
+            BString proxyHost, int proxyPort, BString proxyUsername, BString proxyPassword) {
+        extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval, apiVersion,
+                proxyHost, proxyPort, proxyUsername, proxyPassword);
         listener.addNativeData(IS_OAUTH2, true);
         listener.addNativeData(BASE_URL, baseUrl.getValue());
     }
@@ -153,10 +165,15 @@ public class ListenerUtil {
         long readTimeoutMs = (Long) listener.getNativeData(READ_TIMEOUT);
         long keepAliveIntervalMs = (Long) listener.getNativeData(KEEP_ALIVE_INTERVAL);
         String apiVersion = (String) listener.getNativeData(API_VERSION);
+        String proxyHost = (String) listener.getNativeData(PROXY_HOST);
+        int proxyPort = (Integer) listener.getNativeData(PROXY_PORT);
+        String proxyUsername = (String) listener.getNativeData(PROXY_USERNAME);
+        String proxyPassword = (String) listener.getNativeData(PROXY_PASSWORD);
 
         BearerTokenProvider tokenProvider = new BearerTokenProvider(() ->
             new OAuth2BayeuxParameters(() -> getOAuth2Token(env, listener), baseUrl,
-                readTimeoutMs, keepAliveIntervalMs, apiVersion));
+                readTimeoutMs, keepAliveIntervalMs, apiVersion,
+                proxyHost, proxyPort, proxyUsername, proxyPassword));
 
         BayeuxParameters params;
         try {
