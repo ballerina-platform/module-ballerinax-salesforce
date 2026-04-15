@@ -53,7 +53,7 @@ public type TokenStore isolated object {
     # + lockKey - A unique key identifying the token family (e.g., client ID hash)
     # + ttlSeconds - Maximum time in seconds to hold the lock (auto-release safety net)
     # + return - `true` if the lock was acquired, `false` if another holder has it,
-    #            or an `error` if the store is unreachable
+    # or an `error` if the store is unreachable
     public isolated function acquireLock(string lockKey, int ttlSeconds) returns boolean|error;
 
     # Releases the advisory lock after a refresh cycle completes.
@@ -192,6 +192,9 @@ public isolated class TokenManager {
         self.rtWindowSeconds = sessionTimeoutSeconds;
         self.atGeneration = 0;
         self.rtGeneration = 0;
+        if sessionTimeoutSeconds <= self.clockSkewSeconds {
+            return error("sessionTimeoutSeconds must be greater than clockSkewSeconds (" + string `(${self.clockSkewSeconds})`);
+        }
         if tokenStore is TokenStore {
             self.tokenStore = tokenStore;
         } else {
@@ -308,9 +311,9 @@ public isolated class TokenManager {
                 if storeData.accessTokenExpiryEpoch > now[0] {
                     self.adoptStoreData(storeData);
                     log:printDebug(
-                        string `Adopted token from store after ${attempt} poll(s) (${elapsedSeconds}s wait)`,
-                        fingerprint = fingerprintToken(storeData.accessToken),
-                        expiresInSeconds = storeData.accessTokenExpiryEpoch - now[0]);
+                            string `Adopted token from store after ${attempt} poll(s) (${elapsedSeconds}s wait)`,
+                            fingerprint = fingerprintToken(storeData.accessToken),
+                            expiresInSeconds = storeData.accessTokenExpiryEpoch - now[0]);
                     return storeData.accessToken;
                 }
             }
@@ -373,8 +376,8 @@ public isolated class TokenManager {
                     errMsg = errMsg + " Response: " + errBody.toJsonString();
                 }
                 log:printError("Token refresh failed",
-                    refreshTokenFingerprint = fingerprintToken(currentRefreshToken),
-                    statusCode = response.statusCode);
+                        refreshTokenFingerprint = fingerprintToken(currentRefreshToken),
+                        statusCode = response.statusCode);
                 return error(errMsg);
             }
 
@@ -392,7 +395,7 @@ public isolated class TokenManager {
                     rotatedRefreshToken = rtStr;
                 } else if rtStr is error {
                     log:printError("refresh_token field exists but conversion to string failed",
-                        'error = rtStr);
+                            'error = rtStr);
                 }
             }
 
@@ -425,18 +428,18 @@ public isolated class TokenManager {
 
             int validForMinutes = (self.accessTokenExpiryEpoch - issuedAtEpoch) / 60;
             log:printDebug(string `AT#${self.atGeneration} issued`,
-                fingerprint = fingerprintToken(newAccessToken),
-                validForMinutes = validForMinutes,
-                sessionTimeoutAssumptionMinutes = self.sessionTimeoutSeconds / 60);
+                    fingerprint = fingerprintToken(newAccessToken),
+                    validForMinutes = validForMinutes,
+                    sessionTimeoutAssumptionMinutes = self.sessionTimeoutSeconds / 60);
 
             if rotatedRefreshToken is string {
                 log:printDebug(string `RT#${self.rtGeneration - 1} → RT#${self.rtGeneration} (Salesforce rotated refresh token)`,
-                    previousFingerprint = fingerprintToken(currentRefreshToken),
-                    newFingerprint = fingerprintToken(<string>rotatedRefreshToken));
+                        previousFingerprint = fingerprintToken(currentRefreshToken),
+                        newFingerprint = fingerprintToken(<string>rotatedRefreshToken));
             } else {
                 log:printDebug("No refresh token rotation in response — existing RT unchanged",
-                    rtGeneration = self.rtGeneration,
-                    fingerprint = fingerprintToken(currentRefreshToken));
+                        rtGeneration = self.rtGeneration,
+                        fingerprint = fingerprintToken(currentRefreshToken));
             }
 
             // --- Phase 4: Write updated token data to store ---
@@ -449,7 +452,34 @@ public isolated class TokenManager {
             };
             error? storeErr = self.tokenStore.setTokenData(storeKey, updatedData);
             if storeErr is error {
-                log:printWarn("Failed to write token data to store — other replicas may not see the update",
+                if rotatedRefreshToken is string {
+                    // CRITICAL: Salesforce rotated the refresh token in this response,
+                    // which means RT#(n-1) is NOW REVOKED server-side. The new RT#n
+                    // exists only in this replica's local memory. If we return success
+                    // here, the lock is released, and other replicas will read the
+                    // stale RT#(n-1) from the store, send it to Salesforce, and trigger
+                    // an invalid_grant that kills the entire token family.
+                    //
+                    // Returning an error is safe: this replica still holds RT#n in
+                    // memory. The caller (CometD reconnect) will retry the full
+                    // refreshAccessToken() flow, re-acquire the lock, and attempt
+                    // the store write again — most likely the Redis blip will have
+                    // passed by then and the write will succeed.
+                    log:printError("CRITICAL: Failed to persist rotated refresh token to store — " +
+                            "aborting refresh to prevent Token Replay Attack. " +
+                            "RT#" + self.rtGeneration.toString() + " exists only in local memory. " +
+                            "The caller will retry the full refresh cycle.",
+                            storeKey = storeKey,
+                            rtGeneration = self.rtGeneration,
+                            'error = storeErr);
+                    return error("Failed to persist rotated refresh token to distributed store: " +
+                            storeErr.message());
+                }
+                // No rotation occurred — the existing RT in the store is still valid.
+                // Other replicas can safely use it. Log and continue.
+                log:printWarn("Failed to write token data to store — other replicas " +
+                        "may not see the new access token, but the refresh token " +
+                        "in the store is still valid (no rotation occurred)",
                         'error = storeErr);
             }
 
@@ -548,12 +578,21 @@ public isolated class TokenManager {
         }
     }
 
-    # Replaces the in-memory refresh token and clears the cached access token.
+    # Replaces the in-memory refresh token, clears the cached access token,
+    # and evicts any stale token data from the shared store.
+    #
+    # The store eviction is critical: without it, the double-check read in
+    # `doRefreshWithLock()` would find the old (dead) refresh token in the
+    # store and silently overwrite the fresh seed — causing the next refresh
+    # to send the revoked token to Salesforce and trigger `invalid_grant`.
+    #
     # Resets RT issuance tracking so `getEstimatedRtSecondsLeft()` returns -1
     # until the next rotation response arrives.
     #
     # + newRefreshToken - The new refresh token to install
-    public isolated function updateRefreshToken(string newRefreshToken) {
+    # + return - `()` on success, or an `error` if the store eviction fails
+    public isolated function updateRefreshToken(string newRefreshToken) returns error? {
+        string storeKey;
         lock {
             self.refreshToken = newRefreshToken;
             self.accessToken = "";
@@ -562,9 +601,23 @@ public isolated class TokenManager {
             self.rtWindowSeconds = self.sessionTimeoutSeconds;
             self.atGeneration = 0;
             self.rtGeneration = 0;
+            storeKey = self.storeKey;
         }
-        log:printDebug("New seed refresh token installed (RT#0) — generation counters reset",
-            newSeedFingerprint = fingerprintToken(newRefreshToken));
+        // Evict stale token data from the shared store so the double-check
+        // in doRefreshWithLock() finds an empty store and uses the fresh seed
+        // instead of re-adopting the dead RT from Redis.
+        error? evictErr = self.tokenStore.clearTokenData(storeKey);
+        if evictErr is error {
+            log:printError("Failed to evict stale token data from store after seed update — " +
+                    "the next refresh may re-adopt the dead token from the store",
+                    storeKey = storeKey,
+                    'error = evictErr);
+            return evictErr;
+        }
+        log:printInfo("New seed refresh token installed (RT#0) — generation counters reset, " +
+                "stale store data evicted",
+                newSeedFingerprint = fingerprintToken(newRefreshToken),
+                storeKey = storeKey);
     }
 
 }

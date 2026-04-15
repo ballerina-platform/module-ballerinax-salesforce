@@ -124,8 +124,8 @@ public isolated class RedisTokenStore {
 
     // Flushes all test-namespaced keys from Redis (for test cleanup).
     public isolated function flushAll() returns error? {
-        string[]|redis:Error lockKeys = self.redisClient->keys("lock:*");
-        if lockKeys is string[] && lockKeys.length() > 0 {
+        string[] lockKeys = check self.redisClient->keys("lock:*");
+        if lockKeys.length() > 0 {
             _ = check self.redisClient->del(lockKeys);
         }
         string[]|redis:Error dataKeys = self.redisClient->keys("data:*");

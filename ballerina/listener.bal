@@ -16,7 +16,6 @@
 
 import ballerina/http;
 import ballerina/jballerina.java;
-import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/oauth2;
 import ballerina/task;
@@ -199,8 +198,9 @@ public isolated class Listener {
         return detachService(self, s);
     }
 
-    # Stops subscription through all consumer services by terminating the connection and all its channels.
-    # For OAuth2 listeners, automatically schedules a reconnect after 5 seconds.
+    # Stops subscription through all consumer services by terminating the CometD
+    # connection and all its channels. This is a permanent shutdown — the listener
+    # will NOT auto-reconnect. Call `reconnect()` explicitly to re-establish.
     #
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
@@ -211,19 +211,6 @@ public isolated class Listener {
         }
         error? result = stopListener(self);
         log:printDebug("Salesforce CDC listener stopped");
-        if self.isOAuth2 {
-            boolean permFailed;
-            lock {
-                permFailed = self.tokenRefreshPermanentlyFailed;
-            }
-            if permFailed {
-                log:printError("Refresh token has permanently expired. " +
-                        "Obtain a new refresh token and restart the listener.");
-            } else {
-                log:printDebug("Scheduling auto-reconnect in 5 seconds...");
-                _ = start scheduleReconnect(self);
-            }
-        }
         return result;
     }
 
@@ -252,7 +239,7 @@ public isolated class Listener {
         if tm is () {
             return error("Refresh token updates are only supported for refresh-token OAuth2 listeners");
         }
-        tm.updateRefreshToken(newRefreshToken);
+        check tm.updateRefreshToken(newRefreshToken);
         lock {
             self.tokenRefreshPermanentlyFailed = false;
         }
@@ -357,20 +344,6 @@ public isolated class Listener {
         }
         return stopListener(self);
 
-    }
-}
-
-isolated function scheduleReconnect(Listener instance) {
-    runtime:sleep(5);
-    error? err = startListenerWithOAuth2(instance);
-    if err is error {
-        log:printError("Auto-reconnect failed — manual reconnect required", 'error = err);
-    } else {
-        error? scheduleErr = instance.scheduleTokenRefreshJob();
-        if scheduleErr is error {
-            log:printError("Failed to reschedule token refresh job after auto-reconnect",
-                    'error = scheduleErr);
-        }
     }
 }
 
