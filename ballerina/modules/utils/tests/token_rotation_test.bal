@@ -269,19 +269,19 @@ function testMultiNodeRedisCoordination() returns error? {
         TEST_CLIENT_ID, TEST_CLIENT_SECRET,
         TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
         TEST_SESSION_TIMEOUT,
-        sharedStore
+        tokenStore = sharedStore
     );
     TokenManager pod2 = check new (
         TEST_CLIENT_ID, TEST_CLIENT_SECRET,
         TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
         TEST_SESSION_TIMEOUT,
-        sharedStore
+        tokenStore = sharedStore
     );
     TokenManager pod3 = check new (
         TEST_CLIENT_ID, TEST_CLIENT_SECRET,
         TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
         TEST_SESSION_TIMEOUT,
-        sharedStore
+        tokenStore = sharedStore
     );
 
     // All 3 pods refresh concurrently — only one should win the lock.

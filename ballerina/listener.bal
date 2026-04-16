@@ -86,6 +86,7 @@ public isolated class Listener {
                     rtConfig.clientId, rtConfig.clientSecret,
                     rtConfig.refreshToken, rtConfig.refreshUrl,
                     <int>rtConfig.defaultTokenExpTime,
+                    TOKEN_REFRESH_BUFFER_SECONDS,
                     listenerConfig.tokenStore
                 );
             } else {
@@ -258,11 +259,16 @@ public isolated class Listener {
         return tm.getRefreshToken();
     }
 
-    # Schedules a recurring token refresh job using `task:scheduleJobRecurByFrequency`.
-    # The job fires every (effectiveSessionTimeout - tokenRefreshBuffer) seconds and
-    # proactively refreshes the CometD connection before the access token expires.
-    # The effective session timeout is read from the TokenManager (may have been
-    # auto-detected from the org via the Metadata API).
+    # Schedules a one-shot token refresh job anchored to the current access token's
+    # actual expiry epoch. The job fires at (tokenExpiryEpoch - TOKEN_REFRESH_BUFFER_SECONDS)
+    # to proactively refresh the CometD connection before the access token expires.
+    #
+    # This is a one-shot (not recurring) design: after each successful refresh cycle,
+    # `TokenRefreshJob.execute()` calls this method again to schedule the NEXT one-shot
+    # based on the freshly-issued token's TTL. This eliminates the "startup-anchored
+    # scheduling" bug where a fixed-interval recurring job drifts out of sync with
+    # the actual token expiry — e.g., when a replica adopts a token that was refreshed
+    # by another replica and has a different expiry than the fixed interval assumes.
     #
     # + return - `()` or else an error if scheduling fails
     isolated function scheduleTokenRefreshJob() returns error? {
@@ -273,39 +279,31 @@ public isolated class Listener {
                 log:printWarn("Failed to unschedule existing token refresh job", 'error = unscheduleErr);
             }
 
-            OAuth2Config? & readonly config = self.oauth2Config;
-            int intervalSeconds;
-            if config is http:OAuth2RefreshTokenGrantConfig {
-                intervalSeconds = <int>config.defaultTokenExpTime - TOKEN_REFRESH_BUFFER_SECONDS;
-            } else {
-                intervalSeconds = self.sessionTimeout - TOKEN_REFRESH_BUFFER_SECONDS;
+            int secondsUntilExpiry = tm.getSecondsUntilExpiry();
+            int delaySeconds = secondsUntilExpiry - TOKEN_REFRESH_BUFFER_SECONDS;
+
+            if delaySeconds <= 0 {
+                // Token is already expired or within the buffer window — fire in 1 second.
+                // scheduleOneTimeJob requires a future time, so we use a minimal delay.
+                delaySeconds = 1;
+                log:printDebug("Token already within refresh buffer — scheduling immediate refresh",
+                        secondsUntilExpiry = secondsUntilExpiry,
+                        bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS);
             }
 
-            if intervalSeconds <= 0 {
-                log:printError("Token refresh interval is non-positive — TOKEN_REFRESH_BUFFER_SECONDS " +
-                        "exceeds session timeout. Skipping job scheduling.",
-                        sessionTimeoutMinutes = self.sessionTimeout / 60,
-                        bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS);
-                return;
-            }
             TokenRefreshJob job = new (self, tm);
-            // Delay the first execution by intervalSeconds so the job doesn't fire
-            // immediately at t=0 (scheduleJobRecurByFrequency fires at t=0 by default).
-            time:Utc firstFireUtc = time:utcAddSeconds(time:utcNow(), <decimal>intervalSeconds);
-            time:Civil firstFireCivil = time:utcToCivil(firstFireUtc);
-            task:JobId jobId = check task:scheduleJobRecurByFrequency(job, <decimal>intervalSeconds,
-                    startTime = firstFireCivil);
+            time:Utc fireUtc = time:utcAddSeconds(time:utcNow(), <decimal>delaySeconds);
+            time:Civil fireCivil = time:utcToCivil(fireUtc);
+            task:JobId jobId = check task:scheduleOneTimeJob(job, fireCivil);
             lock {
                 self.tokenRefreshJobId = jobId;
             }
-            int atSecondsLeft = tm.getSecondsUntilExpiry();
-            log:printDebug("Proactive token refresh job scheduled",
+            log:printDebug("Proactive token refresh job scheduled (one-shot)",
                     jobId = jobId.id,
-                    intervalSeconds = intervalSeconds,
-                    intervalMinutes = intervalSeconds / 60,
-                    sessionTimeoutMinutes = self.sessionTimeout / 60,
-                    bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS,
-                    currentAtExpiresInMinutes = atSecondsLeft / 60);
+                    delaySeconds = delaySeconds,
+                    delayMinutes = delaySeconds / 60,
+                    tokenExpiresInSeconds = secondsUntilExpiry,
+                    bufferSeconds = TOKEN_REFRESH_BUFFER_SECONDS);
         } else {
             log:printDebug("Token refresh job not scheduled — TokenManager not available (non-RefreshToken grant)");
         }
@@ -347,8 +345,10 @@ public isolated class Listener {
     }
 }
 
-# Job that proactively refreshes the CometD connection before the access token expires.
-# Scheduled via `task:scheduleJobRecurByFrequency` at (sessionTimeout - tokenRefreshBuffer) intervals.
+# One-shot job that proactively refreshes the CometD connection before the access token
+# expires. Scheduled via `task:scheduleOneTimeJob` at (tokenExpiry - bufferSeconds) from now.
+# After each successful cycle, `execute()` reschedules the next one-shot based on the
+# freshly-issued (or adopted) token's actual TTL.
 class TokenRefreshJob {
     *task:Job;
 
@@ -403,6 +403,14 @@ class TokenRefreshJob {
             int newAtSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
             log:printDebug("Proactive token refresh succeeded — CometD refreshed with new token",
                     newAtExpiresInMinutes = newAtSecondsLeft / 60);
+            // Schedule the NEXT one-shot based on the current token's actual TTL.
+            // This ensures every refresh cycle recalculates from the real expiry epoch,
+            // whether the token was freshly issued or adopted from the store.
+            error? rescheduleErr = self.listenerInstance.scheduleTokenRefreshJob();
+            if rescheduleErr is error {
+                log:printWarn("Failed to reschedule token refresh job after successful refresh",
+                        'error = rescheduleErr);
+            }
         }
     }
 }

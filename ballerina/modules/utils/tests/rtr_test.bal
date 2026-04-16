@@ -164,7 +164,7 @@ function testRedisMasterFlow() returns error? {
         RTR_CLIENT_ID_MASTER, TEST_CLIENT_SECRET,
         TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
         TEST_SESSION_TIMEOUT,
-        store
+        tokenStore = store
     );
 
     // --- Master refreshes (uncontested) ---
@@ -245,7 +245,7 @@ function testRedisWorkerFlow() returns error? {
         RTR_CLIENT_ID_WORKER, TEST_CLIENT_SECRET,
         TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
         TEST_SESSION_TIMEOUT,
-        store
+        tokenStore = store
     );
 
     string adoptedToken = check workerTm.refreshAccessToken();
@@ -334,7 +334,7 @@ function testCachePoisoningAutoEviction() returns error? {
         RTR_CLIENT_ID_POISON, TEST_CLIENT_SECRET,
         TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
         TEST_SESSION_TIMEOUT,
-        store
+        tokenStore = store
     );
 
     string|error refreshResult = tm.refreshAccessToken();

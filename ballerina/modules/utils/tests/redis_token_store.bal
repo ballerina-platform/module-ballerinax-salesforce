@@ -128,8 +128,8 @@ public isolated class RedisTokenStore {
         if lockKeys.length() > 0 {
             _ = check self.redisClient->del(lockKeys);
         }
-        string[]|redis:Error dataKeys = self.redisClient->keys("data:*");
-        if dataKeys is string[] && dataKeys.length() > 0 {
+        string[] dataKeys = check self.redisClient->keys("data:*");
+        if dataKeys.length() > 0 {
             _ = check self.redisClient->del(dataKeys);
         }
         log:printDebug("[RedisTokenStore] Test keys flushed");

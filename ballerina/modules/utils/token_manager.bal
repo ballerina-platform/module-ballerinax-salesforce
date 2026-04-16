@@ -167,6 +167,12 @@ public isolated class TokenManager {
     // Unique key for the token family, derived from the client ID.
     // Used as the lock key and store key for distributed coordination.
     private final string storeKey;
+    // Minimum remaining TTL (seconds) a token must have to be considered valid for
+    // adoption from the shared store. Tokens within this buffer are treated as expired
+    // even if technically still alive — adopting a near-death token is pointless since
+    // it will expire before the CometD long-poll completes.
+    // Set from Listener's TOKEN_REFRESH_BUFFER_SECONDS via init().
+    private final int refreshBufferSeconds;
 
     # Initializes the TokenManager.
     #
@@ -175,17 +181,21 @@ public isolated class TokenManager {
     # + refreshToken - Initial refresh token (seed token)
     # + tokenUrl - Salesforce token endpoint URL
     # + sessionTimeoutSeconds - Salesforce session timeout in seconds (from ListenerConfig.sessionTimeout)
+    # + refreshBufferSeconds - Minimum remaining TTL a token must have to be adoptable from the store.
+    #                          Tokens with fewer seconds remaining are treated as expired.
     # + tokenStore - Optional pluggable token store for multi-replica coordination
     # + return - An error if the HTTP client cannot be created
     public isolated function init(string clientId, string clientSecret,
             string refreshToken, string tokenUrl,
             int sessionTimeoutSeconds = 900,
+            int refreshBufferSeconds = 60,
             TokenStore? tokenStore = ()) returns error? {
         self.clientId = clientId;
         self.clientSecret = clientSecret;
         self.refreshToken = refreshToken;
         self.tokenUrl = tokenUrl;
         self.sessionTimeoutSeconds = sessionTimeoutSeconds;
+        self.refreshBufferSeconds = refreshBufferSeconds;
         self.accessToken = "";
         self.accessTokenExpiryEpoch = -1;
         self.rtIssuedAtEpoch = -1;
@@ -308,13 +318,19 @@ public isolated class TokenManager {
             // Read from store — another replica may have written fresh token data.
             TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
             if storeData is TokenData {
-                if storeData.accessTokenExpiryEpoch > now[0] {
+                int remainingSeconds = storeData.accessTokenExpiryEpoch - now[0];
+                if remainingSeconds > self.refreshBufferSeconds {
                     self.adoptStoreData(storeData);
                     log:printDebug(
                             string `Adopted token from store after ${attempt} poll(s) (${elapsedSeconds}s wait)`,
                             fingerprint = fingerprintToken(storeData.accessToken),
-                            expiresInSeconds = storeData.accessTokenExpiryEpoch - now[0]);
+                            expiresInSeconds = remainingSeconds);
                     return storeData.accessToken;
+                }
+                if remainingSeconds > 0 {
+                    log:printDebug("Store token within refresh buffer during poll — treating as expired",
+                            expiresInSeconds = remainingSeconds,
+                            refreshBufferSeconds = self.refreshBufferSeconds);
                 }
             }
 
@@ -333,8 +349,10 @@ public isolated class TokenManager {
             TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
             if storeData is TokenData {
                 [int, decimal] now = time:utcNow();
-                if storeData.accessTokenExpiryEpoch > now[0] {
+                int remainingSeconds = storeData.accessTokenExpiryEpoch - now[0];
+                if remainingSeconds > self.refreshBufferSeconds {
                     // Another replica refreshed while we waited for the lock.
+                    // Token has enough remaining TTL to be useful (beyond the buffer).
                     self.accessToken = storeData.accessToken;
                     self.refreshToken = storeData.refreshToken;
                     self.accessTokenExpiryEpoch = storeData.accessTokenExpiryEpoch;
@@ -343,8 +361,13 @@ public isolated class TokenManager {
                     }
                     log:printDebug("Adopted token from store (refreshed by another replica)",
                             fingerprint = fingerprintToken(storeData.accessToken),
-                            expiresInSeconds = storeData.accessTokenExpiryEpoch - now[0]);
+                            expiresInSeconds = remainingSeconds);
                     return storeData.accessToken;
+                }
+                if remainingSeconds > 0 {
+                    log:printDebug("Store token within refresh buffer — treating as expired",
+                            expiresInSeconds = remainingSeconds,
+                            refreshBufferSeconds = self.refreshBufferSeconds);
                 }
                 // Store token expired — use the store's refresh token (may be more recent
                 // than ours if another replica rotated it previously).
