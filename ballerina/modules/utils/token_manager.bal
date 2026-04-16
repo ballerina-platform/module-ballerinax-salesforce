@@ -637,7 +637,7 @@ public isolated class TokenManager {
                     'error = evictErr);
             return evictErr;
         }
-        log:printInfo("New seed refresh token installed (RT#0) — generation counters reset, " +
+        log:printDebug("New seed refresh token installed (RT#0) — generation counters reset, " +
                 "stale store data evicted",
                 newSeedFingerprint = fingerprintToken(newRefreshToken),
                 storeKey = storeKey);
