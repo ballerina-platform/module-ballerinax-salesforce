@@ -85,7 +85,7 @@ public isolated class Listener {
                 self.tokenManager = check new (
                     rtConfig.clientId, rtConfig.clientSecret,
                     rtConfig.refreshToken, rtConfig.refreshUrl,
-                    <int>rtConfig.defaultTokenExpTime,
+                    check rtConfig.defaultTokenExpTime.ensureType(int),
                     TOKEN_REFRESH_BUFFER_SECONDS,
                     listenerConfig.tokenStore
                 );
@@ -338,7 +338,7 @@ public isolated class Listener {
     public isolated function immediateStop() returns error? {
         error? unscheduleErr = self.unscheduleTokenRefreshJob();
         if unscheduleErr is error {
-            log:printWarn("Failed to unschedule token refresh job", 'error = unscheduleErr);
+            log:printError("Failed to unschedule token refresh job during immediateStop", 'error = unscheduleErr);
         }
         return stopListener(self);
 

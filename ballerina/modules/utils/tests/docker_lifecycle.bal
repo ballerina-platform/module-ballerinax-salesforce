@@ -1,4 +1,4 @@
-// Copyright (c) 2026 WSO2 LLC. (http://www.wso2.org).
+// Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -22,12 +22,6 @@
 // Refresh Token Rotation (RTR) integration tests. Runs `docker run` in
 // @test:BeforeSuite and `docker rm -f` in @test:AfterSuite via `os:exec`.
 //
-// CI/CD SAFETY CONTRACT: infrastructure errors are NEVER swallowed. If
-// Docker is missing, the daemon is down, the image cannot be pulled, or
-// the container fails to start for any reason, BeforeSuite returns the
-// error and the entire test run fails. This prevents "false pass"
-// outcomes where Redis-dependent tests would silently skip and mislead
-// the CI dashboard into thinking the suite is green.
 // ==========================================================================
 
 import ballerina/lang.runtime;

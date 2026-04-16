@@ -1,4 +1,4 @@
-// Copyright (c) 2026 WSO2 LLC. (http://www.wso2.org).
+// Copyright (c) 2026, WSO2 LLC. (http://www.wso2.com).
 //
 // WSO2 LLC. licenses this file to you under the Apache License,
 // Version 2.0 (the "License"); you may not use this file except
@@ -27,7 +27,7 @@ import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/test;
 import ballerina/time;
-import ballerina/uuid;
+
 
 // --- Configurable mock port ---
 const int MOCK_PORT = 9090;
@@ -137,10 +137,10 @@ final http:Service mockTokenService = service object {
         int issuedAtMs = now[0] * 1000;
 
         // Generate unique tokens per call to simulate RTR.
-        // Include the monotonically-increasing call counter to guarantee
-        // uniqueness even when rapid back-to-back calls share a UUID clock tick.
-        string accessToken = string `AT_mock_${count}_${uuid:createType1AsString()}`;
-        string refreshToken = string `RT_mock_${count}_${uuid:createType1AsString()}`;
+        // The monotonic counter guarantees uniqueness within a test run;
+        // the epoch timestamp adds uniqueness across test-suite restarts.
+        string accessToken = string `AT_mock_${count}_${now[0]}`;
+        string refreshToken = string `RT_mock_${count}_${now[0]}`;
 
         log:printInfo(string `[MockSF] Token endpoint hit #${count}`,
                 accessTokenPrefix = accessToken.substring(0, 16),
