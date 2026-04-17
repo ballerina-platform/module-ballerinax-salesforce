@@ -252,7 +252,8 @@ function testMultiNodeInMemoryChaos() returns error? {
 
 @test:Config {
     groups: ["redis-integration"],
-    dependsOn: [testMultiNodeInMemoryChaos]
+    dependsOn: [testMultiNodeInMemoryChaos],
+    enable: redisAvailable
 }
 function testMultiNodeRedisCoordination() returns error? {
     log:printInfo("=== TEST 3: Multi-Node Redis Coordination — 3 pods, 1 RedisTokenStore ===");

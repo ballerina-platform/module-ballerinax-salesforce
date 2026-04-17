@@ -150,7 +150,8 @@ function testInMemoryRtrWithExpiration() returns error? {
 
 @test:Config {
     groups: ["redis-integration"],
-    dependsOn: [testMultiNodeRedisCoordination]
+    dependsOn: [testMultiNodeRedisCoordination],
+    enable: redisAvailable
 }
 function testRedisMasterFlow() returns error? {
     log:printInfo("=== RTR TEST B: Redis Master Flow (Lock Winner) ===");
@@ -215,7 +216,8 @@ function testRedisMasterFlow() returns error? {
 
 @test:Config {
     groups: ["redis-integration"],
-    dependsOn: [testRedisMasterFlow]
+    dependsOn: [testRedisMasterFlow],
+    enable: redisAvailable
 }
 function testRedisWorkerFlow() returns error? {
     log:printInfo("=== RTR TEST C: Redis Worker Flow (Adopt From Store) ===");
@@ -293,7 +295,8 @@ function testRedisWorkerFlow() returns error? {
 
 @test:Config {
     groups: ["redis-integration"],
-    dependsOn: [testRedisWorkerFlow]
+    dependsOn: [testRedisWorkerFlow],
+    enable: redisAvailable
 }
 function testCachePoisoningAutoEviction() returns error? {
     log:printInfo("=== RTR TEST D: Cache Poisoning Auto-Eviction ===");
