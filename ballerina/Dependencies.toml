@@ -46,6 +46,9 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
 ]
+modules = [
+	{org = "ballerina", packageName = "crypto", moduleName = "crypto"}
+]
 
 [[package]]
 org = "ballerina"
@@ -329,6 +332,22 @@ dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "time"}
 ]
+modules = [
+	{org = "ballerina", packageName = "task", moduleName = "task"}
+]
+
+[[package]]
+org = "ballerina"
+name = "tcp"
+version = "1.12.2"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "tcp", moduleName = "tcp"}
+]
 
 [[package]]
 org = "ballerina"
@@ -392,9 +411,23 @@ modules = [
 
 [[package]]
 org = "ballerinax"
+name = "redis"
+version = "3.2.1"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerinax", packageName = "redis", moduleName = "redis"}
+]
+
+[[package]]
+org = "ballerinax"
 name = "salesforce"
 version = "8.4.0"
 dependencies = [
+	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
 	{org = "ballerina", name = "jballerina.java"},
@@ -407,11 +440,14 @@ dependencies = [
 	{org = "ballerina", name = "log"},
 	{org = "ballerina", name = "oauth2"},
 	{org = "ballerina", name = "os"},
+	{org = "ballerina", name = "task"},
+	{org = "ballerina", name = "tcp"},
 	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "url"},
 	{org = "ballerinai", name = "observe"},
-	{org = "ballerinax", name = "client.config"}
+	{org = "ballerinax", name = "client.config"},
+	{org = "ballerinax", name = "redis"}
 ]
 modules = [
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce"},
