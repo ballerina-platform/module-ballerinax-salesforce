@@ -32,10 +32,6 @@ export = true
 name = "salesforce.types"
 export = true
 
-[[package.modules]]
-name = "salesforce.auth"
-export = true
-
 [platform.java21]
 graalvmCompatible = true
 
