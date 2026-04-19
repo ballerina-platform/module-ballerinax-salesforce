@@ -82,10 +82,24 @@ public isolated class Listener {
                 http:OAuth2RefreshTokenGrantConfig rtConfig =
                     <http:OAuth2RefreshTokenGrantConfig>listenerConfig.auth;
 
+                // `defaultTokenExpTime` is declared as `decimal` in http:OAuth2RefreshTokenGrantConfig
+                // (inherited from ballerina/oauth2). TokenManager expects a whole-second `int`,
+                // so reject fractional values explicitly instead of rounding or truncating.
+                decimal rawExpTime = rtConfig.defaultTokenExpTime;
+                if rawExpTime != decimal:floor(rawExpTime) {
+                    return error("defaultTokenExpTime must be a whole number of seconds. " +
+                            "Fractional values are not valid. Got: " + rawExpTime.toString());
+                }
+                int sessionTimeoutSeconds = <int>decimal:floor(rawExpTime);
+                if sessionTimeoutSeconds <= 0 {
+                    return error("defaultTokenExpTime must be a positive number of seconds. " +
+                            "Got: " + sessionTimeoutSeconds.toString());
+                }
+
                 self.tokenManager = check new (
                     rtConfig.clientId, rtConfig.clientSecret,
                     rtConfig.refreshToken, rtConfig.refreshUrl,
-                    check rtConfig.defaultTokenExpTime.ensureType(int),
+                    sessionTimeoutSeconds,
                     TOKEN_REFRESH_BUFFER_SECONDS,
                     listenerConfig.tokenStore
                 );
@@ -208,7 +222,7 @@ public isolated class Listener {
         log:printDebug("Salesforce CDC listener gracefully stopping — closing CometD connection");
         error? unscheduleErr = self.unscheduleTokenRefreshJob();
         if unscheduleErr is error {
-            log:printWarn("Failed to unschedule token refresh job", 'error = unscheduleErr);
+            log:printError("Failed to unschedule token refresh job", 'error = unscheduleErr);
         }
         error? result = stopListener(self);
         log:printDebug("Salesforce CDC listener stopped");
@@ -349,7 +363,7 @@ public isolated class Listener {
 # expires. Scheduled via `task:scheduleOneTimeJob` at (tokenExpiry - bufferSeconds) from now.
 # After each successful cycle, `execute()` reschedules the next one-shot based on the
 # freshly-issued (or adopted) token's actual TTL.
-class TokenRefreshJob {
+isolated class TokenRefreshJob {
     *task:Job;
 
     private final Listener listenerInstance;

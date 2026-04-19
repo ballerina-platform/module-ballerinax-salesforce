@@ -20,109 +20,7 @@ import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/time;
 import ballerina/url;
-
-# Represents the token data stored and shared across replicas.
-# Used by `TokenStore` implementations to persist and retrieve token state.
-public type TokenData record {|
-    # The current access token
-    string accessToken;
-    # The current refresh token (may have been rotated by Salesforce)
-    string refreshToken;
-    # Epoch seconds when the access token expires
-    int accessTokenExpiryEpoch;
-    # Server-reported issuance epoch (seconds) from the `issued_at` field of the token response
-    int issuedAtEpoch;
-    # Epoch seconds when the token data was last written to the store
-    int lastRefreshedAtEpoch;
-|};
-
-# Pluggable token store interface for coordinating token lifecycle across
-# multiple replicas (e.g., in Kubernetes). Implementations must be `isolated`.
-#
-# The default behaviour (when no `TokenStore` is provided) is an in-memory store
-# that is scoped to the current process — suitable for single-replica deployments.
-#
-# For multi-replica deployments, provide an implementation backed by a distributed
-# store (e.g., Redis) with advisory locking to prevent Token Replay Attacks caused
-# by concurrent refresh-token usage.
-public type TokenStore isolated object {
-
-    # Attempts to acquire an advisory lock for token refresh coordination.
-    # Only one replica should refresh at a time to prevent Token Replay Attacks.
-    #
-    # + lockKey - A unique key identifying the token family (e.g., client ID hash)
-    # + ttlSeconds - Maximum time in seconds to hold the lock (auto-release safety net)
-    # + return - `true` if the lock was acquired, `false` if another holder has it,
-    # or an `error` if the store is unreachable
-    public isolated function acquireLock(string lockKey, int ttlSeconds) returns boolean|error;
-
-    # Releases the advisory lock after a refresh cycle completes.
-    #
-    # + lockKey - The same key used in `acquireLock()`
-    # + return - `()` on success, or an `error` if the release fails
-    public isolated function releaseLock(string lockKey) returns error?;
-
-    # Reads the current token data from the shared store.
-    #
-    # + key - A unique key identifying the token family
-    # + return - The stored `TokenData`, `()` if no data exists yet, or an `error`
-    public isolated function getTokenData(string key) returns TokenData?|error;
-
-    # Writes updated token data to the shared store after a successful refresh.
-    #
-    # + key - A unique key identifying the token family
-    # + data - The new token data to persist
-    # + return - `()` on success, or an `error` if the write fails
-    public isolated function setTokenData(string key, TokenData data) returns error?;
-
-    # Removes token data and its associated lock from the shared store.
-    # Called when the token family is permanently invalidated (e.g., Salesforce
-    # returns `invalid_grant` after absolute session timeout expiry).
-    #
-    # This prevents "cache poisoning" — without eviction, a restarting replica
-    # would read the dead token from the store, ignore the fresh seed token
-    # from its configuration, and crash in a loop.
-    #
-    # + key - A unique key identifying the token family
-    # + return - `()` on success, or an `error` if the delete fails
-    public isolated function clearTokenData(string key) returns error?;
-};
-
-# Default in-memory token store for single-replica deployments.
-# `acquireLock()` always succeeds (no contention in a single process).
-# Token data is stored in-process memory — not shared across replicas.
-public isolated class InMemoryTokenStore {
-    *TokenStore;
-
-    private TokenData? tokenData = ();
-
-    public isolated function acquireLock(string lockKey, int ttlSeconds) returns boolean|error {
-        // Single-process: lock always succeeds (Ballerina `lock` blocks handle concurrency).
-        return true;
-    }
-
-    public isolated function releaseLock(string lockKey) returns error? {
-        // No-op for in-memory store.
-    }
-
-    public isolated function getTokenData(string key) returns TokenData?|error {
-        lock {
-            return self.tokenData.cloneReadOnly();
-        }
-    }
-
-    public isolated function setTokenData(string key, TokenData data) returns error? {
-        lock {
-            self.tokenData = data.cloneReadOnly();
-        }
-    }
-
-    public isolated function clearTokenData(string key) returns error? {
-        lock {
-            self.tokenData = ();
-        }
-    }
-}
+import ballerinax/salesforce.auth;
 
 # Manages OAuth2 token lifecycle with support for refresh token rotation.
 # When Salesforce returns a new refresh token in the token response,
@@ -163,7 +61,7 @@ public isolated class TokenManager {
     // Pluggable token store for multi-replica coordination.
     // When set, acquires an advisory lock before refreshing and reads/writes
     // token state from the shared store.
-    private final TokenStore tokenStore;
+    private final auth:TokenStore tokenStore;
     // Unique key for the token family, derived from the client ID.
     // Used as the lock key and store key for distributed coordination.
     private final string storeKey;
@@ -180,7 +78,21 @@ public isolated class TokenManager {
     # + clientSecret - OAuth2 client secret
     # + refreshToken - Initial refresh token (seed token)
     # + tokenUrl - Salesforce token endpoint URL
-    # + sessionTimeoutSeconds - Salesforce session timeout in seconds (from ListenerConfig.sessionTimeout)
+    # + sessionTimeoutSeconds - The Salesforce org-level "Session Timeout" value, in seconds.
+    #                           Named after the Salesforce setting (NOT a generic token expiry)
+    #                           because the value maps 1:1 to the org configuration operators
+    #                           look up, and Salesforce's own refresh-token OAuth response does
+    #                           NOT include an `expires_in` field — access token expiry must
+    #                           therefore be derived as `issued_at + sessionTimeoutSeconds`.
+    #                           Look this up in your Salesforce org at:
+    #                           Setup → Security → Session Settings → Timeout Value.
+    #                           Default: `900` (15 minutes) — the Salesforce platform default.
+    #                           Operators SHOULD set this to match their org's actual Timeout
+    #                           Value; a mismatch produces either premature refreshes (value
+    #                           too low) or stale-token 401s (value too high).
+    #                           Note: this is distinct from the refresh-token lifetime, which
+    #                           is governed separately by the Connected App's OAuth policies
+    #                           (e.g. "Refresh Token is valid until revoked" vs a fixed window).
     # + refreshBufferSeconds - Minimum remaining TTL a token must have to be adoptable from the store.
     #                          Tokens with fewer seconds remaining are treated as expired.
     # + tokenStore - Optional pluggable token store for multi-replica coordination
@@ -189,7 +101,7 @@ public isolated class TokenManager {
             string refreshToken, string tokenUrl,
             int sessionTimeoutSeconds = 900,
             int refreshBufferSeconds = 60,
-            TokenStore? tokenStore = ()) returns error? {
+            auth:TokenStore? tokenStore = ()) returns error? {
         self.clientId = clientId;
         self.clientSecret = clientSecret;
         self.refreshToken = refreshToken;
@@ -205,10 +117,10 @@ public isolated class TokenManager {
         if sessionTimeoutSeconds <= self.clockSkewSeconds {
             return error("sessionTimeoutSeconds must be greater than clockSkewSeconds (" + string `(${self.clockSkewSeconds})`);
         }
-        if tokenStore is TokenStore {
+        if tokenStore is auth:TokenStore {
             self.tokenStore = tokenStore;
         } else {
-            InMemoryTokenStore defaultStore = new;
+            auth:InMemoryTokenStore defaultStore = new;
             self.tokenStore = defaultStore;
         }
         self.storeKey = "sf_token:" + fingerprintToken(clientId);
@@ -316,8 +228,8 @@ public isolated class TokenManager {
             }
 
             // Read from store — another replica may have written fresh token data.
-            TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
-            if storeData is TokenData {
+            auth:TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
+            if storeData is auth:TokenData {
                 int remainingSeconds = storeData.accessTokenExpiryEpoch - now[0];
                 if remainingSeconds > self.refreshBufferSeconds {
                     self.adoptStoreData(storeData);
@@ -346,8 +258,8 @@ public isolated class TokenManager {
     private isolated function doRefreshWithLock(string storeKey) returns string|error {
         lock {
             // --- Phase 2: Double-check — read from store ---
-            TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
-            if storeData is TokenData {
+            auth:TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
+            if storeData is auth:TokenData {
                 [int, decimal] now = time:utcNow();
                 int remainingSeconds = storeData.accessTokenExpiryEpoch - now[0];
                 if remainingSeconds > self.refreshBufferSeconds {
@@ -447,6 +359,9 @@ public isolated class TokenManager {
             }
             self.atGeneration = self.atGeneration + 1;
             self.accessToken = newAccessToken;
+            // Salesforce does not return an `expires_in` field in its OAuth token response,
+            // so access token expiry is derived from `issued_at` (seconds epoch) plus the
+            // configured org-level Session Timeout, minus a small clock-skew safety margin.
             self.accessTokenExpiryEpoch = issuedAtEpoch + self.sessionTimeoutSeconds - self.clockSkewSeconds;
 
             int validForMinutes = (self.accessTokenExpiryEpoch - issuedAtEpoch) / 60;
@@ -466,7 +381,7 @@ public isolated class TokenManager {
             }
 
             // --- Phase 4: Write updated token data to store ---
-            TokenData updatedData = {
+            auth:TokenData updatedData = {
                 accessToken: newAccessToken,
                 refreshToken: self.refreshToken,
                 accessTokenExpiryEpoch: self.accessTokenExpiryEpoch,
@@ -511,7 +426,7 @@ public isolated class TokenManager {
     }
 
     # Adopts token data from the shared store into local state.
-    private isolated function adoptStoreData(TokenData data) {
+    private isolated function adoptStoreData(auth:TokenData data) {
         lock {
             self.accessToken = data.accessToken;
             self.refreshToken = data.refreshToken;
