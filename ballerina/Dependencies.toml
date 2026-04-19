@@ -452,6 +452,7 @@ dependencies = [
 modules = [
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.apex"},
+	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.auth"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulk"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.bulkv2"},
 	{org = "ballerinax", packageName = "salesforce", moduleName = "salesforce.soap"},
