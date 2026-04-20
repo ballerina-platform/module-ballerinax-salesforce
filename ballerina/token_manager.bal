@@ -20,7 +20,6 @@ import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/time;
 import ballerina/url;
-import ballerinax/salesforce.auth;
 
 # Manages OAuth2 token lifecycle with support for refresh token rotation.
 # When Salesforce returns a new refresh token in the token response,
@@ -61,7 +60,7 @@ public isolated class TokenManager {
     // Pluggable token store for multi-replica coordination.
     // When set, acquires an advisory lock before refreshing and reads/writes
     // token state from the shared store.
-    private final auth:TokenStore tokenStore;
+    private final TokenStore tokenStore;
     // Unique key for the token family, derived from the client ID.
     // Used as the lock key and store key for distributed coordination.
     private final string storeKey;
@@ -101,7 +100,7 @@ public isolated class TokenManager {
             string refreshToken, string tokenUrl,
             int sessionTimeoutSeconds = 900,
             int refreshBufferSeconds = 60,
-            auth:TokenStore? tokenStore = ()) returns error? {
+            TokenStore? tokenStore = ()) returns error? {
         self.clientId = clientId;
         self.clientSecret = clientSecret;
         self.refreshToken = refreshToken;
@@ -117,10 +116,10 @@ public isolated class TokenManager {
         if sessionTimeoutSeconds <= self.clockSkewSeconds {
             return error("sessionTimeoutSeconds must be greater than clockSkewSeconds (" + string `(${self.clockSkewSeconds})`);
         }
-        if tokenStore is auth:TokenStore {
+        if tokenStore is TokenStore {
             self.tokenStore = tokenStore;
         } else {
-            auth:InMemoryTokenStore defaultStore = new;
+            InMemoryTokenStore defaultStore = new;
             self.tokenStore = defaultStore;
         }
         self.storeKey = "sf_token:" + fingerprintToken(clientId);
@@ -228,8 +227,8 @@ public isolated class TokenManager {
             }
 
             // Read from store — another replica may have written fresh token data.
-            auth:TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
-            if storeData is auth:TokenData {
+            TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
+            if storeData is TokenData {
                 int remainingSeconds = storeData.accessTokenExpiryEpoch - now[0];
                 if remainingSeconds > self.refreshBufferSeconds {
                     self.adoptStoreData(storeData);
@@ -258,8 +257,8 @@ public isolated class TokenManager {
     private isolated function doRefreshWithLock(string storeKey) returns string|error {
         lock {
             // --- Phase 2: Double-check — read from store ---
-            auth:TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
-            if storeData is auth:TokenData {
+            TokenData? storeData = check self.tokenStore.getTokenData(storeKey);
+            if storeData is TokenData {
                 [int, decimal] now = time:utcNow();
                 int remainingSeconds = storeData.accessTokenExpiryEpoch - now[0];
                 if remainingSeconds > self.refreshBufferSeconds {
@@ -381,7 +380,7 @@ public isolated class TokenManager {
             }
 
             // --- Phase 4: Write updated token data to store ---
-            auth:TokenData updatedData = {
+            TokenData updatedData = {
                 accessToken: newAccessToken,
                 refreshToken: self.refreshToken,
                 accessTokenExpiryEpoch: self.accessTokenExpiryEpoch,
@@ -426,7 +425,7 @@ public isolated class TokenManager {
     }
 
     # Adopts token data from the shared store into local state.
-    private isolated function adoptStoreData(auth:TokenData data) {
+    private isolated function adoptStoreData(TokenData data) {
         lock {
             self.accessToken = data.accessToken;
             self.refreshToken = data.refreshToken;
@@ -561,7 +560,7 @@ public isolated class TokenManager {
 }
 
 # Returns a short non-reversible fingerprint (first 12 hex chars of SHA-256).
-isolated function fingerprintToken(string token) returns string {
+public isolated function fingerprintToken(string token) returns string {
     string fingerprint = crypto:hashSha256(token.toBytes()).toBase16();
     return fingerprint.substring(0, 12);
 }

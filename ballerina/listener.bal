@@ -32,7 +32,7 @@ public isolated class Listener {
     private final string password;
     private final boolean isOAuth2;
     private final readonly & OAuth2Config? oauth2Config;
-    private final utils:TokenManager? tokenManager;
+    private final TokenManager? tokenManager;
     private string? channelName = ();
     private final int replayFrom;
     private final string apiVersion;
@@ -96,7 +96,7 @@ public isolated class Listener {
                             "Got: " + sessionTimeoutSeconds.toString());
                 }
 
-                self.tokenManager = check new (
+                self.tokenManager = check new TokenManager(
                     rtConfig.clientId, rtConfig.clientSecret,
                     rtConfig.refreshToken, rtConfig.refreshUrl,
                     sessionTimeoutSeconds,
@@ -157,8 +157,8 @@ public isolated class Listener {
     #
     # + return - The access token or an error if token retrieval fails
     isolated function getOAuth2Token() returns string|error {
-        utils:TokenManager? tm = self.tokenManager;
-        if tm is utils:TokenManager {
+        TokenManager? tm = self.tokenManager;
+        if tm is TokenManager {
             tm.invalidateAccessToken();
             log:printDebug("Requesting access token for CometD authentication");
             string|error token = tm.getAccessToken();
@@ -250,7 +250,7 @@ public isolated class Listener {
     # + newRefreshToken - The latest refresh token returned by Salesforce
     # + return - `()` or else an error if this listener is not using refresh-token auth
     public isolated function updateRefreshToken(string newRefreshToken) returns error? {
-        utils:TokenManager? tm = self.tokenManager;
+        TokenManager? tm = self.tokenManager;
         if tm is () {
             return error("Refresh token updates are only supported for refresh-token OAuth2 listeners");
         }
@@ -266,7 +266,7 @@ public isolated class Listener {
     #
     # + return - The current refresh token, or an error if this listener is not using refresh-token auth
     public isolated function getRefreshToken() returns string|error {
-        utils:TokenManager? tm = self.tokenManager;
+        TokenManager? tm = self.tokenManager;
         if tm is () {
             return error("getRefreshToken() is only supported for refresh-token OAuth2 listeners");
         }
@@ -286,8 +286,8 @@ public isolated class Listener {
     #
     # + return - `()` or else an error if scheduling fails
     isolated function scheduleTokenRefreshJob() returns error? {
-        utils:TokenManager? tm = self.tokenManager;
-        if tm is utils:TokenManager {
+        TokenManager? tm = self.tokenManager;
+        if tm is TokenManager {
             error? unscheduleErr = self.unscheduleTokenRefreshJob();
             if unscheduleErr is error {
                 log:printWarn("Failed to unschedule existing token refresh job", 'error = unscheduleErr);
@@ -367,9 +367,9 @@ isolated class TokenRefreshJob {
     *task:Job;
 
     private final Listener listenerInstance;
-    private final utils:TokenManager tokenManager;
+    private final TokenManager tokenManager;
 
-    isolated function init(Listener listenerInstance, utils:TokenManager tokenManager) {
+    isolated function init(Listener listenerInstance, TokenManager tokenManager) {
         self.listenerInstance = listenerInstance;
         self.tokenManager = tokenManager;
     }

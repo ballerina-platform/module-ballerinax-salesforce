@@ -50,7 +50,6 @@ import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/test;
 import ballerina/time;
-import ballerinax/salesforce.auth;
 
 // Dedicated client identifiers (different hashes → different Redis keys)
 // so these tests don't collide with the chaos suite in token_rotation_test.bal.
@@ -178,10 +177,10 @@ function testRedisMasterFlow() returns error? {
 
     // --- Verify Redis persistence ---
     string storeKey = "sf_token:" + fingerprintToken(RTR_CLIENT_ID_MASTER);
-    auth:TokenData? persistedData = check store.getTokenData(storeKey);
-    test:assertTrue(persistedData is auth:TokenData,
+    TokenData? persistedData = check store.getTokenData(storeKey);
+    test:assertTrue(persistedData is TokenData,
             "Master must write token data to Redis after a successful refresh");
-    if persistedData is auth:TokenData {
+    if persistedData is TokenData {
         test:assertEquals(persistedData.accessToken, accessToken,
                 "Redis must contain the exact AT returned to the master");
         test:assertTrue(persistedData.refreshToken.startsWith("RT_mock_"),
@@ -231,7 +230,7 @@ function testRedisWorkerFlow() returns error? {
     // --- Pre-populate Redis with a valid token (as if a master just wrote it) ---
     string storeKey = "sf_token:" + fingerprintToken(RTR_CLIENT_ID_WORKER);
     [int, decimal] now = time:utcNow();
-    auth:TokenData prePopulated = {
+    TokenData prePopulated = {
         accessToken: "AT_prepopulated_by_master_xyz",
         refreshToken: "RT_prepopulated_by_master_xyz",
         accessTokenExpiryEpoch: now[0] + 600, // 10 more minutes of validity
@@ -312,7 +311,7 @@ function testCachePoisoningAutoEviction() returns error? {
     // state was never cleaned up from the distributed cache.
     string storeKey = "sf_token:" + fingerprintToken(RTR_CLIENT_ID_POISON);
     [int, decimal] now = time:utcNow();
-    auth:TokenData deadToken = {
+    TokenData deadToken = {
         accessToken: "AT_dead_poisoned",
         refreshToken: "RT_dead_poisoned",
         accessTokenExpiryEpoch: now[0] - 10, // already expired
@@ -322,8 +321,8 @@ function testCachePoisoningAutoEviction() returns error? {
     check store.setTokenData(storeKey, deadToken);
 
     // Sanity-check: the dead token is indeed in Redis before the test runs
-    auth:TokenData? beforeState = check store.getTokenData(storeKey);
-    test:assertTrue(beforeState is auth:TokenData,
+    TokenData? beforeState = check store.getTokenData(storeKey);
+    test:assertTrue(beforeState is TokenData,
             "Pre-condition: dead token must exist in Redis before the test");
 
     // --- Enable failure mode on the mock ---
@@ -364,7 +363,7 @@ function testCachePoisoningAutoEviction() returns error? {
             (clearResult is error ? clearResult.message() : "<ok>"));
 
     // --- Assert Redis is now EMPTY for this token family ---
-    auth:TokenData? afterState = check store.getTokenData(storeKey);
+    TokenData? afterState = check store.getTokenData(storeKey);
     test:assertTrue(afterState is (),
             "data: key MUST be evicted from Redis after clearTokenStore() — " +
             "cache poisoning protection is broken if this fails");

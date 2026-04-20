@@ -26,7 +26,6 @@
 
 import ballerina/log;
 import ballerinax/redis;
-import ballerinax/salesforce.auth;
 
 const string REDIS_HOST = "localhost";
 const int REDIS_PORT = 6379;
@@ -35,7 +34,7 @@ const int REDIS_PORT = 6379;
 // Uses Redis SETNX + EXPIRE for advisory locking (distributed mutex)
 // and stores TokenData as a JSON string under a namespaced key.
 public isolated class RedisTokenStore {
-    *auth:TokenStore;
+    *TokenStore;
 
     private final redis:Client redisClient;
 
@@ -85,7 +84,7 @@ public isolated class RedisTokenStore {
     //
     // API reference: get(string key) returns string|Error?
     //   Returns nil (()) if the key does not exist.
-    public isolated function getTokenData(string key) returns auth:TokenData?|error {
+    public isolated function getTokenData(string key) returns TokenData?|error {
         string dataKey = "data:" + key;
         string|redis:Error? result = self.redisClient->get(dataKey);
         if result is redis:Error {
@@ -96,14 +95,14 @@ public isolated class RedisTokenStore {
             return;
         }
         json jsonData = check result.fromJsonString();
-        auth:TokenData data = check jsonData.cloneWithType(auth:TokenData);
+        TokenData data = check jsonData.cloneWithType(TokenData);
         return data;
     }
 
     // Writes token data to Redis as a JSON string.
     //
     // API reference: set(string key, string value) returns string|Error
-    public isolated function setTokenData(string key, auth:TokenData data) returns error? {
+    public isolated function setTokenData(string key, TokenData data) returns error? {
         string dataKey = "data:" + key;
         string jsonStr = data.toJsonString();
         _ = check self.redisClient->set(dataKey, jsonStr);

@@ -59,7 +59,6 @@
 import ballerina/lang.runtime;
 import ballerina/log;
 import ballerina/test;
-import ballerinax/salesforce.auth;
 
 // --- Test constants ---
 const string TEST_CLIENT_ID = "test_client_id_001";
@@ -330,9 +329,9 @@ function testMultiNodeRedisCoordination() returns error? {
     }
 
     // Verify Redis store contains the token
-    auth:TokenData? storedData = check sharedStore.getTokenData("sf_token:" + fingerprintToken(TEST_CLIENT_ID));
-    test:assertTrue(storedData is auth:TokenData, "Token data should be persisted in Redis");
-    if storedData is auth:TokenData && r1 is string {
+    TokenData? storedData = check sharedStore.getTokenData("sf_token:" + fingerprintToken(TEST_CLIENT_ID));
+    test:assertTrue(storedData is TokenData, "Token data should be persisted in Redis");
+    if storedData is TokenData && r1 is string {
         test:assertEquals(storedData.accessToken, r1,
             "Redis store should contain the same access token as returned to pods");
         test:assertTrue(storedData.refreshToken.startsWith("RT_mock_"),

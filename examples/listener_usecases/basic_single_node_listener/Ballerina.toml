@@ -1,0 +1,11 @@
+[package]
+org = "salesforce_examples"
+name = "basic_single_node_listener"
+version = "8.4.0" 
+distribution = "2201.11.0"
+
+[[dependency]]
+org = "ballerinax"
+name = "salesforce"
+version = "8.4.0" 
+repository = "local"
