@@ -93,7 +93,7 @@ public isolated class RedisTokenStore {
             return error(result.message());
         }
         if result is () || result == "" {
-            return ();
+            return;
         }
         json jsonData = check result.fromJsonString();
         auth:TokenData data = check jsonData.cloneWithType(auth:TokenData);

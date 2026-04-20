@@ -121,12 +121,12 @@ final http:Service mockTokenService = service object {
         runtime:sleep(0.05);
 
         // --- Failure mode branch ---
-        [boolean, string] failState = getMockFailureState();
-        if failState[0] {
-            log:printInfo(string `[MockSF] Token endpoint hit #${count} — returning 400 ${failState[1]}`);
+        [boolean, string] [isFailed, errorCode] = getMockFailureState();
+        if isFailed {
+            log:printInfo(string `[MockSF] Token endpoint hit #${count} — returning 400 ${errorCode}`);
             http:BadRequest errorResponse = {
                 body: {
-                    "error": failState[1],
+                    "error": errorCode,
                     "error_description": "expired access/refresh token"
                 }
             };
