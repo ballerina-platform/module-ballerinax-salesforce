@@ -2,7 +2,7 @@
 distribution = "2201.11.0-20241117-133400-a3054b77"
 org = "ballerinax"
 name = "salesforce"
-version = "8.4.1"
+version = "8.5.0"
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["Cost/Freemium", "Vendor/Salesforce", "Area/CRM & Sales", "Type/Connector", "Type/Trigger"]
@@ -36,10 +36,10 @@ export = true
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
-path = "../native/build/libs/salesforce-native-8.4.1.jar"
+path = "../native/build/libs/salesforce-native-8.5.0-SNAPSHOT.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "8.4.1"
+version = "8.5.0-SNAPSHOT"
 
 [[platform.java21.dependency]]
 groupId = "com.opencsv"
@@ -86,32 +86,32 @@ path = "./lib/cometd-java-client-http-jetty-8.0.11.jar"
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-client"
-version = "12.0.31"
-path = "./lib/jetty-client-12.0.31.jar"
+version = "12.0.33"
+path = "./lib/jetty-client-12.0.33.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-http"
-version = "12.0.31"
-path = "./lib/jetty-http-12.0.31.jar"
+version = "12.0.33"
+path = "./lib/jetty-http-12.0.33.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-io"
-version = "12.0.31"
-path = "./lib/jetty-io-12.0.31.jar"
+version = "12.0.33"
+path = "./lib/jetty-io-12.0.33.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util"
-version = "12.0.31"
-path = "./lib/jetty-util-12.0.31.jar"
+version = "12.0.33"
+path = "./lib/jetty-util-12.0.33.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util-ajax"
-version = "12.0.31"
-path = "./lib/jetty-util-ajax-12.0.31.jar"
+version = "12.0.33"
+path = "./lib/jetty-util-ajax-12.0.33.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.json"
