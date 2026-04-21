@@ -21,8 +21,8 @@
 // Demonstrates the simplest possible CDC listener setup:
 //
 //   - Uses `salesforce:RestBasedListenerConfig` with OAuth2 refresh-token grant.
-//   - No `tokenStore` is specified — the connector defaults to the built-in
-//     `InMemoryTokenStore`, which is suitable for single-replica deployments.
+//   - No `tokenStore` is specified — the field defaults to `InMemoryTokenStore`,
+//     which is suitable for single-replica deployments.
 //   - Refresh Token Rotation is handled transparently: when Salesforce rotates
 //     the refresh token on each exchange, the connector captures the new RT
 //     in memory and uses it for subsequent refreshes.
@@ -63,10 +63,10 @@ configurable int sessionTimeoutSeconds = 3600;
 // ---------------------------------------------------------------------------
 // Listener configuration
 // ---------------------------------------------------------------------------
-// No `tokenStore` is set here. The connector automatically falls back to the
-// built-in InMemoryTokenStore, which is correct for a single-replica deployment.
+// No `tokenStore` is set here. The field defaults to a new `InMemoryTokenStore`,
+// which is the correct choice for a single-replica deployment.
 // For multi-replica / Kubernetes deployments, see the `distributed_listener`
-// example, which shows how to plug in a shared TokenStore.
+// example, which shows how to plug in a shared Redis-backed TokenStore.
 salesforce:RestBasedListenerConfig listenerConfig = {
     baseUrl: baseUrl,
     auth: <http:OAuth2RefreshTokenGrantConfig>{
@@ -76,7 +76,7 @@ salesforce:RestBasedListenerConfig listenerConfig = {
         refreshUrl: tokenUrl,
         defaultTokenExpTime: <decimal>sessionTimeoutSeconds
     }
-    // tokenStore: ()  // default: InMemoryTokenStore (uncomment to be explicit)
+    // tokenStore: new salesforce:InMemoryTokenStore()  // explicit — same as the default
 };
 
 listener salesforce:Listener eventListener = new (listenerConfig);

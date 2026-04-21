@@ -28,7 +28,7 @@ import ballerina/url;
 # When a `TokenStore` is provided, the manager coordinates with other replicas
 # using advisory locking — only one replica refreshes at a time, preventing
 # Token Replay Attacks in multi-replica Kubernetes deployments.
-public isolated class TokenManager {
+isolated class TokenManager {
 
     private string accessToken;
     private string refreshToken;
@@ -94,13 +94,16 @@ public isolated class TokenManager {
     #                           (e.g. "Refresh Token is valid until revoked" vs a fixed window).
     # + refreshBufferSeconds - Minimum remaining TTL a token must have to be adoptable from the store.
     #                          Tokens with fewer seconds remaining are treated as expired.
-    # + tokenStore - Optional pluggable token store for multi-replica coordination
+    # + tokenStore - Pluggable token store for multi-replica coordination.
+    #               Defaults to a fresh `InMemoryTokenStore` (single-replica, in-process).
+    #               Pass a distributed implementation (e.g. Redis-backed) to coordinate
+    #               token refresh across multiple pods and prevent Token Replay Attacks.
     # + return - An error if the HTTP client cannot be created
-    public isolated function init(string clientId, string clientSecret,
+    isolated function init(string clientId, string clientSecret,
             string refreshToken, string tokenUrl,
             int sessionTimeoutSeconds = 900,
             int refreshBufferSeconds = 60,
-            TokenStore? tokenStore = ()) returns error? {
+            TokenStore tokenStore = new InMemoryTokenStore()) returns error? {
         self.clientId = clientId;
         self.clientSecret = clientSecret;
         self.refreshToken = refreshToken;
@@ -116,12 +119,7 @@ public isolated class TokenManager {
         if sessionTimeoutSeconds <= self.clockSkewSeconds {
             return error("sessionTimeoutSeconds must be greater than clockSkewSeconds (" + string `(${self.clockSkewSeconds})`);
         }
-        if tokenStore is TokenStore {
-            self.tokenStore = tokenStore;
-        } else {
-            InMemoryTokenStore defaultStore = new;
-            self.tokenStore = defaultStore;
-        }
+        self.tokenStore = tokenStore;
         self.storeKey = "sf_token:" + fingerprintToken(clientId);
         self.tokenClient = check new (tokenUrl);
     }
@@ -129,7 +127,7 @@ public isolated class TokenManager {
     # Returns a valid access token, refreshing proactively if expired or about to expire.
     #
     # + return - The access token string or an error
-    public isolated function getAccessToken() returns string|error {
+    isolated function getAccessToken() returns string|error {
         lock {
             [int, decimal] currentTime = time:utcNow();
             if self.accessToken != "" && currentTime[0] < self.accessTokenExpiryEpoch {
@@ -150,7 +148,7 @@ public isolated class TokenManager {
     # 5. Release advisory lock
     #
     # + return - The new access token or an error
-    public isolated function refreshAccessToken() returns string|error {
+    isolated function refreshAccessToken() returns string|error {
         string storeKey;
         lock {
             storeKey = self.storeKey;
@@ -446,7 +444,7 @@ public isolated class TokenManager {
     # Also clears the local in-memory token state.
     #
     # + return - `()` on success, or an `error` if the store eviction fails
-    public isolated function clearTokenStore() returns error? {
+    isolated function clearTokenStore() returns error? {
         string storeKey;
         lock {
             storeKey = self.storeKey;
@@ -474,7 +472,7 @@ public isolated class TokenManager {
     }
 
     # Clears the cached access token, forcing the next `getAccessToken()` call to obtain a fresh one.
-    public isolated function invalidateAccessToken() {
+    isolated function invalidateAccessToken() {
         lock {
             self.accessToken = "";
             self.accessTokenExpiryEpoch = -1;
@@ -483,7 +481,7 @@ public isolated class TokenManager {
 
     # Returns seconds remaining until the cached access token expires.
     # Returns 0 if no token is cached or token is already expired.
-    public isolated function getSecondsUntilExpiry() returns int {
+    isolated function getSecondsUntilExpiry() returns int {
         lock {
             if self.accessTokenExpiryEpoch < 0 {
                 return 0;
@@ -497,7 +495,7 @@ public isolated class TokenManager {
     # Returns an estimate of seconds remaining until the current refresh token expires,
     # based on the `issued_at` epoch from the most recent rotation response and the
     # configured session timeout. Returns -1 if no rotation has occurred yet (seed token still in use).
-    public isolated function getEstimatedRtSecondsLeft() returns int {
+    isolated function getEstimatedRtSecondsLeft() returns int {
         lock {
             if self.rtIssuedAtEpoch < 0 {
                 return -1;
@@ -509,7 +507,7 @@ public isolated class TokenManager {
     }
 
     # Returns the current in-memory refresh token.
-    public isolated function getRefreshToken() returns string {
+    isolated function getRefreshToken() returns string {
         lock {
             return self.refreshToken;
         }
@@ -528,7 +526,7 @@ public isolated class TokenManager {
     #
     # + newRefreshToken - The new refresh token to install
     # + return - `()` on success, or an `error` if the store eviction fails
-    public isolated function updateRefreshToken(string newRefreshToken) returns error? {
+    isolated function updateRefreshToken(string newRefreshToken) returns error? {
         string storeKey;
         lock {
             self.refreshToken = newRefreshToken;
@@ -560,7 +558,7 @@ public isolated class TokenManager {
 }
 
 # Returns a short non-reversible fingerprint (first 12 hex chars of SHA-256).
-public isolated function fingerprintToken(string token) returns string {
+isolated function fingerprintToken(string token) returns string {
     string fingerprint = crypto:hashSha256(token.toBytes()).toBase16();
     return fingerprint.substring(0, 12);
 }

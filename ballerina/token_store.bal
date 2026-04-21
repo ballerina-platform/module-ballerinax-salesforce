@@ -37,12 +37,12 @@ public type TokenData record {|
 # Pluggable token store interface for coordinating token lifecycle across
 # multiple replicas (e.g., in Kubernetes). Implementations must be `isolated`.
 #
-# The default behaviour (when no `TokenStore` is provided) is an in-memory store
-# that is scoped to the current process — suitable for single-replica deployments.
+# The default implementation (`InMemoryTokenStore`) is scoped to the current
+# process and is suitable for single-replica deployments.
 #
 # For multi-replica deployments, provide an implementation backed by a distributed
 # store (e.g., Redis) with advisory locking to prevent Token Replay Attacks caused
-# by concurrent refresh-token usage.
+# by concurrent refresh-token usage across pods.
 public type TokenStore isolated object {
 
     # Attempts to acquire an advisory lock for token refresh coordination.

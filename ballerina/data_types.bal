@@ -47,11 +47,18 @@ public type RestBasedListenerConfig record {|
     OAuth2Config auth;
     # The base URL of the Salesforce instance
     string baseUrl;
-    # Optional pluggable token store for multi-replica coordination.
-    # When set, the `TokenManager` uses this store to share token state across replicas
-    # and acquires an advisory lock before refreshing, preventing Token Replay Attacks.
-    # Leave `()` (default) for single-replica / in-memory token management.
-    TokenStore? tokenStore = ();
+    # Pluggable token store for coordinating token refresh across replicas.
+    # Defaults to `InMemoryTokenStore`, which is scoped to the current process and
+    # is the correct choice for single-replica deployments.
+    #
+    # For horizontally-scaled deployments (e.g. multiple Kubernetes pods sharing one
+    # Salesforce Connected App) where Refresh Token Rotation is enabled, replace this
+    # with a distributed implementation (e.g. Redis-backed) to prevent Token Replay
+    # Attacks caused by concurrent refresh-token usage across pods.
+    #
+    # See `salesforce:TokenStore` for the implementation contract and
+    # `salesforce:InMemoryTokenStore` for the default single-replica implementation.
+    TokenStore tokenStore = new InMemoryTokenStore();
     *CommonListenerConfig;
 |};
 
