@@ -5,6 +5,12 @@ This file contains all the notable changes done to the Ballerina Salesforce pack
 
 ### Added
 
+- [[#8744] Add HTTP proxy support for Salesforce Listener](https://github.com/ballerina-platform/ballerina-library/issues/8744)
+
+## [8.4.0] - 2026-03-13
+
+### Added
+
 - [[#8674] Add support for platform events in Salesforce listener](https://github.com/ballerina-platform/ballerina-library/issues/8674)
 
 ## [8.3.0] - 2026-02-18

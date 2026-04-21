@@ -24,9 +24,14 @@
 package io.ballerinax.salesforce;
 
 import io.ballerina.runtime.api.values.BObject;
+import org.eclipse.jetty.client.Authentication;
+import org.eclipse.jetty.client.BasicAuthentication;
 import org.eclipse.jetty.client.BytesRequestContent;
 import org.eclipse.jetty.client.ContentResponse;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.client.Origin;
+import org.eclipse.jetty.client.ProxyConfiguration;
 import org.eclipse.jetty.client.Request;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
@@ -34,7 +39,11 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
+import java.net.URI;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -114,14 +123,55 @@ public class LoginHelper {
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_PREFIX = "/services/Soap/u/";
     private static final String SERVICES_SOAP_PARTNER_ENDPOINT_SUFFIX = "/";
 
-    public static BayeuxParameters login(String username, String password, 
+    public static BayeuxParameters login(String username, String password,
         BObject listener, String apiVersion) throws Exception {
         boolean isSandBox = (Boolean) listener.getNativeData(IS_SAND_BOX);
         String endpoint = getLoginEndpoint(isSandBox);
-        return login(new URL(endpoint), username, password, apiVersion);
+        ProxyConfig proxy = ListenerUtil.getProxyConfig(listener);
+        List<ProxyConfiguration.Proxy> proxies;
+        BasicAuthentication proxyAuth;
+        if (proxy != null) {
+            proxies = Collections.singletonList(
+                    new HttpProxy(new Origin.Address(proxy.host(), proxy.port()), proxy.isSecure(), null));
+            if (proxy.hasCredentials()) {
+                URI proxyUri = URI.create(String.format("%s://%s:%d", proxy.scheme(), proxy.host(), proxy.port()));
+                proxyAuth = new BasicAuthentication(proxyUri, Authentication.ANY_REALM,
+                        proxy.auth().username(), proxy.auth().password());
+            } else {
+                proxyAuth = null;
+            }
+        } else {
+            proxies = Collections.emptyList();
+            proxyAuth = null;
+        }
+        BayeuxParameters params = new BayeuxParameters() {
+            @Override
+            public String bearerToken() {
+                throw new IllegalStateException("Have not authenticated");
+            }
+
+            @Override
+            public URL endpoint() {
+                throw new IllegalStateException("Have not established replay endpoint");
+            }
+
+            @Override
+            public String version() {
+                return apiVersion;
+            }
+
+            @Override
+            public Collection<? extends ProxyConfiguration.Proxy> proxies() {
+                return proxies;
+            }
+        };
+        if (proxyAuth != null) {
+            return login(new URL(endpoint), username, password, params, apiVersion, proxyAuth);
+        }
+        return login(new URL(endpoint), username, password, params, apiVersion);
     }
 
-    public static BayeuxParameters login(URL loginEndpoint, String username, 
+    public static BayeuxParameters login(URL loginEndpoint, String username,
             String password, String apiVersion) throws Exception {
         return login(loginEndpoint, username, password, new BayeuxParameters() {
             @Override
@@ -143,10 +193,19 @@ public class LoginHelper {
 
     public static BayeuxParameters login(URL loginEndpoint, String username, String password,
                                          BayeuxParameters parameters, String apiVersion) throws Exception {
+        return login(loginEndpoint, username, password, parameters, apiVersion, null);
+    }
+
+    private static BayeuxParameters login(URL loginEndpoint, String username, String password,
+            BayeuxParameters parameters, String apiVersion,
+            BasicAuthentication proxyAuth) throws Exception {
         HttpClient client = new HttpClient();
         client.setSslContextFactory(parameters.sslContextFactory());
         try {
             parameters.proxies().forEach(client.getProxyConfiguration()::addProxy);
+            if (proxyAuth != null) {
+                client.getAuthenticationStore().addAuthentication(proxyAuth);
+            }
             client.start();
             URL endpoint = new URL(loginEndpoint, getSoapUri(apiVersion));
             Request post = client.POST(endpoint.toURI());
