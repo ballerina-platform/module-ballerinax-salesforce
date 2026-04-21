@@ -55,6 +55,36 @@ public type RestBasedListenerConfig record {|
     *CommonListenerConfig;
 |};
 
+# The transport protocol used to connect to the proxy server.
+public enum ProxyScheme {
+    # Unencrypted HTTP proxy connection
+    HTTP = "http",
+    # Encrypted HTTPS proxy connection
+    HTTPS = "https"
+}
+
+# Authentication credentials for proxy server access.
+public type ProxyAuthConfig record {|
+    # The username for authenticating with the proxy server
+    string username;
+    # The password for authenticating with the proxy server
+    string password;
+|};
+
+# Proxy server configuration for routing Salesforce listener traffic.
+public type ProxyConfig record {|
+    # The transport protocol used to connect to the proxy server.
+    # Defaults to `HTTP` which covers most corporate proxy setups
+    ProxyScheme scheme = HTTP;
+    # The hostname or IP address of the proxy server
+    string host;
+    # The port number on which the proxy server is listening
+    int port;
+    # Authentication credentials for the proxy server.
+    # If not provided, an unauthenticated proxy connection is assumed
+    ProxyAuthConfig auth?;
+|};
+
 # Common configuration for Salesforce listeners.
 public type CommonListenerConfig record {|
     # The replay ID to change the point in time when events are read
@@ -71,6 +101,8 @@ public type CommonListenerConfig record {|
     # configured in your Salesforce org's Session Settings (Setup > Session Settings).
     # At startup the listener can be configured with this value, if so it overrides this setting.
     int sessionTimeout = 900;
+    # Proxy server configuration
+    ProxyConfig proxyConfig?;
 |};
 
 # The replay options representing the point in time when events are read.
