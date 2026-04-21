@@ -1,8 +1,16 @@
 ## Overview
 
-Salesforce Sales Cloud is one of the leading Customer Relationship Management(CRM) software, provided by Salesforce.Inc. Salesforce enable users to efficiently manage sales and customer relationships through its APIs, robust and secure databases, and analytics services. Sales cloud provides serveral API packages to make operations on sObjects and metadata, execute queries and searches, and listen to change events through API calls using REST, SOAP, and CometD protocols. 
+Salesforce Sales Cloud is a leading Customer Relationship Management (CRM) software provided by Salesforce Inc. It enables users to efficiently manage sales and customer relationships through its APIs, robust and secure databases, and analytics services. Sales Cloud provides several API packages to perform operations on sObjects and metadata, execute queries and searches, and listen to change events through API calls using REST, SOAP, and CometD protocols.
 
-Ballerina Salesforce connector supports [Salesforce v59.0 REST API](https://developer.salesforce.com/docs/atlas.en-us.224.0.api_rest.meta/api_rest/intro_what_is_rest_api.htm), [Salesforce v59.0 SOAP API](https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_quickstart_intro.htm), [Salesforce v59.0 APEX REST API](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_rest_intro.htm), [Salesforce v59.0 BULK API](https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/api_asynch_introduction_bulk_api.htm), and [Salesforce v59.0 BULK V2 API](https://developer.salesforce.com/docs/atlas.en-us.api_asynch.meta/api_asynch/bulk_api_2_0.htm).
+The Salesforce connector supports various Salesforce APIs including REST, SOAP, APEX REST, BULK, and BULK V2 APIs.
+
+### Key Features
+
+- Support for REST, SOAP, APEX REST, BULK, and BULK V2 APIs
+- Perform CRUD operations on sObjects and metadata
+- Execute complex queries and searches
+- Listen to real-time change events via CometD
+- Efficient management of large datasets using Bulk APIs
 
 ## Setup guide
 

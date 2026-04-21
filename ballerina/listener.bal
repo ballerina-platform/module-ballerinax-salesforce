@@ -71,6 +71,7 @@ public isolated class Listener {
         self.sessionTimeout = sessionTimeout;
         check utils:validateApiVersion(listenerConfig.apiVersion);
         self.apiVersion = listenerConfig.apiVersion;
+        ProxyConfig? proxyConfig = listenerConfig?.proxyConfig;
         if listenerConfig is RestBasedListenerConfig {
             self.username = "";
             self.password = "";
@@ -107,7 +108,7 @@ public isolated class Listener {
                 self.tokenManager = ();
             }
             initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
-                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
+                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion, proxyConfig);
         } else {
             self.username = listenerConfig.auth.username;
             self.password = listenerConfig.auth.password;
@@ -116,7 +117,7 @@ public isolated class Listener {
             self.oauth2Config = ();
             self.tokenManager = ();
             initListener(self, self.replayFrom, listenerConfig.isSandBox,
-                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion);
+                    connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion, proxyConfig);
         }
     }
 
@@ -430,7 +431,8 @@ isolated class TokenRefreshJob {
 }
 
 isolated function initListener(Listener instance, int replayFrom, boolean isSandBox,
-        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval, string apiVersion) =
+        decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval, string apiVersion,
+        ProxyConfig? proxyConfig) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil",
     paramTypes: [
@@ -440,13 +442,14 @@ isolated function initListener(Listener instance, int replayFrom, boolean isSand
         "io.ballerina.runtime.api.values.BDecimal",
         "io.ballerina.runtime.api.values.BDecimal",
         "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BString"
+        "io.ballerina.runtime.api.values.BString",
+        "java.lang.Object"
     ]
 } external;
 
 isolated function initListenerWithOAuth2(Listener instance, int replayFrom, string baseUrl,
         decimal connectionTimeout, decimal readTimeout, decimal keepAliveInterval,
-        string apiVersion) =
+        string apiVersion, ProxyConfig? proxyConfig) =
 @java:Method {
     name: "initListener",
     'class: "io.ballerinax.salesforce.ListenerUtil",
@@ -457,7 +460,8 @@ isolated function initListenerWithOAuth2(Listener instance, int replayFrom, stri
         "io.ballerina.runtime.api.values.BDecimal",
         "io.ballerina.runtime.api.values.BDecimal",
         "io.ballerina.runtime.api.values.BDecimal",
-        "io.ballerina.runtime.api.values.BString"
+        "io.ballerina.runtime.api.values.BString",
+        "java.lang.Object"
     ]
 } external;
 
