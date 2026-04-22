@@ -47,6 +47,18 @@ public type RestBasedListenerConfig record {|
     OAuth2Config auth;
     # The base URL of the Salesforce instance
     string baseUrl;
+    # Pluggable token store for coordinating token refresh across replicas.
+    # Defaults to `InMemoryTokenStore`, which is scoped to the current process and
+    # is the correct choice for single-replica deployments.
+    #
+    # For horizontally-scaled deployments (e.g. multiple Kubernetes pods sharing one
+    # Salesforce Connected App) where Refresh Token Rotation is enabled, replace this
+    # with a distributed implementation (e.g. Redis-backed) to prevent Token Replay
+    # Attacks caused by concurrent refresh-token usage across pods.
+    #
+    # See `salesforce:TokenStore` for the implementation contract and
+    # `salesforce:InMemoryTokenStore` for the default single-replica implementation.
+    TokenStore tokenStore = new InMemoryTokenStore();
     *CommonListenerConfig;
 |};
 
@@ -92,6 +104,10 @@ public type CommonListenerConfig record {|
     decimal keepAliveInterval = 120;
     # The Salesforce API version to use for Streaming API
     string apiVersion = "43.0";
+    # The Salesforce session timeout in seconds. Set this to match the "Session Timeout" value
+    # configured in your Salesforce org's Session Settings (Setup > Session Settings).
+    # At startup the listener can be configured with this value, if so it overrides this setting.
+    int sessionTimeout = 900;
     # Proxy server configuration
     ProxyConfig proxyConfig?;
 |};
