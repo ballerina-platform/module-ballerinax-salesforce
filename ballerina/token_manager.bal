@@ -98,12 +98,15 @@ isolated class TokenManager {
     #               Defaults to a fresh `InMemoryTokenStore` (single-replica, in-process).
     #               Pass a distributed implementation (e.g. Redis-backed) to coordinate
     #               token refresh across multiple pods and prevent Token Replay Attacks.
+    # + proxyConfig - Optional proxy server configuration. When set, all token refresh HTTP
+    #        calls are routed through the specified proxy.
     # + return - An error if the HTTP client cannot be created
     isolated function init(string clientId, string clientSecret,
             string refreshToken, string tokenUrl,
             int sessionTimeoutSeconds = 900,
             int refreshBufferSeconds = 60,
-            TokenStore tokenStore = new InMemoryTokenStore()) returns error? {
+            TokenStore tokenStore = new InMemoryTokenStore(),
+            ProxyConfig? proxyConfig = ()) returns error? {
         self.clientId = clientId;
         self.clientSecret = clientSecret;
         self.refreshToken = refreshToken;
@@ -121,7 +124,17 @@ isolated class TokenManager {
         }
         self.tokenStore = tokenStore;
         self.storeKey = "sf_token:" + fingerprintToken(clientId);
-        self.tokenClient = check new (tokenUrl);
+        if proxyConfig is ProxyConfig {
+            http:ProxyConfig httpProxy = {
+                host: proxyConfig.host,
+                port: proxyConfig.port,
+                userName: proxyConfig.auth?.username ?: "",
+                password: proxyConfig.auth?.password ?: ""
+            };
+            self.tokenClient = check new (tokenUrl, {proxy: httpProxy});
+        } else {
+            self.tokenClient = check new (tokenUrl);
+        }
     }
 
     # Returns a valid access token, refreshing proactively if expired or about to expire.
