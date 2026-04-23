@@ -102,7 +102,8 @@ public isolated class Listener {
                     rtConfig.refreshToken, rtConfig.refreshUrl,
                     sessionTimeoutSeconds,
                     TOKEN_REFRESH_BUFFER_SECONDS,
-                    listenerConfig.tokenStore
+                    listenerConfig.tokenStore,
+                    proxyConfig
                 );
             } else {
                 self.tokenManager = ();
