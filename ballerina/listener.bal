@@ -49,8 +49,10 @@ public isolated class Listener {
     public isolated function init(ListenerConfig listenerConfig) returns error? {
         if listenerConfig.replayFrom is REPLAY_FROM_TIP {
             self.replayFrom = -1;
-        } else {
+        } else if listenerConfig.replayFrom is REPLAY_FROM_EARLIEST {
             self.replayFrom = -2;
+        } else {
+            self.replayFrom = <int>listenerConfig.replayFrom;
         }
         decimal connectionTimeout = listenerConfig.connectionTimeout;
         if connectionTimeout <= 0d {
