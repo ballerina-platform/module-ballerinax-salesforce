@@ -78,10 +78,11 @@ public isolated class Listener {
             self.username = "";
             self.password = "";
             self.isOAuth2 = true;
-            self.baseUrl = listenerConfig.baseUrl;
-            if listenerConfig.baseUrl.trim() == "" {
+            string normalizedBaseUrl = listenerConfig.baseUrl.trim();
+            if normalizedBaseUrl == "" {
                 return error("Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
             }
+            self.baseUrl = normalizedBaseUrl;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
             // Create TokenManager for RefreshTokenGrantConfig to handle token rotation
             if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
@@ -113,7 +114,7 @@ public isolated class Listener {
             } else {
                 self.tokenManager = ();
             }
-            initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
+            initListenerWithOAuth2(self, self.replayFrom, self.baseUrl,
                     connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion, proxyConfig);
         } else {
             self.username = listenerConfig.auth.username;
