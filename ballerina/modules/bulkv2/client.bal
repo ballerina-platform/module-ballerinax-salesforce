@@ -39,7 +39,7 @@ public isolated client class Client {
     public isolated function init(ConnectionConfig config) returns error? {
         string normalizedBaseUrl = config.baseUrl.trim();
         if normalizedBaseUrl == "" {
-            return error("Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
+            return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
         }
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);

@@ -196,7 +196,7 @@ function testListenerInitWithEmptyBaseUrl() returns error? {
     test:assertTrue(result is error, "Expected an error when baseUrl is empty");
     if result is error {
         test:assertEquals(result.message(),
-            "Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
+            "Salesforce base URL cannot be empty. Please verify and provide a valid URL");
     }
 }
 
@@ -216,6 +216,6 @@ function testListenerInitWithWhitespaceBaseUrl() returns error? {
     test:assertTrue(result is error, "Expected an error when baseUrl is whitespace-only");
     if result is error {
         test:assertEquals(result.message(),
-            "Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
+            "Salesforce base URL cannot be empty. Please verify and provide a valid URL");
     }
 }

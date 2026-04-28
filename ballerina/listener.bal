@@ -80,7 +80,7 @@ public isolated class Listener {
             self.isOAuth2 = true;
             string normalizedBaseUrl = listenerConfig.baseUrl.trim();
             if normalizedBaseUrl == "" {
-                return error("Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
+                return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
             }
             self.baseUrl = normalizedBaseUrl;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();

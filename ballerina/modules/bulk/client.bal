@@ -40,7 +40,7 @@ public isolated client class Client {
     # + return - An error on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
         if config.baseUrl.trim() == "" {
-            return error("Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
+            return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
         }
         check utils:validateApiVersion(config.apiVersion);
         self.bulkApiVersion = config.apiVersion;
