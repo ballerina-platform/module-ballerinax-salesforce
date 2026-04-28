@@ -37,6 +37,9 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - `salesforce:Error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
+        if config.baseUrl.trim() == "" {
+            return error("Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
+        }
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
         httpClientResult = trap new (config.baseUrl, httpClientConfig);

@@ -79,6 +79,9 @@ public isolated class Listener {
             self.password = "";
             self.isOAuth2 = true;
             self.baseUrl = listenerConfig.baseUrl;
+            if listenerConfig.baseUrl.trim() == "" {
+                return error("Invalid or missing authentication configuration. Please verify your Salesforce URL and credentials.");
+            }
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
             // Create TokenManager for RefreshTokenGrantConfig to handle token rotation
             if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
@@ -139,7 +142,8 @@ public isolated class Listener {
             }
             return attachService(self, s, channelName);
         } else {
-            return error("Invalid channel name.");
+            string invalidValue = name is string[] ? string `[${", ".join(...name)}]` : "null";
+            return error(string `Invalid channel name: '${invalidValue}'`);
         }
     }
 
