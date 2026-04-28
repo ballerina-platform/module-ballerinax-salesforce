@@ -176,6 +176,46 @@ function testPlatformEventInvalidChannelName() returns error? {
     error? attachResult = peListener.attach(peService, [platformEventApiName]);
     test:assertTrue(attachResult is error, "Passing a string[] as the channel name should return an error");
     if attachResult is error {
-        test:assertEquals(attachResult.message(), "Invalid channel name.");
+        test:assertEquals(attachResult.message(), string `Invalid channel name: '[${platformEventApiName}]'`);
+    }
+}
+
+@test:Config {
+    groups: ["unit"]
+}
+function testListenerInitWithEmptyBaseUrl() returns error? {
+    Listener|error result = new ({
+        auth: {
+            clientId,
+            clientSecret,
+            refreshToken,
+            refreshUrl
+        },
+        baseUrl: ""
+    });
+    test:assertTrue(result is error, "Expected an error when baseUrl is empty");
+    if result is error {
+        test:assertEquals(result.message(),
+            "Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+    }
+}
+
+@test:Config {
+    groups: ["unit"]
+}
+function testListenerInitWithWhitespaceBaseUrl() returns error? {
+    Listener|error result = new ({
+        auth: {
+            clientId,
+            clientSecret,
+            refreshToken,
+            refreshUrl
+        },
+        baseUrl: "   "
+    });
+    test:assertTrue(result is error, "Expected an error when baseUrl is whitespace-only");
+    if result is error {
+        test:assertEquals(result.message(),
+            "Salesforce base URL cannot be empty. Please verify and provide a valid URL");
     }
 }

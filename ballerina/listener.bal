@@ -78,7 +78,11 @@ public isolated class Listener {
             self.username = "";
             self.password = "";
             self.isOAuth2 = true;
-            self.baseUrl = listenerConfig.baseUrl;
+            string normalizedBaseUrl = listenerConfig.baseUrl.trim();
+            if normalizedBaseUrl == "" {
+                return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+            }
+            self.baseUrl = normalizedBaseUrl;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
             // Create TokenManager for RefreshTokenGrantConfig to handle token rotation
             if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
@@ -110,7 +114,7 @@ public isolated class Listener {
             } else {
                 self.tokenManager = ();
             }
-            initListenerWithOAuth2(self, self.replayFrom, listenerConfig.baseUrl,
+            initListenerWithOAuth2(self, self.replayFrom, self.baseUrl,
                     connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion, proxyConfig);
         } else {
             self.username = listenerConfig.auth.username;
@@ -139,7 +143,8 @@ public isolated class Listener {
             }
             return attachService(self, s, channelName);
         } else {
-            return error("Invalid channel name.");
+            string invalidValue = name is string[] ? string `[${", ".join(...name)}]` : "null";
+            return error(string `Invalid channel name: '${invalidValue}'`);
         }
     }
 

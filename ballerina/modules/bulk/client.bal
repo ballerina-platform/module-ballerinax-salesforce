@@ -39,6 +39,9 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - An error on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
+        if config.baseUrl.trim() == "" {
+            return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+        }
         check utils:validateApiVersion(config.apiVersion);
         self.bulkApiVersion = config.apiVersion;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);

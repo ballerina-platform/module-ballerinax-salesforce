@@ -37,9 +37,13 @@ public isolated client class Client {
     # + salesforceConfig - Salesforce Connector configuration
     # + return - `salesforce:Error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
+        string normalizedBaseUrl = config.baseUrl.trim();
+        if normalizedBaseUrl == "" {
+            return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+        }
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
-        httpClientResult = trap new (config.baseUrl, httpClientConfig);
+        httpClientResult = trap new (normalizedBaseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {
             self.salesforceClient = httpClientResult;
