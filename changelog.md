@@ -5,6 +5,19 @@ This file contains all the notable changes done to the Ballerina Salesforce pack
 
 ### Added
 
+- [Salesforce: Some error messages are not user friendly](https://github.com/wso2/product-integrator/issues/1060)
+
+
+## [8.6.0] - 2026-04-22
+
+### Added
+
+- [[#8746] Refresh Token Rotation support for the Salesforce connector](https://github.com/ballerina-platform/ballerina-library/issues/8746)
+
+## [8.5.0] - 2026-04-21
+
+### Added
+
 - [[#8744] Add HTTP proxy support for Salesforce Listener](https://github.com/ballerina-platform/ballerina-library/issues/8744)
 
 ## [8.4.0] - 2026-03-13
