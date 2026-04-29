@@ -386,6 +386,20 @@ modules = [
 ]
 
 [[package]]
+org = "ballerina"
+name = "uuid"
+version = "1.9.0"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.int"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerina", packageName = "uuid", moduleName = "uuid"}
+]
+
+[[package]]
 org = "ballerinai"
 name = "observe"
 version = "0.0.0"
@@ -425,7 +439,7 @@ modules = [
 [[package]]
 org = "ballerinax"
 name = "salesforce"
-version = "8.6.3"
+version = "8.6.4"
 dependencies = [
 	{org = "ballerina", name = "crypto"},
 	{org = "ballerina", name = "http"},
@@ -445,6 +459,7 @@ dependencies = [
 	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "time"},
 	{org = "ballerina", name = "url"},
+	{org = "ballerina", name = "uuid"},
 	{org = "ballerinai", name = "observe"},
 	{org = "ballerinax", name = "client.config"},
 	{org = "ballerinax", name = "redis"}
