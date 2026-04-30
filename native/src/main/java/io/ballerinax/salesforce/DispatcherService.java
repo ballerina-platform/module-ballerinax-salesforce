@@ -33,6 +33,8 @@ import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -55,6 +57,7 @@ import static io.ballerinax.salesforce.Constants.ON_CREATE;
 import static io.ballerinax.salesforce.Constants.ON_DELETE;
 import static io.ballerinax.salesforce.Constants.ON_RESTORE;
 import static io.ballerinax.salesforce.Constants.ON_UPDATE;
+import static io.ballerinax.salesforce.Constants.RECORD_EVENT_DISPATCHED;
 import static io.ballerinax.salesforce.Constants.RECORD_IDS;
 import static io.ballerinax.salesforce.Constants.SEQUENCE_NUMBER;
 import static io.ballerinax.salesforce.Constants.TRANSACTION_KEY;
@@ -63,27 +66,69 @@ import static io.ballerinax.salesforce.Constants.UPDATE;
 
 /**
  * Dispatcher Service class to dispatch the event data obtained through the streaming API.
+ *
+ * <p>After each successful user-handler invocation, {@link #notifyCheckpoint(long)} calls
+ * {@code Listener.recordEventDispatched(channel, replayId)} on the Ballerina listener so
+ * that the Active-Standby coordinator can persist the high-water mark and resume correctly
+ * after a leader failover.
  */
 public class DispatcherService {
+    private static final Logger log = LoggerFactory.getLogger(DispatcherService.class);
+
     public static final String ON_MESSAGE = "onMessage";
     public static final String PLATFORM_EVENT_MESSAGE = "PlatformEventsMessage";
     private static final String PLATFORM_EVENT_CHANNEL_PREFIX = "/event/";
     public static final String EVENT_FIELD = "event";
     public static final String REPLAY_ID = "replayId";
 
+    /**
+     * Strand metadata used when invoking {@code recordEventDispatched} on the Ballerina
+     * listener. The method is {@code public isolated} on an {@code isolated class}, so
+     * concurrent invocations are safe — hence {@code isConcurrentSafe = true}.
+     */
+    private static final StrandMetadata CHECKPOINT_STRAND_META = new StrandMetadata(true, null);
+
     private final BObject service;
     private final Runtime runtime;
     private final String channelName;
     private final Set<String> methodNames;
 
+    /**
+     * The Ballerina {@code Listener} BObject. Used to invoke
+     * {@code recordEventDispatched(channel, replayId)} after each successful dispatch.
+     * {@code null} for legacy callers that do not supply the listener reference (e.g.
+     * direct test construction via the 2-arg constructor).
+     */
+    private final BObject listener;
+
+    /** Legacy constructor — no checkpoint callback. Used by existing tests. */
     public DispatcherService(BObject service, Runtime runtime) {
-        this(service, runtime, null);
+        this(service, runtime, null, null);
     }
 
+    /** Channel-aware constructor — no checkpoint callback. */
     public DispatcherService(BObject service, Runtime runtime, String channelName) {
+        this(service, runtime, channelName, null);
+    }
+
+    /**
+     * Full constructor used by {@link ListenerUtil#attachService} to wire the checkpoint
+     * callback. The {@code listener} BObject is retained so that after each successful
+     * user-handler execution the dispatcher can call
+     * {@code listener.recordEventDispatched(channel, replayId)}.
+     *
+     * @param service     the Ballerina service BObject ({@code CdcService} or
+     *                    {@code PlatformEventsService})
+     * @param runtime     the Ballerina runtime used to invoke service methods
+     * @param channelName fully-qualified Salesforce channel (e.g. {@code /event/Foo__e})
+     * @param listener    the Ballerina {@code Listener} BObject; may be {@code null} if
+     *                    checkpointing is not required
+     */
+    public DispatcherService(BObject service, Runtime runtime, String channelName, BObject listener) {
         this.service = service;
         this.runtime = runtime;
         this.channelName = channelName;
+        this.listener = listener;
         this.methodNames = Arrays.stream(service.getType().getMethods())
                 .map(MethodType::getName)
                 .collect(Collectors.toSet());
@@ -93,14 +138,35 @@ public class DispatcherService {
         return channelName;
     }
 
+    /**
+     * Entry point for a single CometD event. Extracts the {@code replayId} from the
+     * envelope, dispatches to the appropriate user handler, and — if the handler
+     * completes without throwing — notifies the checkpoint so the coordinator can
+     * persist the high-water mark.
+     *
+     * <p>The checkpoint notification is a best-effort fire-and-forget: any exception
+     * it raises is logged and swallowed so that a checkpoint failure never disrupts
+     * normal event delivery.
+     *
+     * @param eventData raw CometD message payload
+     */
     public void handleDispatch(Map<String, Object> eventData) {
+        // Extract replayId before dispatching so we have it regardless of which
+        // handler path (platform event vs. CDC) is taken below.
+        Long replayId = extractReplayId(eventData);
+
         boolean isPlatformEvent = channelName != null &&
                 channelName.startsWith(PLATFORM_EVENT_CHANNEL_PREFIX);
-
         if (isPlatformEvent) {
             handlePlatformEvent(eventData);
         } else {
             handleCdcEvent(eventData);
+        }
+
+        // Only reached when the user handler returned successfully (no BError thrown).
+        // Notify the Ballerina listener so it can persist the checkpoint replayId.
+        if (replayId != null) {
+            notifyCheckpoint(replayId);
         }
     }
 
@@ -140,6 +206,56 @@ public class DispatcherService {
         boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(functionName);
         return runtime.callMethod(service, functionName,
                 new StrandMetadata(isIsolated, ModuleUtils.getProperties(functionName)), eventRecord);
+    }
+
+    /**
+     * Extracts the Salesforce {@code replayId} from the raw CometD event envelope.
+     * Both platform events and CDC events carry the replayId under
+     * {@code event.replayId} at the top level of the message data map.
+     *
+     * @param eventData raw CometD message payload
+     * @return the replayId, or {@code null} if it cannot be found
+     */
+    private static Long extractReplayId(Map<String, Object> eventData) {
+        Object eventEnvelope = eventData.get(EVENT_FIELD);
+        if (eventEnvelope instanceof Map<?, ?> envelope) {
+            Object rid = envelope.get(REPLAY_ID);
+            if (rid instanceof Number number) {
+                return number.longValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Invokes {@code Listener.recordEventDispatched(channel, replayId)} on the Ballerina
+     * listener after a successful user-handler execution. This persists the high-water
+     * mark so that an Active-Standby failover replica resumes from the correct position.
+     *
+     * <p>All exceptions are caught and logged. A checkpoint failure must never
+     * propagate into the event-dispatch path — the worst outcome is that a failover
+     * replica re-delivers a handful of recent events, which is consistent with
+     * Salesforce's at-least-once delivery guarantee.
+     *
+     * @param replayId the Salesforce-issued, monotonically increasing replay ID
+     */
+    private void notifyCheckpoint(long replayId) {
+        if (listener == null || channelName == null) {
+            return;
+        }
+        try {
+            runtime.callMethod(
+                    listener,
+                    RECORD_EVENT_DISPATCHED,
+                    CHECKPOINT_STRAND_META,
+                    StringUtils.fromString(channelName),
+                    replayId
+            );
+        } catch (Exception e) {
+            // Swallow: checkpoint failure must never disrupt event dispatch.
+            log.warn("Failed to notify checkpoint for channel '{}', replayId {}: {}",
+                    channelName, replayId, e.getMessage());
+        }
     }
 
     private static BMap<BString, Object> getPlatformEventDataRecord(Map<String, Object> event) {
