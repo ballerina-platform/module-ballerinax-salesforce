@@ -40,7 +40,7 @@ public isolated client class Client {
     public isolated function init(ConnectionConfig config) returns error? {
         string normalizedBaseUrl = config.baseUrl.trim();
         if normalizedBaseUrl == "" {
-                return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+                return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL.");
         }
         http:Client|http:ClientError|error httpClientResult;
         http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);

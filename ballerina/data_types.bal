@@ -41,6 +41,30 @@ public type SoapBasedListenerConfig record {|
     *CommonListenerConfig;
 |};
 
+# Active-Standby coordination settings for a Salesforce listener.
+public type ListenerCoordinationConfig record {|
+    # Active-Standby coordinator. In a multi-replica deployment only the leader
+    # opens the CometD subscription; standbys idle until the leader's lease
+    # expires. Defaults to `InMemoryCoordinator`, which is scoped to the
+    # current process. 
+    # 
+    # For multi-replica deployments, supply a distributed implementation
+    # (e.g. backed by MySQL/PostgreSQL) so that exactly one replica holds the
+    # subscription at any time and replayId checkpoints survive failover.
+    #
+    # See `salesforce:ListenerCoordinator` for the implementation contract.
+    ListenerCoordinator coordinator = new InMemoryCoordinator();
+    # The interval, in seconds, before a leader's heartbeat is considered
+    # expired. A standby that observes a stale heartbeat will attempt to take
+    # over. Set higher than the worst-case GC pause / network blip you expect
+    # from the leader.
+    decimal livenessInterval = 30;
+    # The interval, in seconds, between standby leadership-acquisition attempts
+    # AND between leader heartbeat renewals. Must be strictly less than
+    # `livenessInterval` (recommended ratio: 1/3 to 1/2).
+    decimal heartbeatInterval = 5;
+|};
+
 # Salesforce listener configuration for OAuth2 based authentication.
 public type RestBasedListenerConfig record {|
     # Authentication configuration for the listener
@@ -59,6 +83,19 @@ public type RestBasedListenerConfig record {|
     # See `salesforce:TokenStore` for the implementation contract and
     # `salesforce:InMemoryTokenStore` for the default single-replica implementation.
     TokenStore tokenStore = new InMemoryTokenStore();
+    # Active-Standby coordination settings.
+    # Controls leader election, heartbeat intervals, and replayId checkpointing
+    # across multiple replicas. The default value (`{}`) selects
+    # `InMemoryCoordinator`, which is scoped to the current process and is the
+    # correct choice for single-replica deployments.
+    #
+    # For multi-replica deployments (e.g. multiple Kubernetes pods), provide a
+    # `ListenerCoordinationConfig` with a distributed `coordinator` implementation
+    # (e.g. backed by MySQL/PostgreSQL) so that exactly one replica holds the
+    # CometD subscription at any time and replayId checkpoints survive failover.
+    #
+    # See `salesforce:ListenerCoordinationConfig` for field-level documentation.
+    ListenerCoordinationConfig coordination = {};
     *CommonListenerConfig;
 |};
 

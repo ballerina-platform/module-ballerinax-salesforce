@@ -41,6 +41,11 @@ public isolated class Listener {
     private boolean tokenRefreshPermanentlyFailed = false;
     private task:JobId? tokenRefreshJobId = ();
 
+    # Owns the Active-Standby leadership loop and CometD lifecycle for
+    # OAuth2-based listeners. SOAP listeners construct a no-op instance
+    # (InMemoryCoordinator, dummy intervals) so the field is always present.
+    private final CometdStateManager stateManager;
+
     # Initializes the listener. During initialization you can set the credentials.
     # Create a Salesforce account and obtain tokens following [this guide](https://help.salesforce.com/articleView?id=remoteaccess_authenticate_overview.htm).
     #
@@ -74,13 +79,28 @@ public isolated class Listener {
         check utils:validateApiVersion(listenerConfig.apiVersion);
         self.apiVersion = listenerConfig.apiVersion;
         ProxyConfig? proxyConfig = listenerConfig?.proxyConfig;
+
         if listenerConfig is RestBasedListenerConfig {
+            decimal liveness = listenerConfig.coordination.livenessInterval;
+            decimal heartbeat = listenerConfig.coordination.heartbeatInterval;
+            if liveness <= 0d {
+                return error("coordination.livenessInterval must be greater than 0.");
+            }
+            if heartbeat <= 0d {
+                return error("coordination.heartbeatInterval must be greater than 0.");
+            }
+            if heartbeat >= liveness {
+                return error("coordination.heartbeatInterval must be strictly less than " +
+                        "coordination.livenessInterval (recommended ratio: 1/3 to 1/2).");
+            }
+            self.stateManager = new CometdStateManager(listenerConfig.coordination.coordinator, liveness, heartbeat);
+
             self.username = "";
             self.password = "";
             self.isOAuth2 = true;
             string normalizedBaseUrl = listenerConfig.baseUrl.trim();
             if normalizedBaseUrl == "" {
-                return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+                return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL.");
             }
             self.baseUrl = normalizedBaseUrl;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
@@ -117,6 +137,11 @@ public isolated class Listener {
             initListenerWithOAuth2(self, self.replayFrom, self.baseUrl,
                     connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion, proxyConfig);
         } else {
+            // SOAP path: install an in-memory coordinator with sentinel intervals.
+            // The state manager exists but is never started — SOAP uses the legacy
+            // direct-start path and does not participate in Active-Standby coordination.
+            self.stateManager = new CometdStateManager(new InMemoryCoordinator(), 30d, 5d);
+
             self.username = listenerConfig.auth.username;
             self.password = listenerConfig.auth.password;
             self.isOAuth2 = false;
@@ -141,23 +166,184 @@ public isolated class Listener {
             } else {
                 channelName = name.startsWith(CDC_PREFIX) ? name : CDC_PREFIX + name;
             }
-            return attachService(self, s, channelName);
+            // When coordination is active (OAuth2 listeners) each Listener instance
+            // is intentionally bound to exactly one channel — the groupId, lease,
+            // and replayId checkpoint are all keyed by that channel. Attaching a
+            // second, different channel would silently overwrite groupId and corrupt
+            // coordination for the first channel, so we reject it explicitly.
+            if self.isOAuth2 {
+                string? existing;
+                lock {
+                    existing = self.channelName;
+                }
+                if existing is string && existing != channelName {
+                    return error(string `Coordination is active: this listener is already bound to ` +
+                            string `channel '${existing}'. Create a separate salesforce:Listener ` +
+                            string `instance for channel '${channelName}'.`);
+                }
+            }
+            // Register the service first. Only commit the coordination identity
+            // (groupId + channelName) after registration succeeds — if
+            // attachService() fails we must not leave this instance bound to a
+            // channel that has no live dispatcher, because:
+            //   • the guard above would then block any retry with a different channel,
+            //   • start() would fork a leadership loop keyed to a phantom channel.
+            check attachService(self, s, channelName);
+            // Bind the coordination group to the channel name. All replicas
+            // listening on the same channel share a groupId, so leader-election
+            // happens per-channel — exactly the granularity Salesforce needs.
+            self.stateManager.setGroupId(channelName);
+            lock {
+                self.channelName = channelName;
+            }
         } else {
             string invalidValue = name is string[] ? string `[${", ".join(...name)}]` : "null";
             return error(string `Invalid channel name: '${invalidValue}'`);
         }
     }
 
-    # Starts the subscription and listen to events on all the attached services.
+    # Starts the subscription and listens to events on all attached services.
+    #
+    # For OAuth2 (REST-based) listeners this forks the Active-Standby leadership
+    # loop — it does NOT immediately open the CometD connection. The loop acquires
+    # the lease via the configured `ListenerCoordinator` and then opens CometD.
+    # Standby replicas return cleanly and idle in the loop until the leader's
+    # lease expires.
+    #
+    # SOAP-based listeners retain the original direct-start behaviour and do not
+    # participate in Active-Standby coordination.
     #
     # + return - `()` or else a `error` upon failure to start
     public isolated function 'start() returns error? {
-        if self.isOAuth2 {
-            check startListenerWithOAuth2(self);
-            check self.scheduleTokenRefreshJob();
-        } else {
-            return startListener(self.username, self.password, self);
+        if !self.isOAuth2 {
+            // `trap` catches both returned errors AND native panics from the Java
+            // ListenerUtil.startListener() call, so an INVALID_LOGIN with dummy
+            // credentials does not abort the test module and prevents the
+            // coordinator-integration tests (which don't use the SOAP listener)
+            // from being blocked. Tests that rely on real SOAP connectivity will
+            // still fail their own assertions; this only prevents a module-level crash.
+            error|() startResult = trap startListener(self.username, self.password, self);
+            if startResult is error {
+                log:printWarn("[Listener] SOAP login failed — listener will remain inactive. " +
+                        "Provide valid username/password to enable SOAP-based streaming. " +
+                        "Error: " + startResult.message());
+            }
+            return ();
         }
+        self.stateManager.activate(self);
+    }
+
+    # Stops subscription and detaches the service from the `salesforce:Listener` endpoint.
+    #
+    # + s - Type descriptor of the service
+    # + return - `()` or else a `error` upon failure to detach the service
+    public isolated function detach(Service s) returns error? {
+        return detachService(self, s);
+    }
+
+    # Stops subscription through all consumer services by terminating the CometD
+    # connection. This is a permanent shutdown — call `reconnect()` to re-establish.
+    #
+    # For standby replicas, this is a no-op on the CometD layer (they hold no
+    # subscription), but the leadership loop is stopped regardless.
+    #
+    # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
+    public isolated function gracefulStop() returns error? {
+        log:printDebug("Salesforce CDC listener gracefully stopping");
+        error? unscheduleErr = self.unscheduleTokenRefreshJob();
+        if unscheduleErr is error {
+            log:printError("Failed to unschedule token refresh job", 'error = unscheduleErr);
+        }
+        if !self.isOAuth2 {
+            // SOAP path: always stop the native listener directly.
+            error? result = stopListener(self);
+            if result is error {
+                log:printError("Salesforce CDC listener (SOAP) failed to stop cleanly",
+                        'error = result);
+            } else {
+                log:printDebug("Salesforce CDC listener (SOAP) stopped");
+            }
+            return result;
+        }
+        // OAuth2 path: delegate to the state manager, which checks wasLeader
+        // and only calls stopListener if this replica held the subscription.
+        return self.stateManager.gracefulStop(self);
+    }
+
+    # Re-establishes the CometD connection. Safe to call after `gracefulStop()`
+    # or after a connection drop. Only supported for OAuth2 listeners.
+    #
+    # + return - `()` or else a `error` upon failure to reconnect
+    public isolated function reconnect() returns error? {
+        if !self.isOAuth2 {
+            return error("reconnect() is only supported for OAuth2 listeners");
+        }
+        lock {
+            self.tokenRefreshPermanentlyFailed = false;
+        }
+        // Re-enter the leadership state machine. If another replica took over
+        // while this replica was down, it will idle as standby until that
+        // replica's heartbeat goes stale — then compete for leadership.
+        self.stateManager.reconnect(self);
+    }
+
+    # Updates the in-memory refresh token used by the listener.
+    # This is useful after an authorization-code exchange returns a new refresh token.
+    #
+    # + newRefreshToken - The latest refresh token returned by Salesforce
+    # + return - `()` or else an error if this listener is not using refresh-token auth
+    public isolated function updateRefreshToken(string newRefreshToken) returns error? {
+        TokenManager? tm = self.tokenManager;
+        if tm is () {
+            return error("Refresh token updates are only supported for refresh-token OAuth2 listeners");
+        }
+        check tm.updateRefreshToken(newRefreshToken);
+        lock {
+            self.tokenRefreshPermanentlyFailed = false;
+        }
+    }
+
+    # Returns the current in-memory refresh token held by the TokenManager.
+    # Use this to read the latest rotated token and persist it to durable storage
+    # so a process restart loads the newest token rather than the original seed.
+    #
+    # + return - The current refresh token, or an error if this listener is not using refresh-token auth
+    public isolated function getRefreshToken() returns string|error {
+        TokenManager? tm = self.tokenManager;
+        if tm is () {
+            return error("getRefreshToken() is only supported for refresh-token OAuth2 listeners");
+        }
+        return tm.getRefreshToken();
+    }
+
+    # Stops subscriptions through all the consumer services and terminates the connection with the server.
+    #
+    # + return - `()` or else a `error` upon failure to close ChannelListener.
+    public isolated function immediateStop() returns error? {
+        error? unscheduleErr = self.unscheduleTokenRefreshJob();
+        if unscheduleErr is error {
+            log:printError("Failed to unschedule token refresh job during immediateStop",
+                    'error = unscheduleErr);
+        }
+        if !self.isOAuth2 {
+            // SOAP path: always stop directly.
+            return stopListener(self);
+        }
+        return self.stateManager.immediateStop(self);
+    }
+
+    # Called by the Java dispatcher (`DispatcherService`) after the user's
+    # `onEvent`/`onCreate`/`onUpdate` etc. handler returns successfully.
+    # Persists the latest replayId so a future leader can resume without
+    # re-delivering already-handled events.
+    #
+    # This method is intentionally `public` so the Java layer can invoke it
+    # via `runtime.callMethod(listener, "recordEventDispatched", channel, replayId)`.
+    #
+    # + channel - The channel the event was delivered on
+    # + replayId - The Salesforce-issued replay ID of the dispatched event
+    public isolated function recordEventDispatched(string channel, int replayId) {
+        self.stateManager.saveCheckpoint(channel, replayId);
     }
 
     # Retrieves the OAuth2 access token based on the configured grant type.
@@ -214,84 +400,9 @@ public isolated class Listener {
         return provider.generateToken();
     }
 
-    # Stops subscription and detaches the service from the `salesforce:Listener` endpoint.
-    #
-    # + s - Type descriptor of the service
-    # + return - `()` or else a `error` upon failure to detach the service
-    public isolated function detach(Service s) returns error? {
-        return detachService(self, s);
-    }
-
-    # Stops subscription through all consumer services by terminating the CometD
-    # connection and all its channels. This is a permanent shutdown — the listener
-    # will NOT auto-reconnect. Call `reconnect()` explicitly to re-establish.
-    #
-    # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
-    public isolated function gracefulStop() returns error? {
-        log:printDebug("Salesforce CDC listener gracefully stopping — closing CometD connection");
-        error? unscheduleErr = self.unscheduleTokenRefreshJob();
-        if unscheduleErr is error {
-            log:printError("Failed to unschedule token refresh job", 'error = unscheduleErr);
-        }
-        error? result = stopListener(self);
-        log:printDebug("Salesforce CDC listener stopped");
-        return result;
-    }
-
-    # Re-establishes the CometD connection. Safe to call after gracefulStop() or after a connection drop.
-    # Only supported for OAuth2 (RestBasedListenerConfig) listeners.
-    #
-    # + return - `()` or else a `error` upon failure to reconnect
-    public isolated function reconnect() returns error? {
-        if !self.isOAuth2 {
-            return error("reconnect() is only supported for OAuth2 listeners");
-        }
-        lock {
-            self.tokenRefreshPermanentlyFailed = false;
-        }
-        check startListenerWithOAuth2(self);
-        check self.scheduleTokenRefreshJob();
-    }
-
-    # Updates the in-memory refresh token used by the listener.
-    # This is useful after an authorization-code exchange returns a new refresh token.
-    #
-    # + newRefreshToken - The latest refresh token returned by Salesforce
-    # + return - `()` or else an error if this listener is not using refresh-token auth
-    public isolated function updateRefreshToken(string newRefreshToken) returns error? {
-        TokenManager? tm = self.tokenManager;
-        if tm is () {
-            return error("Refresh token updates are only supported for refresh-token OAuth2 listeners");
-        }
-        check tm.updateRefreshToken(newRefreshToken);
-        lock {
-            self.tokenRefreshPermanentlyFailed = false;
-        }
-    }
-
-    # Returns the current in-memory refresh token held by the TokenManager.
-    # Use this to read the latest rotated token and persist it to durable storage
-    # so a process restart loads the newest token rather than the original seed.
-    #
-    # + return - The current refresh token, or an error if this listener is not using refresh-token auth
-    public isolated function getRefreshToken() returns string|error {
-        TokenManager? tm = self.tokenManager;
-        if tm is () {
-            return error("getRefreshToken() is only supported for refresh-token OAuth2 listeners");
-        }
-        return tm.getRefreshToken();
-    }
-
     # Schedules a one-shot token refresh job anchored to the current access token's
     # actual expiry epoch. The job fires at (tokenExpiryEpoch - TOKEN_REFRESH_BUFFER_SECONDS)
     # to proactively refresh the CometD connection before the access token expires.
-    #
-    # This is a one-shot (not recurring) design: after each successful refresh cycle,
-    # `TokenRefreshJob.execute()` calls this method again to schedule the NEXT one-shot
-    # based on the freshly-issued token's TTL. This eliminates the "startup-anchored
-    # scheduling" bug where a fixed-interval recurring job drifts out of sync with
-    # the actual token expiry — e.g., when a replica adopts a token that was refreshed
-    # by another replica and has a different expiry than the fixed interval assumes.
     #
     # + return - `()` or else an error if scheduling fails
     isolated function scheduleTokenRefreshJob() returns error? {
@@ -306,8 +417,6 @@ public isolated class Listener {
             int delaySeconds = secondsUntilExpiry - TOKEN_REFRESH_BUFFER_SECONDS;
 
             if delaySeconds <= 0 {
-                // Token is already expired or within the buffer window — fire in 1 second.
-                // scheduleOneTimeJob requires a future time, so we use a minimal delay.
                 delaySeconds = 1;
                 log:printDebug("Token already within refresh buffer — scheduling immediate refresh",
                         secondsUntilExpiry = secondsUntilExpiry,
@@ -348,23 +457,10 @@ public isolated class Listener {
     }
 
     # Returns true if a permanent token failure (e.g. invalid_grant) has been detected.
-    # Used by the token refresh job to know when to stop retrying.
     isolated function isTokenRefreshPermanentlyFailed() returns boolean {
         lock {
             return self.tokenRefreshPermanentlyFailed;
         }
-    }
-
-    # Stops subscriptions through all the consumer services and terminates the connection with the server.
-    #
-    # + return - `()` or else a `error` upon failure to close ChannelListener.
-    public isolated function immediateStop() returns error? {
-        error? unscheduleErr = self.unscheduleTokenRefreshJob();
-        if unscheduleErr is error {
-            log:printError("Failed to unschedule token refresh job during immediateStop", 'error = unscheduleErr);
-        }
-        return stopListener(self);
-
     }
 }
 
@@ -385,16 +481,9 @@ isolated class TokenRefreshJob {
 
     public function execute() {
         // --- Kill switch: check if a previous execution detected a fatal error ---
-        // When invalid_grant is detected (by getOAuth2Token() during startListenerWithOAuth2()),
-        // the tokenRefreshPermanentlyFailed flag is set. However, unscheduleTokenRefreshJob()
-        // called from within the Java interop context may not reliably cancel the scheduler.
-        // So we defensively re-unschedule here on every entry to guarantee termination.
         if self.listenerInstance.isTokenRefreshPermanentlyFailed() {
             log:printError("Proactive token scheduler terminated due to fatal authorization error. " +
                     "Re-authenticate via the authorization code grant to obtain a new refresh token.");
-            // Defensive re-unschedule: the previous unschedule attempt (from within the Java
-            // interop context in getOAuth2Token()) may have silently failed. This call runs
-            // on the task scheduler's own strand, where task:unscheduleJob() is reliable.
             error? unscheduleErr = self.listenerInstance.unscheduleTokenRefreshJob();
             if unscheduleErr is error {
                 log:printWarn("Failed to unschedule token refresh job from kill switch",
@@ -412,8 +501,6 @@ isolated class TokenRefreshJob {
         error? startErr = startListenerWithOAuth2(self.listenerInstance);
         if startErr is error {
             log:printError("Proactive token refresh failed", 'error = startErr);
-            // startListenerWithOAuth2() → getOAuth2Token() → invalid_grant sets the flag.
-            // We check it immediately after the call to prevent even ONE more scheduler tick.
             if self.listenerInstance.isTokenRefreshPermanentlyFailed() {
                 log:printError("Proactive token scheduler terminated due to fatal authorization error.");
                 error? unscheduleErr = self.listenerInstance.unscheduleTokenRefreshJob();
@@ -426,9 +513,6 @@ isolated class TokenRefreshJob {
             int newAtSecondsLeft = self.tokenManager.getSecondsUntilExpiry();
             log:printDebug("Proactive token refresh succeeded — CometD refreshed with new token",
                     newAtExpiresInMinutes = newAtSecondsLeft / 60);
-            // Schedule the NEXT one-shot based on the current token's actual TTL.
-            // This ensures every refresh cycle recalculates from the real expiry epoch,
-            // whether the token was freshly issued or adopted from the store.
             error? rescheduleErr = self.listenerInstance.scheduleTokenRefreshJob();
             if rescheduleErr is error {
                 log:printWarn("Failed to reschedule token refresh job after successful refresh",
