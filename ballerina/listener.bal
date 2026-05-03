@@ -182,6 +182,13 @@ public isolated class Listener {
                             string `instance for channel '${channelName}'.`);
                 }
             }
+            // Register the service first. Only commit the coordination identity
+            // (groupId + channelName) after registration succeeds — if
+            // attachService() fails we must not leave this instance bound to a
+            // channel that has no live dispatcher, because:
+            //   • the guard above would then block any retry with a different channel,
+            //   • start() would fork a leadership loop keyed to a phantom channel.
+            check attachService(self, s, channelName);
             // Bind the coordination group to the channel name. All replicas
             // listening on the same channel share a groupId, so leader-election
             // happens per-channel — exactly the granularity Salesforce needs.
@@ -189,7 +196,6 @@ public isolated class Listener {
             lock {
                 self.channelName = channelName;
             }
-            return attachService(self, s, channelName);
         } else {
             string invalidValue = name is string[] ? string `[${", ".join(...name)}]` : "null";
             return error(string `Invalid channel name: '${invalidValue}'`);
@@ -251,7 +257,12 @@ public isolated class Listener {
         if !self.isOAuth2 {
             // SOAP path: always stop the native listener directly.
             error? result = stopListener(self);
-            log:printDebug("Salesforce CDC listener (SOAP) stopped");
+            if result is error {
+                log:printError("Salesforce CDC listener (SOAP) failed to stop cleanly",
+                        'error = result);
+            } else {
+                log:printDebug("Salesforce CDC listener (SOAP) stopped");
+            }
             return result;
         }
         // OAuth2 path: delegate to the state manager, which checks wasLeader

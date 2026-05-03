@@ -118,7 +118,30 @@ isolated class CometdStateManager {
                     nodeId = self.nodeId);
             return;
         }
+        error? unscheduleErr = listenerInstance.unscheduleTokenRefreshJob();
+        if unscheduleErr is error {
+            log:printWarn("Failed to unschedule token refresh job during stop",
+                    nodeId = self.nodeId, 'error = unscheduleErr);
+        }
         error? result = stopListener(listenerInstance);
+        // Release the coordination lease immediately so standbys can take over
+        // at their next heartbeatInterval poll rather than waiting for the full
+        // livenessInterval to expire. This is only meaningful for graceful stops —
+        // a crashed process cannot reach this line, so livenessInterval still
+        // guards the crash-failover path.
+        string groupId;
+        lock {
+            groupId = self.groupId;
+        }
+        error? relinquishErr = self.coordinator.relinquishLeadership(groupId, self.nodeId);
+        if relinquishErr is error {
+            log:printWarn("Failed to relinquish leadership on graceful stop; " +
+                    "standbys will take over after livenessInterval expires",
+                    nodeId = self.nodeId, groupId = groupId, 'error = relinquishErr);
+        } else {
+            log:printInfo("Leadership relinquished — standbys may now take over",
+                    nodeId = self.nodeId, groupId = groupId);
+        }
         log:printDebug("CometD state manager stopped (was leader)", nodeId = self.nodeId);
         return result;
     }
@@ -136,6 +159,11 @@ isolated class CometdStateManager {
         }
         if !wasLeader {
             return;
+        }
+        error? unscheduleErr = listenerInstance.unscheduleTokenRefreshJob();
+        if unscheduleErr is error {
+            log:printWarn("Failed to unschedule token refresh job during immediate stop",
+                    nodeId = self.nodeId, 'error = unscheduleErr);
         }
         return stopListener(listenerInstance);
     }

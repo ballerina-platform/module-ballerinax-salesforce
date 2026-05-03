@@ -57,7 +57,7 @@ public type ListenerCoordinationConfig record {|
     # The interval, in seconds, before a leader's heartbeat is considered
     # expired. A standby that observes a stale heartbeat will attempt to take
     # over. Set higher than the worst-case GC pause / network blip you expect
-    # from the leader. Default 30 s mirrors `ballerina/task`'s WarmBackupConfig.
+    # from the leader.
     decimal livenessInterval = 30;
     # The interval, in seconds, between standby leadership-acquisition attempts
     # AND between leader heartbeat renewals. Must be strictly less than

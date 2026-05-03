@@ -24,17 +24,6 @@ import ballerina/time;
 # other replicas idle in standby until the leader's lease expires, at which
 # point one of them acquires the token and resumes the subscription from the
 # last persisted `replayId`.
-#
-# This is structurally the same warm-standby pattern used by `ballerina/task`'s
-# `WarmBackupConfig`. We re-implement the contract here (rather than depending
-# on `ballerina/task`) because the unit of coordination is "subscription
-# ownership," not "scheduled trigger fire."
-#
-# Implementations MUST be `isolated`. The default `InMemoryCoordinator` is
-# scoped to the current process and is intended for single-replica deployments
-# and unit tests. Production multi-replica deployments should provide a
-# distributed implementation backed by MySQL/PostgreSQL or another
-# linearizable store.
 public type ListenerCoordinator isolated object {
 
     # Attempts to become the leader for the given coordination group.
@@ -42,6 +31,13 @@ public type ListenerCoordinator isolated object {
     # Semantics:
     # - If no replica currently holds leadership, the caller acquires it.
     # - If the caller is already the leader, this is a no-op success.
+    #   **Implementations MUST NOT refresh the heartbeat timestamp in this
+    #   case.** Refreshing the heartbeat from `attemptLeadership()` would
+    #   silently renew the lease even when called from `standbyTick()` after
+    #   a failed `startListenerWithOAuth2()`, preventing a healthy standby
+    #   from taking over. Heartbeat refresh is the exclusive responsibility
+    #   of `renewLeadership()`, which is only called from `leaderTick()` while
+    #   the CometD subscription is actually active.
     # - If a different replica holds leadership AND its last heartbeat is
     #   within `livenessInterval` seconds, the caller remains a standby.
     # - If a different replica holds leadership but its heartbeat is older
@@ -94,6 +90,24 @@ public type ListenerCoordinator isolated object {
     # + channel - Fully-qualified Salesforce channel name
     # + return - The persisted `replayId`, `()` if none exists, or `error`
     public isolated function getCheckpoint(string channel) returns int|error?;
+
+    # Immediately releases the leadership lease for the given coordination group.
+    # Called on graceful shutdown so that standbys can take over at their next
+    # poll tick (`heartbeatInterval` seconds) rather than waiting for the full
+    # `livenessInterval` to expire.
+    #
+    # Semantics:
+    # - If the caller is the current leader, the lease is cleared immediately
+    #   (e.g. DELETE the row, or set `leader_node_id = NULL`).
+    # - If the caller is NOT the current leader (already lost the lease or never
+    #   held it), this MUST be a silent no-op — never return an error in that case.
+    # - Implementations MUST be idempotent: calling twice for the same node has
+    #   the same effect as calling once.
+    #
+    # + groupId - Logical identity of the coordination group
+    # + nodeId - Unique identifier of the calling replica
+    # + return - `()` on success, or an `error` on store failure
+    public isolated function relinquishLeadership(string groupId, string nodeId) returns error?;
 };
 
 # Internal heartbeat record tracked by `InMemoryCoordinator`.
@@ -126,7 +140,14 @@ public isolated class InMemoryCoordinator {
                 return true;
             }
             if current.nodeId == nodeId {
-                self.leaders[groupId] = {nodeId, lastHeartbeatEpochMillis: nowMillis};
+                // The caller is already the recorded leader — return success
+                // WITHOUT refreshing the heartbeat. Refreshing here would
+                // silently renew the lease on every standbyTick() call that
+                // follows a failed startListenerWithOAuth2(), blocking other
+                // replicas from taking over indefinitely. Only renewLeadership()
+                // (called from leaderTick() while CometD is active) may reset
+                // the heartbeat timestamp. This matches the contract comment:
+                // "if the caller is already the leader, this is a no-op success."
                 return true;
             }
             int staleness = nowMillis - current.lastHeartbeatEpochMillis;
@@ -170,6 +191,17 @@ public isolated class InMemoryCoordinator {
     public isolated function getCheckpoint(string channel) returns int|error? {
         lock {
             return self.checkpoints[channel];
+        }
+    }
+
+    public isolated function relinquishLeadership(string groupId, string nodeId) returns error? {
+        lock {
+            LeaderEntry? current = self.leaders[groupId];
+            // Only clear the entry if this node is still the recorded leader.
+            // If another replica already took over, leave its entry untouched.
+            if current is LeaderEntry && current.nodeId == nodeId {
+                _ = self.leaders.remove(groupId);
+            }
         }
     }
 }
