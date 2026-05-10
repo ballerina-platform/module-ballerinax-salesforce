@@ -1,0 +1,29 @@
+# Docker Compose for TokenStore integration tests.
+# Provides a Redis instance for the distributed token store tests.
+#
+# Usage:
+#   docker compose up -d          # start Redis
+#   bal test --groups token_store  # run the test suite
+#   docker compose down -v         # teardown
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --save ""
+      --appendonly no
+      --maxmemory 64mb
+      --maxmemory-policy allkeys-lru
+
+volumes:
+  redis_data:

@@ -122,9 +122,99 @@ clean {
     delete 'build'
 }
 
+// ---- Redis test-container lifecycle (integration tests) ----
+def redisContainerName = 'sf-redis-test'
+def redisImage = 'redis:7-alpine'
+def redisPort = 6379
+
+def isDockerAvailable = {
+    try {
+        def p = ['docker', 'version', '--format', '{{.Server.Version}}'].execute()
+        p.waitFor()
+        return p.exitValue() == 0
+    } catch (Exception ignored) {
+        return false
+    }
+}
+
+task startRedis {
+    group = 'verification'
+    description = 'Start Redis container for Ballerina integration tests.'
+    onlyIf {
+        if (!isDockerAvailable()) {
+            logger.warn("[startRedis] Docker daemon not reachable — skipping Redis startup. " +
+                        "Redis-integration tests will be skipped gracefully.")
+            return false
+        }
+        return true
+    }
+    doLast {
+        // Idempotent cleanup of any orphan
+        exec {
+            ignoreExitValue true
+            commandLine 'docker', 'rm', '-f', redisContainerName
+        }
+        // Start fresh with pull-retry (mitigates transient Docker Hub 125s)
+        def maxAttempts = 3
+        def attempt = 0
+        def started = false
+        while (attempt < maxAttempts && !started) {
+            attempt++
+            def result = exec {
+                ignoreExitValue true
+                commandLine 'docker', 'run', '-d',
+                        '-p', "${redisPort}:6379",
+                        '--name', redisContainerName,
+                        redisImage
+            }
+            if (result.exitValue == 0) {
+                started = true
+            } else {
+                logger.warn("[startRedis] docker run attempt ${attempt}/${maxAttempts} failed (exit=${result.exitValue}). Retrying in 3s.")
+                sleep(3000)
+            }
+        }
+        if (!started) {
+            throw new GradleException("Failed to start Redis container after ${maxAttempts} attempts.")
+        }
+        // Real readiness probe — PING-until-PONG, 30x1s
+        def ready = false
+        for (int i = 0; i < 30 && !ready; i++) {
+            def probe = exec {
+                ignoreExitValue true
+                commandLine 'docker', 'exec', redisContainerName, 'redis-cli', 'PING'
+            }
+            if (probe.exitValue == 0) {
+                ready = true
+            } else {
+                sleep(1000)
+            }
+        }
+        if (!ready) {
+            throw new GradleException("Redis container started but did not respond to PING within 30s.")
+        }
+        logger.lifecycle("[startRedis] Redis ready on localhost:${redisPort} (container=${redisContainerName}).")
+    }
+}
+
+task stopRedis {
+    group = 'verification'
+    description = 'Stop and remove the Redis integration-test container.'
+    onlyIf { isDockerAvailable() }
+    doLast {
+        exec {
+            ignoreExitValue true
+            commandLine 'docker', 'rm', '-f', redisContainerName
+        }
+        logger.lifecycle("[stopRedis] Redis container removed.")
+    }
+}
+
 updateTomlFiles.dependsOn copyStdlibs
 build.dependsOn ":${project.packageName}-native:build"
 build.dependsOn "generatePomFileForMavenPublication"
 publishToMavenLocal.dependsOn build
 test.dependsOn ":${project.packageName}-native:build"
+test.dependsOn startRedis
+test.finalizedBy stopRedis
 publish.dependsOn build

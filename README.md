@@ -18,6 +18,8 @@ For more information about configuration and operations, go to the module(s).
    - Perform Salesforce bulk operations programmatically through the Salesforce Bulk API. Users can perform CRUD operations in bulk for Salesforce.
 - [salesforce.soap](ballerina/modules/soap/Module.md)
    - Perform Salesforce operations programmatically through the Salesforce SOAP API, which is not supported by the Salesforce REST API. The connector is comprised of limited operations on SOAP API.
+- **salesforce** (Listener / RTR)
+   - **Refresh Token Rotation (RTR)**: Automatically captures and stores rotated refresh tokens issued by Salesforce on every token exchange, preventing `invalid_grant` failures in long-running integrations. Implements a proactive reconnect scheduler that refreshes the CometD connection before the access token expires, and exposes a pluggable `TokenStore` interface for multi-replica coordination.
 
 ## Setup guide
 
@@ -71,6 +73,8 @@ Import the `ballerinax/salesforce` package into the Ballerina project.
 ```ballerina
 import ballerinax/salesforce;
 ```
+
+The `TokenStore`, `TokenData`, and `InMemoryTokenStore` types are all part of the root `ballerinax/salesforce` package — no additional import is needed.
 
 #### Step 2: Create a new connector instance
 
@@ -153,6 +157,27 @@ service "/data/ChangeEvents" on eventListener {
 }
 ```
 
+Alternatively, to use OAuth2 with the REST-based listener (recommended for long-running integrations with Refresh Token Rotation):
+
+```ballerina
+import ballerina/http;
+import ballerinax/salesforce;
+
+salesforce:RestBasedListenerConfig listenerConfig = {
+    baseUrl: "<SALESFORCE_BASE_URL>",
+    auth: <http:OAuth2RefreshTokenGrantConfig>{
+        clientId: "<CLIENT_ID>",
+        clientSecret: "<CLIENT_SECRET>",
+        refreshToken: "<REFRESH_TOKEN>",
+        refreshUrl: "<TOKEN_URL>",
+        defaultTokenExpTime: 3600  // Match your org's Session Timeout setting
+    }
+    // Optional: plug in a custom TokenStore for multi-replica deployments
+    // tokenStore: myRedisTokenStore
+};
+listener salesforce:Listener eventListener = new (listenerConfig);
+```
+
 3. Integrate custom SObject types
 
 To seamlessly integrate custom SObject types into your Ballerina project, you have the option to either generate a package using the Ballerina Open API tool or utilize the `ballerinax/salesforce.types` module. Follow the steps given [here](https://github.com/ballerina-platform/module-ballerinax-salesforce/blob/master/ballerina/modules/types/Module.md) based on your preferred approach.
@@ -176,6 +201,77 @@ public function main() returns error? {
 bal run
 ````
 
+## Refresh Token Rotation (RTR)
+
+When Salesforce is configured with **Refresh Token Rotation**, each token exchange invalidates the previous refresh token and issues a new one. The connector handles this automatically — no code changes required for single-replica deployments.
+
+**What the connector does automatically:**
+- Captures the new refresh token from every Salesforce token response
+- Proactively refreshes the CometD connection before the access token expires
+- Detects permanent failures (`invalid_grant`) and shuts down cleanly with a clear error log
+
+**Salesforce org configuration required:**
+1. Enable **Refresh Token Rotation** on your Connected App (Setup → App Manager → Your App → Edit Policies → Enable Refresh Token Rotation)
+2. Set the refresh token policy to **"Expire refresh token if not used for N"** (idle/sliding window) — this allows the connector to run indefinitely. The "Expire after N" (absolute) policy will stop the connector at the configured deadline regardless of activity.
+3. Set `defaultTokenExpTime` in your config to match your org's **Session Timeout** value (Setup → Security → Session Settings → Timeout Value). Salesforce does not return `expires_in` in its token response — this value is required for the connector to calculate expiry correctly.
+
+**For multi-replica deployments**, implement the `salesforce:TokenStore` interface to share token state across replicas:
+
+```ballerina
+import ballerinax/salesforce;
+
+isolated class MyRedisTokenStore {
+    *salesforce:TokenStore;
+    // implement acquireLock, releaseLock, getTokenData, setTokenData, clearTokenData
+}
+```
+
+Then pass your store to the listener config:
+
+```ballerina
+salesforce:RestBasedListenerConfig listenerConfig = {
+    baseUrl: "<SALESFORCE_BASE_URL>",
+    auth: <http:OAuth2RefreshTokenGrantConfig>{ ... },
+    tokenStore: new MyRedisTokenStore()
+};
+```
+
+For a complete reference implementation and architectural guide, see [examples/listener_usecases](examples/listener_usecases).
+
+## Cloud-Native Listener: Multi-Replica Deployments
+
+Salesforce CDC listeners running in Kubernetes or any horizontally-scaled environment face a critical reliability hazard known as the **Token Replay Attack**. When Salesforce is configured with Refresh Token Rotation (RTR), each token exchange invalidates the previous refresh token and issues a new one. If two replicas attempt to refresh at the same time using the same refresh token, the second request will arrive after the token has already been rotated — Salesforce returns `400 invalid_grant` and permanently revokes the entire token family, killing all replicas.
+
+### How the connector solves this
+
+The `salesforce:Listener` uses a **distributed double-checked locking** protocol coordinated through a pluggable `salesforce:TokenStore`:
+
+1. **Acquire** an advisory lock (Redis `SETNX`, database row lock, etc.) before calling the Salesforce token endpoint.
+2. **Double-check** the shared store — a peer replica may have already refreshed while you were waiting for the lock. If so, adopt its result and skip the HTTP call entirely.
+3. **Refresh** (only one replica), write the new token data to the shared store, then **release** the lock.
+4. **Proactively reconnect** CometD before the access token expires using an internal `task:scheduleOneTimeJob`, eliminating the reactive 401 cycle.
+
+### Deployment models
+
+| Deployment | Configuration |
+|---|---|
+| Single replica / local dev | No `tokenStore` required — uses the built-in `InMemoryTokenStore` |
+| Multi-replica (K8s) | Set `tokenStore` to a `salesforce:TokenStore` backed by Redis, a relational database, or any shared store |
+
+### TokenStore contract
+
+```ballerina
+public type TokenStore isolated object {
+    public isolated function acquireLock(string lockKey, int ttlSeconds) returns boolean|error;
+    public isolated function releaseLock(string lockKey) returns error?;
+    public isolated function getTokenData(string key) returns salesforce:TokenData?|error;
+    public isolated function setTokenData(string key, salesforce:TokenData data) returns error?;
+    public isolated function clearTokenData(string key) returns error?;
+};
+```
+
+See [examples/listener_usecases](examples/listener_usecases) for a fully annotated single-node and distributed listener example.
+
 ## Examples
 
 The `salesforce` connector provides practical examples illustrating usage in various scenarios. Explore these examples below, covering use cases like creating sObjects, retrieving records, and executing bulk operations.
@@ -187,6 +283,8 @@ The `salesforce` connector provides practical examples illustrating usage in var
 3. [Salesforce Bulk v2 API use cases](https://github.com/ballerina-platform/module-ballerinax-salesforce/tree/master/examples/bulkv2_api_usecases) - How to employ Bulk v2 API to execute an ingest job.
 
 4. [Salesforce APEX REST API use cases](https://github.com/ballerina-platform/module-ballerinax-salesforce/tree/master/examples/apex_rest_api_usecases) - How to employ APEX REST API to create a case in Salesforce.
+
+5. [Salesforce Listener use cases](https://github.com/ballerina-platform/module-ballerinax-salesforce/tree/master/examples/listener_usecases) - How to use the CDC Listener with Refresh Token Rotation for single-node and multi-replica Kubernetes deployments.
 
 ## Report Issues
 

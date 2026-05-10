@@ -18,19 +18,31 @@
 
 package io.ballerinax.salesforce;
 
+import org.eclipse.jetty.client.ProxyConfiguration;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A delegating BayeuxParameters implementation that overrides timeout and keep-alive settings.
+ * A delegating BayeuxParameters implementation that overrides timeout, keep-alive, and proxy settings.
  */
 public class TimeoutBayeuxParameters extends DelegatingBayeuxParameters {
     private final long readTimeoutMs;
     private final long keepAliveIntervalMs;
+    private final List<ProxyConfiguration.Proxy> proxiesList;
 
     public TimeoutBayeuxParameters(BayeuxParameters parameters, long readTimeoutMs, long keepAliveIntervalMs) {
+        this(parameters, readTimeoutMs, keepAliveIntervalMs, Collections.emptyList());
+    }
+
+    public TimeoutBayeuxParameters(BayeuxParameters parameters, long readTimeoutMs, long keepAliveIntervalMs,
+            List<ProxyConfiguration.Proxy> proxies) {
         super(parameters);
         this.readTimeoutMs = readTimeoutMs;
         this.keepAliveIntervalMs = keepAliveIntervalMs;
+        this.proxiesList = List.copyOf(proxies);
     }
 
     @Override
@@ -46,5 +58,10 @@ public class TimeoutBayeuxParameters extends DelegatingBayeuxParameters {
     @Override
     public TimeUnit keepAliveUnit() {
         return TimeUnit.MILLISECONDS;
+    }
+
+    @Override
+    public Collection<? extends ProxyConfiguration.Proxy> proxies() {
+        return Collections.unmodifiableList(proxiesList);
     }
 }

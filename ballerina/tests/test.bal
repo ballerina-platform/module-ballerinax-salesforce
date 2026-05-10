@@ -687,6 +687,36 @@ function testDeleteRecordNew() returns error? {
     }
 }
 
+@test:Config {
+    groups: ["unit"]
+}
+function testClientInitWithEmptyBaseUrl() returns error? {
+    Client|error result = new ({
+        baseUrl: "",
+        auth: {token: "dummy-token"}
+    });
+    test:assertTrue(result is error, "Expected an error when baseUrl is empty");
+    if result is error {
+        test:assertEquals(result.message(),
+            "Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+    }
+}
+
+@test:Config {
+    groups: ["unit"]
+}
+function testClientInitWithWhitespaceBaseUrl() returns error? {
+    Client|error result = new ({
+        baseUrl: "   ",
+        auth: {token: "dummy-token"}
+    });
+    test:assertTrue(result is error, "Expected an error when baseUrl is whitespace-only");
+    if result is error {
+        test:assertEquals(result.message(),
+            "Salesforce base URL cannot be empty. Please verify and provide a valid URL");
+    }
+}
+
 /////////////////////////////////////////// Helper Functions ///////////////////////////////////////////////////////////
 
 isolated function countStream(stream<record {}, error?> resultStream) returns int|error {

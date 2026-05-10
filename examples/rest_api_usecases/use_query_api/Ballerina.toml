@@ -1,11 +1,11 @@
 [package]
 org = "salesforce_examples"
 name = "use_query_api"
-version = "8.5.0"
+version = "8.6.4"
 distribution = "2201.11.0"
 
 [[dependency]]
 org = "ballerinax"
 name = "salesforce"
-version = "8.5.0"
+version = "8.6.4"
 repository = "local"

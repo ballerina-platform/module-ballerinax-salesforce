@@ -1,6 +1,6 @@
 [package]
 org = "salesforce_examples"
-name = "use_bulk_upsert"
+name = "distributed_listener"
 version = "8.6.4"
 distribution = "2201.11.0"
 

@@ -18,8 +18,13 @@
 
 package io.ballerinax.salesforce;
 
+import org.eclipse.jetty.client.ProxyConfiguration;
+
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -32,14 +37,22 @@ public class OAuth2BayeuxParameters implements BayeuxParameters {
     private final long readTimeoutMs;
     private final long keepAliveIntervalMs;
     private final String apiVersion;
+    private final List<ProxyConfiguration.Proxy> proxiesList;
 
     public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl,
         long readTimeoutMs, long keepAliveIntervalMs, String apiVersion) {
+        this(tokenSupplier, baseUrl, readTimeoutMs, keepAliveIntervalMs, apiVersion, Collections.emptyList());
+    }
+
+    public OAuth2BayeuxParameters(Supplier<String> tokenSupplier, String baseUrl,
+        long readTimeoutMs, long keepAliveIntervalMs, String apiVersion,
+        List<ProxyConfiguration.Proxy> proxies) {
         this.tokenSupplier = tokenSupplier;
         this.baseUrl = baseUrl;
         this.readTimeoutMs = readTimeoutMs;
         this.keepAliveIntervalMs = keepAliveIntervalMs;
         this.apiVersion = apiVersion;
+        this.proxiesList = List.copyOf(proxies);
     }
 
     @Override
@@ -75,5 +88,10 @@ public class OAuth2BayeuxParameters implements BayeuxParameters {
     @Override
     public TimeUnit keepAliveUnit() {
         return TimeUnit.MILLISECONDS;
+    }
+
+    @Override
+    public Collection<? extends ProxyConfiguration.Proxy> proxies() {
+        return Collections.unmodifiableList(proxiesList);
     }
 }

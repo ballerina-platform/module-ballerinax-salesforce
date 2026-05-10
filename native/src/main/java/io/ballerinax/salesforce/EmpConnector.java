@@ -31,12 +31,15 @@ import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSessionChannel;
 import org.cometd.client.BayeuxClient;
 import org.cometd.client.http.jetty.JettyHttpClientTransport;
+import org.eclipse.jetty.client.Authentication;
+import org.eclipse.jetty.client.BasicAuthentication;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.ConnectException;
+import java.net.URI;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -205,6 +208,24 @@ public class EmpConnector {
      */
     public void setBearerTokenProvider(Function<Boolean, String> bearerTokenProvider) {
         this.bearerTokenProvider = bearerTokenProvider;
+    }
+
+    /**
+     * Configure basic authentication for a proxy server.
+     *
+     * @param proxyHost     the proxy host
+     * @param proxyPort     the proxy port
+     * @param proxyUsername the proxy username
+     * @param proxyPassword the proxy password
+     * @param secure        whether the proxy uses HTTPS ({@code true}) or HTTP ({@code false})
+     */
+    public void setProxyAuthentication(String proxyHost, int proxyPort,
+            String proxyUsername, String proxyPassword, boolean secure) {
+        String scheme = secure ? "https" : "http";
+        URI proxyUri = URI.create(String.format("%s://%s:%d", scheme, proxyHost, proxyPort));
+        httpClient.getAuthenticationStore().addAuthentication(
+                new BasicAuthentication(proxyUri, Authentication.ANY_REALM,
+                        proxyUsername, proxyPassword));
     }
 
     /**
