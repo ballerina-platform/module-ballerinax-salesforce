@@ -19,7 +19,6 @@ import ballerina/io;
 import ballerina/jballerina.java;
 import ballerina/lang.runtime;
 import ballerina/time;
-import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce connector provides the capability to access Salesforce REST API.
@@ -39,7 +38,22 @@ public isolated client class Client {
     # + return - `salesforce:Error` on failure of initialization or else `()`
     public isolated function init(ConnectionConfig config) returns error? {
         http:Client|http:ClientError|error httpClientResult;
-        http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
+        http:ClientConfiguration httpClientConfig = {
+            auth: config.auth,
+            httpVersion: config.httpVersion,
+            timeout: config.timeout,
+            forwarded: config.forwarded,
+            poolConfig: config.poolConfig,
+            compression: config.compression,
+            circuitBreaker: config.circuitBreaker,
+            retryConfig: config.retryConfig,
+            http1Settings: config.http1Settings,
+            http2Settings: config.http2Settings,
+            cache: config.cache,
+            responseLimits: config.responseLimits,
+            secureSocket: config.secureSocket,
+            proxy: config.proxy
+        };
         httpClientResult = trap new (config.baseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {

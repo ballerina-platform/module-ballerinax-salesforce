@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce SOAP connector provides the capability to access Salesforce SOAP API. 
@@ -41,9 +40,23 @@ public isolated client class Client {
     public isolated function init(ConnectionConfig config) returns error? {
         check utils:validateApiVersion(config.apiVersion);
         self.apiVersion = config.apiVersion;
-        http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
-        http:OAuth2RefreshTokenGrantConfig|http:BearerTokenConfig auth = let var authConfig = config.auth in 
-                (authConfig is http:BearerTokenConfig ?  authConfig : {...authConfig});
+        http:ClientConfiguration httpClientConfig = {
+            auth: config.auth,
+            httpVersion: config.httpVersion,
+            timeout: config.timeout,
+            forwarded: config.forwarded,
+            poolConfig: config.poolConfig,
+            compression: config.compression,
+            circuitBreaker: config.circuitBreaker,
+            retryConfig: config.retryConfig,
+            http1Settings: config.http1Settings,
+            http2Settings: config.http2Settings,
+            cache: config.cache,
+            responseLimits: config.responseLimits,
+            secureSocket: config.secureSocket,
+            proxy: config.proxy
+        };
+        http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth = config.auth;
         self.clientConfig = auth.cloneReadOnly();
 
         http:ClientOAuth2Handler|http:ClientBearerTokenAuthHandler|error httpHandlerResult;
