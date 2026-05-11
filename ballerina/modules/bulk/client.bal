@@ -57,7 +57,11 @@ public isolated client class Client {
             cache: config.cache,
             responseLimits: config.responseLimits,
             secureSocket: config.secureSocket,
-            proxy: config.proxy
+            proxy: config.proxy,
+            followRedirects: config.followRedirects,
+            cookieConfig: config.cookieConfig,
+            validation: config.validation,
+            laxDataBinding: config.laxDataBinding
         };
         http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth = config.auth;
         self.clientConfig = auth.cloneReadOnly();
