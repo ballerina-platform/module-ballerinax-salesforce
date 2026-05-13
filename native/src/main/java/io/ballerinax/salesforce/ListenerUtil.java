@@ -130,6 +130,22 @@ public class ListenerUtil {
         listener.addNativeData(EFFECTIVE_REPLAY_FROM, replayFrom);
     }
 
+    /**
+     * Clears the per-start-cycle effective {@code replayFrom} override so that the
+     * next {@link #subscribeServices} call falls back to the init-time {@code REPLAY_FROM}.
+     *
+     * <p>Called by {@code CometdStateManager.standbyTick()} whenever {@code getCheckpoint}
+     * returns no usable value (error or absent).  Without this call, a stale
+     * {@code EFFECTIVE_REPLAY_FROM} written by a prior {@code setEffectiveReplayFrom}
+     * that survived a failed {@code startListenerWithOAuth2} attempt would silently
+     * anchor the next successful subscribe at the wrong replay position.
+     *
+     * @param listener the Ballerina {@code Listener} BObject
+     */
+    public static void clearEffectiveReplayFrom(BObject listener) {
+        listener.addNativeData(EFFECTIVE_REPLAY_FROM, null);
+    }
+
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
         String channel = ((BString) channelName).getValue();
 

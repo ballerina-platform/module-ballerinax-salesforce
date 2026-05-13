@@ -63,6 +63,12 @@ isolated class CometdStateManager {
     private final decimal livenessInterval;
     private final decimal heartbeatInterval;
     private string leadershipState = LEADER_STATE_INIT;
+    // True from the moment a leadership loop strand is forked until that strand
+    // observes LEADER_STATE_STOPPED and returns. Prevents reconnect() from forking
+    // a second loop while a prior one is still sleeping between ticks — the prior
+    // loop would wake, read STANDBY (not STOPPED), and both strands would then
+    // call startListenerWithOAuth2 / setEffectiveReplayFrom concurrently.
+    private boolean loopRunning = false;
 
     isolated function init(ListenerCoordinator coordinator,
             decimal livenessInterval, decimal heartbeatInterval) {
@@ -96,6 +102,7 @@ isolated class CometdStateManager {
     public isolated function activate(Listener listenerInstance) {
         lock {
             self.leadershipState = LEADER_STATE_STANDBY;
+            self.loopRunning = true;
         }
         // Fork the leadership loop. We do NOT wait for the future —
         // `'start()` must return so listener registration completes.
@@ -169,18 +176,29 @@ isolated class CometdStateManager {
     }
 
     # Re-enters the leadership state machine after a stop or connection drop.
-    # If the loop is already running (state ≠ STOPPED), this is a no-op —
-    # the existing loop will continue competing for the lease.
+    # If a loop strand is still alive (loopRunning = true), this is a no-op —
+    # the existing strand wakes from its sleep, reads STANDBY, and continues
+    # competing for the lease without a second strand being forked.
     #
     # + listenerInstance - The owning `Listener` instance
     public isolated function reconnect(Listener listenerInstance) {
-        boolean restartLoop;
+        boolean shouldFork;
         lock {
-            restartLoop = self.leadershipState == LEADER_STATE_STOPPED;
+            // Always transition to STANDBY so an already-running loop
+            // picks up the intent on its next tick.
             self.leadershipState = LEADER_STATE_STANDBY;
+            // Only fork a new strand if the previous loop has actually exited.
+            // Checking loopRunning rather than leadershipState == STOPPED avoids
+            // the race where gracefulStop() sets STOPPED but the sleeping loop
+            // has not yet observed it — reconnect() would otherwise fork a second
+            // strand and both would tick concurrently on the same nodeId/groupId.
+            shouldFork = !self.loopRunning;
+            if shouldFork {
+                self.loopRunning = true;
+            }
         }
-        if restartLoop {
-            // The previous loop exited on STOPPED; fork a fresh one.
+        if shouldFork {
+            // The previous loop has exited; fork a fresh one.
             future<()> _ = start self.leadershipLoop(listenerInstance);
         }
     }
@@ -219,6 +237,11 @@ isolated class CometdStateManager {
             }
             if state == LEADER_STATE_STOPPED {
                 log:printDebug("Leadership loop exiting", nodeId = self.nodeId);
+                lock {
+                    // Signal that this strand has fully exited. reconnect() waits
+                    // for this before forking a new strand, preventing concurrent loops.
+                    self.loopRunning = false;
+                }
                 return;
             }
             if state == LEADER_STATE_STANDBY {
@@ -262,6 +285,11 @@ isolated class CometdStateManager {
         if checkpoint is error {
             log:printWarn("Failed to read checkpoint; using configured replayFrom",
                     nodeId = self.nodeId, groupId = groupId, 'error = checkpoint);
+            // Clear any stale override that may have been written by setEffectiveReplayFrom
+            // on a previous standbyTick attempt that failed inside startListenerWithOAuth2
+            // before subscribeServices could consume-and-clear it. Without this, the stale
+            // value would silently anchor the next subscribe at the wrong replay position.
+            clearEffectiveReplayFrom(listenerInstance);
         } else if checkpoint is int {
             log:printInfo("Resuming CometD from checkpointed replayId",
                     nodeId = self.nodeId, groupId = groupId, replayId = checkpoint);
@@ -269,6 +297,10 @@ isolated class CometdStateManager {
             // `startListenerWithOAuth2` call subscribes from the checkpoint
             // rather than the init-time configured value.
             setEffectiveReplayFrom(listenerInstance, checkpoint);
+        } else {
+            // No checkpoint persisted for this channel — fall back to the init-time
+            // REPLAY_FROM. Clear any stale override for the same reason as the error path.
+            clearEffectiveReplayFrom(listenerInstance);
         }
 
         error? startErr = startListenerWithOAuth2(listenerInstance);
@@ -349,5 +381,24 @@ isolated function setEffectiveReplayFrom(Listener instance, int replayFrom) =
     paramTypes: [
         "io.ballerina.runtime.api.values.BObject",
         "long"
+    ]
+} external;
+
+# Clears the per-start-cycle `EFFECTIVE_REPLAY_FROM` override so that the next
+# `startListenerWithOAuth2` call falls back to the init-time `REPLAY_FROM`.
+#
+# Called whenever `getCheckpoint` returns no usable value (error or absent).
+# Without this call, a stale override written by a prior `setEffectiveReplayFrom`
+# that survived a failed `startListenerWithOAuth2` attempt would persist on the
+# `BObject` and silently anchor the next successful subscribe at the wrong
+# replay position — for example, when the checkpoint store is wiped to force
+# a fresh subscription at the configured `replayFrom`.
+#
+# + instance - The owning `Listener` instance
+isolated function clearEffectiveReplayFrom(Listener instance) =
+@java:Method {
+    'class: "io.ballerinax.salesforce.ListenerUtil",
+    paramTypes: [
+        "io.ballerina.runtime.api.values.BObject"
     ]
 } external;
