@@ -17,7 +17,6 @@
 import ballerina/http;
 import ballerina/io;
 import ballerina/lang.runtime;
-import ballerinax/'client.config;
 import ballerinax/salesforce.utils;
 
 # Ballerina Salesforce Bulk v2 Client provides the capability to access Salesforce Bulk API v2.
@@ -42,7 +41,26 @@ public isolated client class Client {
             return error("Salesforce base URL cannot be empty. Please verify and provide a valid URL");
         }
         http:Client|http:ClientError|error httpClientResult;
-        http:ClientConfiguration httpClientConfig = check config:constructHTTPClientConfig(config);
+        http:ClientConfiguration httpClientConfig = {
+            auth: config.auth,
+            httpVersion: config.httpVersion,
+            timeout: config.timeout,
+            forwarded: config.forwarded,
+            poolConfig: config.poolConfig,
+            compression: config.compression,
+            circuitBreaker: config.circuitBreaker,
+            retryConfig: config.retryConfig,
+            http1Settings: config.http1Settings,
+            http2Settings: config.http2Settings,
+            cache: config.cache,
+            responseLimits: config.responseLimits,
+            secureSocket: config.secureSocket,
+            proxy: config.proxy,
+            followRedirects: config.followRedirects,
+            cookieConfig: config.cookieConfig,
+            validation: config.validation,
+            laxDataBinding: config.laxDataBinding
+        };
         httpClientResult = trap new (normalizedBaseUrl, httpClientConfig);
 
         if httpClientResult is http:Client {

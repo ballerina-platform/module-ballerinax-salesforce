@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerinax/'client.config;
 
 # Represents status of the bulk jobs
 public enum Status {
@@ -69,12 +68,12 @@ public enum ColumnDelimiterEnum {
 
 # Represents the Salesforce client configuration.
 public type ConnectionConfig record {|
-    *config:ConnectionConfig;
+    *http:ClientConfiguration;
     # The Salesforce endpoint URL
     string baseUrl;
     # Configurations related to client authentication
-    http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig|
-        config:OAuth2PasswordGrantConfig|config:OAuth2ClientCredentialsGrantConfig auth;
+    http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|
+        http:OAuth2PasswordGrantConfig|http:OAuth2ClientCredentialsGrantConfig auth;
     # The Salesforce API version
     string apiVersion = "59.0";
 |};
