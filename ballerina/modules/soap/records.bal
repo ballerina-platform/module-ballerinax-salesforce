@@ -16,17 +16,16 @@
 
 
 import ballerina/http;
-import ballerinax/'client.config;
 
 # Salesforce client configuration.
 #
 @display {label: "Connection Config"}
 public type ConnectionConfig record {|
-    *config:ConnectionConfig;
+    *http:ClientConfiguration;
     # The Salesforce endpoint URL
     string baseUrl;
     # Configurations related to client authentication
-    http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig auth;
+    http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig auth;
     # The Salesforce API version
     string apiVersion = "59.0";
 |};
