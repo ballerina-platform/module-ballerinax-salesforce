@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/http;
-import ballerinax/'client.config;
 
 # Represents the status of the bulk jobs.
 #
@@ -112,10 +111,10 @@ public enum ColumnDelimiterEnum {
 # + auth - Configurations related to client authentication
 # + apiVersion - The Salesforce REST API version
 public type ConnectionConfig record {|
-    *config:ConnectionConfig;
+    *http:ClientConfiguration;
     string baseUrl;
-    http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig|
-        config:OAuth2PasswordGrantConfig|config:OAuth2ClientCredentialsGrantConfig auth;
+    http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|
+        http:OAuth2PasswordGrantConfig|http:OAuth2ClientCredentialsGrantConfig auth;
     string apiVersion = "59.0";
 |};
 

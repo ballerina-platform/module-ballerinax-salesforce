@@ -15,15 +15,14 @@
 // under the License.
 
 import ballerina/http;
-import ballerinax/'client.config;
 
 # Represents the Salesforce Apex client configurations.
 # 
 # + baseUrl - The Salesforce endpoint URL
 # + auth - Configurations related to client authentication
 public type ConnectionConfig record {|
-    *config:ConnectionConfig;
+    *http:ClientConfiguration;
     string baseUrl;
-    http:BearerTokenConfig|config:OAuth2RefreshTokenGrantConfig|
-        config:OAuth2PasswordGrantConfig|config:OAuth2ClientCredentialsGrantConfig auth;
+    http:BearerTokenConfig|http:OAuth2RefreshTokenGrantConfig|
+        http:OAuth2PasswordGrantConfig|http:OAuth2ClientCredentialsGrantConfig auth;
 |};
