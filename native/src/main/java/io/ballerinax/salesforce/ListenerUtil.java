@@ -63,11 +63,21 @@ public class ListenerUtil {
     public static final String GET_OAUTH2_TOKEN_METHOD = "getOAuth2Token";
     public static final String SUBSCRIPTIONS = "subscriptions";
     public static final String PROXY_CONFIG = "proxyConfig";
+
+    /**
+     * Native data key for the per-start-cycle replayFrom override set by
+     * {@code CometdStateManager.standbyTick()} when resuming from a persisted
+     * checkpoint.  Takes precedence over {@link Constants#REPLAY_FROM} for
+     * exactly one {@code startListenerWithOAuth2} call, then is cleared so
+     * subsequent starts fall back to the init-time value.
+     */
+    public static final String EFFECTIVE_REPLAY_FROM = "effective_replay_from";
+
     private static final String CONNECTOR = "connector";
     private static final List<String> CDC_METHODS = List.of(
             Constants.ON_CREATE, Constants.ON_UPDATE, Constants.ON_DELETE, Constants.ON_RESTORE);
 
-    private static void extractBaseConfigs(BObject listener, int replayFrom,
+    private static void extractBaseConfigs(BObject listener, long replayFrom,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
             BString apiVersion, Object proxyConfig) {
         listener.addNativeData(CONSUMER_SERVICES, new ArrayList<BObject>());
@@ -88,7 +98,7 @@ public class ListenerUtil {
         }
     }
 
-    public static void initListener(BObject listener, int replayFrom, boolean isSandBox,
+    public static void initListener(BObject listener, long replayFrom, boolean isSandBox,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
             BString apiVersion, Object proxyConfig) {
         extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval,
@@ -97,13 +107,43 @@ public class ListenerUtil {
         listener.addNativeData(IS_SAND_BOX, isSandBox);
     }
 
-    public static void initListener(BObject listener, int replayFrom, BString baseUrl,
+    public static void initListener(BObject listener, long replayFrom, BString baseUrl,
             BDecimal connectionTimeout, BDecimal readTimeout, BDecimal keepAliveInterval,
             BString apiVersion, Object proxyConfig) {
         extractBaseConfigs(listener, replayFrom, connectionTimeout, readTimeout, keepAliveInterval,
                 apiVersion, proxyConfig);
         listener.addNativeData(IS_OAUTH2, true);
         listener.addNativeData(BASE_URL, baseUrl.getValue());
+    }
+
+    /**
+     * Sets the per-start-cycle effective {@code replayFrom} override.  Called by
+     * {@code CometdStateManager.standbyTick()} (via the Ballerina external binding
+     * {@code setEffectiveReplayFrom}) when resuming from a persisted coordinator
+     * checkpoint.  The value is consumed and cleared by {@link #subscribeServices}
+     * so it applies to exactly one subscription attempt.
+     *
+     * @param listener   the Ballerina {@code Listener} BObject
+     * @param replayFrom the checkpoint replayId to use as the subscription start
+     */
+    public static void setEffectiveReplayFrom(BObject listener, long replayFrom) {
+        listener.addNativeData(EFFECTIVE_REPLAY_FROM, replayFrom);
+    }
+
+    /**
+     * Clears the per-start-cycle effective {@code replayFrom} override so that the
+     * next {@link #subscribeServices} call falls back to the init-time {@code REPLAY_FROM}.
+     *
+     * <p>Called by {@code CometdStateManager.standbyTick()} whenever {@code getCheckpoint}
+     * returns no usable value (error or absent).  Without this call, a stale
+     * {@code EFFECTIVE_REPLAY_FROM} written by a prior {@code setEffectiveReplayFrom}
+     * that survived a failed {@code startListenerWithOAuth2} attempt would silently
+     * anchor the next successful subscribe at the wrong replay position.
+     *
+     * @param listener the Ballerina {@code Listener} BObject
+     */
+    public static void clearEffectiveReplayFrom(BObject listener) {
+        listener.addNativeData(EFFECTIVE_REPLAY_FROM, null);
     }
 
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
@@ -129,7 +169,10 @@ public class ListenerUtil {
                     "and 'PlatformEventsService'. A service must implement only one of these types.", null);
         }
 
-        DispatcherService dispatcherService = new DispatcherService(service, environment.getRuntime(), channel);
+        // Pass the listener BObject to DispatcherService so it can invoke
+        // `recordEventDispatched` after each successful user-handler execution.
+        DispatcherService dispatcherService =
+                new DispatcherService(service, environment.getRuntime(), channel, listener);
         services.add(service);
         serviceDispatcherMap.put(service, dispatcherService);
 
@@ -201,9 +244,6 @@ public class ListenerUtil {
         String connectionTimeoutDisplay = (String) listener.getNativeData(CONNECTION_TIMEOUT + "_display");
 
         EmpConnector connector = new EmpConnector(params);
-        // The proxy host/port is already registered in the BayeuxParameters via buildProxies(),
-        // so unauthenticated proxies work without any extra step.
-        // setProxyAuthentication is only needed when credentials are provided.
         ProxyConfig proxy = getProxyConfig(listener);
         if (proxy != null && proxy.hasCredentials()) {
             connector.setProxyAuthentication(proxy.host(), proxy.port(),
@@ -231,7 +271,20 @@ public class ListenerUtil {
         Map<BObject, TopicSubscription> subscriptionMap =
                 (Map<BObject, TopicSubscription>) listener.getNativeData(SUBSCRIPTIONS);
 
-        long replayFrom = (Integer) listener.getNativeData(REPLAY_FROM);
+        // Resolve the effective replayFrom for this subscription attempt.
+        // When CometdStateManager.standbyTick() loads a persisted checkpoint, it
+        // calls setEffectiveReplayFrom() before startListenerWithOAuth2(), which
+        // sets EFFECTIVE_REPLAY_FROM on the listener.  We consume-and-clear that
+        // value here so subsequent starts fall back to the init-time REPLAY_FROM.
+        long replayFrom;
+        Object effectiveReplayFromObj = listener.getNativeData(EFFECTIVE_REPLAY_FROM);
+        if (effectiveReplayFromObj != null) {
+            replayFrom = (Long) effectiveReplayFromObj;
+            // Clear so the next start (e.g. proactive token refresh) uses REPLAY_FROM.
+            listener.addNativeData(EFFECTIVE_REPLAY_FROM, null);
+        } else {
+            replayFrom = (Long) listener.getNativeData(REPLAY_FROM);
+        }
 
         for (BObject service : services) {
             DispatcherService dispatcherService = serviceDispatcherMap.get(service);

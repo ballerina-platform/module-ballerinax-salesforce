@@ -56,4 +56,8 @@ public class Constants {
     public static final String UNDELETE = "UNDELETE";
     
     public static final String IS_SAND_BOX = "isSandBox";
+
+    /* Ballerina Listener method invoked from the Java dispatcher after each
+     * successful user-handler execution to persist the event's replayId. */
+    public static final String RECORD_EVENT_DISPATCHED = "recordEventDispatched";
 }
