@@ -155,6 +155,11 @@ public isolated class Listener {
 
     # Attaches the service to the `salesforce:Listener` endpoint.
     #
+    # **Breaking change (coordination):** For OAuth2 listeners, each `Listener` instance is bound to
+    # exactly one channel. Attaching a second, different channel returns an error — create a separate
+    # `salesforce:Listener` instance for each channel you need to subscribe to. SOAP listeners are
+    # unaffected and may still attach multiple services on different channels.
+    #
     # + s - Service object to attach. Use `CdcService` for CDC channels and `PlatformEventsService` for platform events.
     # + name - Channel name to subscribe to (e.g. `/data/ChangeEvents` or `/event/MyEvent__e`)
     # + return - `()` or else a `error` upon failure to register the service
@@ -205,15 +210,17 @@ public isolated class Listener {
     # Starts the subscription and listens to events on all attached services.
     #
     # For OAuth2 (REST-based) listeners this forks the Active-Standby leadership
-    # loop — it does NOT immediately open the CometD connection. The loop acquires
-    # the lease via the configured `ListenerCoordinator` and then opens CometD.
-    # Standby replicas return cleanly and idle in the loop until the leader's
-    # lease expires.
+    # loop and **always returns `()`** — CometD connection errors are handled
+    # asynchronously inside the loop and surfaced only in log output. Callers
+    # must not assume a successful return means the CometD connection is open;
+    # the connection is established once the leadership loop acquires the lease.
+    # Standby replicas idle in the loop until the leader's lease expires.
     #
-    # SOAP-based listeners retain the original direct-start behaviour and do not
-    # participate in Active-Standby coordination.
+    # SOAP-based listeners retain the original direct-start behaviour: the
+    # connection is opened synchronously and any error (e.g. `INVALID_LOGIN`)
+    # is returned to the caller.
     #
-    # + return - `()` or else a `error` upon failure to start
+    # + return - `()` always for OAuth2; `()` or `error` for SOAP
     public isolated function 'start() returns error? {
         if !self.isOAuth2 {
             // Empty username means SOAP credentials are absent — the listener is
@@ -257,12 +264,13 @@ public isolated class Listener {
     # + return - `()` or else a `error` upon failure to close the `salesforce:Listener`
     public isolated function gracefulStop() returns error? {
         log:printDebug("Salesforce CDC listener gracefully stopping");
-        error? unscheduleErr = self.unscheduleTokenRefreshJob();
-        if unscheduleErr is error {
-            log:printError("Failed to unschedule token refresh job", 'error = unscheduleErr);
-        }
         if !self.isOAuth2 {
-            // SOAP path: always stop the native listener directly.
+            // SOAP path: unschedule the token refresh job (always a no-op for SOAP,
+            // but kept for symmetry) and stop the native listener directly.
+            error? unscheduleErr = self.unscheduleTokenRefreshJob();
+            if unscheduleErr is error {
+                log:printError("Failed to unschedule token refresh job", 'error = unscheduleErr);
+            }
             error? result = stopListener(self);
             if result is error {
                 log:printError("Salesforce CDC listener (SOAP) failed to stop cleanly",
@@ -272,8 +280,9 @@ public isolated class Listener {
             }
             return result;
         }
-        // OAuth2 path: delegate to the state manager, which checks wasLeader
-        // and only calls stopListener if this replica held the subscription.
+        // OAuth2 path: delegate to the state manager, which checks wasLeader and
+        // calls unscheduleTokenRefreshJob + stopListener only when necessary.
+        // Calling unscheduleTokenRefreshJob here too would be a redundant no-op.
         return self.stateManager.gracefulStop(self);
     }
 
@@ -327,15 +336,17 @@ public isolated class Listener {
     #
     # + return - `()` or else a `error` upon failure to close ChannelListener.
     public isolated function immediateStop() returns error? {
-        error? unscheduleErr = self.unscheduleTokenRefreshJob();
-        if unscheduleErr is error {
-            log:printError("Failed to unschedule token refresh job during immediateStop",
-                    'error = unscheduleErr);
-        }
         if !self.isOAuth2 {
-            // SOAP path: always stop directly.
+            // SOAP path: unschedule the token refresh job and stop the native listener.
+            error? unscheduleErr = self.unscheduleTokenRefreshJob();
+            if unscheduleErr is error {
+                log:printError("Failed to unschedule token refresh job during immediateStop",
+                        'error = unscheduleErr);
+            }
             return stopListener(self);
         }
+        // OAuth2 path: the state manager calls unscheduleTokenRefreshJob internally
+        // when wasLeader — calling it here too would be a redundant no-op.
         return self.stateManager.immediateStop(self);
     }
 

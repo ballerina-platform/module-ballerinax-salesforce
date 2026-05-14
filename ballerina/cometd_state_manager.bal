@@ -55,6 +55,15 @@ const string LEADER_STATE_STOPPED = "stopped";
 #                                        STANDBY          STANDBY → …
 #       ↓ gracefulStop / immediateStop (from any state, including STARTING)
 #   STOPPED (loop exits)
+#
+# **STARTING window note:** `gracefulStop()` may return before the CometD
+# subscription is fully closed when the state is STARTING (i.e.
+# `startListenerWithOAuth2` is still in flight). In that case the state
+# transitions to STOPPED, and `standbyTick()` — which checks the state after
+# its slow connect call returns — detects STOPPED and tears down the newly
+# created subscription before the loop exits. The brief window where both the
+# stop caller and the starting strand are alive is bounded by the OAuth2
+# token-exchange + CometD handshake latency (typically < 5 s).
 isolated class CometdStateManager {
 
     private final ListenerCoordinator coordinator;
@@ -204,6 +213,16 @@ isolated class CometdStateManager {
         lock {
             // Always transition to STANDBY so an already-running loop
             // picks up the intent on its next tick.
+            //
+            // STARTING is intentionally overwritten here. If reconnect() is
+            // called while startListenerWithOAuth2 is still in flight (e.g.
+            // from a CometD error callback racing with the start), setting
+            // STANDBY is safe: standbyTick() checks whether it is still
+            // STARTING before it sets LEADER, and will find STANDBY instead
+            // (or STOPPED, if gracefulStop arrived), so the in-flight connect
+            // is treated as a failed attempt that feeds back into the normal
+            // retry loop. The subscription itself is cleaned up by the
+            // STARTING→STANDBY/STOPPED path inside standbyTick().
             self.leadershipState = LEADER_STATE_STANDBY;
             // Only fork a new strand if the previous loop has actually exited.
             // Checking loopRunning rather than leadershipState == STOPPED avoids

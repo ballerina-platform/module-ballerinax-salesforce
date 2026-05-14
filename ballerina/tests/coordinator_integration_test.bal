@@ -136,9 +136,10 @@ function testInitialLeaderElection() returns error? {
 // test for Active-Standby: if the leader crashes or loses connectivity, a
 // standby replica MUST be able to take over after livenessInterval seconds.
 //
-//   1. Node A acquires leadership with livenessInterval = 2 seconds.
+//   1. Node A acquires leadership with livenessInterval = 1 second.
 //   2. Sanity-check: Node B cannot steal the lease while A is live.
-//   3. Sleep 3 seconds — Node A's heartbeat becomes stale (> 2 s old).
+//   3. Sleep 3 seconds — Node A's heartbeat becomes stale (> 1 s old).
+//      The 2-second margin gives reliable results on heavily loaded CI runners.
 //   4. Node B re-attempts: detects stale heartbeat, takes over → true.
 //   5. Node A calls renewLeadership() → MUST receive an error.
 //      (This error is the signal that causes CometdStateManager to tear
@@ -153,29 +154,31 @@ function testInitialLeaderElection() returns error? {
 function testLeaderFailover() returns error? {
     log:printInfo("=== COORD TEST 2: Leader Failover via Heartbeat Staleness ===");
 
-    // --- Phase 1: Node A acquires a short-lived lease (2 s) ---
+    // --- Phase 1: Node A acquires a short-lived lease (1 s) ---
     boolean nodeAWon = check coordinator.attemptLeadership(
-            GROUP_FAILOVER, COORD_NODE_A, 2d);
+            GROUP_FAILOVER, COORD_NODE_A, 1d);
 
     test:assertTrue(nodeAWon,
             "Node A must win leadership for the failover group — got: false");
-    log:printInfo("[COORD TEST 2] Node A acquired lease (liveness = 2 s) ✓");
+    log:printInfo("[COORD TEST 2] Node A acquired lease (liveness = 1 s) ✓");
 
     // --- Phase 2: Sanity check — B cannot steal a healthy lease ---
     boolean nodeBTooEarly = check coordinator.attemptLeadership(
-            GROUP_FAILOVER, COORD_NODE_B, 2d);
+            GROUP_FAILOVER, COORD_NODE_B, 1d);
 
     test:assertFalse(nodeBTooEarly,
             "Node B must not steal the lease while Node A is within its liveness window — got: true");
     log:printInfo("[COORD TEST 2] Node B correctly blocked while Node A is healthy ✓");
 
     // --- Phase 3: Let Node A's heartbeat expire ---
-    log:printInfo("[COORD TEST 2] Sleeping 3 s to expire Node A's 2-second liveness window...");
+    // Sleep 3 s against a 1-second lease gives a 2-second margin, making this
+    // test reliable even on heavily loaded CI runners.
+    log:printInfo("[COORD TEST 2] Sleeping 3 s to expire Node A's 1-second liveness window...");
     runtime:sleep(3);
 
     // --- Phase 4: Node B retries — heartbeat is now stale — must win ---
     boolean nodeBStole = check coordinator.attemptLeadership(
-            GROUP_FAILOVER, COORD_NODE_B, 2d);
+            GROUP_FAILOVER, COORD_NODE_B, 1d);
 
     test:assertTrue(nodeBStole,
             "Node B MUST take over leadership after Node A's lease expired — " +
@@ -199,6 +202,7 @@ function testLeaderFailover() returns error? {
 
     // --- Verify Node B can still renew (it is the new owner) ---
     check coordinator.renewLeadership(GROUP_FAILOVER, COORD_NODE_B);
+
     log:printInfo("[COORD TEST 2] Node B lease renewal → ok ✓");
 
     log:printInfo("=== COORD TEST 2 PASSED ===");

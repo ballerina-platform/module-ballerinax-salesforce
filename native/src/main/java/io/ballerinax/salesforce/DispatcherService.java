@@ -253,8 +253,8 @@ public class DispatcherService {
             );
         } catch (Exception e) {
             // Swallow: checkpoint failure must never disrupt event dispatch.
-            log.warn("Failed to notify checkpoint for channel '{}', replayId {}: {}",
-                    channelName, replayId, e.getMessage());
+            log.warn("Failed to notify checkpoint for channel '{}', replayId {}",
+                    channelName, replayId, e);
         }
     }
 

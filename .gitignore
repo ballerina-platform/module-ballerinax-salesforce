@@ -73,4 +73,5 @@ build
 *.deb 
 
 #Ignore examples auto generated files
-examples/**/*
+examples/**/Dependencies.toml
+examples/**/Config.toml
