@@ -23,13 +23,17 @@ import ballerina/uuid;
 // Leadership state constants
 // ---------------------------------------------------------------------------
 
-// "init"    – constructed, `'start()` not yet called
+// "init"     – constructed, `'start()` not yet called
 const string LEADER_STATE_INIT = "init";
-// "standby" – loop running; this replica does NOT hold the CometD subscription
+// "standby"  – loop running; this replica does NOT hold the CometD subscription
 const string LEADER_STATE_STANDBY = "standby";
-// "leader"  – this replica holds the CometD subscription open
+// "starting" – lease acquired; startListenerWithOAuth2 / scheduleTokenRefreshJob
+//              are in flight. Treated as leader-owned by gracefulStop/immediateStop
+//              so a concurrent stop performs CometD teardown rather than a no-op.
+const string LEADER_STATE_STARTING = "starting";
+// "leader"   – this replica holds the CometD subscription open
 const string LEADER_STATE_LEADER = "leader";
-// "stopped" – `gracefulStop()`/`immediateStop()` called; loop exits on next tick
+// "stopped"  – `gracefulStop()`/`immediateStop()` called; loop exits on next tick
 const string LEADER_STATE_STOPPED = "stopped";
 
 // ---------------------------------------------------------------------------
@@ -46,10 +50,10 @@ const string LEADER_STATE_STOPPED = "stopped";
 # Lifecycle (OAuth2 path):
 #   init → setGroupId(channel) → activate(listenerInstance)
 #       ↓ leadership loop (on dedicated strand)
-#   INIT → STANDBY → (lease acquired) → LEADER ←→ (renewal) → LEADER
-#                                       ↓ (lease lost)
-#                                    STANDBY → …
-#       ↓ gracefulStop / immediateStop
+#   INIT → STANDBY → (lease acquired) → STARTING → LEADER ←→ (renewal) → LEADER
+#                                          ↓ start failed    ↓ (lease lost)
+#                                        STANDBY          STANDBY → …
+#       ↓ gracefulStop / immediateStop (from any state, including STARTING)
 #   STOPPED (loop exits)
 isolated class CometdStateManager {
 
@@ -117,7 +121,10 @@ isolated class CometdStateManager {
     public isolated function gracefulStop(Listener listenerInstance) returns error? {
         boolean wasLeader;
         lock {
-            wasLeader = self.leadershipState == LEADER_STATE_LEADER;
+            // STARTING is treated as leader-owned: startListenerWithOAuth2 may
+            // already have opened a CometD subscription; teardown is required.
+            wasLeader = self.leadershipState == LEADER_STATE_LEADER
+                     || self.leadershipState == LEADER_STATE_STARTING;
             self.leadershipState = LEADER_STATE_STOPPED;
         }
         if !wasLeader {
@@ -130,16 +137,26 @@ isolated class CometdStateManager {
             log:printWarn("Failed to unschedule token refresh job during stop",
                     nodeId = self.nodeId, 'error = unscheduleErr);
         }
+        string groupId;
+        lock {
+            groupId = self.groupId;
+        }
         error? result = stopListener(listenerInstance);
+        // If CometD failed to stop cleanly, do NOT relinquish the coordination
+        // lease: the subscription may still be alive, and signalling standbys to
+        // take over now could cause two replicas to hold concurrent subscriptions.
+        // Return the error immediately; standbys will take over naturally after
+        // livenessInterval expires without a heartbeat renewal.
+        if result is error {
+            log:printWarn("Failed to stop CometD; keeping leadership lease until it expires",
+                    nodeId = self.nodeId, groupId = groupId, 'error = result);
+            return result;
+        }
         // Release the coordination lease immediately so standbys can take over
         // at their next heartbeatInterval poll rather than waiting for the full
         // livenessInterval to expire. This is only meaningful for graceful stops —
         // a crashed process cannot reach this line, so livenessInterval still
         // guards the crash-failover path.
-        string groupId;
-        lock {
-            groupId = self.groupId;
-        }
         error? relinquishErr = self.coordinator.relinquishLeadership(groupId, self.nodeId);
         if relinquishErr is error {
             log:printWarn("Failed to relinquish leadership on graceful stop; " +
@@ -150,7 +167,6 @@ isolated class CometdStateManager {
                     nodeId = self.nodeId, groupId = groupId);
         }
         log:printDebug("CometD state manager stopped (was leader)", nodeId = self.nodeId);
-        return result;
     }
 
     # Immediately stops the CometD subscription (if held) without waiting
@@ -161,7 +177,9 @@ isolated class CometdStateManager {
     public isolated function immediateStop(Listener listenerInstance) returns error? {
         boolean wasLeader;
         lock {
-            wasLeader = self.leadershipState == LEADER_STATE_LEADER;
+            // STARTING is treated as leader-owned: same reasoning as gracefulStop.
+            wasLeader = self.leadershipState == LEADER_STATE_LEADER
+                     || self.leadershipState == LEADER_STATE_STARTING;
             self.leadershipState = LEADER_STATE_STOPPED;
         }
         if !wasLeader {
@@ -303,6 +321,23 @@ isolated class CometdStateManager {
             clearEffectiveReplayFrom(listenerInstance);
         }
 
+        // Claim STARTING so gracefulStop/immediateStop know to perform
+        // leader-owned teardown if they arrive during the slow connect.
+        // Check STOPPED first in case a stop was requested between the
+        // checkpoint load above and this point.
+        boolean shouldAbort;
+        lock {
+            shouldAbort = self.leadershipState == LEADER_STATE_STOPPED;
+            if !shouldAbort {
+                self.leadershipState = LEADER_STATE_STARTING;
+            }
+        }
+        if shouldAbort {
+            log:printDebug("Aborting CometD start — stop was requested before connection",
+                    nodeId = self.nodeId, groupId = groupId);
+            return;
+        }
+
         error? startErr = startListenerWithOAuth2(listenerInstance);
         if startErr is error {
             log:printError("Failed to start CometD after acquiring leadership; " +
@@ -311,6 +346,14 @@ isolated class CometdStateManager {
                     nodeId = self.nodeId, groupId = groupId, 'error = startErr);
             // Do NOT renew the lease. The next replica will take over after
             // `livenessInterval` when our heartbeat goes stale.
+            lock {
+                // If a stop arrived while startListenerWithOAuth2 was running it
+                // already set STOPPED; leave that so the loop exits on next tick.
+                // Otherwise reset to STANDBY so the loop keeps polling.
+                if self.leadershipState == LEADER_STATE_STARTING {
+                    self.leadershipState = LEADER_STATE_STANDBY;
+                }
+            }
             return;
         }
 
@@ -319,8 +362,32 @@ isolated class CometdStateManager {
             log:printWarn("Failed to schedule proactive token refresh after leadership acquisition",
                     nodeId = self.nodeId, groupId = groupId, 'error = scheduleErr);
         }
+
+        // Atomically promote to LEADER only if stop has not been requested.
+        // A stop that arrived while startListenerWithOAuth2 / scheduleTokenRefreshJob
+        // was running set STOPPED but skipped teardown (wasLeader saw STARTING and
+        // called stopListener — which may have been a no-op if the connector was not
+        // yet stored). Clean up the now-live subscription here instead.
+        boolean wasStopped;
         lock {
-            self.leadershipState = LEADER_STATE_LEADER;
+            wasStopped = self.leadershipState == LEADER_STATE_STOPPED;
+            if !wasStopped {
+                self.leadershipState = LEADER_STATE_LEADER;
+            }
+        }
+        if wasStopped {
+            log:printInfo("Stop requested during CometD startup; tearing down subscription",
+                    nodeId = self.nodeId, groupId = groupId);
+            error? unscheduleErr = listenerInstance.unscheduleTokenRefreshJob();
+            if unscheduleErr is error {
+                log:printWarn("Failed to unschedule token refresh job during startup teardown",
+                        nodeId = self.nodeId, 'error = unscheduleErr);
+            }
+            error? stopErr = stopListener(listenerInstance);
+            if stopErr is error {
+                log:printWarn("Failed to stop CometD cleanly after startup teardown",
+                        nodeId = self.nodeId, 'error = stopErr);
+            }
         }
     }
 
