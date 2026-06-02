@@ -490,6 +490,13 @@ public isolated class Listener {
             return self.tokenRefreshPermanentlyFailed;
         }
     }
+
+    # Resolves the persisted checkpoint for the bound channel into the per-start-cycle
+    # replay override so the next CometD subscribe resumes from the latest dispatched
+    # replayId. Delegates to the state manager, which owns the coordinator and channel.
+    isolated function applyCheckpointReplayFrom() {
+        self.stateManager.applyCheckpointReplayFrom(self);
+    }
 }
 
 # One-shot job that proactively refreshes the CometD connection before the access token
@@ -533,6 +540,11 @@ isolated class TokenRefreshJob {
         if stopErr is error {
             log:printWarn("Proactive token refresh: stop warning", 'error = stopErr);
         }
+        // Resume from the latest checkpointed replayId rather than the init-time
+        // REPLAY_FROM. Without this, a proactive token-refresh reconnect re-reads
+        // the configured replayFrom (EARLIEST → 72h of duplicates, TIP → missed
+        // window events, a >72h numeric ID → 400). Mirrors standbyTick()'s resume.
+        self.listenerInstance.applyCheckpointReplayFrom();
         error? startErr = startListenerWithOAuth2(self.listenerInstance);
         if startErr is error {
             log:printError("Proactive token refresh failed", 'error = startErr);

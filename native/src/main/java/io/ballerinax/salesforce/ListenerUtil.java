@@ -146,6 +146,25 @@ public class ListenerUtil {
         listener.addNativeData(EFFECTIVE_REPLAY_FROM, null);
     }
 
+    /**
+     * TEST-ONLY observability hook. Returns the per-start-cycle effective
+     * {@code replayFrom} override that the next {@link #subscribeServices} would
+     * consume, or {@code -1} if no override is set (i.e. it would fall back to the
+     * init-time {@code REPLAY_FROM}). {@code EFFECTIVE_REPLAY_FROM} only ever holds
+     * a real checkpoint replayId ({@code >= 0}) or {@code null}, so {@code -1} is an
+     * unambiguous "absent" sentinel. Used by the token-refresh checkpoint-resume test.
+     *
+     * @param listener the Ballerina {@code Listener} BObject
+     * @return the effective replayId override, or {@code -1} if absent
+     */
+    public static long getEffectiveReplayFrom(BObject listener) {
+        Object value = listener.getNativeData(EFFECTIVE_REPLAY_FROM);
+        if (value == null) {
+            return -1L;
+        }
+        return (Long) value;
+    }
+
     public static Object attachService(Environment environment, BObject listener, BObject service, Object channelName) {
         String channel = ((BString) channelName).getValue();
 

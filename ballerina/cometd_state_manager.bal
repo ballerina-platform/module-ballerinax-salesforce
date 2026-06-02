@@ -240,6 +240,37 @@ isolated class CometdStateManager {
         }
     }
 
+    # Resolves the persisted checkpoint for the current channel into the
+    # per-start-cycle `EFFECTIVE_REPLAY_FROM` override, so the next
+    # `startListenerWithOAuth2()` resumes from the latest dispatched replayId
+    # rather than the init-time `REPLAY_FROM`.
+    #
+    # Used by the in-place `TokenRefreshJob` reconnect, which restarts CometD
+    # directly (stop + start) and bypasses the leadership loop — so it would
+    # otherwise miss the checkpoint-resume that `standbyTick()` performs on
+    # leader acquisition, re-reading the stale init-time `replayFrom`.
+    #
+    # + listenerInstance - The owning `Listener` instance
+    public isolated function applyCheckpointReplayFrom(Listener listenerInstance) {
+        string groupId;
+        lock {
+            groupId = self.groupId;
+        }
+        int|error? checkpoint = self.coordinator.getCheckpoint(groupId);
+        if checkpoint is int {
+            log:printInfo("Token-refresh reconnect resuming from checkpointed replayId",
+                    nodeId = self.nodeId, groupId = groupId, replayId = checkpoint);
+            setEffectiveReplayFrom(listenerInstance, checkpoint);
+        } else {
+            if checkpoint is error {
+                log:printWarn("Failed to read checkpoint for token-refresh reconnect; " +
+                        "using configured replayFrom",
+                        nodeId = self.nodeId, groupId = groupId, 'error = checkpoint);
+            }
+            clearEffectiveReplayFrom(listenerInstance);
+        }
+    }
+
     # Persists the latest successfully-dispatched `replayId`. Called by
     # `Listener.recordEventDispatched()`, which is invoked from the Java
     # dispatcher after each successful user-handler execution.
