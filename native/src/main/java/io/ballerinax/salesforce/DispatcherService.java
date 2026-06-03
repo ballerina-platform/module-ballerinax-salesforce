@@ -53,6 +53,7 @@ import static io.ballerinax.salesforce.Constants.EVENT_METADATA_RECORD;
 import static io.ballerinax.salesforce.Constants.EVENT_PAYLOAD;
 import static io.ballerinax.salesforce.Constants.ON_CREATE;
 import static io.ballerinax.salesforce.Constants.ON_DELETE;
+import static io.ballerinax.salesforce.Constants.ON_ERROR;
 import static io.ballerinax.salesforce.Constants.ON_RESTORE;
 import static io.ballerinax.salesforce.Constants.ON_UPDATE;
 import static io.ballerinax.salesforce.Constants.RECORD_IDS;
@@ -131,8 +132,18 @@ public class DispatcherService {
     private void executeResourceOnEvent(BMap<BString, Object> eventRecord, String functionName) {
         Object result = executeResource(functionName, eventRecord);
         if (result instanceof BError bError) {
-            throw bError;
+            invokeOnError(bError);
         }
+    }
+
+    public void invokeOnError(BError error) {
+        if (!methodNames.contains(ON_ERROR)) {
+            throw error;
+        }
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
+        boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(ON_ERROR);
+        runtime.callMethod(service, ON_ERROR,
+                new StrandMetadata(isIsolated, ModuleUtils.getProperties(ON_ERROR)), error);
     }
 
     private Object executeResource(String functionName, BMap<BString, Object> eventRecord) {

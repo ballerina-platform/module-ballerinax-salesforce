@@ -50,6 +50,7 @@ public class Constants {
     public static final String ON_UPDATE = "onUpdate";
     public static final String ON_DELETE = "onDelete";
     public static final String ON_RESTORE = "onRestore";
+    public static final String ON_ERROR = "onError";
     public static final String UPDATE = "UPDATE";
     public static final String CREATE = "CREATE";
     public static final String DELETE = "DELETE";
