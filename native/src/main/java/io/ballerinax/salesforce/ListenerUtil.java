@@ -176,9 +176,7 @@ public class ListenerUtil {
         try {
             params = tokenProvider.login();
         } catch (Exception e) {
-            BError loginError = sfdcError(e.getMessage(), e.getCause());
-            notifyAllDispatchersOnError(listener, loginError);
-            return loginError;
+            return sfdcError(e.getMessage(), e.getCause());
         }
 
         return startConnector(params, tokenProvider, listener);

@@ -43,6 +43,8 @@ public type CdcService service object {
     # + payload - The information about the triggered event
     # + return - `()` on success else an `error`
     remote function onRestore(EventData payload) returns error?;
+
+    // remote function onError(error err) returns error?;
 };
 
 # Triggers when a new Platform Event is received from Salesforce channels.
@@ -53,4 +55,6 @@ public type PlatformEventsService service object {
     # + message - The Platform Events message including all published fields and metadata
     # + return - `()` on success else an `error`
     remote function onMessage(PlatformEventsMessage message) returns error?;
+
+    // remote function onError(error err) returns error?;
 };
