@@ -132,6 +132,9 @@ public class DispatcherService {
     private void executeResourceOnEvent(BMap<BString, Object> eventRecord, String functionName) {
         Object result = executeResource(functionName, eventRecord);
         if (result instanceof BError bError) {
+            if (!methodNames.contains(ON_ERROR)) {
+                throw bError;
+            }
             BError onErrorResult = invokeOnError(bError);
             if (onErrorResult != null) {
                 throw onErrorResult;

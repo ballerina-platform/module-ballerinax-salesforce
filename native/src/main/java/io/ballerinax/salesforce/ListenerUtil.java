@@ -264,8 +264,8 @@ public class ListenerUtil {
             } catch (Exception e) {
                 connector.stop();
                 BError subscriptionError = sfdcError(e.getMessage(), e.getCause());
-                dispatcherService.invokeOnError(subscriptionError);
-                return subscriptionError;
+                BError onErrorResult = dispatcherService.invokeOnError(subscriptionError);
+                return onErrorResult != null ? onErrorResult : subscriptionError;
             }
         }
         return null;
