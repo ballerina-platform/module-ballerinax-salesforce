@@ -132,18 +132,22 @@ public class DispatcherService {
     private void executeResourceOnEvent(BMap<BString, Object> eventRecord, String functionName) {
         Object result = executeResource(functionName, eventRecord);
         if (result instanceof BError bError) {
-            invokeOnError(bError);
+            BError onErrorResult = invokeOnError(bError);
+            if (onErrorResult != null) {
+                throw onErrorResult;
+            }
         }
     }
 
-    public void invokeOnError(BError error) {
+    public BError invokeOnError(BError error) {
         if (!methodNames.contains(ON_ERROR)) {
-            throw error;
+            return null;
         }
         ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
         boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(ON_ERROR);
-        runtime.callMethod(service, ON_ERROR,
+        Object result = runtime.callMethod(service, ON_ERROR,
                 new StrandMetadata(isIsolated, ModuleUtils.getProperties(ON_ERROR)), error);
+        return result instanceof BError bError ? bError : null;
     }
 
     private Object executeResource(String functionName, BMap<BString, Object> eventRecord) {

@@ -250,7 +250,10 @@ public class ListenerUtil {
                     injectEvent(dispatcherService, event);
                 } catch (Exception e) {
                     BError error = sfdcError(e.getMessage(), e.getCause());
-                    dispatcherService.invokeOnError(error);
+                    BError onErrorResult = dispatcherService.invokeOnError(error);
+                    if (onErrorResult != null) {
+                        throw onErrorResult;
+                    }
                 }
             };
 
