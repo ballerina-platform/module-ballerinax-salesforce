@@ -20,6 +20,8 @@ import ballerina/test;
 
 configurable string platformEventApiName = os:getEnv("PLATFORM_EVENT_API_NAME");
 
+const int INVALID_REPLAY_ID = -100;
+
 isolated boolean isPlatformEventReceived = false;
 isolated boolean onErrorCalledForOnMessage = false;
 isolated string onErrorMessageForOnMessage = "";
@@ -280,7 +282,7 @@ function testOnErrorInvokedOnSubscriptionFailure() returns error? {
     Listener peListener = check new ({
         auth: {clientId, clientSecret, refreshToken, refreshUrl},
         baseUrl,
-        replayFrom: 1
+        replayFrom: INVALID_REPLAY_ID
     });
 
     Service peService = service object {
@@ -312,7 +314,7 @@ function testSubscriptionFailureReturnedWithoutOnError() returns error? {
     Listener peListener = check new ({
         auth: {clientId, clientSecret, refreshToken, refreshUrl},
         baseUrl,
-        replayFrom: 1
+        replayFrom: INVALID_REPLAY_ID
     });
 
     Service peService = service object {
