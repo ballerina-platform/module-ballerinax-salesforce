@@ -9,7 +9,8 @@ The Salesforce connector supports various Salesforce APIs including REST, SOAP, 
 - Support for REST, SOAP, APEX REST, BULK, and BULK V2 APIs
 - Perform CRUD operations on sObjects and metadata
 - Execute complex queries and searches
-- Listen to real-time change events via CometD
+- Listen to real-time Change Data Capture events and Platform Events via CometD
+- Handle listener errors gracefully with an optional `onError` callback
 - Efficient management of large datasets using Bulk APIs
 
 ## Setup guide
@@ -146,7 +147,42 @@ service "/data/ChangeEvents" on eventListener {
 }
 ```
 
-3. Integrate custom SObject types
+3. Optionally, add an `onError` remote function to handle errors from `onMessage`/`onCreate`/`onUpdate`/`onDelete`/`onRestore` or from failed CometD subscriptions:
+
+```ballerina
+import ballerina/io;
+import ballerina/log;
+import ballerinax/salesforce;
+
+salesforce:ListenerConfig listenerConfig = {
+    auth: {
+        clientId: "<clientId>",
+        clientSecret: "<clientSecret>",
+        refreshToken: "<refreshToken>",
+        refreshUrl: "https://login.salesforce.com/services/oauth2/token"
+    },
+    baseUrl: "https://<instance>.salesforce.com"
+};
+listener salesforce:Listener eventListener = new (listenerConfig);
+
+service "/event/MyEvent__e" on eventListener {
+    remote function onMessage(salesforce:PlatformEventsMessage message) returns error? {
+        io:println("Platform event received: ", message.payload);
+    }
+
+    remote function onError(error err) returns error? {
+        log:printError("Listener error", 'error = err);
+    }
+}
+```
+
+The `onError` callback is invoked in two situations:
+- When `onMessage` (or a CDC handler) returns an `error`
+- When the CometD subscription itself fails (e.g., stale replay ID)
+
+If `onError` is not defined and a subscription failure occurs, `start()` returns the error directly.
+
+4. Integrate custom SObject types
 
 To seamlessly integrate custom SObject types into your Ballerina project, you have the option to either generate a package using the Ballerina Open API tool or utilize the `ballerinax/salesforce.types` module. Follow the steps given [here](https://github.com/ballerina-platform/module-ballerinax-salesforce/blob/master/ballerina/modules/types/Module.md) based on your preferred approach.
 
