@@ -182,8 +182,9 @@ public class DispatcherService {
         BMap<BString, Object> returnMap = ValueCreator.createMapValue();
         if (map != null) {
             for (Object aKey : map.keySet().toArray()) {
+                Object value = map.get(aKey);
                 returnMap.put(StringUtils.fromString(aKey.toString()),
-                        StringUtils.fromString(map.get(aKey).toString()));
+                        value != null ? StringUtils.fromString(value.toString()) : null);
             }
         }
         return returnMap;
