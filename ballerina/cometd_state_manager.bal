@@ -258,7 +258,7 @@ isolated class CometdStateManager {
         }
         int|error? checkpoint = self.coordinator.getCheckpoint(groupId);
         if checkpoint is int {
-            log:printInfo("Token-refresh reconnect resuming from checkpointed replayId",
+            log:printDebug("Token-refresh reconnect resuming from checkpointed replayId",
                     nodeId = self.nodeId, groupId = groupId, replayId = checkpoint);
             setEffectiveReplayFrom(listenerInstance, checkpoint);
         } else {
@@ -359,7 +359,7 @@ isolated class CometdStateManager {
             // value would silently anchor the next subscribe at the wrong replay position.
             clearEffectiveReplayFrom(listenerInstance);
         } else if checkpoint is int {
-            log:printInfo("Resuming CometD from checkpointed replayId",
+            log:printDebug("Resuming CometD from checkpointed replayId",
                     nodeId = self.nodeId, groupId = groupId, replayId = checkpoint);
             // Push the effective replayFrom into the Java layer so the next
             // `startListenerWithOAuth2` call subscribes from the checkpoint
@@ -426,7 +426,7 @@ isolated class CometdStateManager {
             }
         }
         if wasStopped {
-            log:printInfo("Stop requested during CometD startup; tearing down subscription",
+            log:printDebug("Stop requested during CometD startup; tearing down subscription",
                     nodeId = self.nodeId, groupId = groupId);
             error? unscheduleErr = listenerInstance.unscheduleTokenRefreshJob();
             if unscheduleErr is error {
