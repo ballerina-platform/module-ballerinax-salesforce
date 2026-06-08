@@ -23,6 +23,11 @@ import ballerina/test;
 configurable string username = os:getEnv("LISTENER_USERNAME");
 configurable string password = os:getEnv("LISTENER_PASSWORD");
 
+// SOAP integration tests require a live Salesforce org. When LISTENER_USERNAME
+// and LISTENER_PASSWORD are absent (e.g. coordinator-only CI runs) the tests
+// are skipped so that module initialisation succeeds without real credentials.
+final boolean soapTestsEnabled = username != "" && password != "";
+
 ListenerConfig listenerConfig = {
     auth: {
         username,
@@ -111,7 +116,9 @@ service "/data/ChangeEvents" on eventListener {
 Client lisbaseClient = check new (sfConfigRefreshCodeFlow);
 string testRecordId = "";
 
-@test:Config {}
+@test:Config {
+    enable: soapTestsEnabled
+}
 function testCreateRecord() {
     log:printInfo("lisbaseClient -> createRecord()");
     Account account = {
@@ -129,6 +136,7 @@ function testCreateRecord() {
 }
 
 @test:Config {
+    enable: soapTestsEnabled,
     dependsOn: [testCreateRecord]
 }
 function testUpdateRecord() {
@@ -146,6 +154,7 @@ function testUpdateRecord() {
 }
 
 @test:Config {
+    enable: soapTestsEnabled,
     dependsOn: [testUpdateRecord]
 }
 function testDeleteRecord() {
@@ -159,6 +168,7 @@ function testDeleteRecord() {
 }
 
 @test:Config {
+    enable: soapTestsEnabled,
     dependsOn: [testCreateRecord]
 }
 function testCreatedEventTrigger() {
@@ -170,6 +180,7 @@ function testCreatedEventTrigger() {
 }
 
 @test:Config {
+    enable: soapTestsEnabled,
     dependsOn: [testUpdateRecord]
 }
 function testUpdatedEventTrigger() {
@@ -181,6 +192,7 @@ function testUpdatedEventTrigger() {
 }
 
 @test:Config {
+    enable: soapTestsEnabled,
     dependsOn: [testDeleteRecord]
 }
 function testDeletedEventTrigger() {
