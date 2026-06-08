@@ -55,6 +55,7 @@ import static io.ballerinax.salesforce.Constants.EVENT_METADATA_RECORD;
 import static io.ballerinax.salesforce.Constants.EVENT_PAYLOAD;
 import static io.ballerinax.salesforce.Constants.ON_CREATE;
 import static io.ballerinax.salesforce.Constants.ON_DELETE;
+import static io.ballerinax.salesforce.Constants.ON_ERROR;
 import static io.ballerinax.salesforce.Constants.ON_RESTORE;
 import static io.ballerinax.salesforce.Constants.ON_UPDATE;
 import static io.ballerinax.salesforce.Constants.RECORD_EVENT_DISPATCHED;
@@ -197,8 +198,25 @@ public class DispatcherService {
     private void executeResourceOnEvent(BMap<BString, Object> eventRecord, String functionName) {
         Object result = executeResource(functionName, eventRecord);
         if (result instanceof BError bError) {
-            throw bError;
+            if (!methodNames.contains(ON_ERROR)) {
+                throw bError;
+            }
+            BError onErrorResult = invokeOnError(bError);
+            if (onErrorResult != null) {
+                throw onErrorResult;
+            }
         }
+    }
+
+    public BError invokeOnError(BError error) {
+        if (!methodNames.contains(ON_ERROR)) {
+            return null;
+        }
+        ObjectType serviceType = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(service));
+        boolean isIsolated = serviceType.isIsolated() && serviceType.isIsolated(ON_ERROR);
+        Object result = runtime.callMethod(service, ON_ERROR,
+                new StrandMetadata(isIsolated, ModuleUtils.getProperties(ON_ERROR)), error);
+        return result instanceof BError bError ? bError : null;
     }
 
     private Object executeResource(String functionName, BMap<BString, Object> eventRecord) {
@@ -280,8 +298,9 @@ public class DispatcherService {
         BMap<BString, Object> returnMap = ValueCreator.createMapValue();
         if (map != null) {
             for (Object aKey : map.keySet().toArray()) {
+                Object value = map.get(aKey);
                 returnMap.put(StringUtils.fromString(aKey.toString()),
-                        StringUtils.fromString(map.get(aKey).toString()));
+                        value != null ? StringUtils.fromString(value.toString()) : null);
             }
         }
         return returnMap;

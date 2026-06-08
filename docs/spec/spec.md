@@ -1,7 +1,7 @@
 # Specification: Ballerina Salesforce package
 _Authors_: @sahanHe \
 _Reviewers_: @daneshk, @Bhashinee \
-_Updated_: 2024/02/12 \
+_Updated_: 2026/06/04 \
 _Edition_: Swan Lake  
 
 ## Introduction
@@ -63,10 +63,17 @@ The conforming implementation of the specification is released and included in t
         41. [deleteJob](#deleteJob)
         42. [closeIngestJobAndWait](#closeIngestJobAndWait)
         43. [closeIngestJob](#closeIngestJob)
-3. [Bulk Client](#3-bulkclient)
-    1. [Client Configurations](#31-client-configurations)
-    2. [Initialization](#32-initialization)
-    3. [Bulk APIs](#33-bulkapis)
+3. [Listener](#3-listener)
+    1. [Listener Configurations](#31-listener-configurations)
+    2. [Initialization](#32-listener-initialization)
+    3. [Service Types](#33-service-types)
+        1. [CdcService](#331-cdcservice)
+        2. [PlatformEventsService](#332-platformeventsservice)
+    4. [Error Handling](#34-error-handling)
+4. [Bulk Client](#4-bulkclient)
+    1. [Client Configurations](#41-client-configurations)
+    2. [Initialization](#42-initialization)
+    3. [Bulk APIs](#43-bulkapis)
         1. [getJobInfo](#getJobInfoV1)
         2. [closeJob](#closeJobV1)
         3. [abortJob](#abortJobV1)
@@ -75,10 +82,10 @@ The conforming implementation of the specification is released and included in t
         6. [getAllBatches](#getAllBatchesV1)
         7. [getBatchRequest](#getBatchRequestV1)
         8. [getBatchRequest](#getBatchRequestV1)
-4. [Soap Client](#4-soapclient)
-    1. [Client Configurations](#41-client-configurations)
-    2. [Initialization](#42-initialization)
-    3. [Soap APIs](#43-soapapis)
+5. [Soap Client](#5-soapclient)
+    1. [Client Configurations](#51-client-configurations)
+    2. [Initialization](#52-initialization)
+    3. [Soap APIs](#53-soapapis)
         1. [convertLead](#convertLead)
 
 
@@ -700,11 +707,116 @@ Used to notify Salesforce servers that the upload of job data is complete.
 isolated remote function closeIngestJob(string bulkJobId) returns error|BulkJobCloseInfo
 ```
 
-## 3. [Bulk Client](#3-bulkclient)
+## 3. [Listener](#3-listener)
 
-`salesforce.bulk:Client` can be used to access the Salesforce Bulk API. 
+`salesforce:Listener` subscribes to Salesforce Streaming API channels over CometD to receive real-time Change Data Capture (CDC) events and Platform Events.
 
-### 3.1. [Client Configurations](#31-client-configurations)
+### 3.1. [Listener Configurations](#31-listener-configurations)
+
+The listener accepts either password-based (`SoapBasedListenerConfig`) or OAuth2-based (`RestBasedListenerConfig`) authentication:
+
+```ballerina
+# Salesforce listener configuration for password based authentication against the SOAP API endpoint.
+public type SoapBasedListenerConfig record {|
+    CredentialsConfig auth;
+    boolean isSandBox = false;
+    *CommonListenerConfig;
+|};
+
+# Salesforce listener configuration for OAuth2 based authentication.
+public type RestBasedListenerConfig record {|
+    OAuth2Config auth;
+    string baseUrl;
+    TokenStore tokenStore = new InMemoryTokenStore();
+    *CommonListenerConfig;
+|};
+
+# Common configuration for Salesforce listeners.
+public type CommonListenerConfig record {|
+    int|ReplayOptions replayFrom = REPLAY_FROM_TIP;
+    decimal connectionTimeout = 30;
+    decimal readTimeout = 120;
+    decimal keepAliveInterval = 30;
+    string apiVersion = "43.0";
+    ProxyConfig proxyConfig?;
+|};
+```
+
+### 3.2. [Initialization](#32-listener-initialization)
+
+A listener is created with a `ListenerConfig` and services are attached either declaratively or programmatically:
+
+```ballerina
+// Declarative (module-level)
+listener salesforce:Listener eventListener = new ({
+    auth: {username: "<username>", password: "<password><token>"}
+});
+
+// Programmatic
+salesforce:Listener eventListener = check new ({
+    auth: {clientId: "<id>", clientSecret: "<secret>",
+           refreshToken: "<token>", refreshUrl: "<url>"},
+    baseUrl: "https://<instance>.salesforce.com"
+});
+check eventListener.attach(myService, "/data/ChangeEvents");
+check eventListener.'start();
+```
+
+### 3.3. [Service Types](#33-service-types)
+
+#### 3.3.1. [CdcService](#331-cdcservice)
+
+Handles Change Data Capture events. Channel names follow the pattern `/data/<SObjectName>ChangeEvent` or `/data/ChangeEvents` for all objects.
+
+```ballerina
+public type CdcService service object {
+    remote function onCreate(EventData payload) returns error?;
+    remote function onUpdate(EventData payload) returns error?;
+    remote function onDelete(EventData payload) returns error?;
+    remote function onRestore(EventData payload) returns error?;
+    // remote function onError(error err) returns error?;
+};
+```
+
+#### 3.3.2. [PlatformEventsService](#332-platformeventsservice)
+
+Handles Platform Events. Channel names follow the pattern `/event/<EventName>__e`.
+
+```ballerina
+public type PlatformEventsService service object {
+    remote function onMessage(PlatformEventsMessage message) returns error?;
+    // remote function onError(error err) returns error?;
+};
+```
+
+### 3.4. [Error Handling](#34-error-handling)
+
+Both service types support an optional `onError` remote function for centralised error handling. It is invoked in two situations:
+
+1. **Handler error** — when `onMessage`, `onCreate`, `onUpdate`, `onDelete`, or `onRestore` returns an `error`.
+2. **Subscription failure** — when the CometD subscription itself fails (e.g., stale or invalid replay ID). In this case `onError` is called first and then `start()` returns the error.
+
+If `onError` is not defined:
+- Handler errors cause the listener to panic.
+- Subscription failures are returned directly from `start()`.
+
+```ballerina
+service "/event/OrderUpdate__e" on eventListener {
+    remote function onMessage(salesforce:PlatformEventsMessage message) returns error? {
+        // process the event; returning an error routes it to onError
+    }
+
+    remote function onError(error err) returns error? {
+        log:printError("Listener error", 'error = err);
+    }
+}
+```
+
+## 4. [Bulk Client](#4-bulkclient)
+
+`salesforce.bulk:Client` can be used to access the Salesforce Bulk API.
+
+### 4.1. [Client Configurations](#41-client-configurations)
 
 When initializing the client, following configurations can be provided,
 
@@ -718,7 +830,7 @@ public type ConnectionConfig record {|
 |};
 ```
 
-### 3.2. [Initialization](#32-initialization)
+### 4.2. [Initialization](#42-initialization)
 
 A client can be initialized by providing the Salesforce and optionally the other configurations in `ClientConfiguration`.
 
@@ -733,7 +845,7 @@ ConnectionConfig config = {
 Client salesforceClient = check new (config);
 ```
 
-### 3.3. [Bulk APIs](#33-bulkapis)
+### 4.3. [Bulk APIs](#43-bulkapis)
 
 #### [createJob](#createJobV1)
 
@@ -853,11 +965,11 @@ Used to get the request payload of a batch.
 isolated remote function getBatchResult(BulkJob bulkJob, string batchId) returns error|json|xml|string|Result[]
 ```
 
-## 4. [SOAP Client](#4-soapclient)
+## 5. [SOAP Client](#5-soapclient)
 
-`salesforce.soap:Client` can be used to access the Salesforce SOAP API. 
+`salesforce.soap:Client` can be used to access the Salesforce SOAP API.
 
-### 4.1. [Client Configurations](#41-client-configurations)
+### 5.1. [Client Configurations](#51-client-configurations)
 
 When initializing the client, following configurations can be provided,
 
@@ -871,7 +983,7 @@ public type ConnectionConfig record {|
 |};
 ```
 
-### 4.2. [Initialization](#42-initialization)
+### 5.2. [Initialization](#52-initialization)
 
 A client can be initialized by providing the Salesforce and optionally the other configurations in `ClientConfiguration`.
 
@@ -886,7 +998,7 @@ ConnectionConfig config = {
 Client salesforceClient = check new (config);
 ```
 
-### 4.3. [Soap APIs](#43-soapapis)
+### 5.3. [Soap APIs](#53-soapapis)
 
 #### [convertLead](#convertLead)
 

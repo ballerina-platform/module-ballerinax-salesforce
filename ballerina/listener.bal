@@ -548,6 +548,7 @@ isolated class TokenRefreshJob {
         error? startErr = startListenerWithOAuth2(self.listenerInstance);
         if startErr is error {
             log:printError("Proactive token refresh failed", 'error = startErr);
+            notifyServicesOnError(self.listenerInstance, startErr.message());
             // startListenerWithOAuth2() → getOAuth2Token() → invalid_grant sets the flag.
             // We check it immediately after the call to prevent even ONE more scheduler tick.
             if self.listenerInstance.isTokenRefreshPermanentlyFailed() {
@@ -632,6 +633,11 @@ isolated function detachService(Listener instance, Service s) returns error? =
 } external;
 
 isolated function stopListener(Listener instance) returns error? =
+@java:Method {
+    'class: "io.ballerinax.salesforce.ListenerUtil"
+} external;
+
+isolated function notifyServicesOnError(Listener instance, string message) =
 @java:Method {
     'class: "io.ballerinax.salesforce.ListenerUtil"
 } external;

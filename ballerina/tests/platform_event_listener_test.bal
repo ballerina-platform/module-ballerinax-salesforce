@@ -20,7 +20,12 @@ import ballerina/test;
 
 configurable string platformEventApiName = os:getEnv("PLATFORM_EVENT_API_NAME");
 
+const int INVALID_REPLAY_ID = -100;
+
 isolated boolean isPlatformEventReceived = false;
+isolated boolean onErrorCalledForOnMessage = false;
+isolated string onErrorMessageForOnMessage = "";
+isolated boolean onErrorCalledForSubscription = false;
 
 @test:Config {
     groups: ["platform-events"]
@@ -218,4 +223,107 @@ function testListenerInitWithWhitespaceBaseUrl() returns error? {
         test:assertEquals(result.message(),
             "Salesforce base URL cannot be empty. Please verify and provide a valid URL.");
     }
+}
+
+// Test: onError is invoked when onMessage returns an error
+@test:Config {
+    groups: ["platform-events"]
+}
+function testOnErrorInvokedWhenOnMessageFails() returns error? {
+    lock { onErrorCalledForOnMessage = false; }
+    lock { onErrorMessageForOnMessage = ""; }
+
+    Listener peListener = check new ({
+        auth: {clientId, clientSecret, refreshToken, refreshUrl},
+        baseUrl,
+        replayFrom: REPLAY_FROM_TIP
+    });
+
+    Service peService = service object {
+        remote function onMessage(PlatformEventsMessage message) returns error? {
+            return error("simulated-onMessage-failure");
+        }
+
+        remote function onError(error err) returns error? {
+            lock { onErrorCalledForOnMessage = true; }
+            lock { onErrorMessageForOnMessage = err.message(); }
+        }
+    };
+
+    check peListener.attach(peService, platformEventApiName);
+    check peListener.'start();
+    runtime:registerListener(peListener);
+
+    string eventSObjectName = platformEventApiName.startsWith("/event/")
+        ? platformEventApiName.substring("/event/".length())
+        : platformEventApiName;
+    CreationResponse _ = check sfdc->create(eventSObjectName, {});
+    runtime:sleep(10);
+
+    lock {
+        test:assertTrue(onErrorCalledForOnMessage,
+            "onError was not invoked when onMessage returned an error");
+    }
+    lock {
+        test:assertEquals(onErrorMessageForOnMessage, "simulated-onMessage-failure");
+    }
+    check peListener.gracefulStop();
+}
+
+// Test: subscription failure (stale replayId) invokes onError and returns error from start()
+@test:Config {
+    groups: ["platform-events"]
+}
+function testOnErrorInvokedOnSubscriptionFailure() returns error? {
+    lock {
+        onErrorCalledForSubscription = false;
+    }
+
+    Listener peListener = check new ({
+        auth: {clientId, clientSecret, refreshToken, refreshUrl},
+        baseUrl,
+        replayFrom: INVALID_REPLAY_ID
+    });
+
+    Service peService = service object {
+        remote function onMessage(PlatformEventsMessage message) returns error? {}
+
+        remote function onError(error err) returns error? {
+            lock {
+                onErrorCalledForSubscription = true;
+            }
+        }
+    };
+
+    check peListener.attach(peService, platformEventApiName);
+    error? startResult = peListener.'start();
+
+    test:assertTrue(startResult is error,
+        "Expected start() to return an error on stale replayId");
+    lock {
+        test:assertTrue(onErrorCalledForSubscription,
+            "onError was not invoked on subscription failure");
+    }
+}
+
+// Test: subscription failure without onError returns error from start() without panicking
+@test:Config {
+    groups: ["platform-events"]
+}
+function testSubscriptionFailureReturnedWithoutOnError() returns error? {
+    Listener peListener = check new ({
+        auth: {clientId, clientSecret, refreshToken, refreshUrl},
+        baseUrl,
+        replayFrom: INVALID_REPLAY_ID
+    });
+
+    Service peService = service object {
+        remote function onMessage(PlatformEventsMessage message) returns error? {}
+    };
+
+    check peListener.attach(peService, platformEventApiName);
+    error? startResult = peListener.'start();
+
+    test:assertTrue(startResult is error,
+        "Expected start() to return an error on stale replayId when no onError is defined");
 }
