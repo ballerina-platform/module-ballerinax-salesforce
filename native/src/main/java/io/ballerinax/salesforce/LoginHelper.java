@@ -132,7 +132,7 @@ public class LoginHelper {
         BasicAuthentication proxyAuth;
         if (proxy != null) {
             proxies = Collections.singletonList(
-                    new HttpProxy(new Origin.Address(proxy.host(), proxy.port()), proxy.isSecure(), null));
+                    new HttpProxy(new Origin.Address(proxy.host(), proxy.port()), proxy.isSecure()));
             if (proxy.hasCredentials()) {
                 URI proxyUri = URI.create(String.format("%s://%s:%d", proxy.scheme(), proxy.host(), proxy.port()));
                 proxyAuth = new BasicAuthentication(proxyUri, Authentication.ANY_REALM,

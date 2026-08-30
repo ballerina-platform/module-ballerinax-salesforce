@@ -254,7 +254,7 @@ public class ListenerUtil {
             return Collections.emptyList();
         }
         return Collections.singletonList(
-                new HttpProxy(new Origin.Address(proxy.host(), proxy.port()), proxy.isSecure(), null));
+                new HttpProxy(new Origin.Address(proxy.host(), proxy.port()), proxy.isSecure()));
     }
 
     private static Object startConnector(BayeuxParameters params, BearerTokenProvider tokenProvider,
