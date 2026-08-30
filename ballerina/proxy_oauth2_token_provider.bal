@@ -29,6 +29,10 @@ isolated class ProxyOAuth2TokenProvider {
 
     isolated function init(ProxyOAuth2GrantConfig grantConfig, ProxyConfig proxyConfig,
             decimal connectionTimeout = 15, decimal requestTimeout = 30) returns error? {
+        if proxyConfig.scheme != HTTP {
+            return error(string `Unsupported proxy scheme '${proxyConfig.scheme}'. ` +
+                    "OAuth2 token requests support only HTTP proxies.");
+        }
         self.grantConfig = grantConfig.cloneReadOnly();
 
         oauth2:ClientConfiguration oauthClientConfig = grantConfig.clientConfig;

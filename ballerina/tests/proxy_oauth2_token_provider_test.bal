@@ -127,3 +127,24 @@ function testPasswordGrantTokenRequestThroughProxy() returns error? {
     test:assertTrue(recordedRequest.payload.includes("client_secret=client-secret"));
     test:assertEquals(recordedRequest.authorization, "");
 }
+
+@test:Config {}
+function testRejectsHttpsProxyForOAuth2TokenRequest() {
+    oauth2:ClientCredentialsGrantConfig grantConfig = {
+        tokenUrl: UNREACHABLE_TOKEN_URL,
+        clientId: "client-id",
+        clientSecret: "client-secret"
+    };
+    ProxyConfig proxyConfig = {
+        scheme: HTTPS,
+        host: "localhost",
+        port: MOCK_OAUTH2_PROXY_PORT
+    };
+
+    ProxyOAuth2TokenProvider|error provider = new (grantConfig, proxyConfig);
+    test:assertTrue(provider is error);
+    if provider is error {
+        test:assertEquals(provider.message(),
+                "Unsupported proxy scheme 'https'. OAuth2 token requests support only HTTP proxies.");
+    }
+}
