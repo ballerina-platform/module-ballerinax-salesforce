@@ -105,15 +105,13 @@ public isolated class Listener {
             }
             self.baseUrl = normalizedBaseUrl;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
+            OAuth2Config auth = listenerConfig.auth;
             // Create TokenManager for RefreshTokenGrantConfig to handle token rotation
-            if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
-                http:OAuth2RefreshTokenGrantConfig rtConfig =
-                    <http:OAuth2RefreshTokenGrantConfig>listenerConfig.auth;
-
+            if auth is http:OAuth2RefreshTokenGrantConfig {
                 // `defaultTokenExpTime` is declared as `decimal` in http:OAuth2RefreshTokenGrantConfig
                 // (inherited from ballerina/oauth2). TokenManager expects a whole-second `int`,
                 // so reject fractional values explicitly instead of rounding or truncating.
-                decimal rawExpTime = rtConfig.defaultTokenExpTime;
+                decimal rawExpTime = auth.defaultTokenExpTime;
                 if rawExpTime != decimal:floor(rawExpTime) {
                     return error("defaultTokenExpTime must be a whole number of seconds. " +
                             "Fractional values are not valid. Got: " + rawExpTime.toString());
@@ -125,8 +123,8 @@ public isolated class Listener {
                 }
 
                 self.tokenManager = check new TokenManager(
-                    rtConfig.clientId, rtConfig.clientSecret,
-                    rtConfig.refreshToken, rtConfig.refreshUrl,
+                    auth.clientId, auth.clientSecret,
+                    auth.refreshToken, auth.refreshUrl,
                     sessionTimeoutSeconds,
                     TOKEN_REFRESH_BUFFER_SECONDS,
                     listenerConfig.tokenStore,
@@ -134,17 +132,11 @@ public isolated class Listener {
                 );
                 self.proxyOAuth2TokenProvider = ();
             } else if proxyConfig is ProxyConfig &&
-                    (listenerConfig.auth is oauth2:ClientCredentialsGrantConfig ||
-                    listenerConfig.auth is oauth2:PasswordGrantConfig) {
+                    (auth is oauth2:ClientCredentialsGrantConfig ||
+                    auth is oauth2:PasswordGrantConfig) {
                 self.tokenManager = ();
-                ProxyOAuth2GrantConfig grantConfig;
-                if listenerConfig.auth is oauth2:ClientCredentialsGrantConfig {
-                    grantConfig = <oauth2:ClientCredentialsGrantConfig>listenerConfig.auth;
-                } else {
-                    grantConfig = <oauth2:PasswordGrantConfig>listenerConfig.auth;
-                }
                 self.proxyOAuth2TokenProvider = check new ProxyOAuth2TokenProvider(
-                    grantConfig, proxyConfig, connectionTimeout, readTimeout);
+                    auth, proxyConfig, connectionTimeout, readTimeout);
             } else {
                 self.tokenManager = ();
                 self.proxyOAuth2TokenProvider = ();
