@@ -20,6 +20,7 @@ import ballerina/oauth2;
 import ballerina/url;
 
 type ProxyOAuth2GrantConfig oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig;
+const string UTF8 = "UTF-8";
 
 # Obtains OAuth2 tokens for grant types that are not handled by `TokenManager`,
 # while routing the token request through the listener's configured proxy.
@@ -101,12 +102,15 @@ isolated class ProxyOAuth2TokenProvider {
             optionalParams = config?.optionalParams;
             credentialBearer = config.credentialBearer;
         } else {
-            payload = "grant_type=password&username=" + check url:encode(config.username, "UTF-8") +
-                "&password=" + check url:encode(config.password, "UTF-8");
+            payload = "grant_type=password&username=" + check url:encode(config.username, UTF8) +
+                "&password=" + check url:encode(config.password, UTF8);
             clientId = config?.clientId;
             clientSecret = config?.clientSecret;
-            if (clientId is string) != (clientSecret is string) {
-                return error("Both client-id and client-secret must be provided together.");
+            // Client credentials are optional for public clients, but must be provided together.
+            if clientId is string || clientSecret is string {
+                if (clientId is string) != (clientSecret is string) {
+                    return error("Both client-id and client-secret must be provided together.");
+                }
             }
             if clientId is string && clientSecret is string && (clientId == "" || clientSecret == "") {
                 return error("Client-id or client-secret cannot be empty.");
@@ -126,8 +130,8 @@ isolated class ProxyOAuth2TokenProvider {
                 request.setHeader("Authorization", "Basic " + credentials.toBytes().toBase64());
             }
         } else if clientId is string && clientSecret is string {
-            payload += "&client_id=" + check url:encode(clientId, "UTF-8") +
-                "&client_secret=" + check url:encode(clientSecret, "UTF-8");
+            payload += "&client_id=" + check url:encode(clientId, UTF8) +
+                "&client_secret=" + check url:encode(clientSecret, UTF8);
         }
 
         map<string>? customHeaders = config.clientConfig?.customHeaders;
@@ -142,7 +146,7 @@ isolated class ProxyOAuth2TokenProvider {
         }
         request.setTextPayload(payload, contentType = "application/x-www-form-urlencoded");
 
-        http:Response response = check self.tokenClient->execute("POST", "", request);
+        http:Response response = check self.tokenClient->post("", request);
         json|error jsonPayload = response.getJsonPayload();
         if response.statusCode < 200 || response.statusCode >= 300 {
             string message = string `Failed to call the token endpoint. HTTP status: ${response.statusCode}`;
@@ -179,7 +183,7 @@ isolated function appendScopes(string payload, string|string[]? scopes) returns 
         }
     }
     if values.length() > 0 {
-        updatedPayload += "&scope=" + check url:encode(string:'join(" ", ...values), "UTF-8");
+        updatedPayload += "&scope=" + check url:encode(string:'join(" ", ...values), UTF8);
     }
     return updatedPayload;
 }
@@ -188,8 +192,8 @@ isolated function appendOptionalParams(string payload, map<string>? optionalPara
     string updatedPayload = payload;
     if optionalParams is map<string> {
         foreach [string, string] [key, value] in optionalParams.entries() {
-            updatedPayload += "&" + check url:encode(key.trim(), "UTF-8") +
-                "=" + check url:encode(value.trim(), "UTF-8");
+            updatedPayload += "&" + check url:encode(key.trim(), UTF8) +
+                "=" + check url:encode(value.trim(), UTF8);
         }
     }
     return updatedPayload;
