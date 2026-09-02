@@ -122,8 +122,7 @@ public isolated class Listener {
                 }
 
                 self.tokenManager = check new TokenManager(
-                    auth.clientId, auth.clientSecret,
-                    auth.refreshToken, auth.refreshUrl,
+                    auth,
                     sessionTimeoutSeconds,
                     TOKEN_REFRESH_BUFFER_SECONDS,
                     listenerConfig.tokenStore,
@@ -132,15 +131,11 @@ public isolated class Listener {
             } else if auth is oauth2:ClientCredentialsGrantConfig ||
                     auth is oauth2:PasswordGrantConfig {
                 self.tokenManager = check new TokenManager(
-                    auth is oauth2:ClientCredentialsGrantConfig ? auth.clientId : auth.clientId ?: "",
-                    auth is oauth2:ClientCredentialsGrantConfig ? auth.clientSecret : auth.clientSecret ?: "",
-                    "",
-                    auth.tokenUrl,
+                    auth,
                     listenerConfig.sessionTimeout,
                     TOKEN_REFRESH_BUFFER_SECONDS,
                     listenerConfig.tokenStore,
                     proxyConfig = proxyConfig,
-                    grantConfig = auth,
                     connectionTimeout = connectionTimeout,
                     requestTimeout = readTimeout
                 );

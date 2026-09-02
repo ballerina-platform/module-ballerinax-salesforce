@@ -36,6 +36,16 @@ const int MOCK_PORT = 9090;
 // then posts to "" (empty path). So the mock server base URL IS the token URL.
 final string MOCK_TOKEN_URL = string `http://localhost:${MOCK_PORT}`;
 
+function getRefreshTokenGrantConfig(string clientId, string clientSecret, string refreshToken,
+        string refreshUrl) returns http:OAuth2RefreshTokenGrantConfig {
+    return {
+        clientId,
+        clientSecret,
+        refreshToken,
+        refreshUrl
+    };
+}
+
 // --- Global atomic counter ---
 // Tracks how many times the mock token endpoint was actually hit.
 isolated int tokenEndpointCallCount = 0;
