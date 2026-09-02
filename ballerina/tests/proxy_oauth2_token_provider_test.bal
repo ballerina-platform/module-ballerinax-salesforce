@@ -84,8 +84,9 @@ function testClientCredentialsTokenRequestThroughProxy() returns error? {
         port: MOCK_OAUTH2_PROXY_PORT
     };
 
-    ProxyOAuth2TokenProvider provider = check new (grantConfig, proxyConfig);
-    string token = check provider.generateToken();
+    TokenManager provider = check new ("client-id", "client-secret", "", UNREACHABLE_TOKEN_URL,
+            proxyConfig = proxyConfig, grantConfig = grantConfig);
+    string token = check provider.getAccessToken();
     test:assertEquals(token, "proxy-access-token");
 
     RecordedProxyRequest recordedRequest = getRecordedProxyRequest();
@@ -115,8 +116,9 @@ function testPasswordGrantTokenRequestThroughProxy() returns error? {
         }
     };
 
-    ProxyOAuth2TokenProvider provider = check new (grantConfig, proxyConfig);
-    string token = check provider.generateToken();
+    TokenManager provider = check new ("client-id", "client-secret", "", UNREACHABLE_TOKEN_URL,
+            proxyConfig = proxyConfig, grantConfig = grantConfig);
+    string token = check provider.getAccessToken();
     test:assertEquals(token, "proxy-access-token");
 
     RecordedProxyRequest recordedRequest = getRecordedProxyRequest();
@@ -141,7 +143,8 @@ function testRejectsHttpsProxyForOAuth2TokenRequest() {
         port: MOCK_OAUTH2_PROXY_PORT
     };
 
-    ProxyOAuth2TokenProvider|error provider = new (grantConfig, proxyConfig);
+    TokenManager|error provider = new ("client-id", "client-secret", "", UNREACHABLE_TOKEN_URL,
+            proxyConfig = proxyConfig, grantConfig = grantConfig);
     test:assertTrue(provider is error);
     if provider is error {
         test:assertEquals(provider.message(),

@@ -33,7 +33,6 @@ public isolated class Listener {
     private final boolean isOAuth2;
     private final readonly & OAuth2Config? oauth2Config;
     private final TokenManager? tokenManager;
-    private final ProxyOAuth2TokenProvider? proxyOAuth2TokenProvider;
     private string? channelName = ();
     private final int replayFrom;
     private final string apiVersion;
@@ -130,16 +129,23 @@ public isolated class Listener {
                     listenerConfig.tokenStore,
                     proxyConfig
                 );
-                self.proxyOAuth2TokenProvider = ();
-            } else if proxyConfig is ProxyConfig &&
-                    (auth is oauth2:ClientCredentialsGrantConfig ||
-                    auth is oauth2:PasswordGrantConfig) {
-                self.tokenManager = ();
-                self.proxyOAuth2TokenProvider = check new ProxyOAuth2TokenProvider(
-                    auth, proxyConfig, connectionTimeout, readTimeout);
+            } else if auth is oauth2:ClientCredentialsGrantConfig ||
+                    auth is oauth2:PasswordGrantConfig {
+                self.tokenManager = check new TokenManager(
+                    auth is oauth2:ClientCredentialsGrantConfig ? auth.clientId : auth.clientId ?: "",
+                    auth is oauth2:ClientCredentialsGrantConfig ? auth.clientSecret : auth.clientSecret ?: "",
+                    "",
+                    auth.tokenUrl,
+                    listenerConfig.sessionTimeout,
+                    TOKEN_REFRESH_BUFFER_SECONDS,
+                    listenerConfig.tokenStore,
+                    proxyConfig = proxyConfig,
+                    grantConfig = auth,
+                    connectionTimeout = connectionTimeout,
+                    requestTimeout = readTimeout
+                );
             } else {
                 self.tokenManager = ();
-                self.proxyOAuth2TokenProvider = ();
             }
             initListenerWithOAuth2(self, self.replayFrom, self.baseUrl,
                     connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion, proxyConfig);
@@ -155,7 +161,6 @@ public isolated class Listener {
             self.baseUrl = "";
             self.oauth2Config = ();
             self.tokenManager = ();
-            self.proxyOAuth2TokenProvider = ();
             initListener(self, self.replayFrom, listenerConfig.isSandBox,
                     connectionTimeout, readTimeout, keepAliveInterval, self.apiVersion, proxyConfig);
         }
@@ -411,11 +416,6 @@ public isolated class Listener {
             log:printDebug("Access token obtained for CometD",
                     expiresInMinutes = tm.getSecondsUntilExpiry() / 60);
             return token;
-        }
-
-        ProxyOAuth2TokenProvider? proxyProvider = self.proxyOAuth2TokenProvider;
-        if proxyProvider is ProxyOAuth2TokenProvider {
-            return proxyProvider.generateToken();
         }
 
         // Existing paths for other grant types

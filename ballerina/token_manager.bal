@@ -18,8 +18,11 @@ import ballerina/crypto;
 import ballerina/http;
 import ballerina/lang.runtime;
 import ballerina/log;
+import ballerina/oauth2;
 import ballerina/time;
 import ballerina/url;
+
+const string UTF8 = "UTF-8";
 
 # Manages OAuth2 token lifecycle with support for refresh token rotation.
 # When Salesforce returns a new refresh token in the token response,
@@ -49,6 +52,8 @@ isolated class TokenManager {
     private final string clientSecret;
     private final string tokenUrl;
     private final http:Client tokenClient;
+    private final readonly & (oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig)? grantConfig;
+    private final boolean supportsRefreshTokenRotation;
     private final int clockSkewSeconds = 30;
     // Lock TTL in seconds — safety net to auto-release if a replica crashes mid-refresh.
     private final int lockTtlSeconds = 30;
@@ -106,13 +111,19 @@ isolated class TokenManager {
             int sessionTimeoutSeconds = 900,
             int refreshBufferSeconds = 60,
             TokenStore tokenStore = new InMemoryTokenStore(),
-            ProxyConfig? proxyConfig = ()) returns error? {
+            ProxyConfig? proxyConfig = (),
+            oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig? grantConfig = (),
+            decimal connectionTimeout = 15,
+            decimal requestTimeout = 30) returns error? {
         self.clientId = clientId;
         self.clientSecret = clientSecret;
         self.refreshToken = refreshToken;
         self.tokenUrl = tokenUrl;
         self.sessionTimeoutSeconds = sessionTimeoutSeconds;
         self.refreshBufferSeconds = refreshBufferSeconds;
+        self.grantConfig = grantConfig is oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig ?
+                grantConfig.cloneReadOnly() : ();
+        self.supportsRefreshTokenRotation = grantConfig is ();
         self.accessToken = "";
         self.accessTokenExpiryEpoch = -1;
         self.rtIssuedAtEpoch = -1;
@@ -124,7 +135,52 @@ isolated class TokenManager {
         }
         self.tokenStore = tokenStore;
         self.storeKey = "sf_token:" + fingerprintToken(clientId);
-        if proxyConfig is ProxyConfig {
+        if grantConfig is oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig {
+            if proxyConfig is ProxyConfig && proxyConfig.scheme != HTTP {
+                return error(string `Unsupported proxy scheme '${proxyConfig.scheme}'. ` +
+                        "OAuth2 token requests support only HTTP proxies.");
+            }
+            oauth2:ClientConfiguration oauthClientConfig = grantConfig.clientConfig;
+            http:ClientConfiguration httpClientConfig = {
+                httpVersion: oauthClientConfig.httpVersion == oauth2:HTTP_2 ? http:HTTP_2_0 : http:HTTP_1_1,
+                timeout: requestTimeout,
+                socketConfig: {
+                    connectTimeOut: connectionTimeout
+                }
+            };
+            if proxyConfig is ProxyConfig {
+                http:ProxyConfig httpProxy = {
+                    host: proxyConfig.host,
+                    port: proxyConfig.port,
+                    userName: proxyConfig.auth?.username ?: "",
+                    password: proxyConfig.auth?.password ?: ""
+                };
+                httpClientConfig.proxy = httpProxy;
+            }
+            oauth2:SecureSocket? oauthSecureSocket = oauthClientConfig?.secureSocket;
+            if oauthSecureSocket is oauth2:SecureSocket {
+                http:ClientSecureSocket httpSecureSocket = {
+                    enable: !oauthSecureSocket.disable
+                };
+                crypto:TrustStore|string? cert = oauthSecureSocket?.cert;
+                if cert is crypto:TrustStore|string {
+                    httpSecureSocket.cert = cert;
+                }
+                crypto:KeyStore|oauth2:CertKey? key = oauthSecureSocket?.key;
+                if key is crypto:KeyStore {
+                    httpSecureSocket.key = key;
+                } else if key is oauth2:CertKey {
+                    http:CertKey httpCertKey = {
+                        certFile: key.certFile,
+                        keyFile: key.keyFile,
+                        keyPassword: key?.keyPassword
+                    };
+                    httpSecureSocket.key = httpCertKey;
+                }
+                httpClientConfig.secureSocket = httpSecureSocket;
+            }
+            self.tokenClient = check new (tokenUrl, httpClientConfig);
+        } else if proxyConfig is ProxyConfig {
             http:ProxyConfig httpProxy = {
                 host: proxyConfig.host,
                 port: proxyConfig.port,
@@ -141,6 +197,22 @@ isolated class TokenManager {
     #
     # + return - The access token string or an error
     isolated function getAccessToken() returns string|error {
+        if self.grantConfig is oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig {
+            lock {
+                [int, decimal] currentTime = time:utcNow();
+                if self.accessToken != "" && currentTime[0] < self.accessTokenExpiryEpoch {
+                    return self.accessToken;
+                }
+            }
+            string token = check self.generateGrantToken();
+            lock {
+                [int, decimal] currentTime = time:utcNow();
+                self.accessToken = token;
+                self.accessTokenExpiryEpoch = currentTime[0] + self.sessionTimeoutSeconds -
+                        self.clockSkewSeconds;
+            }
+            return token;
+        }
         lock {
             [int, decimal] currentTime = time:utcNow();
             if self.accessToken != "" && currentTime[0] < self.accessTokenExpiryEpoch {
@@ -148,6 +220,131 @@ isolated class TokenManager {
             }
         }
         return self.refreshAccessToken();
+    }
+
+    isolated function generateGrantToken() returns string|error {
+        oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig grantConfig;
+        var configuredGrant = self.grantConfig;
+        if configuredGrant is oauth2:ClientCredentialsGrantConfig|oauth2:PasswordGrantConfig {
+            grantConfig = configuredGrant;
+        } else {
+            return error("OAuth2 grant configuration is not set.");
+        }
+        string payload;
+        string? clientId = ();
+        string? clientSecret = ();
+        string|string[]? scopes;
+        map<string>? optionalParams;
+        oauth2:CredentialBearer credentialBearer;
+
+        if grantConfig is oauth2:ClientCredentialsGrantConfig {
+            if grantConfig.clientId == "" || grantConfig.clientSecret == "" {
+                return error("Client-id or client-secret cannot be empty.");
+            }
+            payload = "grant_type=client_credentials";
+            clientId = grantConfig.clientId;
+            clientSecret = grantConfig.clientSecret;
+            scopes = grantConfig?.scopes;
+            optionalParams = grantConfig?.optionalParams;
+            credentialBearer = grantConfig.credentialBearer;
+        } else {
+            payload = "grant_type=password&username=" + check url:encode(grantConfig.username, UTF8) +
+                "&password=" + check url:encode(grantConfig.password, UTF8);
+            clientId = grantConfig?.clientId;
+            clientSecret = grantConfig?.clientSecret;
+            if clientId is string || clientSecret is string {
+                if (clientId is string) != (clientSecret is string) {
+                    return error("Both client-id and client-secret must be provided together.");
+                }
+            }
+            if clientId is string && clientSecret is string && (clientId == "" || clientSecret == "") {
+                return error("Client-id or client-secret cannot be empty.");
+            }
+            scopes = grantConfig?.scopes;
+            optionalParams = grantConfig?.optionalParams;
+            credentialBearer = grantConfig.credentialBearer;
+        }
+
+        payload = check self.appendScopes(payload, scopes);
+        payload = check self.appendOptionalParams(payload, optionalParams);
+
+        http:Request request = new;
+        if credentialBearer == oauth2:AUTH_HEADER_BEARER {
+            if clientId is string && clientSecret is string {
+                string credentials = clientId + ":" + clientSecret;
+                request.setHeader("Authorization", "Basic " + credentials.toBytes().toBase64());
+            }
+        } else if clientId is string && clientSecret is string {
+            payload += "&client_id=" + check url:encode(clientId, UTF8) +
+                "&client_secret=" + check url:encode(clientSecret, UTF8);
+        }
+
+        map<string>? customHeaders = grantConfig.clientConfig?.customHeaders;
+        if customHeaders is map<string> {
+            foreach [string, string] [name, value] in customHeaders.entries() {
+                request.setHeader(name, value);
+            }
+        }
+        string? customPayload = grantConfig.clientConfig?.customPayload;
+        if customPayload is string && customPayload != "" {
+            payload += "&" + customPayload;
+        }
+        request.setTextPayload(payload, contentType = "application/x-www-form-urlencoded");
+
+        http:Response response = check self.tokenClient->post("", request);
+        json|error jsonPayload = response.getJsonPayload();
+        if response.statusCode < 200 || response.statusCode >= 300 {
+            string message = string `Failed to call the token endpoint. HTTP status: ${response.statusCode}`;
+            if jsonPayload is json {
+                message += ". Response: " + jsonPayload.toJsonString();
+            }
+            return error(message);
+        }
+        if jsonPayload is error {
+            return error("Failed to parse the token endpoint response as JSON.", jsonPayload);
+        }
+        json|error accessToken = jsonPayload.access_token;
+        if accessToken is string {
+            return accessToken;
+        }
+        return error("Failed to extract 'access_token' from the token endpoint response.");
+    }
+
+    isolated function appendScopes(string payload, string|string[]? scopes) returns string|error {
+        string updatedPayload = payload;
+        string[] values = [];
+        if scopes is string {
+            string scope = scopes.trim();
+            if scope != "" {
+                values.push(scope);
+            }
+        } else if scopes is string[] {
+            foreach string value in scopes {
+                string scope = value.trim();
+                if scope != "" {
+                    values.push(scope);
+                }
+            }
+        }
+        if values.length() > 0 {
+            updatedPayload += "&scope=" + check url:encode(string:'join(" ", ...values), UTF8);
+        }
+        return updatedPayload;
+    }
+
+    isolated function appendOptionalParams(string payload, map<string>? optionalParams) returns string|error {
+        string updatedPayload = payload;
+        if optionalParams is map<string> {
+            foreach [string, string] [key, value] in optionalParams.entries() {
+                updatedPayload += "&" + check url:encode(key.trim(), UTF8) +
+                    "=" + check url:encode(value.trim(), UTF8);
+            }
+        }
+        return updatedPayload;
+    }
+
+    isolated function isRefreshTokenManager() returns boolean {
+        return self.supportsRefreshTokenRotation;
     }
 
     # Refreshes the access token by calling the Salesforce token endpoint.
