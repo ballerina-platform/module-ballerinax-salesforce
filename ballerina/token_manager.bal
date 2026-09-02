@@ -23,16 +23,16 @@ import ballerina/time;
 import ballerina/url;
 
 const UTF8 = "UTF-8";
-const string FORM_URLENCODED = "application/x-www-form-urlencoded";
-const string GRANT_TYPE_PARAM = "grant_type";
-const string CLIENT_CREDENTIALS_GRANT = "client_credentials";
-const string PASSWORD_GRANT = "password";
-const string USERNAME_PARAM = "username";
-const string SCOPE_PARAM = "scope";
-const string CLIENT_ID_PARAM = "client_id";
-const string CLIENT_SECRET_PARAM = "client_secret";
-const string AUTHORIZATION_HEADER = "Authorization";
-const string BASIC_AUTH_SCHEME = "Basic ";
+const FORM_URLENCODED = "application/x-www-form-urlencoded";
+const GRANT_TYPE_PARAM = "grant_type";
+const CLIENT_CREDENTIALS_GRANT = "client_credentials";
+const PASSWORD_GRANT = "password";
+const USERNAME_PARAM = "username";
+const SCOPE_PARAM = "scope";
+const CLIENT_ID_PARAM = "client_id";
+const CLIENT_SECRET_PARAM = "client_secret";
+const AUTHORIZATION_HEADER = "Authorization";
+const BASIC_AUTH_SCHEME = "Basic ";
 
 type TokenManagerConfig http:OAuth2RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig|
         oauth2:PasswordGrantConfig;
