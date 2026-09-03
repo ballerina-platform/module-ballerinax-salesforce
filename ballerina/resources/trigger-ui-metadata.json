@@ -1,0 +1,392 @@
+{
+  "version": "v1.0",
+  "metadata": {
+    "kind": "event"
+  },
+  "trigger": {
+    "displayName": "Salesforce Events",
+    "description": "Listen for Salesforce Change Data Capture and Platform Events over the Streaming API (CometD)",
+    "type": "salesforce"
+  },
+  "readOnlyMetadata": [
+    {
+      "key": "serviceType",
+      "displayName": "Event Type",
+      "extractor": "SERVICE_DESCRIPTION"
+    },
+    {
+      "key": "basePath",
+      "displayName": "Event Channel",
+      "extractor": "SERVICE_BASE_PATH"
+    }
+  ],
+  "initForm": {
+    "fields": [
+      {
+        "target": {
+          "kind": "recordField",
+          "owner": "trigger.initProperties",
+          "path": "serviceType"
+        },
+        "metadata": {
+          "label": "Event Type",
+          "description": "The type of Salesforce event to listen for: Change Data Capture or Platform Events."
+        },
+        "source": {
+          "construct": {
+            "kind": "SERVICE_TYPE_DESCRIPTOR"
+          },
+          "module": {
+            "name": "salesforce"
+          }
+        },
+        "state": {
+          "enabled": true,
+          "editable": true,
+          "optional": false,
+          "advanced": false
+        },
+        "key": "serviceType",
+        "default": "salesforce:CdcService"
+      }
+    ]
+  },
+  "listeners": [
+    {
+      "target": "$listener",
+      "form": {
+        "section": {
+          "label": "Listener",
+          "description": "Attach the service to a new or existing Salesforce listener."
+        },
+        "createNew": {
+          "label": "Create New Listener",
+          "description": "Define a new Salesforce listener in the project."
+        },
+        "listenerConfig": {
+          "label": "Listener Configurations",
+          "description": "Configure the Salesforce Streaming API (CometD) listener."
+        },
+        "useExisting": {
+          "label": "Use Existing Listener",
+          "description": "Attach to one or more Salesforce listeners already declared in the project."
+        },
+        "existingListener": {
+          "label": "Listener(s)",
+          "description": "Select one or more existing listeners to attach the service to (no new(...) is generated)."
+        },
+        "existingListenerWidget": "MULTI_SELECT_LISTENER",
+        "existingListenerItems": [
+          "salesforceListener"
+        ],
+        "existingListenerValue": [
+          "salesforceListener"
+        ]
+      },
+      "formFields": {
+        "listenerVarName": {
+          "key": "listenerVarName",
+          "default": "salesforceListener",
+          "metadata": {
+            "label": "Listener Name",
+            "description": "Provide a name for the listener being created."
+          },
+          "source": {
+            "construct": {
+              "kind": "LISTENER_VAR_NAME"
+            }
+          },
+          "state": {
+            "enabled": true,
+            "editable": true,
+            "optional": false,
+            "advanced": false
+          }
+        },
+        "authMode": {
+          "key": "authMode",
+          "default": "REST",
+          "metadata": {
+            "label": "Authentication Mode",
+            "description": "The authentication mode to use for the Salesforce listener."
+          },
+          "widget": {
+            "widgetKind": "CHOICE",
+            "selected": true,
+            "ballerinaType": "salesforce:ListenerConfig",
+            "options": [
+              {
+                "label": "OAuth2 (REST API)",
+                "value": "REST"
+              },
+              {
+                "label": "Username & Password (SOAP API)",
+                "value": "SOAP"
+              }
+            ]
+          },
+          "choices": [
+            {
+              "default": "REST",
+              "metadata": {
+                "label": "OAuth2 (REST API)",
+                "description": "Authenticate against the Salesforce REST-based Streaming API using OAuth2."
+              },
+              "properties": {
+                "baseUrl": {
+                  "key": "baseUrl",
+                  "placeholder": "https://mydomain.my.salesforce.com",
+                  "default": "",
+                  "metadata": {
+                    "label": "Base URL",
+                    "description": "The base URL of the Salesforce instance."
+                  },
+                  "source": {
+                    "argument": {
+                      "kind": "LISTENER_PARAM_CONFIG_FIELD",
+                      "position": 1
+                    },
+                    "path": "baseUrl"
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": false,
+                    "advanced": false
+                  }
+                },
+                "auth": {
+                  "key": "auth",
+                  "default": "",
+                  "metadata": {
+                    "label": "OAuth2 Configuration",
+                    "description": "OAuth2 credentials used to authenticate with Salesforce (bearer token, password grant, refresh-token grant, or client-credentials grant)."
+                  },
+                  "source": {
+                    "argument": {
+                      "kind": "LISTENER_PARAM_CONFIG_FIELD",
+                      "position": 1
+                    },
+                    "path": "auth"
+                  },
+                  "widget": {
+                    "widgetKind": "RECORD_MAP_EXPRESSION",
+                    "selected": true,
+                    "ballerinaType": "http:BearerTokenConfig|oauth2:PasswordGrantConfig|oauth2:RefreshTokenGrantConfig|oauth2:ClientCredentialsGrantConfig",
+                    "typeMembers": [
+                      {
+                        "type": "BearerTokenConfig",
+                        "packageInfo": "ballerina:http:2.14.11",
+                        "packageName": "http",
+                        "kind": "RECORD_TYPE",
+                        "selected": false
+                      },
+                      {
+                        "type": "PasswordGrantConfig",
+                        "packageInfo": "ballerina:oauth2:2.14.1",
+                        "packageName": "oauth2",
+                        "kind": "RECORD_TYPE",
+                        "selected": false
+                      },
+                      {
+                        "type": "RefreshTokenGrantConfig",
+                        "packageInfo": "ballerina:oauth2:2.14.1",
+                        "packageName": "oauth2",
+                        "kind": "RECORD_TYPE",
+                        "selected": true
+                      },
+                      {
+                        "type": "ClientCredentialsGrantConfig",
+                        "packageInfo": "ballerina:oauth2:2.14.1",
+                        "packageName": "oauth2",
+                        "kind": "RECORD_TYPE",
+                        "selected": false
+                      }
+                    ]
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": false,
+                    "advanced": false
+                  }
+                }
+              },
+              "state": {
+                "enabled": true,
+                "editable": true,
+                "optional": false,
+                "advanced": false
+              }
+            },
+            {
+              "default": "SOAP",
+              "metadata": {
+                "label": "Username & Password (SOAP API)",
+                "description": "Authenticate against the legacy Salesforce SOAP API with a username and password."
+              },
+              "properties": {
+                "username": {
+                  "key": "username",
+                  "default": "",
+                  "metadata": {
+                    "label": "Username",
+                    "description": "Salesforce login username."
+                  },
+                  "source": {
+                    "argument": {
+                      "kind": "LISTENER_PARAM_CONFIG_FIELD",
+                      "position": 1
+                    },
+                    "path": "auth.username"
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": false,
+                    "advanced": false
+                  }
+                },
+                "password": {
+                  "key": "password",
+                  "default": "",
+                  "metadata": {
+                    "label": "Password",
+                    "description": "Salesforce login password appended with the security token (<password><security token>)."
+                  },
+                  "source": {
+                    "argument": {
+                      "kind": "LISTENER_PARAM_CONFIG_FIELD",
+                      "position": 1
+                    },
+                    "path": "auth.password"
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": false,
+                    "advanced": false
+                  }
+                },
+                "isSandBox": {
+                  "key": "isSandBox",
+                  "default": false,
+                  "metadata": {
+                    "label": "Sandbox Environment",
+                    "description": "Whether the target Salesforce environment is a sandbox."
+                  },
+                  "source": {
+                    "argument": {
+                      "kind": "LISTENER_PARAM_CONFIG_FIELD",
+                      "position": 1
+                    },
+                    "path": "isSandBox"
+                  },
+                  "state": {
+                    "enabled": true,
+                    "editable": true,
+                    "optional": true,
+                    "advanced": false
+                  }
+                }
+              },
+              "state": {
+                "enabled": false,
+                "editable": true,
+                "optional": false,
+                "advanced": false
+              }
+            }
+          ],
+          "state": {
+            "enabled": true,
+            "editable": true,
+            "optional": false,
+            "advanced": false
+          }
+        }
+      },
+      "serviceProperties": {
+        "basePath": {
+          "key": "basePath",
+          "placeholder": "/data/ChangeEvents",
+          "default": "/data/ChangeEvents",
+          "metadata": {
+            "label": "EventChannel",
+            "description": "The Salesforce channel path to subscribe to."
+          },
+          "widget": {
+            "widgetKind": "SERVICE_PATH",
+            "selected": true,
+            "ballerinaType": "string"
+          },
+          "source": {
+            "construct": {
+              "kind": "SERVICE_BASE_PATH"
+            }
+          },
+          "state": {
+            "enabled": true,
+            "editable": true,
+            "optional": false,
+            "advanced": false
+          }
+        }
+      }
+    }
+  ],
+  "serviceTypes": [
+    {
+      "target": "$cdcService",
+      "metadata": {
+        "label": "Change Data Capture",
+        "description": "Triggers when a new Change Data Capture event is received from Salesforce channels. Available actions: onCreate, onUpdate, onDelete, and onRestore."
+      },
+      "source": {
+        "construct": {
+          "kind": "SERVICE_TYPE_DESCRIPTOR"
+        },
+        "argument": {
+          "originalName": "CdcService"
+        },
+        "module": {
+          "name": "salesforce"
+        }
+      },
+      "state": {
+        "enabled": true,
+        "editable": true
+      }
+    },
+    {
+      "target": "$platformEventsService",
+      "metadata": {
+        "label": "Platform Events",
+        "description": "Triggers when a new Platform Event is received from Salesforce channels. Available action: onMessage."
+      },
+      "source": {
+        "construct": {
+          "kind": "SERVICE_TYPE_DESCRIPTOR"
+        },
+        "argument": {
+          "originalName": "PlatformEventsService"
+        },
+        "module": {
+          "name": "salesforce"
+        }
+      },
+      "state": {
+        "enabled": false,
+        "editable": true
+      }
+    }
+  ],
+  "artifactInfo": {
+    "displayLabel": "Salesforce Event Integration",
+    "icon": {
+      "lightPath": "icons/light.svg",
+      "darkPath": "icons/dark.svg",
+      "color": "#00A1E0"
+    }
+  }
+}
