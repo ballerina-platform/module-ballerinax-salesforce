@@ -92,8 +92,8 @@ function testInMemoryRtrWithExpiration() returns error? {
     // Default behaviour: NO tokenStore argument — TokenManager falls back
     // to its internal InMemoryTokenStore.
     TokenManager tm = check new (
-        RTR_CLIENT_ID_INMEM, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(RTR_CLIENT_ID_INMEM, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         shortSessionTimeout
     );
 
@@ -162,8 +162,8 @@ function testRedisMasterFlow() returns error? {
     check store.flushAll();
 
     TokenManager master = check new (
-        RTR_CLIENT_ID_MASTER, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(RTR_CLIENT_ID_MASTER, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT,
         tokenStore = store
     );
@@ -244,8 +244,8 @@ function testRedisWorkerFlow() returns error? {
     // read the store (double-check), find the valid token, and adopt it
     // instead of hitting Salesforce.
     TokenManager workerTm = check new (
-        RTR_CLIENT_ID_WORKER, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(RTR_CLIENT_ID_WORKER, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT,
         tokenStore = store
     );
@@ -334,8 +334,8 @@ function testCachePoisoningAutoEviction() returns error? {
     // It will see the dead token as expired (accessTokenExpiryEpoch < now),
     // attempt to refresh using the dead RT, and receive 400 invalid_grant.
     TokenManager tm = check new (
-        RTR_CLIENT_ID_POISON, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(RTR_CLIENT_ID_POISON, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT,
         tokenStore = store
     );

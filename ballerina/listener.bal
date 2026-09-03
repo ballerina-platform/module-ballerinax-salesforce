@@ -104,15 +104,13 @@ public isolated class Listener {
             }
             self.baseUrl = normalizedBaseUrl;
             self.oauth2Config = listenerConfig.auth.cloneReadOnly();
+            OAuth2Config auth = listenerConfig.auth;
             // Create TokenManager for RefreshTokenGrantConfig to handle token rotation
-            if listenerConfig.auth is http:OAuth2RefreshTokenGrantConfig {
-                http:OAuth2RefreshTokenGrantConfig rtConfig =
-                    <http:OAuth2RefreshTokenGrantConfig>listenerConfig.auth;
-
+            if auth is http:OAuth2RefreshTokenGrantConfig {
                 // `defaultTokenExpTime` is declared as `decimal` in http:OAuth2RefreshTokenGrantConfig
                 // (inherited from ballerina/oauth2). TokenManager expects a whole-second `int`,
                 // so reject fractional values explicitly instead of rounding or truncating.
-                decimal rawExpTime = rtConfig.defaultTokenExpTime;
+                decimal rawExpTime = auth.defaultTokenExpTime;
                 if rawExpTime != decimal:floor(rawExpTime) {
                     return error("defaultTokenExpTime must be a whole number of seconds. " +
                             "Fractional values are not valid. Got: " + rawExpTime.toString());
@@ -124,12 +122,22 @@ public isolated class Listener {
                 }
 
                 self.tokenManager = check new TokenManager(
-                    rtConfig.clientId, rtConfig.clientSecret,
-                    rtConfig.refreshToken, rtConfig.refreshUrl,
+                    auth,
                     sessionTimeoutSeconds,
                     TOKEN_REFRESH_BUFFER_SECONDS,
                     listenerConfig.tokenStore,
                     proxyConfig
+                );
+            } else if auth is oauth2:ClientCredentialsGrantConfig ||
+                    auth is oauth2:PasswordGrantConfig {
+                self.tokenManager = check new TokenManager(
+                    auth,
+                    listenerConfig.sessionTimeout,
+                    TOKEN_REFRESH_BUFFER_SECONDS,
+                    listenerConfig.tokenStore,
+                    proxyConfig = proxyConfig,
+                    connectionTimeout = connectionTimeout,
+                    requestTimeout = readTimeout
                 );
             } else {
                 self.tokenManager = ();

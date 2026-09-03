@@ -85,8 +85,8 @@ function testSingleNodeInMemory() returns error? {
 
     // Create ONE TokenManager with default InMemoryTokenStore (no tokenStore arg).
     TokenManager tm = check new (
-        TEST_CLIENT_ID, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(TEST_CLIENT_ID, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT
     );
 
@@ -178,18 +178,18 @@ function testMultiNodeInMemoryChaos() returns error? {
     // Create 3 SEPARATE TokenManagers with SEPARATE InMemoryTokenStores.
     // This simulates 3 isolated K8s pods — no shared memory.
     TokenManager pod1 = check new (
-        TEST_CLIENT_ID, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(TEST_CLIENT_ID, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT
     );
     TokenManager pod2 = check new (
-        TEST_CLIENT_ID, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(TEST_CLIENT_ID, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT
     );
     TokenManager pod3 = check new (
-        TEST_CLIENT_ID, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(TEST_CLIENT_ID, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT
     );
 
@@ -267,20 +267,20 @@ function testMultiNodeRedisCoordination() returns error? {
 
     // Create 3 SEPARATE TokenManagers, all sharing the SAME RedisTokenStore.
     TokenManager pod1 = check new (
-        TEST_CLIENT_ID, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(TEST_CLIENT_ID, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT,
         tokenStore = sharedStore
     );
     TokenManager pod2 = check new (
-        TEST_CLIENT_ID, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(TEST_CLIENT_ID, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT,
         tokenStore = sharedStore
     );
     TokenManager pod3 = check new (
-        TEST_CLIENT_ID, TEST_CLIENT_SECRET,
-        TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL,
+        getRefreshTokenGrantConfig(TEST_CLIENT_ID, TEST_CLIENT_SECRET,
+            TEST_SEED_REFRESH_TOKEN, MOCK_TOKEN_URL),
         TEST_SESSION_TIMEOUT,
         tokenStore = sharedStore
     );
