@@ -8,6 +8,7 @@ authors = ["Ballerina"]
 keywords = ["Cost/Freemium", "Vendor/Salesforce", "Area/CRM & Sales", "Type/Connector", "Type/Trigger"]
 icon = "icon.png"
 repository = "https://github.com/ballerina-platform/module-ballerinax-salesforce"
+include = ["resources/**/*"]
 
 [build-options]
 observabilityIncluded = true
