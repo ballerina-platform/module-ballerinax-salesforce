@@ -57,10 +57,8 @@ target/
 # Build files
 **/build/*
 
-# Json files created inside resources folder. Refer exception below.
+# Json files created inside resources folder.
 **/resources/*.json
-!ballerina/resources/trigger-metadata.json
-!ballerina/resources/trigger-ui-metadata.json
 
 # Allow files in the bulk test folder
 !**/tests/resources/*
