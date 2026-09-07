@@ -37,10 +37,10 @@ export = true
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
-path = "../native/build/libs/salesforce-native-8.7.1-SNAPSHOT.jar"
+path = "../native/build/libs/salesforce-native-8.7.1.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "8.7.1-SNAPSHOT"
+version = "8.7.1"
 
 [[platform.java21.dependency]]
 groupId = "com.opencsv"
@@ -87,32 +87,32 @@ path = "./lib/cometd-java-client-http-jetty-8.0.11.jar"
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-client"
-version = "12.0.33"
-path = "./lib/jetty-client-12.0.33.jar"
+version = "12.0.35"
+path = "./lib/jetty-client-12.0.35.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-http"
-version = "12.0.33"
-path = "./lib/jetty-http-12.0.33.jar"
+version = "12.0.35"
+path = "./lib/jetty-http-12.0.35.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-io"
-version = "12.0.33"
-path = "./lib/jetty-io-12.0.33.jar"
+version = "12.0.35"
+path = "./lib/jetty-io-12.0.35.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util"
-version = "12.0.33"
-path = "./lib/jetty-util-12.0.33.jar"
+version = "12.0.35"
+path = "./lib/jetty-util-12.0.35.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.eclipse.jetty"
 artifactId = "jetty-util-ajax"
-version = "12.0.33"
-path = "./lib/jetty-util-ajax-12.0.33.jar"
+version = "12.0.35"
+path = "./lib/jetty-util-ajax-12.0.35.jar"
 
 [[platform.java21.dependency]]
 groupId = "org.json"
@@ -123,17 +123,17 @@ path = "./lib/json-20240303.jar"
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-databind"
-version = "2.18.6"
-path = "./lib/jackson-databind-2.18.6.jar"
+version = "2.18.9"
+path = "./lib/jackson-databind-2.18.9.jar"
 
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-annotations"
-version = "2.18.6"
-path = "./lib/jackson-annotations-2.18.6.jar"
+version = "2.18.9"
+path = "./lib/jackson-annotations-2.18.9.jar"
 
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-core"
-version = "2.18.6"
-path = "./lib/jackson-core-2.18.6.jar"
+version = "2.18.9"
+path = "./lib/jackson-core-2.18.9.jar"
