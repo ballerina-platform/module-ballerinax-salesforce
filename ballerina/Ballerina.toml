@@ -2,13 +2,13 @@
 distribution = "2201.12.0"
 org = "ballerinax"
 name = "salesforce"
-version = "8.7.0"
+version = "8.7.1"
 license= ["Apache-2.0"]
 authors = ["Ballerina"]
 keywords = ["Cost/Freemium", "Vendor/Salesforce", "Area/CRM & Sales", "Type/Connector", "Type/Trigger"]
 icon = "icon.png"
 repository = "https://github.com/ballerina-platform/module-ballerinax-salesforce"
-include = ["resources/**/*"]
+include = ["metadata/**"]
 
 [build-options]
 observabilityIncluded = true
@@ -37,10 +37,10 @@ export = true
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
-path = "../native/build/libs/salesforce-native-8.7.0.jar"
+path = "../native/build/libs/salesforce-native-8.7.1-SNAPSHOT.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "8.7.0"
+version = "8.7.1-SNAPSHOT"
 
 [[platform.java21.dependency]]
 groupId = "com.opencsv"
