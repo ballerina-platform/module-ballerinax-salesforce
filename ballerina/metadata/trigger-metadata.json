@@ -1,0 +1,35 @@
+{
+  "version": "v1.0",
+
+  "listeners": [
+    {
+      "id": "$listener",
+      "doc": "Subscribes to the configured Salesforce channels and dispatches each inbound event to the service matching its channel type.",
+      "type": { "name": "Listener" },
+      "services": ["$cdcService", "$platformEventsService"],
+      "multipleServicesAllowed": true,
+      "multipleServicesOfSameTypeAllowed": true
+    }
+  ],
+
+  "serviceTypes": [
+    {
+      "id": "$cdcService",
+      "doc": "Receives change data capture events published for the subscribed Salesforce object channel.",
+      "type": { "name": "CdcService" },
+      "concrete": true,
+      "multipleListenersAllowed": true,
+      "identifier": { "presence": "required", "form": ["stringLiteral"] },
+      "handlers": { "backedByConcreteType": true }
+    },
+    {
+      "id": "$platformEventsService",
+      "doc": "Receives custom platform events published to the subscribed Salesforce event channel.",
+      "type": { "name": "PlatformEventsService" },
+      "concrete": true,
+      "multipleListenersAllowed": true,
+      "identifier": { "presence": "required", "form": ["stringLiteral"] },
+      "handlers": { "backedByConcreteType": true }
+    }
+  ]
+}

@@ -57,7 +57,7 @@ target/
 # Build files
 **/build/*
 
-# Json files created inside resources folder. Refer exception below.
+# Json files created inside resources folder.
 **/resources/*.json
 
 # Allow files in the bulk test folder
