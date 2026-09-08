@@ -310,10 +310,15 @@
         "basePath": {
           "key": "basePath",
           "placeholder": "/data/ChangeEvents",
-          "default": "/data/ChangeEvents",
+          "default": "",
+          "validations": [
+            {
+              "rule": "common.validate.required"
+            }
+          ],
           "metadata": {
             "label": "EventChannel",
-            "description": "The Salesforce channel path to subscribe to."
+            "description": "The Salesforce channel path to subscribe to. Use a CDC channel (e.g. /data/ChangeEvents) for a CDC service or a platform event channel (e.g. /event/MyEvent__e) for a Platform Events service."
           },
           "widget": {
             "widgetKind": "SERVICE_PATH",
