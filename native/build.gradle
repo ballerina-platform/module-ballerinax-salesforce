@@ -93,9 +93,9 @@ spotbugsTest {
 task validateSpotbugs() {
     doLast {
         if (spotbugsMain.reports.size() > 0 &&
-                spotbugsMain.reports[0].destination.exists() &&
-                spotbugsMain.reports[0].destination.text.readLines().size() > 0) {
-            spotbugsMain.reports[0].destination?.eachLine {
+                spotbugsMain.reports.text.destination.exists() &&
+                spotbugsMain.reports.text.destination.text.readLines().size() > 0) {
+            spotbugsMain.reports.text.destination?.eachLine {
                 println 'Failure: ' + it
             }
             throw new GradleException("Spotbugs rule violations were found.");
