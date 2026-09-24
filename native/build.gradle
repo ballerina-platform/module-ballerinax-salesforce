@@ -50,12 +50,6 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-
-jacoco {
-    toolVersion = "0.8.14"
-}
-
 test {
     testLogging {
         showStackTraces = true
