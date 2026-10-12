@@ -178,10 +178,75 @@ function testPlatformEventInvalidChannelName() returns error? {
         }
     };
 
-    error? attachResult = peListener.attach(peService, [platformEventApiName]);
-    test:assertTrue(attachResult is error, "Passing a string[] as the channel name should return an error");
+    error? attachResult = peListener.attach(peService, []);
+    test:assertTrue(attachResult is error, "Passing an empty path as the channel name should return an error");
     if attachResult is error {
-        test:assertEquals(attachResult.message(), string `Invalid channel name: '[${platformEventApiName}]'`);
+        test:assertEquals(attachResult.message(), "Invalid channel name: '[]'");
+    }
+}
+
+// Asserts the channel a listener got bound to by attaching it, then trying to
+// attach a second, different channel and reading the coordination guard error.
+isolated function assertBoundChannel(Service s, string[]|string name, string expectedChannel) returns error? {
+    Listener lis = check new ({
+        auth: {token: "test-bearer-token"},
+        baseUrl: "https://example.my.salesforce.com"
+    });
+    check lis.attach(s, name);
+    error? result = lis.attach(s, "/data/SomeOtherChannel__ChangeEvent");
+    if result is () {
+        return error("Expected the coordination guard to reject a second channel");
+    }
+    test:assertTrue(result.message().includes(string `already bound to channel '${expectedChannel}'`),
+            result.message());
+}
+
+@test:Config {
+    groups: ["unit"]
+}
+function testCdcChannelFromUnquotedServicePath() returns error? {
+    Service cdcService = service object {
+        remote function onCreate(EventData payload) returns error? {
+        }
+
+        remote function onUpdate(EventData payload) returns error? {
+        }
+
+        remote function onDelete(EventData payload) returns error? {
+        }
+
+        remote function onRestore(EventData payload) returns error? {
+        }
+    };
+    check assertBoundChannel(cdcService, ["data", "ChangeEvents"], "/data/ChangeEvents");
+    check assertBoundChannel(cdcService, ["ChangeEvents"], "/data/ChangeEvents");
+    check assertBoundChannel(cdcService, "/data/ChangeEvents", "/data/ChangeEvents");
+    check assertBoundChannel(cdcService, "ChangeEvents", "/data/ChangeEvents");
+}
+
+@test:Config {
+    groups: ["unit"]
+}
+function testPlatformEventChannelFromUnquotedServicePath() returns error? {
+    check assertBoundChannel(makeNoopService(), ["event", "MyEvent__e"], "/event/MyEvent__e");
+    check assertBoundChannel(makeNoopService(), ["MyEvent__e"], "/event/MyEvent__e");
+    check assertBoundChannel(makeNoopService(), "/MyEvent__e", "/event/MyEvent__e");
+}
+
+@test:Config {
+    groups: ["unit"]
+}
+function testChannelNameWithEmptyFinalSegmentRejected() returns error? {
+    foreach string name in ["", "/", "/event/", "MyEvent__e/", "/event/MyEvent__e/"] {
+        Listener lis = check new ({
+            auth: {token: "test-bearer-token"},
+            baseUrl: "https://example.my.salesforce.com"
+        });
+        error? result = lis.attach(makeNoopService(), name);
+        if result is () {
+            return error(string `Expected channel name '${name}' to be rejected`);
+        }
+        test:assertEquals(result.message(), string `Invalid channel name: '${name}'`);
     }
 }
 

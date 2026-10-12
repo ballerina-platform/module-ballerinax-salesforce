@@ -169,15 +169,23 @@ public isolated class Listener {
     # unaffected and may still attach multiple services on different channels.
     #
     # + s - Service object to attach. Use `CdcService` for CDC channels and `PlatformEventsService` for platform events.
-    # + name - Channel name to subscribe to (e.g. `/data/ChangeEvents` or `/event/MyEvent__e`)
+    # + name - Channel name to subscribe to (e.g. `/data/ChangeEvents` or `/event/MyEvent__e`), given either as a
+    #          string literal or as an unquoted service path
     # + return - `()` or else a `error` upon failure to register the service
     public isolated function attach(Service s, string[]|string? name) returns error? {
-        if name is string {
+        // An unquoted service path (e.g. `service salesforce:CdcService /data/ChangeEvents on ...`)
+        // arrives as path segments; rebuild the channel name from them.
+        string? channel = name is string[] ? (name.length() > 0 ? "/" + "/".'join(...name) : ()) : name;
+        if channel is string {
+            string prefix = s is PlatformEventsService ? PLATFORM_EVENT_PREFIX : CDC_PREFIX;
             string channelName;
-            if s is PlatformEventsService {
-                channelName = name.startsWith(PLATFORM_EVENT_PREFIX) ? name : PLATFORM_EVENT_PREFIX + name;
+            if channel.startsWith(prefix) {
+                channelName = channel;
             } else {
-                channelName = name.startsWith(CDC_PREFIX) ? name : CDC_PREFIX + name;
+                channelName = prefix + (channel.startsWith("/") ? channel.substring(1) : channel);
+            }
+            if channelName.endsWith("/") {
+                return error(string `Invalid channel name: '${channel}'`);
             }
             // When coordination is active (OAuth2 listeners) each Listener instance
             // is intentionally bound to exactly one channel — the groupId, lease,
@@ -210,7 +218,7 @@ public isolated class Listener {
                 self.channelName = channelName;
             }
         } else {
-            string invalidValue = name is string[] ? string `[${", ".join(...name)}]` : "null";
+            string invalidValue = name is string[] ? "[]" : "null";
             return error(string `Invalid channel name: '${invalidValue}'`);
         }
     }
