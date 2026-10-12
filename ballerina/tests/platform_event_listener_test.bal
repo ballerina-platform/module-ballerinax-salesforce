@@ -236,6 +236,23 @@ function testPlatformEventChannelFromUnquotedServicePath() returns error? {
 @test:Config {
     groups: ["unit"]
 }
+function testChannelNameWithEmptyFinalSegmentRejected() returns error? {
+    foreach string name in ["", "/", "/event/", "MyEvent__e/", "/event/MyEvent__e/"] {
+        Listener lis = check new ({
+            auth: {token: "test-bearer-token"},
+            baseUrl: "https://example.my.salesforce.com"
+        });
+        error? result = lis.attach(makeNoopService(), name);
+        if result is () {
+            return error(string `Expected channel name '${name}' to be rejected`);
+        }
+        test:assertEquals(result.message(), string `Invalid channel name: '${name}'`);
+    }
+}
+
+@test:Config {
+    groups: ["unit"]
+}
 function testListenerInitWithEmptyBaseUrl() returns error? {
     Listener|error result = new ({
         auth: {

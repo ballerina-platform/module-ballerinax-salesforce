@@ -184,6 +184,9 @@ public isolated class Listener {
             } else {
                 channelName = prefix + (channel.startsWith("/") ? channel.substring(1) : channel);
             }
+            if channelName.endsWith("/") {
+                return error(string `Invalid channel name: '${channel}'`);
+            }
             // When coordination is active (OAuth2 listeners) each Listener instance
             // is intentionally bound to exactly one channel — the groupId, lease,
             // and replayId checkpoint are all keyed by that channel. Attaching a
