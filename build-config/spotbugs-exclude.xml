@@ -60,5 +60,33 @@
         <Bug code="SIC" />
         <Package name="io.ballerinax.salesforce" />
     </Match>
+
+    <!-- login() is a first-party method (not an interface override) that declares a broad
+         throws Exception as an intentional catch-all for the session/auth supplier call; its
+         only callers (ListenerUtil#startListener) already handle it as a generic Exception. -->
+    <Match>
+        <Class name="io.ballerinax.salesforce.BearerTokenProvider" />
+        <Method name="login" />
+        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION" />
+    </Match>
+
+    <!-- apply(Boolean) overrides Function&lt;Boolean, String&gt;#apply, whose functional-interface
+         signature declares no throws clause; the checked exception from the session-token
+         supplier must be wrapped as unchecked to cross that boundary. -->
+    <Match>
+        <Class name="io.ballerinax.salesforce.BearerTokenProvider" />
+        <Method name="apply" />
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+    </Match>
+
+    <!-- endpoint() overrides BayeuxParameters' default endpoint(), whose signature also declares
+         no throws clause; the MalformedURLException from URL construction must be wrapped as
+         unchecked to cross that boundary, the same pattern the interface's own default
+         implementation uses (there via IllegalArgumentException instead of RuntimeException). -->
+    <Match>
+        <Class name="io.ballerinax.salesforce.OAuth2BayeuxParameters" />
+        <Method name="endpoint" />
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION" />
+    </Match>
 </FindBugsFilter>
 

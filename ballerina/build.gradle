@@ -17,6 +17,13 @@
  */
 
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
+
+abstract class BallerinaExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 plugins {
     id 'io.ballerina.plugin'
@@ -47,7 +54,7 @@ ballerina {
     packageOrganization = packageOrg
     module = project.packageName
     testCoverageParam = "--code-coverage --coverage-format=xml --excludes='./modules/types/*.bal'"
-    isConnector = true
+    connector = true
 }
 
 task updateTomlFiles {
@@ -88,8 +95,9 @@ dependencies {
 }
 
 task commitTomlFiles {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     doLast {
-        project.exec {
+        execHelper.execOperations.exec {
             ignoreExitValue true
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "git commit -m \"[Automated] Update the toml files\" Ballerina.toml Dependencies.toml"
@@ -140,6 +148,7 @@ def isDockerAvailable = {
 task startRedis {
     group = 'verification'
     description = 'Start Redis container for Ballerina integration tests.'
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     onlyIf {
         if (!isDockerAvailable()) {
             logger.warn("[startRedis] Docker daemon not reachable — skipping Redis startup. " +
@@ -150,7 +159,7 @@ task startRedis {
     }
     doLast {
         // Idempotent cleanup of any orphan
-        exec {
+        execHelper.execOperations.exec {
             ignoreExitValue true
             commandLine 'docker', 'rm', '-f', redisContainerName
         }
@@ -160,7 +169,7 @@ task startRedis {
         def started = false
         while (attempt < maxAttempts && !started) {
             attempt++
-            def result = exec {
+            def result = execHelper.execOperations.exec {
                 ignoreExitValue true
                 commandLine 'docker', 'run', '-d',
                         '-p', "${redisPort}:6379",
@@ -180,7 +189,7 @@ task startRedis {
         // Real readiness probe — PING-until-PONG, 30x1s
         def ready = false
         for (int i = 0; i < 30 && !ready; i++) {
-            def probe = exec {
+            def probe = execHelper.execOperations.exec {
                 ignoreExitValue true
                 commandLine 'docker', 'exec', redisContainerName, 'redis-cli', 'PING'
             }
@@ -200,9 +209,10 @@ task startRedis {
 task stopRedis {
     group = 'verification'
     description = 'Stop and remove the Redis integration-test container.'
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     onlyIf { isDockerAvailable() }
     doLast {
-        exec {
+        execHelper.execOperations.exec {
             ignoreExitValue true
             commandLine 'docker', 'rm', '-f', redisContainerName
         }
