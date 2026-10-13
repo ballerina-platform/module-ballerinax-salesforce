@@ -16,7 +16,6 @@
  * under the License.
  */
 
-import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.process.ExecOperations
 
 import javax.inject.Inject
@@ -45,17 +44,27 @@ def stripBallerinaExtensionVersion(String extVersion) {
     }
 }
 
-def filePath = project.fileTree("${project.projectDir}")
-def examples = filePath.matching {
-    include("**/*.bal")
-    exclude("**/deprecated/**/*.bal")
+// Compiles every example against the locally built connector. Examples are compiled, not run:
+// running them needs live Salesforce credentials and the listener examples never exit.
+def buildAllExamples = { execHelper ->
+    try {
+        execHelper.execOperations.exec {
+            workingDir project.projectDir
+            println("Working dir: ${workingDir}")
+            commandLine 'sh', '-c', "chmod +x ./build.sh && ./build.sh build ${tomlVersion}"
+        }
+    } catch (Exception e) {
+        println("Example Build failed: " + e.message)
+        throw e
+    }
 }
 
 task testExamples {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     dependsOn ":${project.packageName}-ballerina:build"
 
     doLast {
-        examples.each { example ->  executeBalCommand ("run ${example}", "${project.rootDir}") }
+        buildAllExamples(execHelper)
     }
 }
 
@@ -71,20 +80,7 @@ task buildExamples {
         }
     }
     doLast {
-        try {
-            execHelper.execOperations.exec {
-                workingDir project.projectDir
-                println("Working dir: ${workingDir}")
-                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'sh', "/c", "chmod +x ./build.sh && ./build.sh build ${tomlVersion} && exit %%ERRORLEVEL%%"
-                } else {
-                    commandLine 'sh', "-c", "chmod +x ./build.sh && ./build.sh build ${tomlVersion}"
-                }
-            }
-        } catch (Exception e) {
-            println("Example Build failed: " + e.message)
-            throw e
-        }
+        buildAllExamples(execHelper)
     }
 }
 

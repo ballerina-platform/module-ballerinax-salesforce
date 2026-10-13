@@ -14,15 +14,6 @@
  * limitations under the License.
  *
  */
-import org.apache.tools.ant.taskdefs.condition.Os
-import org.gradle.process.ExecOperations
-
-import javax.inject.Inject
-
-abstract class BallerinaExecHelper {
-    @Inject abstract ExecOperations getExecOperations()
-}
-
 plugins {
     id 'com.github.spotbugs-base'
     id 'com.gradleup.shadow'
@@ -74,23 +65,6 @@ allprojects {
 }
 
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
-
-def executeBalCommand(String command, String dir) {
-    def execHelper = project.objects.newInstance(BallerinaExecHelper)
-    try {
-        execHelper.execOperations.exec {
-            workingDir dir
-            if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "bal.bat ${command} && exit %%ERRORLEVEL%%"
-            } else {
-                commandLine 'sh', '-c', "bal ${command}"
-            }
-        }
-    } catch (Exception e) {
-        println("bal command failed. " + e.message)
-        throw e
-    }
-}
 
 def configureBuild = { Task task ->
     task.dependsOn("${project.packageName}-native:build")
