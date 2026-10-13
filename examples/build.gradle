@@ -17,6 +17,13 @@
  */
 
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
+
+abstract class BallerinaExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 apply plugin: 'java'
 
@@ -53,6 +60,7 @@ task testExamples {
 }
 
 task buildExamples {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     dependsOn ":${project.packageName}-ballerina:build"
 
     gradle.taskGraph.whenReady { graph ->
@@ -64,7 +72,7 @@ task buildExamples {
     }
     doLast {
         try {
-            exec {
+            execHelper.execOperations.exec {
                 workingDir project.projectDir
                 println("Working dir: ${workingDir}")
                 if (Os.isFamily(Os.FAMILY_WINDOWS)) {

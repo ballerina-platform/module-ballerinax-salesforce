@@ -15,10 +15,17 @@
  *
  */
 import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
+
+abstract class BallerinaExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 plugins {
     id 'com.github.spotbugs-base'
-    id 'com.github.johnrengelman.shadow'
+    id 'com.gradleup.shadow'
     id 'de.undercouch.download'
     id 'net.researchgate.release'
 }
@@ -69,8 +76,9 @@ allprojects {
 def moduleVersion = project.version.replace("-SNAPSHOT", "")
 
 def executeBalCommand(String command, String dir) {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     try {
-        exec {
+        execHelper.execOperations.exec {
             workingDir dir
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                 commandLine 'cmd', '/c', "bal.bat ${command} && exit %%ERRORLEVEL%%"
@@ -84,10 +92,16 @@ def executeBalCommand(String command, String dir) {
     }
 }
 
-task build {
-    dependsOn("${project.packageName}-native:build")
-    dependsOn("${project.packageName}-ballerina:build")
-    dependsOn("${project.packageName}-examples:build")
+def configureBuild = { Task task ->
+    task.dependsOn("${project.packageName}-native:build")
+    task.dependsOn("${project.packageName}-ballerina:build")
+    task.dependsOn("${project.packageName}-examples:build")
+}
+
+if (tasks.names.contains('build')) {
+    tasks.named('build', configureBuild)
+} else {
+    tasks.register('build', configureBuild)
 }
 
 release {
