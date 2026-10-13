@@ -46,28 +46,8 @@ def stripBallerinaExtensionVersion(String extVersion) {
 
 // Compiles every example against the locally built connector. Examples are compiled, not run:
 // running them needs live Salesforce credentials and the listener examples never exit.
-def buildAllExamples = { execHelper ->
-    try {
-        execHelper.execOperations.exec {
-            workingDir project.projectDir
-            println("Working dir: ${workingDir}")
-            commandLine 'sh', '-c', "chmod +x ./build.sh && ./build.sh build ${tomlVersion}"
-        }
-    } catch (Exception e) {
-        println("Example Build failed: " + e.message)
-        throw e
-    }
-}
-
-task testExamples {
-    def execHelper = project.objects.newInstance(BallerinaExecHelper)
-    dependsOn ":${project.packageName}-ballerina:build"
-
-    doLast {
-        buildAllExamples(execHelper)
-    }
-}
-
+// Skipped when tests are part of the build: the Docker-based test run leaves ballerina/target
+// unwritable for build.sh's `bal pack`, and CI already builds the examples with `build -x test`.
 task buildExamples {
     def execHelper = project.objects.newInstance(BallerinaExecHelper)
     dependsOn ":${project.packageName}-ballerina:build"
@@ -75,14 +55,20 @@ task buildExamples {
     gradle.taskGraph.whenReady { graph ->
         if (graph.hasTask(":${project.packageName}-examples:test")) {
             buildExamples.enabled = false
-        } else {
-            testExamples.enabled = false
         }
     }
     doLast {
-        buildAllExamples(execHelper)
+        try {
+            execHelper.execOperations.exec {
+                workingDir project.projectDir
+                println("Working dir: ${workingDir}")
+                commandLine 'sh', '-c', "chmod +x ./build.sh && ./build.sh build ${tomlVersion}"
+            }
+        } catch (Exception e) {
+            println("Example Build failed: " + e.message)
+            throw e
+        }
     }
 }
 
-test.dependsOn testExamples
 build.dependsOn buildExamples
