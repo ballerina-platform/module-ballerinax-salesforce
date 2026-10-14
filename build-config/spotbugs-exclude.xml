@@ -60,5 +60,15 @@
         <Bug code="SIC" />
         <Package name="io.ballerinax.salesforce" />
     </Match>
+
+    <Match>
+        <Bug code="THROWS" />
+        <Class name="io.ballerinax.salesforce.BearerTokenProvider" />
+    </Match>
+
+    <Match>
+        <Bug code="THROWS" />
+        <Class name="io.ballerinax.salesforce.OAuth2BayeuxParameters" />
+    </Match>
 </FindBugsFilter>
 

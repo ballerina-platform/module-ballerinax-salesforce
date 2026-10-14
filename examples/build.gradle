@@ -16,7 +16,13 @@
  * under the License.
  */
 
-import org.apache.tools.ant.taskdefs.condition.Os
+import org.gradle.process.ExecOperations
+
+import javax.inject.Inject
+
+abstract class BallerinaExecHelper {
+    @Inject abstract ExecOperations getExecOperations()
+}
 
 apply plugin: 'java'
 
@@ -38,40 +44,25 @@ def stripBallerinaExtensionVersion(String extVersion) {
     }
 }
 
-def filePath = project.fileTree("${project.projectDir}")
-def examples = filePath.matching {
-    include("**/*.bal")
-    exclude("**/deprecated/**/*.bal")
-}
-
-task testExamples {
-    dependsOn ":${project.packageName}-ballerina:build"
-
-    doLast {
-        examples.each { example ->  executeBalCommand ("run ${example}", "${project.rootDir}") }
-    }
-}
-
+// Compiles every example against the locally built connector. Examples are compiled, not run:
+// running them needs live Salesforce credentials and the listener examples never exit.
+// Skipped when tests are part of the build: the Docker-based test run leaves ballerina/target
+// unwritable for build.sh's `bal pack`, and CI already builds the examples with `build -x test`.
 task buildExamples {
+    def execHelper = project.objects.newInstance(BallerinaExecHelper)
     dependsOn ":${project.packageName}-ballerina:build"
 
     gradle.taskGraph.whenReady { graph ->
         if (graph.hasTask(":${project.packageName}-examples:test")) {
             buildExamples.enabled = false
-        } else {
-            testExamples.enabled = false
         }
     }
     doLast {
         try {
-            exec {
+            execHelper.execOperations.exec {
                 workingDir project.projectDir
                 println("Working dir: ${workingDir}")
-                if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                    commandLine 'sh', "/c", "chmod +x ./build.sh && ./build.sh build ${tomlVersion} && exit %%ERRORLEVEL%%"
-                } else {
-                    commandLine 'sh', "-c", "chmod +x ./build.sh && ./build.sh build ${tomlVersion}"
-                }
+                commandLine 'sh', '-c', "chmod +x ./build.sh && ./build.sh build ${tomlVersion}"
             }
         } catch (Exception e) {
             println("Example Build failed: " + e.message)
@@ -80,5 +71,4 @@ task buildExamples {
     }
 }
 
-test.dependsOn testExamples
 build.dependsOn buildExamples
