@@ -123,17 +123,17 @@ path = "./lib/json-20240303.jar"
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-databind"
-version = "2.18.9"
-path = "./lib/jackson-databind-2.18.9.jar"
+version = "2.18.11"
+path = "./lib/jackson-databind-2.18.11.jar"
 
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-annotations"
-version = "2.18.9"
-path = "./lib/jackson-annotations-2.18.9.jar"
+version = "2.18.11"
+path = "./lib/jackson-annotations-2.18.11.jar"
 
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"
 artifactId = "jackson-core"
-version = "2.18.9"
-path = "./lib/jackson-core-2.18.9.jar"
+version = "2.18.11"
+path = "./lib/jackson-core-2.18.11.jar"
