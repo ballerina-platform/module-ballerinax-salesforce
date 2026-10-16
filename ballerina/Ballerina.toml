@@ -37,10 +37,10 @@ export = true
 graalvmCompatible = true
 
 [[platform.java21.dependency]]
-path = "../native/build/libs/salesforce-native-8.7.3-SNAPSHOT.jar"
+path = "../native/build/libs/salesforce-native-8.7.3.jar"
 groupId = "io.ballerinax"
 artifactId = "salesforce"
-version = "8.7.3-SNAPSHOT"
+version = "8.7.3"
 
 [[platform.java21.dependency]]
 groupId = "com.opencsv"
