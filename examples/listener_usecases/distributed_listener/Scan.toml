@@ -1,0 +1,7 @@
+# ballerina:14 is a false positive: it matches identifier names such as clientId, clientSecret, refreshToken and
+# auth. The values are not hard-coded; they come from `os:getEnv(...)`, required configurables
+# (`= ?`) or are passed through from those configurables, so there is no embedded secret.
+# ballerina/log:1 (listener examples only) is a false positive: the logged values are the Salesforce base URL,
+# a channel name and a session timeout, none of which is a secret.
+[rule]
+exclude = ["ballerina:14", "ballerina/log:1"]
