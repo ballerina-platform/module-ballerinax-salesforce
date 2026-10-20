@@ -1,0 +1,11 @@
+# ballerina:13 and ballerina:14 are false positives. They match identifier names containing words such as
+# "password", "token", "secret", "auth" or "authorization", not secret values. Flagged code is:
+#  - public/internal constants naming a concept (PASSWORD = "password", PASSWORD_GRANT = "password",
+#    AUTHORIZATION = "Authorization" header name, TOKEN_REFRESH_BUFFER_SECONDS = 60),
+#  - public record fields with an empty/URL default (password = "", tokenUrl = "https://login.salesforce.com/...")
+#    that are part of the public API,
+#  - internal state (tokenStore, tokenData, tokenRefreshPermanentlyFailed, authorizationHeaderMap) and
+#    `auth: config.auth` forwarding of caller-supplied configuration.
+# No credential is embedded in the source; renaming any of these would change the public API.
+[rule]
+exclude = ["ballerina:13", "ballerina:14"]
