@@ -7,5 +7,8 @@
 #  - internal state (tokenStore, tokenData, tokenRefreshPermanentlyFailed, authorizationHeaderMap) and
 #    `auth: config.auth` forwarding of caller-supplied configuration.
 # No credential is embedded in the source; renaming any of these would change the public API.
+# TODO: replace this rule exclusion with a targeted scan suppression (with a reason) once `bal scan` supports it
+# (planned for v0.13.0), and fix the false positives on the scan tool side: a secret-named identifier should only be
+# reported when it is assigned a fixed value.
 [rule]
 exclude = ["ballerina:13", "ballerina:14"]
