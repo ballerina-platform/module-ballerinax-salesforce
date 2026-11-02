@@ -3,5 +3,8 @@
 # (`= ?`) or are passed through from those configurables, so there is no embedded secret.
 # ballerina/log:1 (listener examples only) is a false positive: the logged values are the Salesforce base URL,
 # a channel name and a session timeout, none of which is a secret.
+# TODO: replace this rule exclusion with a targeted scan suppression (with a reason) once `bal scan` supports it
+# (planned for v0.13.0), and fix the false positives on the scan tool side: a secret-named identifier should only be
+# reported when it is assigned a fixed value.
 [rule]
 exclude = ["ballerina:14", "ballerina/log:1"]
