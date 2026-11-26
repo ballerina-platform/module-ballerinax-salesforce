@@ -117,8 +117,8 @@ path = "./lib/jetty-util-ajax-12.0.35.jar"
 [[platform.java21.dependency]]
 groupId = "org.json"
 artifactId = "json"
-version = "20240303"
-path = "./lib/json-20240303.jar"
+version = "20260719"
+path = "./lib/json-20260719.jar"
 
 [[platform.java21.dependency]]
 groupId = "com.fasterxml.jackson.core"

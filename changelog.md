@@ -7,6 +7,10 @@ This file contains all the notable changes done to the Ballerina Salesforce pack
 
 - [Salesforce: Some error messages are not user friendly](https://github.com/wso2/product-integrator/issues/1060)
 
+### Changed
+
+- [Update the bundled `org.json` library to 20260719](https://github.com/ballerina-platform/ballerina-library/issues/9645)
+
 
 ## [8.6.0] - 2026-04-22
 
